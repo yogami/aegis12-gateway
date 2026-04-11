@@ -6,3 +6,7 @@ node_modules
 test-ledger
 .yarn
 .surfpool
+
+# Agent Context Injections
+.agent_rules.md
+.agent_catalog.md

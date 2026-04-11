@@ -2,3 +2,7 @@
 Cargo.lock
 methods/guest/Cargo.lock
 target/
+
+# Agent Context Injections
+.agent_rules.md
+.agent_catalog.md

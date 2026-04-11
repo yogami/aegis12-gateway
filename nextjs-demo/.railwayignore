@@ -1,0 +1,8 @@
+.agent_*.md
+.agent_metadata.json
+.*rules
+.agent_rules.md
+.agent_catalog.md
+.clinerules
+.cursorrules
+.windsurfrules
