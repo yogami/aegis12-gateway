@@ -5,7 +5,7 @@
     "buildCommand": "npm install --prefix nextjs-demo && npm run build --prefix nextjs-demo"
   },
   "deploy": {
-    "startCommand": "env HOSTNAME=0.0.0.0 PORT=3000 npm start --prefix nextjs-demo",
+    "startCommand": "npm start --prefix nextjs-demo",
     "restartPolicyType": "ON_FAILURE"
   }
 }
