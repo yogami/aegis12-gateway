@@ -1,9 +1,8 @@
 FROM node:18-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
 COPY . .
-RUN npm run build || echo "No build script"
+RUN npm install --prefix nextjs-demo
+RUN npm run build --prefix nextjs-demo
 ENV PORT=3000
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "start", "--prefix", "nextjs-demo"]
