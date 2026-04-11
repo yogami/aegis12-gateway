@@ -21,7 +21,8 @@ async function recordNativeDOM() {
 
     const browser = await puppeteer.launch({ 
         headless: 'new',
-        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        args: ['--window-size=1920,1080']
     });
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 }); // Full HD Frame
@@ -34,13 +35,34 @@ async function recordNativeDOM() {
     await recorder.start(recorderPath);
     await page.goto('http://localhost:3000/');
     
-    // 0s-10s: Introduction & URL highlighting.
-    
+    // === TIMELINE CHOREOGRAPHY ===
     console.log('  ⏳ Waiting for NextJS Hot Compile to finish (up to 60s)...');
     await page.waitForSelector('#executeAegisBtn', { timeout: 60000 });
     console.log('  ✅ Page Loaded. Starting visual timeline logic.');
     
-    await new Promise(r => setTimeout(r, 2000));
+    // Inject Image Preamble (0s to 26s)
+    await page.evaluate(() => {
+        const div = document.createElement('div');
+        div.id = 'slide-overlay';
+        div.style = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;background:black;display:flex;align-items:center;justify-content:center;';
+        
+        const img = document.createElement('img');
+        img.id = 'p-img';
+        img.src = 'http://localhost:3000/image_1.png';
+        img.style = 'max-width:100%;max-height:100%;object-fit:contain;';
+        
+        div.appendChild(img);
+        document.body.appendChild(div);
+
+        setTimeout(() => { document.getElementById('p-img').src = 'http://localhost:3000/image_2.png'; }, 6000);
+        setTimeout(() => { document.getElementById('p-img').src = 'http://localhost:3000/image_3.png'; }, 16000);
+        setTimeout(() => { document.getElementById('slide-overlay').style.display = 'none'; }, 26000);
+    });
+
+    // We wait 26 seconds total for the preamble slides
+    await new Promise(r => setTimeout(r, 26000));
+    
+    // Natively hook URL UI highlight immediately prior to click
     await page.evaluate(() => {
         const u = document.getElementById('demo-url');
         if(u) {
@@ -50,14 +72,13 @@ async function recordNativeDOM() {
         }
     });
 
-    // 10s: Execute Button
-    await new Promise(r => setTimeout(r, 10000));
+    // Wait until 28s before clicking, ensuring perfectly timed Voiceover match
+    await new Promise(r => setTimeout(r, 2000));
     await page.waitForSelector('#executeAegisBtn', { timeout: 5000 });
     await page.click('#executeAegisBtn');
 
-    // 40s: Highlight Durable Nonce mapping
-    // At exactly 40s into the video (2s intro + 10s click + 28s wait)
-    await new Promise(r => setTimeout(r, 28000));
+    // 28s -> +9s wait = 37s. The UI logic is now bound, so it will drop at 37s!
+    await new Promise(r => setTimeout(r, 9000));
     await page.evaluate(() => {
         const tx = document.getElementById('demo-transaction-log');
         if(tx) {
@@ -67,9 +88,9 @@ async function recordNativeDOM() {
         }
     });
 
-    // 73s: Highlight the Final Validator Result
-    // (We waited 40s so far, wait another 33s)
-    await new Promise(r => setTimeout(r, 34000));
+    // Wait for the Final validation box
+    // Total wait from 35s to 54s = 19 seconds
+    await new Promise(r => setTimeout(r, 19000));
     await page.evaluate(() => {
         const res = document.getElementById('demo-result-log');
         if(res) {
@@ -79,9 +100,9 @@ async function recordNativeDOM() {
         }
     });
 
-    // Keep recording through the end of the voiceover (91.5s total duration)
-    // Currently at 2+10+28+34 = 74s. Wait 18 more seconds.
-    await new Promise(r => setTimeout(r, 18000));
+    // Wait until audio sequence completely finishes (extending to > 95 seconds total duration)
+    // We are currently at roughly 56 seconds. We need to hold the UI completely static for the remaining 36 seconds of audio.
+    await new Promise(r => setTimeout(r, 45000));
     
     await recorder.stop();
     await browser.close();
