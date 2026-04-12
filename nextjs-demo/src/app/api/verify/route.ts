@@ -21,18 +21,27 @@ export async function POST(req: NextRequest) {
 
     const tx = await connection.getTransaction(signature, { maxSupportedTransactionVersion: 0 });
     
-    if (!tx || !tx.transaction.message.instructions) {
+    const message: any = tx.transaction.message;
+    const instructions = message.compiledInstructions || message.instructions;
+
+    if (!tx || !instructions) {
         return NextResponse.json({ status: 404, error: "Transaction signature not found on Ledger." });
     }
 
     // 3. Extract the Memo Program Instruction
     const memoProgramIdStr = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
-    const accountKeys = tx.transaction.message.getAccountKeys();
+    const accountKeys = typeof message.getAccountKeys === 'function' ? message.getAccountKeys() : (message.staticAccountKeys || message.accountKeys);
     let foundMemo = null;
 
-    for (const ix of tx.transaction.message.instructions) {
+    for (const ix of instructions) {
         // Find the index of the programId in the static account keys
-        const programId = accountKeys.get(ix.programIdIndex);
+        let programId: any = null;
+        if (accountKeys && typeof accountKeys.get === 'function') {
+            programId = accountKeys.get(ix.programIdIndex);
+        } else if (accountKeys && accountKeys.length > ix.programIdIndex) {
+            programId = accountKeys[ix.programIdIndex];
+        }
+
         if (programId && programId.toBase58() === memoProgramIdStr) {
             // @ts-ignore - The instruction data is a buffer or UInt8Array, cast it slightly depending on web3.js version
             const dataBuffer = Buffer.from(ix.data);
