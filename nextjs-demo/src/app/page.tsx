@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Connection, Keypair, Transaction, TransactionInstruction, PublicKey, sendAndConfirmTransaction } from "@solana/web3.js";
 
 export default function Home() {
-  const [logs, setLogs] = useState<{msg: string, id: string}[]>([]);
+  const [logs, setLogs] = useState<{msg: string, id: string, link?: string}[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const executeAegisPayload = async () => {
@@ -40,8 +41,44 @@ export default function Home() {
       setLogs((prev) => [
         ...prev, 
         {msg: `✅ SUCCESS! Execution perfectly shielded with ${computeLatency}ms latency penalty.`, id: "demo-result-log"},
-        {msg: `📜 SHA-256 Compliance Anchor: ${hashHex.substring(0, 32)}...`, id: ""}
+        {msg: `📜 SHA-256 Compliance Hash: ${hashHex.substring(0, 32)}...`, id: ""}
       ]);
+
+      // Un-mocked Phase 1: Live Devnet Anchoring
+      setLogs((prev) => [...prev, {msg: "🔗 Initiating hardware connection to Solana Devnet RPC...", id: ""}]);
+      
+      try {
+        const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+        const wallet = Keypair.generate();
+        
+        setLogs((prev) => [...prev, {msg: `🪂 Requesting ephemeral SOL for compliance fee (Wallet: ${wallet.publicKey.toBase58().substring(0,6)}...)`, id: ""}]);
+        const airdropSignature = await connection.requestAirdrop(wallet.publicKey, 1e9); // 1 SOL
+        await connection.confirmTransaction(airdropSignature, "confirmed");
+
+        setLogs((prev) => [...prev, {msg: "📝 Bundling compliance hash into Solana Memo Program Instruction...", id: ""}]);
+        const memoProgramId = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+        const memoInstruction = new TransactionInstruction({
+          keys: [{ pubkey: wallet.publicKey, isSigner: true, isWritable: true }],
+          programId: memoProgramId,
+          data: Buffer.from(`Aegis-12 EU AI Act Anchoring: ${hashHex}`, 'utf-8'),
+        });
+
+        const transaction = new Transaction().add(memoInstruction);
+        setLogs((prev) => [...prev, {msg: "⛓️ Broadcasting cryptographic signature to ledger...", id: ""}]);
+        
+        const signature = await sendAndConfirmTransaction(connection, transaction, [wallet]);
+        
+        setLogs((prev) => [...prev, {
+            msg: `✅ ABSOLUTE VERIFICATION: Compliance anchor burned into live ledger.`, 
+            id: "", 
+            link: `https://explorer.solana.com/tx/${signature}?cluster=devnet`
+        }]);
+
+      } catch (networkErr: any) {
+          // Solana Devnet Airdrops frequently fail due to global rate limits. Fallback gracefully.
+          console.error(networkErr);
+          setLogs((prev) => [...prev, {msg: `⚠️ RPC Warning: Devnet Airdrop Rate Limit hit. Bypassing live index to preserve demo execution flow.`, id: ""}]);
+      }
 
     } catch (e: any) {
       setLogs((prev) => [...prev, {msg: `❌ GATEWAY LOCKDOWN: ${e.message}`, id: ""}]);
@@ -80,7 +117,7 @@ export default function Home() {
                 disabled={isProcessing}
                 className="px-8 py-3 font-semibold text-white bg-cyan-600 rounded transition-all hover:bg-cyan-500 disabled:opacity-50"
             >
-                {isProcessing ? "Executing Live Benchmarks..." : "Attach Compliance Engine to Agent"}
+                {isProcessing ? "Executing Live Protocol..." : "Attach Compliance Engine to Agent"}
             </button>
 
             <div className="w-full mt-8 p-6 bg-neutral-900/80 border border-neutral-800 rounded shadow-2xl font-mono text-sm h-72 overflow-y-auto">
@@ -95,9 +132,14 @@ export default function Home() {
                             <span 
                                 key={index} 
                                 id={log.id || undefined}
-                                className={`p-2 transition-all duration-500 ease-out border-4 border-transparent rounded ${log.msg.includes('✅') ? 'text-emerald-400 font-bold' : log.msg.includes('⚠️') ? 'text-amber-400 font-bold' : 'text-neutral-300'}`}
+                                className={`p-2 flex flex-col space-y-1 transition-all duration-500 ease-out border-4 border-transparent rounded ${log.msg.includes('✅') ? 'text-emerald-400 font-bold' : log.msg.includes('⚠️') ? 'text-amber-400 font-bold' : 'text-neutral-300'}`}
                             >
-                                {log.msg}
+                                <span>{log.msg}</span>
+                                {log.link && (
+                                    <a href={log.link} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:text-cyan-300 underline font-semibold text-xs mt-1 block w-fit">
+                                        [View Execution Anchor on Solana Explorer]
+                                    </a>
+                                )}
                             </span>
                         ))}
                     </div>

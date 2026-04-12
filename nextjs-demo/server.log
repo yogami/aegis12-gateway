@@ -620,8 +620,8 @@ Require stack:
  POST /api/route 500 in 4ms
  ✓ Compiled in 3.4s (471 modules)
  ✓ Compiled in 2.1s (423 modules)
-tics_channel:328:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+ ✓ Compiled in 6.1s (477 modules)
+leLoad (node:internal/modules/cjs/loader:245:24)
     at Module.require (node:internal/modules/cjs/loader:1503:12)
     at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
     at require (node:internal/modules/helpers:152:16)
@@ -881,3 +881,5 @@ Require stack:
  POST /api/route 500 in 7ms
  ✓ Compiled in 5.4s (471 modules)
  ✓ Compiled in 2.1s (423 modules)
+ ✓ Compiled in 6.1s (477 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/1.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/1.pack.gz'
