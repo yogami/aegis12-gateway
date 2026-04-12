@@ -4,7 +4,6 @@ import crypto from "crypto";
 import bs58 from "bs58";
 
 async function anchorCompliancePayload(hashHex: string): Promise<{signature: string | null, status: string, explorer_url: string}> {
-  // Use Mainnet if a private key is supplied
   if (process.env.SOLANA_PRIVATE_KEY) {
       try {
           const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
@@ -26,12 +25,10 @@ async function anchorCompliancePayload(hashHex: string): Promise<{signature: str
       }
   }
 
-  // Fallback to Hyper-Resilient Devnet Engine
   const connection = new Connection("https://api.devnet.solana.com", "confirmed");
   const wallet = Keypair.generate();
   const memoProgramId = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
-  // Attempt Airdrop with retries to circumvent rate limits (Gap 1 Mitigation)
   let airdropSuccess = false;
   for (let i = 0; i < 3; i++) {
         try {
@@ -68,8 +65,6 @@ export async function POST(req: NextRequest) {
     const payload = await req.json();
 
     // =============== ACTIVE POLICY GUARDRAIL (Zero-Latency Circuit Breaker) ===============
-    // If the agent submits a target_rate exceeding 5.0, block the transaction immediately.
-    // This proves Aegis-12 is an active gateway, not a passive logger.
     if (payload.target_rate && payload.target_rate > 5.0) {
          return NextResponse.json({ 
              status: 403, 
@@ -77,21 +72,37 @@ export async function POST(req: NextRequest) {
          }, { status: 403 });
     }
 
-    const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+    // PRIMARY EXECUTION CONNECTION
+    const executionConnection = new Connection("https://api.devnet.solana.com", "confirmed");
     let activeBlockhash = "MOCK_DUE_TO_RPC_FAIL";
     try {
-      const { blockhash } = await connection.getLatestBlockhash();
+      const { blockhash } = await executionConnection.getLatestBlockhash();
       activeBlockhash = blockhash;
     } catch (e) {}
 
-    // =============== ENTROPY-BACKED CHAFF INJECTOR (Solves Fingerprinting) ===============
     let seedInteger = 5;
     if (activeBlockhash !== "MOCK_DUE_TO_RPC_FAIL") {
         const hashSub = activeBlockhash.substring(0, 8);
         seedInteger = [...hashSub].reduce((acc, char) => acc + char.charCodeAt(0), 0);
     }
     
-    // Randomize call volume between 5 and 14 concurrent calls
+    // =============== GAP 2: RPC CONNECTION SHARDING ===============
+    // Route Chaff through isolated public fallback RPCs to protect the primary execution pool.
+    const fallbackRPCs = [
+        "https://api.mainnet-beta.solana.com",
+        "https://api.devnet.solana.com"
+    ];
+    const isolatedRpcUrl = fallbackRPCs[seedInteger % fallbackRPCs.length];
+    const chaffConnection = new Connection(isolatedRpcUrl, "confirmed");
+
+    // =============== GAP 1: CORRELATED LIQUIDITY CHAFF ===============
+    // Querying active Raydium v4 Liquidity Pools & USDC mints rather than dummy SystemPrograms.
+    const ACTIVE_CORRELATED_POOLS = [
+        new PublicKey("675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"), // Raydium Liquidity Pool v4
+        new PublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"), // USDC Mint (Heavy Traffic)
+        new PublicKey("srmqPvymZy18hoA37322K93e226kddLksmR1uV1TntF") // Serum V3 DEX
+    ];
+
     const dynamicCallCount = (seedInteger % 10) + 5; 
     let chaffLatency = 0;
 
@@ -99,15 +110,17 @@ export async function POST(req: NextRequest) {
       const chaffT0 = performance.now();
       const promises = Array.from({length: dynamicCallCount}).map((_, i) => {
           return new Promise(res => {
-              // Inject non-deterministic jitter spread between 0ms and 50ms based on blockhash
               const jitterMs = (seedInteger * (i + 1)) % 50;
               setTimeout(async () => {
                   try {
-                      // Randomize RPC method to break deterministic MEV signature filters
+                      // Dynamically query Active Liquidity Pools and randomized native chains
                       const methodRand = (seedInteger + i) % 3;
-                      if (methodRand === 0) await connection.getLatestBlockhash();
-                      else if (methodRand === 1) await connection.getSlot();
-                      else await connection.getAccountInfo(new PublicKey("11111111111111111111111111111111"));
+                      if (methodRand === 0) await chaffConnection.getLatestBlockhash();
+                      else if (methodRand === 1) await chaffConnection.getSlot();
+                      else {
+                          const targetPool = ACTIVE_CORRELATED_POOLS[i % ACTIVE_CORRELATED_POOLS.length];
+                          await chaffConnection.getAccountInfo(targetPool);
+                      }
                   } catch(e) {}
                   res(true);
               }, jitterMs);
@@ -117,20 +130,23 @@ export async function POST(req: NextRequest) {
       chaffLatency = performance.now() - chaffT0;
     } catch (e) {}
 
-    // =============== ON-CHAIN CHAFF VERIFIABILITY ===============
-    // By bundling these into the JSON before the hash, the /api/verify check 
-    // mathematically proves the Telemetry radar jammer fired for this specific intent.
     const chaffMetrics = {
         entropy_seed_blockhash: activeBlockhash,
         calls_executed: dynamicCallCount,
-        synthetic_jitter_ms: chaffLatency.toFixed(2)
+        synthetic_jitter_ms: chaffLatency.toFixed(2),
+        rpc_shard: isolatedRpcUrl
     };
+
+    // =============== GAP 3: EXECUTION RECEIPT LEDGERING (The Stranded Log Fix) ===============
+    // Connects the off-path intent to the on-chain settlement if the AI worker provided it.
+    const verifiedExecutionReceipt = payload.execution_receipt_tx || "INTENT_AWAITING_SETTLEMENT";
 
     const agentContextPayload = {
       ...payload,
       timestamp: Date.now(),
       network_state: activeBlockhash,
-      chaff_metrics: chaffMetrics
+      chaff_metrics: chaffMetrics,
+      verified_execution_receipt: verifiedExecutionReceipt
     };
 
     const t0 = performance.now();
