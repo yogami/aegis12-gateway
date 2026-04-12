@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     let seedInteger = 5;
     if (activeBlockhash !== "MOCK_DUE_TO_RPC_FAIL") {
         const hashSub = activeBlockhash.substring(0, 8);
-        seedInteger = [...hashSub].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        seedInteger = hashSub.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     }
     
     // =============== GAP 2: RPC CONNECTION SHARDING ===============
