@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import crypto from "crypto";
 
 export default function Home() {
   const [logs, setLogs] = useState<{msg: string, id: string}[]>([]);
@@ -23,9 +22,7 @@ export default function Home() {
 
       await new Promise((r) => setTimeout(r, 3000));
       // Simulate SHA-256 hash generation for logging
-      const complianceHash = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const complianceHash = Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join("");
 
       setLogs((prev) => [...prev, {msg: "⚖️ Generating EU AI Act (Article 12) compliant payload JSON...", id: ""}]);
 
