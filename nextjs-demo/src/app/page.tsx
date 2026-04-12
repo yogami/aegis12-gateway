@@ -11,16 +11,9 @@ export default function Home() {
     setLogs([{msg: "🚀 Initializing Aegis-12 Off-Path Telemetry Broker...", id: ""}]);
     
     try {
-      await new Promise((r) => setTimeout(r, 1500));
       setLogs((prev) => [...prev, {msg: "📡 Ingesting Yellowstone gRPC firehose (Local Enclave Filter Mode)...", id: ""}]);
-      
-      await new Promise((r) => setTimeout(r, 2000));
       setLogs((prev) => [...prev, {msg: "🛡️ Injecting synthetic decoy traffic (Chaff) into RPC network...", id: "demo-tls-warn"}]);
-
-      await new Promise((r) => setTimeout(r, 2500));
       setLogs((prev) => [...prev, {msg: "🧠 Agent evaluating Strategy (RAY/USDC Swap Matrix)...", id: "demo-transaction-log"}]);
-
-      await new Promise((r) => setTimeout(r, 3000));
       setLogs((prev) => [...prev, {msg: "⚖️ Executing LIVE EU AI Act Compliance Hashing Benchmark...", id: ""}]);
 
       // Massive dummy payload mimicking an agent's context window decision tree
@@ -44,7 +37,6 @@ export default function Home() {
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
       const computeLatency = (t1 - t0).toFixed(4); // Keep high precision for ms
 
-      await new Promise((r) => setTimeout(r, 1000)); 
       setLogs((prev) => [
         ...prev, 
         {msg: `✅ SUCCESS! Execution perfectly shielded with ${computeLatency}ms latency penalty.`, id: "demo-result-log"},

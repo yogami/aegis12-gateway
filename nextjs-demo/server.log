@@ -619,7 +619,8 @@ Require stack:
 }
  POST /api/route 500 in 4ms
  ✓ Compiled in 3.4s (471 modules)
-acingChannel.traceSync (node:diagnostics_channel:328:14)
+ ✓ Compiled in 2.1s (423 modules)
+tics_channel:328:14)
     at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
     at Module.require (node:internal/modules/cjs/loader:1503:12)
     at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
@@ -879,3 +880,4 @@ Require stack:
 }
  POST /api/route 500 in 7ms
  ✓ Compiled in 5.4s (471 modules)
+ ✓ Compiled in 2.1s (423 modules)
