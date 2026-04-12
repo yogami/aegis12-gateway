@@ -9,9 +9,13 @@
  ✓ Ready in 185ms
 Error: Failed to find Server Action "x". This request might be from an older or newer depl ○ Compiling / ...
  ✓ Compiled / in 1469ms  ○ Compiling /_error ...
- ✓ Compiled /_error in 1231ms (255 modules)
- GET /..%2F..%2F..%2F..%2F..%2F..%2Fetc%2Fpasswd 400 in 1391ms
-000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:40:1694)
+ ✓ Compiled /_erro ○ Compiling /_error ...
+ ✓ Compiled /_error in 11.2s (255 modules)
+ GET /..%2F..%2F. ✓ Compiled in 4.4s (253 modules)
+ ✓ Compiled in 5.8s (253 modules)
+3 modules)
+ ✓ Compiled in 4.8s (253 modules)
+)
     at rk (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:38:6522)
     at ne (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:42:1262)
     at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:726
@@ -621,9 +625,11 @@ Require stack:
  ✓ Compiled in 3.4s (471 modules)
  ✓ Compiled in 2.1s (423 modules)
  ✓ Compiled in 6.1s (477 modules)
-leLoad (node:internal/modules/cjs/loader:245:24)
-    at Module.require (node:internal/modules/cjs/loader:1503:12)
-    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+ ✓ Compiled in 5.8s (477 modules)
+ ✓ Compiled in 6.4s (511 modules)
+ ✓ Compiled in 3.9s (477 modules)
+ ✓ Compiled in 3.4s (511 modules)
+r1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
     at require (node:internal/modules/helpers:152:16)
     at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
     at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
@@ -883,3 +889,390 @@ Require stack:
  ✓ Compiled in 2.1s (423 modules)
  ✓ Compiled in 6.1s (477 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/1.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/1.pack.gz'
+ ✓ Compiled in 10.6s (477 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz'
+ ✓ Compiled in 6.5s (511 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz'
+ ○ Compiling / ...
+ ✓ Compiled / in 1291ms (375 modules)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at rC (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:40:1694)
+    at rk (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:38:6522)
+    at ne (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:42:1262)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:726
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Object.wrap (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:17827)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:616
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
+    at Object.wrap (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:16929)
+    at nt (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:543)
+    at nb.render (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:4699)
+    at doRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1438:44)
+    at cacheEntry.responseCache.get.routeKind (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1599:34)
+    at ResponseCache.get (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/response-cache/index.js:49:26)
+    at DevServer.renderToResponseWithComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1507:53)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1002:121
+    at NextTracerImpl.trace (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/trace/tracer.js:105:20)
+    at DevServer.renderToResponseWithComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1002:41)
+    at DevServer.renderPageComponent (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1924:35)
+    at async DevServer.renderToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1962:32)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:272:17)
+    at async DevServer.handleRequestImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:816:17)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:353:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13)
+ POST / 200 in 1730ms
+ ✓ Compiled /_not-found in 168ms (841 modules)
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:162:22)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3460
+    at Object.<anonymous> (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3501)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at requirePage (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js:109:84)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:84
+    at async loadComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:26)
+    at async DevServer.findPageComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:710:36)
+    at async DevServer.findPageComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderErrorToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2090:30)
+    at async pipe.req.req (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:368:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ ✓ Compiled /_error in 96ms (843 modules)
+ POST /_next 500 in 307ms
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:162:22)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3460
+    at Object.<anonymous> (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3501)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at requirePage (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js:109:84)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:84
+    at async loadComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:26)
+    at async DevServer.findPageComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:710:36)
+    at async DevServer.findPageComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderErrorToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2090:30)
+    at async pipe.req.req (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:368:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ POST /api 500 in 7ms
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:162:22)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3460
+    at Object.<anonymous> (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3501)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at requirePage (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js:109:84)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:84
+    at async loadComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:26)
+    at async DevServer.findPageComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:710:36)
+    at async DevServer.findPageComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderErrorToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2090:30)
+    at async pipe.req.req (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:368:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ POST /_next/server 500 in 4ms
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:162:22)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3460
+    at Object.<anonymous> (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3501)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at requirePage (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js:109:84)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:84
+    at async loadComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:26)
+    at async DevServer.findPageComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:710:36)
+    at async DevServer.findPageComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderErrorToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2090:30)
+    at async pipe.req.req (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:368:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ POST /app 500 in 3ms
+ ⨯ Error: Cannot find module './819.js'
+Require stack:
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js
+- /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1420:15)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:55:36
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1058:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1063:22)
+    at Module._load (node:internal/modules/cjs/loader:1226:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at __webpack_require__.f.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:198:28)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:111:40
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:110:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js:162:22)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3460
+    at Object.<anonymous> (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js:1:3501)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.require (node:internal/modules/cjs/loader:1503:12)
+    at mod.require (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require-hook.js:65:28)
+    at require (node:internal/modules/helpers:152:16)
+    at requirePage (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js:109:84)
+    at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:84
+    at async loadComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js:98:26)
+    at async DevServer.findPageComponentsImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/next-server.js:710:36)
+    at async DevServer.findPageComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:577:20)
+    at async DevServer.renderErrorToResponseImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2090:30)
+    at async pipe.req.req (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:2056:30)
+    at async DevServer.pipeImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:920:25)
+    at async /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:339:20
+    at async Span.traceAsyncFn (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/trace/trace.js:154:20)
+    at async DevServer.handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/next-dev-server.js:336:24)
+    at async invokeRender (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:174:21)
+    at async handleRequest (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:368:24)
+    at async requestHandlerImpl (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js:377:13)
+    at async Server.requestListener (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js:141:13) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/webpack-runtime.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/server/app/_not-found/page.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/require.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/load-components.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/build/utils.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-middleware.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/dev/hot-reloader-webpack.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/router-server.js',
+    '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+ POST /api/route 500 in 3ms
+ ✓ Compiled in 3s (477 modules)
+ ✓ Compiled in 3.3s (511 modules)
