@@ -50,7 +50,7 @@ test.describe('Aegis-12 Telemetry Shield Production Verification', () => {
     await expect(page.locator('body')).toContainText('Injecting synthetic decoy traffic (Chaff)', { timeout: 15000 });
     await expect(page.locator('body')).toContainText('Generating EU AI Act (Article 12)', { timeout: 15000 });
     await expect(page.locator('body')).toContainText('SHA-256 Compliance Anchor', { timeout: 15000 });
-    await expect(page.locator('body')).toContainText('0ms latency penalty', { timeout: 15000 });
+    await expect(page.locator('body')).toContainText(/latency penalty/, { timeout: 15000 });
   });
 
 });

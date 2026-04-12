@@ -21,16 +21,34 @@ export default function Home() {
       setLogs((prev) => [...prev, {msg: "🧠 Agent evaluating Strategy (RAY/USDC Swap Matrix)...", id: "demo-transaction-log"}]);
 
       await new Promise((r) => setTimeout(r, 3000));
-      // Simulate SHA-256 hash generation for logging
-      const complianceHash = Array.from({length: 32}, () => Math.floor(Math.random() * 16).toString(16)).join("");
+      setLogs((prev) => [...prev, {msg: "⚖️ Executing LIVE EU AI Act Compliance Hashing Benchmark...", id: ""}]);
 
-      setLogs((prev) => [...prev, {msg: "⚖️ Generating EU AI Act (Article 12) compliant payload JSON...", id: ""}]);
+      // Massive dummy payload mimicking an agent's context window decision tree
+      const agentContextPayload = {
+        agent_id: "aegis_ai_v9",
+        timestamp: Date.now(),
+        liquidity_routes: Array.from({length: 1000}, (_, i) => ({ pool: `RAY-USDC-${i}`, rate: Math.random() })),
+        chaff_signals: Array.from({length: 50}, (_, i) => `FAKE_SIGNAL_${i}`)
+      };
 
-      await new Promise((r) => setTimeout(r, 1500));
+      // Real Crypto Benchmarking
+      const encoder = new TextEncoder();
+      const stringifiedPayload = JSON.stringify(agentContextPayload);
+      const data = encoder.encode(stringifiedPayload);
+      
+      const t0 = performance.now();
+      const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+      const t1 = performance.now();
+      
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      const computeLatency = (t1 - t0).toFixed(4); // Keep high precision for ms
+
+      await new Promise((r) => setTimeout(r, 1000)); 
       setLogs((prev) => [
         ...prev, 
-        {msg: `✅ SUCCESS! Execution perfectly shielded with 0ms latency penalty.`, id: "demo-result-log"},
-        {msg: `📜 SHA-256 Compliance Anchor: ${complianceHash.substring(0, 32)}...`, id: ""}
+        {msg: `✅ SUCCESS! Execution perfectly shielded with ${computeLatency}ms latency penalty.`, id: "demo-result-log"},
+        {msg: `📜 SHA-256 Compliance Anchor: ${hashHex.substring(0, 32)}...`, id: ""}
       ]);
 
     } catch (e: any) {
@@ -70,7 +88,7 @@ export default function Home() {
                 disabled={isProcessing}
                 className="px-8 py-3 font-semibold text-white bg-cyan-600 rounded transition-all hover:bg-cyan-500 disabled:opacity-50"
             >
-                {isProcessing ? "Shielding Telemetry..." : "Attach Compliance Engine to Agent"}
+                {isProcessing ? "Executing Live Benchmarks..." : "Attach Compliance Engine to Agent"}
             </button>
 
             <div className="w-full mt-8 p-6 bg-neutral-900/80 border border-neutral-800 rounded shadow-2xl font-mono text-sm h-72 overflow-y-auto">
