@@ -28,7 +28,7 @@ export class LitProtocolAnchor implements ITeeAnchor {
             // Initialize Node Client
             litNodeClient = new LitNodeClient({
                 litNetwork: "cayenne",
-                debug: false
+                debug: true
             });
             await litNodeClient.connect();
 
