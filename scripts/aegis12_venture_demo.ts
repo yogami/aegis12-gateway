@@ -1,5 +1,6 @@
 import { PhalaTeeAnchor } from "../packages/telemetry-shield/src/anchors/phala";
 import { ZkHybridAnchor } from "../packages/telemetry-shield/src/anchors/zk_hybrid";
+import { LitProtocolAnchor } from "../packages/telemetry-shield/src/anchors/lit";
 import { AgentEvidenceRecord } from "../packages/telemetry-shield/src/types";
 
 // ANSI colors for the VC console demo
@@ -60,6 +61,9 @@ async function main() {
     const phalaCloudUrl = process.env.PHALA_CLOUD_URL || "https://gateway.phala.network/evidence";
     const phalaAnchor = new PhalaTeeAnchor(phalaCloudUrl);
 
+    // 2. Lit Protocol (The Web3 Native JavaScript execution)
+    const litAnchor = new LitProtocolAnchor("0xVentureDemoPKP");
+
     // 3. The Hybrid TEE + ZK
     const zkHybridAnchor = new ZkHybridAnchor();
 
@@ -69,6 +73,9 @@ async function main() {
     
     // Demonstrate failing ZK 
     await executePureZK_Simulation(mockRecord);
+
+    // Demonstrate blazing fast Lit Protocol
+    await executeNetwork(litAnchor, "DATIL_NODE", "Lit Protocol Native NodeJS SDK", mockRecord);
 
     // Demonstrate Real Decentralized Phala Intel SGX on Phala Cloud
     await executeNetwork(phalaAnchor, "dSTACK", "Phala Network Decentralized TEE", mockRecord);

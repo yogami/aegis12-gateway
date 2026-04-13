@@ -1,5 +1,5 @@
 import { AgentEvidenceRecord, ITeeAnchor } from "../types";
-import { LitNodeClient } from "@lit-protocol/lit-node-client";
+import { LitNodeClientNodeJs } from "@lit-protocol/lit-node-client-nodejs";
 import { ethers } from "ethers";
 import { SiweMessage } from "siwe";
 
@@ -26,7 +26,7 @@ export class LitProtocolAnchor implements ITeeAnchor {
             console.log(`[LitProtocol Anchor] Establishing peer-to-peer connection with Datil Network...`);
 
             // Initialize Node Client
-            litNodeClient = new LitNodeClient({
+            litNodeClient = new LitNodeClientNodeJs({
                 litNetwork: "datil-test",
                 debug: true
             });
