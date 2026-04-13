@@ -1,32 +1,18 @@
-# Build Stage
-FROM node:18-alpine AS builder
-
+FROM node:20-alpine
 WORKDIR /app
+
+# Install project dependencies definitively
 COPY package*.json ./
-COPY tsconfig*.json ./
+RUN npm ci
 
-# Install project dependencies
-RUN npm install
-
-# Copy source logic
+# Copy the server logic and SDK wrapper
 COPY src/ ./src/
 COPY packages/ ./packages/
-
-# We run typescript compiler directly natively to transpile the CVM server
-RUN npx tsc src/phala_cvm_server.ts --esModuleInterop --skipLibCheck
-
-# Production Stage
-FROM node:18-alpine
-WORKDIR /app
-
-# Copy the transpiled logic and dependencies
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/src ./src
-COPY --from=builder /app/packages ./packages
+COPY tsconfig.json ./
 
 # Phala CVM runs typically on port 8000
 ENV PORT=8000
 EXPOSE 8000
 
-# Execute the native Hardware Enclave server
-CMD ["node", "src/phala_cvm_server.js"]
+# Execute natively using TSX to bypass strict Type-checking crashes
+CMD ["npx", "tsx", "src/phala_cvm_server.ts"]
