@@ -1,6 +1,5 @@
-
+import { PhalaTeeAnchor } from "../packages/telemetry-shield/src/anchors/phala";
 import { ZkHybridAnchor } from "../packages/telemetry-shield/src/anchors/zk_hybrid";
-import { LitProtocolAnchor } from "../packages/telemetry-shield/src/anchors/lit";
 import { AgentEvidenceRecord } from "../packages/telemetry-shield/src/types";
 
 // ANSI colors for the VC console demo
@@ -55,8 +54,11 @@ async function main() {
         policy_flags: ["EU_AI_ACT_ART_12_COMPLIANT"]
     };
 
-    // 2. Lit Protocol (The Web3 Native JavaScript execution)
-    const litAnchor = new LitProtocolAnchor("0xVentureDemoPKP");
+    // 1. Phala Network (The Web3 Hardware Execution)
+    // We expect the user to provide their Phala Cloud URL via Environment variables.
+    // If none is provided, it falls back to the default deployed Web2 proxy wrapper.
+    const phalaCloudUrl = process.env.PHALA_CLOUD_URL || "https://gateway.phala.network/evidence";
+    const phalaAnchor = new PhalaTeeAnchor(phalaCloudUrl);
 
     // 3. The Hybrid TEE + ZK
     const zkHybridAnchor = new ZkHybridAnchor();
@@ -68,8 +70,8 @@ async function main() {
     // Demonstrate failing ZK 
     await executePureZK_Simulation(mockRecord);
 
-    // Demonstrate blazing fast Lit Protocol
-    await executeNetwork(litAnchor, "DATIL_NODE", "Lit Protocol Native JS", mockRecord);
+    // Demonstrate Real Decentralized Phala Intel SGX on Phala Cloud
+    await executeNetwork(phalaAnchor, "dSTACK", "Phala Network Decentralized TEE", mockRecord);
 
     // Demonstrate The Hybrid Coprocessor (Hot-Path TEE + Cold-path ZK)
     await executeNetwork(zkHybridAnchor, "SP1_SNARK", "TEE + ZK Hybrid (Aegis-12 Standard)", mockRecord);
