@@ -27,7 +27,7 @@ export class LitProtocolAnchor implements ITeeAnchor {
 
             // Initialize Node Client
             litNodeClient = new LitNodeClient({
-                litNetwork: "cayenne",
+                litNetwork: "datil-test",
                 debug: true
             });
             await litNodeClient.connect();
@@ -72,8 +72,7 @@ export class LitProtocolAnchor implements ITeeAnchor {
                     AegisEvidenceHash: record.input_snapshot_hash,
                     AgentIdentifier: record.agent_id
                 },
-                sessionSigs,
-                authSig
+                sessionSigs
             });
 
             console.log(`[LitProtocol Anchor] ✅ Lit Action physically executed inside Datil Network TEE.`);
