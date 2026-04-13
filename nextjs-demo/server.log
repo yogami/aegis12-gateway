@@ -14,10 +14,12 @@ Error: Failed to find Server Action "x". This request might be from an older or 
  GET /..%2F..%2F. ✓ Compiled in 4.4s (253 modules)
  ✓ Compiled in 5.8s (253 modules)
  ✓ Compiled in 739ms (253 modules)
- modules)
+[?25h
+s)
  ✓ Compiled in 773ms (253 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz'
-dist/compiled/next-server/app-page.runtime.dev.js:43:726
+[?25h
+mpiled/next-server/app-page.runtime.dev.js:43:726
     at AsyncLocalStorage.run (node:internal/async_local_storage/async_context_frame:63:14)
     at Object.wrap (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:36:17827)
     at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/compiled/next-server/app-page.runtime.dev.js:43:616
@@ -842,7 +844,8 @@ Error: Failed to find Server Action "x". This request might be from an older or 
  ✓ Compiled in 446ms (477 modules)
  ✓ Compiled in 57ms (477 modules)
  ✓ Compiled in 479ms (511 modules)
-les/next/dist/server/base-server.js:1507:53)
+[?25h
+t/dist/server/base-server.js:1507:53)
     at /Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1002:121
     at NextTracerImpl.trace (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/lib/trace/tracer.js:105:20)
     at DevServer.renderToResponseWithComponents (/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/node_modules/next/dist/server/base-server.js:1002:41)
@@ -1224,3 +1227,4 @@ Require stack:
  ✓ Compiled in 60ms (477 modules)
  ✓ Compiled in 492ms (511 modules)
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz_' -> '/Users/user1000/gitprojects/aegis12-gateway/nextjs-demo/.next/cache/webpack/client-development/0.pack.gz'
+[?25h

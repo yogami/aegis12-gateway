@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "npx tsx tests/blackbox.e2e.test.ts"
   },
   "keywords": [
     "solana",
@@ -17,7 +18,7 @@
   ],
   "author": "Yogami Labs",
   "license": "MIT",
-  "dependencies": {
+  "peerDependencies": {
     "@solana/web3.js": "^1.87.0",
     "bs58": "^5.0.0"
   },
