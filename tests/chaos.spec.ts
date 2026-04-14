@@ -18,6 +18,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             { name: "tenantId", type: "string" },
             { name: "version", type: "string" },
             { name: "chainId", type: "uint256" },
+            { name: "crossChainTarget", type: "string" },
             { name: "maxAnomalyScore", type: "uint256" },
             { name: "financialLimitsString", type: "string" },
             { name: "expiresAt", type: "uint256" },
@@ -55,6 +56,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
                 tenantId: "tenant-abc",
                 version: "1.0.0",
                 chainId: 1,
+                crossChainTarget: "solana-mainnet",
                 maxAnomalyScore: 100,
                 financialLimits: { 'T4': 50000 },
                 financialLimitsString: JSON.stringify({ 'T4': 50000 }),
@@ -87,6 +89,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: "legitTenant",
             version: "1.0.0",
             chainId: 1,
+            crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 100,
             financialLimits: { 'T4': 5000000 }, // Huge limits!
             expiresAt: Math.floor(Date.now() / 1000) + 60,
@@ -100,6 +103,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: config.tenantId,
             version: config.version,
             chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
@@ -131,6 +135,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: "expiredTenant",
             version: "1.0.0",
             chainId: 1,
+            crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 80,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) - 10,
@@ -143,6 +148,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: config.tenantId,
             version: config.version,
             chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
@@ -168,6 +174,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: "legitTenant",
             version: "1.0.0",
             chainId: 1,
+            crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
@@ -180,6 +187,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: config.tenantId,
             version: config.version,
             chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
@@ -226,6 +234,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: "legitTenant",
             version: "1.0.0",
             chainId: 1,
+            crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
@@ -238,6 +247,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: config.tenantId,
             version: config.version,
             chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
@@ -282,6 +292,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: "legitTenant",
             version: "1.0.0",
             chainId: 1,
+            crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             // Attacker wants to secretly pass this unsigned JSON
             financialLimits: { 'T4': 5000000 }, 
@@ -296,6 +307,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             tenantId: config.tenantId,
             version: config.version,
             chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
@@ -311,5 +323,44 @@ describe("AegisPEP Chaos Testing Suite", () => {
 
         // Enclave MUST ignore the unsigned `config.financialLimits` object and enforce the signed $50 string boundary, rejecting it.
         await expect(aegisPEP.enforce(request)).rejects.toThrow("Action value 100000 exceeds mathematically signed Tier limit 50");
+    });
+
+    /**
+     * Case 8: Cross-Chain Replay Attack
+     */
+    it("denies action entirely when an attacker replays a valid Ethereum EVM signature against the Solana gateway", async () => {
+        const config: any = {
+            policyId: "crossChainExploit",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1,
+            crossChainTarget: "ethereum", // The user signed this for an EVM chain
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "cross-chain-nonce"
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+
+        const sig = await ceoWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
+            crossChainTarget: config.crossChainTarget,
+            maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            agent: { did: "did:example:999", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Cross-Chain Replay Defended");
     });
 });

@@ -109,6 +109,7 @@ export interface PolicyEvaluationRequest {
             tenantId: string;
             version?: string;
             chainId?: number;
+            crossChainTarget?: string; // VULNERABILITY FIXED: Locks the signature to specific network execution semantics
             maxAnomalyScore: number;
             financialLimits: Record<string, number>;
             financialLimitsString?: string; // VULNERABILITY FIXED: Hardened cryptographic string binding for mutable parameters

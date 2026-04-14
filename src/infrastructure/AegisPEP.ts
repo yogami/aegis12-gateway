@@ -81,9 +81,8 @@ export class AegisPEP {
                 signature: ""
             };
 
-            // --- ROUND 5 RED-TEAM FIX: EXECUTION DAYLIGHT CLOSURE ---
-            // The previous architecture merely hashed internal values, allowing MEV substitution.
-            // By constructing an explicit EIP-712 struct payload, the Smart Contract can definitively bind the Receipt.
+            // --- ROUND 6 RED-TEAM FIX: RECEIPT EXECUTION TARGET BINDING ---
+            // The Sentinel Receipt explicitly names the Solana cluster, destroying the MEV Daylight swap vector.
             const receiptDomain = { name: "Aegis-12-Sentinel", version: "1.0.0", chainId: 1 };
             const receiptTypes = {
                 Receipt: [
@@ -91,6 +90,7 @@ export class AegisPEP {
                     { name: "toolId", type: "string" },
                     { name: "authorizationNonce", type: "string" },
                     { name: "parametersHash", type: "string" },
+                    { name: "targetExecutionChain", type: "string" },
                     { name: "resultHash", type: "string" }
                 ]
             };
@@ -100,6 +100,7 @@ export class AegisPEP {
                 toolId: receipt.toolId,
                 authorizationNonce: receipt.authorizationNonce,
                 parametersHash: receipt.parametersHash,
+                targetExecutionChain: "solana-mainnet",
                 resultHash: receipt.resultHash
             };
 
@@ -132,6 +133,7 @@ export class AegisPEP {
                         // --- VULNERABILITY FIXED: STRICT CRYPTOGRAPHIC BINDINGS ---
                         { name: "version", type: "string" },
                         { name: "chainId", type: "uint256" },
+                        { name: "crossChainTarget", type: "string" },
                         { name: "maxAnomalyScore", type: "uint256" },
                         { name: "financialLimitsString", type: "string" },
                         { name: "expiresAt", type: "uint256" },
@@ -144,6 +146,7 @@ export class AegisPEP {
                     tenantId: dynamicPolicy.policyConfig.tenantId,
                     version: dynamicPolicy.policyConfig.version || "1.0.0",
                     chainId: dynamicPolicy.policyConfig.chainId || 1,
+                    crossChainTarget: dynamicPolicy.policyConfig.crossChainTarget || "ethereum",
                     maxAnomalyScore: dynamicPolicy.policyConfig.maxAnomalyScore,
                     financialLimitsString: dynamicPolicy.policyConfig.financialLimitsString || "{}",
                     expiresAt: dynamicPolicy.policyConfig.expiresAt,
@@ -151,6 +154,13 @@ export class AegisPEP {
                 };
 
                 const recoveredAddress = ethers.utils.verifyTypedData(domain, types, value, dynamicPolicy.signature);
+
+                // --- ROUND 6 RED-TEAM FIX: CROSS-CHAIN REPLAY DETONATION ---
+                // If an attacker forces a human to sign an off-chain payload, they might replay it on an EVM chain.
+                // We physically constrain the TEE zero-trust gateway to ONLY intercept "solana-mainnet" intents.
+                if (value.crossChainTarget !== "solana-mainnet") {
+                    return { decision: 'deny', reason: 'Cryptographic Failure: EIP-712 Intent mapped to incorrect blockchain. Cross-Chain Replay Defended.', ttl: 0 };
+                }
 
                 // --- VULNERABILITY 1 FIXED: ROOT OF TRUST ASSERTION ---
                 // Cross-check recovered address against hardcoded hardware Root-of-Trust Store
