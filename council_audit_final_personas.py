@@ -45,12 +45,11 @@ except Exception as e:
     sys.exit(1)
 
 base_prompt = """
-[ROUND 3: THE CISO RED-TEAM LOCKOUT]
+[ROUND 4: THE ARCHITECT'S ABSOLUTE SEAL]
 The development team has executed the final structural mandates required for the Phala-backed CVM compliance gateway.
 In response to your previous fatal discoveries:
-1. `financialLimitsString`, `version`, and `chainId` are now strictly bound directly into the EIP-712 typing schema.
-2. The `usedNonces` RAM constraint was obliterated. It is now explicitly backed by a persistent `.aegis_wal.json` (mocking a global Redis/KMS cluster), locking out inter-node replays.
-3. The nonce is only explicitly burned *after* anomaly and limit policies pass to prevent DoS-burning valid policies on limits rejections.
+1. `financialLimits` is no longer a detached signature bisection vector. The TEE explicitly executes `JSON.parse` on the signed `financialLimitsString` to assert mathematical limits.
+2. The TOCTOU Replay race condition is eliminated. The code synchronously registers `usedNonces.add()` and writes to `.aegis_wal.json` *before* hitting any failure limits to physically burn the nonce on evaluation, stopping check-to-use loopholes.
 
 Your objective:
 Review the updated architecture of AegisPEP.ts and the resulting proof-of-work in chaos.spec.ts. 

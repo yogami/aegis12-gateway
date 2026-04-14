@@ -36,6 +36,14 @@ export class AegisSigner {
         return bytesToHex(signedBytes);
     }
 
+    public signEIP712(domain: any, types: any, value: Record<string, any>): string {
+        const { ethers } = require('ethers');
+        const digest = ethers.utils._TypedDataEncoder.hash(domain, types, value);
+        const digestBytes = hexToBytes(digest.replace('0x', ''));
+        const signedBytes = nacl.sign.detached(digestBytes, this.privateKey);
+        return bytesToHex(signedBytes);
+    }
+
     public getKeypair(): import('@solana/web3.js').Keypair {
         const { Keypair } = require('@solana/web3.js');
         return Keypair.fromSecretKey(this.privateKey);

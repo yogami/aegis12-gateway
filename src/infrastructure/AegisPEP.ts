@@ -2,10 +2,7 @@ import { PolicyEvaluationRequest, PolicyDecision, ToolExecutionReceipt, SolanaTr
 import { getCircuitBreaker } from './CircuitBreaker';
 import { AegisSigner } from './AegisSigner';
 import { ethers } from 'ethers';
-import * as fs from 'fs';
-import * as path from 'path';
-
-const WAL_PATH = path.resolve(process.cwd(), '.aegis_wal.json');
+import { INonceRegistry, AegisLocalNonceRegistry } from './NonceRegistry';
 
 export class AegisPEP {
     private signer: AegisSigner;
@@ -14,25 +11,13 @@ export class AegisPEP {
     // Immutable TEE Root of Trust Provisioning
     private tenantTrustStore: Record<string, string[]>;
     
-    // --- VULNERABILITY FIXED: STATE-BACKED ANTI-REPLAY ---
-    private usedNonces: Set<string>;
+    // --- VULNERABILITY FIXED: STATE-BACKED ANTI-REPLAY VIA 2PC ---
+    private nonceRegistry: INonceRegistry;
 
     constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}) {
         this.signer = signer;
         this.tenantTrustStore = tenantTrustStore;
-        
-        // Load persistent WAL state into physical RAM constraints
-        this.usedNonces = new Set<string>();
-        if (fs.existsSync(WAL_PATH)) {
-            try {
-                const stored = JSON.parse(fs.readFileSync(WAL_PATH, 'utf-8'));
-                if (Array.isArray(stored)) {
-                    stored.forEach(n => this.usedNonces.add(n));
-                }
-            } catch (e) {
-                // Failsafe empty initialization
-            }
-        }
+        this.nonceRegistry = new AegisLocalNonceRegistry();
     }
 
     /**
@@ -57,7 +42,7 @@ export class AegisPEP {
 
     public async enforce(request: PolicyEvaluationRequest): Promise<ToolExecutionReceipt> {
         return this.breaker.execute(async () => {
-            const decision = this.evaluatePolicy(request);
+            const decision = await this.evaluatePolicy(request);
 
             if (decision.decision !== 'allow') {
                 throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: ${decision.reason}`);
@@ -85,12 +70,6 @@ export class AegisPEP {
             
             const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
 
-            const canonicalString = JSON.stringify({
-                actionId: request.action.toolId,
-                parametersHash,
-                nonce: boundNonce
-            });
-
             const receipt: ToolExecutionReceipt = {
                 actionId: `action-${request.action.toolId}-${boundNonce}`,
                 toolId: request.action.toolId,
@@ -99,14 +78,43 @@ export class AegisPEP {
                 validatedParams: deterministicParams,
                 resultHash: "pending",
                 timestamp: new Date().toISOString(), // Optional metadata, NOT cryptographically hashed into the digest boundary
-                signature: this.signer.sign(canonicalString)
+                signature: ""
             };
+
+            // --- ROUND 5 RED-TEAM FIX: EXECUTION DAYLIGHT CLOSURE ---
+            // The previous architecture merely hashed internal values, allowing MEV substitution.
+            // By constructing an explicit EIP-712 struct payload, the Smart Contract can definitively bind the Receipt.
+            const receiptDomain = { name: "Aegis-12-Sentinel", version: "1.0.0", chainId: 1 };
+            const receiptTypes = {
+                Receipt: [
+                    { name: "actionId", type: "string" },
+                    { name: "toolId", type: "string" },
+                    { name: "authorizationNonce", type: "string" },
+                    { name: "parametersHash", type: "string" },
+                    { name: "resultHash", type: "string" }
+                ]
+            };
+
+            const receiptValue = {
+                actionId: receipt.actionId,
+                toolId: receipt.toolId,
+                authorizationNonce: receipt.authorizationNonce,
+                parametersHash: receipt.parametersHash,
+                resultHash: receipt.resultHash
+            };
+
+            receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
+
+            // --- ROUND 5: COMMIT THE 2PC TO PREVENT REPLAYS AFTER SUCCESS ---
+            if (request.dynamicPolicy) {
+                await this.nonceRegistry.commit(boundNonce);
+            }
 
             return receipt;
         });
     }
 
-    private evaluatePolicy(request: PolicyEvaluationRequest): PolicyDecision {
+    private async evaluatePolicy(request: PolicyEvaluationRequest): Promise<PolicyDecision> {
         const { action, agent, context, dynamicPolicy } = request;
 
         if (dynamicPolicy) {
@@ -158,18 +166,19 @@ export class AegisPEP {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Policy Expired (Replay Attack Detected). Valid time window has closed.', ttl: 0 };
                 }
 
-                // --- ROUND 4 RED-TEAM FIX: TOCTOU RACE ERADICATION ---
-                // Physically track processed nonces synchronously at validation logic, BEFORE
-                // async limits/anomalies to eliminate the Check-to-Use multi-spend gap.
-                if (this.usedNonces.has(dynamicPolicy.policyConfig.nonce)) {
+                // --- ROUND 5 RED-TEAM FIX: TOCTOU 2PC MUTEX ---
+                // We abstract the `usedNonces` physics into an async Registry that locks the nonce dynamically.
+                // It stays Pending internally. If the limits below fail, it throws and unlocks. 
+                // If it passes, it is formally committed in `enforce`.
+                const reserved = await this.nonceRegistry.reserve(dynamicPolicy.policyConfig.nonce);
+                if (!reserved) {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Nonce already used (Double-Spend Replay Attack Detected).', ttl: 0 };
                 }
-                this.usedNonces.add(dynamicPolicy.policyConfig.nonce);
-                fs.writeFileSync(WAL_PATH, JSON.stringify(Array.from(this.usedNonces)));
                 
                 const activePolicy = dynamicPolicy.policyConfig;
 
                 if (activePolicy.maxAnomalyScore && context.currentAnomalyScore > activePolicy.maxAnomalyScore) {
+                    await this.nonceRegistry.rollback(dynamicPolicy.policyConfig.nonce);
                     return { decision: 'deny', reason: `Anomaly score exceeds Dynamic TEE threshold (>${activePolicy.maxAnomalyScore})`, ttl: 0 };
                 }
 
@@ -182,6 +191,7 @@ export class AegisPEP {
                     const estimatedValue = action.estimatedValue || 0;
 
                     if (estimatedValue > maxAllowedValue) {
+                        await this.nonceRegistry.rollback(dynamicPolicy.policyConfig.nonce);
                         return { decision: 'deny', reason: `Action value ${estimatedValue} exceeds mathematically signed Tier limit ${maxAllowedValue}`, ttl: 0 };
                     }
                 }
@@ -189,6 +199,10 @@ export class AegisPEP {
                 return { decision: 'allow', reason: 'Action passed strictly parsed Cryptographic configurations', ttl: 60 };
 
             } catch (err) {
+                // Failsafe unlock: if anything throws inside evaluate, release the lock.
+                if (request.dynamicPolicy) {
+                    await this.nonceRegistry.rollback(request.dynamicPolicy.policyConfig.nonce);
+                }
                 return { decision: 'deny', reason: 'Cryptographic Payload processing failed.', ttl: 0 };
             }
         }
