@@ -191,5 +191,58 @@ describe("AegisPEP Chaos Testing Suite", () => {
         // The hash must exist instead of raw parameters dumped into canonicalString
         expect(receipt.parametersHash).toBeDefined();
         expect(receipt.parametersHash.startsWith('0x')).toBe(true);
+        expect(receipt.authorizationNonce).toEqual("sanitizer-nonce"); // Strict deterministic propagation
+    });
+
+    /**
+     * Case 4: Double-Spend Replay Nonce Tracking
+     */
+    it("denies action when an attacker successfully broadcasts the exact same signed payload twice", async () => {
+        const config = {
+            policyId: "doubleSpendPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1,
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "unique-nonce-1"
+        };
+
+        const sig = await ceoWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            maxAnomalyScore: config.maxAnomalyScore,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "wallet", amount: 10 }, estimatedValue: 10 },
+            agent: { did: "did:example:222", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        // First Execution should PASS
+        const receipt1 = await aegisPEP.enforce(request);
+        expect(receipt1.parametersHash).toBeDefined(); // Passes cleanly
+
+        // Second Execution of the EXACT SAME PAYLOAD should be violently rejected by internal Nonce set
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Nonce already used (Double-Spend Replay Attack Detected)");
+    });
+
+    /**
+     * Case 5: The Fatal Fallback Loophole (Missing dynamic policy)
+     */
+    it("denies action entirely when the payload lacks a cryptographic envelope", async () => {
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "wallet", amount: 10 }, estimatedValue: 10 },
+            agent: { did: "did:example:333", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            // VULNERABILITY 3 FIXED: dynamicPolicy is completely omitted
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Missing Cryptographic Policy. Zero-Trust Gateway defaults to Fail-Closed");
     });
 });

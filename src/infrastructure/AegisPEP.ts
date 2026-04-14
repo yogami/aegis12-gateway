@@ -9,10 +9,14 @@ export class AegisPEP {
     
     // Immutable TEE Root of Trust Provisioning
     private tenantTrustStore: Record<string, string[]>;
+    
+    // --- VULNERABILITY FIXED: STATE-BACKED ANTI-REPLAY ---
+    private usedNonces: Set<string>;
 
     constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}) {
         this.signer = signer;
         this.tenantTrustStore = tenantTrustStore;
+        this.usedNonces = new Set<string>();
     }
 
     /**
@@ -59,23 +63,26 @@ export class AegisPEP {
                 deterministicParams[k] = validatedParams[k];
             }
             
-            const timestamp = new Date().toISOString();
+            // --- VULNERABILITY FIXED: ERADICATE THE DETERMINISM FRAUD ---
+            // Remove ephemeral Math.random() and Date.now() from canonical signing digest
+            const boundNonce = request.dynamicPolicy ? request.dynamicPolicy.policyConfig.nonce : "fallback-nonce";
+            
             const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
 
             const canonicalString = JSON.stringify({
                 actionId: request.action.toolId,
                 parametersHash,
-                timestamp
+                nonce: boundNonce
             });
 
             const receipt: ToolExecutionReceipt = {
-                actionId: `action-${Date.now()}`,
+                actionId: `action-${request.action.toolId}-${boundNonce}`,
                 toolId: request.action.toolId,
-                authorizationNonce: `nonce-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+                authorizationNonce: boundNonce,
                 parametersHash,
                 validatedParams: deterministicParams,
                 resultHash: "pending",
-                timestamp,
+                timestamp: new Date().toISOString(), // Optional metadata, NOT cryptographically hashed into the digest boundary
                 signature: this.signer.sign(canonicalString)
             };
 
@@ -127,6 +134,13 @@ export class AegisPEP {
                 if (currentTime > dynamicPolicy.policyConfig.expiresAt) {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Policy Expired (Replay Attack Detected). Valid time window has closed.', ttl: 0 };
                 }
+
+                // --- VULNERABILITY FIXED: MISSING NONCE STATE ---
+                // Physically track processed nonces to prevent window-based replay attacks
+                if (this.usedNonces.has(dynamicPolicy.policyConfig.nonce)) {
+                    return { decision: 'deny', reason: '[TERMINAL REFUSAL] Nonce already used (Double-Spend Replay Attack Detected).', ttl: 0 };
+                }
+                this.usedNonces.add(dynamicPolicy.policyConfig.nonce);
                 
                 const activePolicy = dynamicPolicy.policyConfig;
 
@@ -149,7 +163,7 @@ export class AegisPEP {
                 return { decision: 'deny', reason: 'Cryptographic Payload processing failed.', ttl: 0 };
             }
         }
-        
-        return { decision: 'allow', reason: 'Fallback executed', ttl: 60 };
+        // --- VULNERABILITY FIXED: THE FATAL FALLBACK LOOPHOLE ---
+        return { decision: 'deny', reason: '[TERMINAL REFUSAL] Missing Cryptographic Policy. Zero-Trust Gateway defaults to Fail-Closed.', ttl: 0 };
     }
 }
