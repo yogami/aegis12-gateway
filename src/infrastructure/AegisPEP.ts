@@ -28,7 +28,8 @@ export class AegisPEP {
         if (toolId === "solana_transfer") {
             if (typeof rawParams.to !== "string" || rawParams.to.length === 0) throw new Error("Missing or invalid 'to' field");
             if (typeof rawParams.amount !== "number" || rawParams.amount <= 0) throw new Error("Missing or invalid 'amount' field");
-            validated = { to: rawParams.to, amount: rawParams.amount };
+            if (typeof rawParams.token !== "string") throw new Error("Missing 'token' field preventing asset substitution");
+            validated = { token: rawParams.token, to: rawParams.to, amount: rawParams.amount };
         } else if (toolId === "swap") {
             if (typeof rawParams.fromMint !== "string" || typeof rawParams.toMint !== "string") throw new Error("Missing mints");
             if (typeof rawParams.amount !== "number" || typeof rawParams.slippageBps !== "number") throw new Error("Missing amounts");
@@ -48,70 +49,69 @@ export class AegisPEP {
                 throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: ${decision.reason}`);
             }
 
-            // --- VULNERABILITY 2 FIXED: STRICT SANITIZATION ---
-            // Strip hallucinated keys completely and convert to strict determinism
-            let validatedParams;
             try {
-                validatedParams = this.normalizeParameters(request.action.toolId, request.action.parameters);
-            } catch (err: any) {
-                throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Schema Sanitization Failed: ${err.message}`);
+                // --- VULNERABILITY 2 FIXED: STRICT SANITIZATION ---
+                let validatedParams;
+                try {
+                    validatedParams = this.normalizeParameters(request.action.toolId, request.action.parameters);
+                } catch (err: any) {
+                    throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Schema Sanitization Failed: ${err.message}`);
+                }
+
+                const sortedKeys = Object.keys(validatedParams).sort();
+                const deterministicParams: Record<string, unknown> = {};
+                for (const k of sortedKeys) {
+                    deterministicParams[k] = validatedParams[k];
+                }
+                
+                const boundNonce = request.dynamicPolicy ? request.dynamicPolicy.policyConfig.nonce : crypto.randomUUID();
+                
+                const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
+
+                const receipt: ToolExecutionReceipt = {
+                    actionId: `action-${request.action.toolId}-${boundNonce}`,
+                    toolId: request.action.toolId,
+                    authorizationNonce: boundNonce,
+                    parametersHash,
+                    validatedParams: deterministicParams,
+                    resultHash: "pending",
+                    signature: ""
+                };
+
+                const receiptDomain = { name: "Aegis-12-Sentinel", version: "1.0.0", chainId: 1399811149 };
+                const receiptTypes = {
+                    Receipt: [
+                        { name: "actionId", type: "string" },
+                        { name: "toolId", type: "string" },
+                        { name: "authorizationNonce", type: "string" },
+                        { name: "parametersHash", type: "string" },
+                        { name: "targetExecutionChain", type: "string" },
+                        { name: "resultHash", type: "string" }
+                    ]
+                };
+
+                const receiptValue = {
+                    actionId: receipt.actionId,
+                    toolId: receipt.toolId,
+                    authorizationNonce: receipt.authorizationNonce,
+                    parametersHash: receipt.parametersHash,
+                    targetExecutionChain: "solana-mainnet",
+                    resultHash: receipt.resultHash
+                };
+
+                receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
+
+                if (request.dynamicPolicy) {
+                    await this.nonceRegistry.commit(request.dynamicPolicy.policyConfig.nonce);
+                }
+
+                return receipt;
+            } catch (err) {
+                if (request.dynamicPolicy) {
+                    await this.nonceRegistry.rollback(request.dynamicPolicy.policyConfig.nonce);
+                }
+                throw err;
             }
-
-            // Lexicographically sort parameters for guaranteed deterministic hashing
-            const sortedKeys = Object.keys(validatedParams).sort();
-            const deterministicParams: Record<string, unknown> = {};
-            for (const k of sortedKeys) {
-                deterministicParams[k] = validatedParams[k];
-            }
-            
-            // --- VULNERABILITY FIXED: ERADICATE THE DETERMINISM FRAUD ---
-            // Remove ephemeral Math.random() and Date.now() from canonical signing digest
-            const boundNonce = request.dynamicPolicy ? request.dynamicPolicy.policyConfig.nonce : "fallback-nonce";
-            
-            const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
-
-            const receipt: ToolExecutionReceipt = {
-                actionId: `action-${request.action.toolId}-${boundNonce}`,
-                toolId: request.action.toolId,
-                authorizationNonce: boundNonce,
-                parametersHash,
-                validatedParams: deterministicParams,
-                resultHash: "pending",
-                timestamp: new Date().toISOString(), // Optional metadata, NOT cryptographically hashed into the digest boundary
-                signature: ""
-            };
-
-            // --- ROUND 6 RED-TEAM FIX: RECEIPT EXECUTION TARGET BINDING ---
-            // The Sentinel Receipt explicitly names the Solana cluster, destroying the MEV Daylight swap vector.
-            const receiptDomain = { name: "Aegis-12-Sentinel", version: "1.0.0", chainId: 1 };
-            const receiptTypes = {
-                Receipt: [
-                    { name: "actionId", type: "string" },
-                    { name: "toolId", type: "string" },
-                    { name: "authorizationNonce", type: "string" },
-                    { name: "parametersHash", type: "string" },
-                    { name: "targetExecutionChain", type: "string" },
-                    { name: "resultHash", type: "string" }
-                ]
-            };
-
-            const receiptValue = {
-                actionId: receipt.actionId,
-                toolId: receipt.toolId,
-                authorizationNonce: receipt.authorizationNonce,
-                parametersHash: receipt.parametersHash,
-                targetExecutionChain: "solana-mainnet",
-                resultHash: receipt.resultHash
-            };
-
-            receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
-
-            // --- ROUND 5: COMMIT THE 2PC TO PREVENT REPLAYS AFTER SUCCESS ---
-            if (request.dynamicPolicy) {
-                await this.nonceRegistry.commit(boundNonce);
-            }
-
-            return receipt;
         });
     }
 
@@ -123,14 +123,13 @@ export class AegisPEP {
                 const domain = {
                     name: "Aegis-12-Compliance-Matrix",
                     version: dynamicPolicy.policyConfig.version || "1.0.0",
-                    chainId: dynamicPolicy.policyConfig.chainId || 1, 
+                    chainId: dynamicPolicy.policyConfig.chainId || 1399811149, 
                 };
 
                 const types = {
                     Policy: [
                         { name: "policyId", type: "string" },
                         { name: "tenantId", type: "string" },
-                        // --- VULNERABILITY FIXED: STRICT CRYPTOGRAPHIC BINDINGS ---
                         { name: "version", type: "string" },
                         { name: "chainId", type: "uint256" },
                         { name: "crossChainTarget", type: "string" },
@@ -145,7 +144,7 @@ export class AegisPEP {
                     policyId: dynamicPolicy.policyConfig.policyId,
                     tenantId: dynamicPolicy.policyConfig.tenantId,
                     version: dynamicPolicy.policyConfig.version || "1.0.0",
-                    chainId: dynamicPolicy.policyConfig.chainId || 1,
+                    chainId: dynamicPolicy.policyConfig.chainId || 1399811149,
                     crossChainTarget: dynamicPolicy.policyConfig.crossChainTarget || "ethereum",
                     maxAnomalyScore: dynamicPolicy.policyConfig.maxAnomalyScore,
                     financialLimitsString: dynamicPolicy.policyConfig.financialLimitsString || "{}",
@@ -197,12 +196,20 @@ export class AegisPEP {
                 const verifiedLimits = JSON.parse(activePolicy.financialLimitsString || "{}");
 
                 if (agent.purpose === 'financial_operations' && Object.keys(verifiedLimits).length > 0) {
-                    const maxAllowedValue = verifiedLimits[agent.currentTier] || 0;
-                    const estimatedValue = action.estimatedValue || 0;
-
-                    if (estimatedValue > maxAllowedValue) {
-                        await this.nonceRegistry.rollback(dynamicPolicy.policyConfig.nonce);
-                        return { decision: 'deny', reason: `Action value ${estimatedValue} exceeds mathematically signed Tier limit ${maxAllowedValue}`, ttl: 0 };
+                    const maxAllowedValue = verifiedLimits[agent.currentTier];
+                    
+                    if (maxAllowedValue !== undefined) {
+                        if (typeof maxAllowedValue !== 'number') {
+                            throw new Error("Financial limit must be strict number");
+                        }
+                        const estimatedValue = action.estimatedValue;
+                        if (typeof estimatedValue !== 'number') {
+                            throw new Error("[TERMINAL REFUSAL] estimatedValue missing or invalid type");
+                        }
+                        if (estimatedValue > maxAllowedValue) {
+                            await this.nonceRegistry.rollback(dynamicPolicy.policyConfig.nonce);
+                            return { decision: 'deny', reason: `Action value ${estimatedValue} exceeds mathematically signed Tier limit ${maxAllowedValue}`, ttl: 0 };
+                        }
                     }
                 }
 

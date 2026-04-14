@@ -24,7 +24,7 @@ const API_URL = process.env.TEST_API_URL || 'http://127.0.0.1:8000';
 const TEST_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const e2eWallet = new ethers.Wallet(TEST_PRIVATE_KEY);
 
-const eip712Domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1 };
+const eip712Domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1399811149 };
 const eip712Types = {
     Policy: [
         { name: "policyId", type: "string" },
@@ -44,7 +44,7 @@ async function createSignedDynamicPolicy(tier: string, limit: number, maxScore: 
         policyId: "e2e-policy-" + nonceStr,
         tenantId: "tenant-e2e",
         version: "1.0.0",
-        chainId: 1,
+        chainId: 1399811149,
         crossChainTarget: "solana-mainnet",
         maxAnomalyScore: maxScore,
         financialLimitsString: JSON.stringify({ [tier]: limit }),

@@ -11,7 +11,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
     let ceoWallet: ethers.Wallet;
     
     // EIP-712 Domain
-    const domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1 };
+    const domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1399811149 };
     const types = {
         Policy: [
             { name: "policyId", type: "string" },
@@ -55,7 +55,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
                 policyId: "fakePolicy123",
                 tenantId: "tenant-abc",
                 version: "1.0.0",
-                chainId: 1,
+                chainId: 1399811149,
                 crossChainTarget: "solana-mainnet",
                 maxAnomalyScore: 100,
                 financialLimits: { 'T4': 50000 },
@@ -88,7 +88,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "unauthorizedPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 100,
             financialLimits: { 'T4': 5000000 }, // Huge limits!
@@ -117,7 +117,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         };
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "attacker", amount: 100000 }, estimatedValue: 100000 },
             agent: { did: "did:example:777", purpose: "testing", currentTier: "T4" },
             context: { currentAnomalyScore: 0 },
             dynamicPolicy: selfSignedPolicy
@@ -134,7 +134,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "expiredPolicy",
             tenantId: "expiredTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 80,
             financialLimits: { 'T4': 50000 },
@@ -156,7 +156,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         });
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "x", amount: 10 }, estimatedValue: 10 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "x", amount: 10 }, estimatedValue: 10 },
             agent: { did: "did:example:567", purpose: "testing", currentTier: "T2" },
             context: { currentAnomalyScore: 0 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
@@ -173,7 +173,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "legitPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
@@ -204,7 +204,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         };
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: dirtyLLMParameters, estimatedValue: 50 },
+            action: { toolId: "solana_transfer", parameters: { ...dirtyLLMParameters, token: "USDC" }, estimatedValue: 50 },
             agent: { did: "did:example:111", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
@@ -233,7 +233,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "doubleSpendPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
@@ -255,7 +255,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         });
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "wallet", amount: 10 }, estimatedValue: 10 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "wallet", amount: 10 }, estimatedValue: 10 },
             agent: { did: "did:example:222", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
@@ -274,7 +274,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
      */
     it("denies action entirely when the payload lacks a cryptographic envelope", async () => {
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "wallet", amount: 10 }, estimatedValue: 10 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "wallet", amount: 10 }, estimatedValue: 10 },
             agent: { did: "did:example:333", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             // VULNERABILITY 3 FIXED: dynamicPolicy is completely omitted
@@ -291,7 +291,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "bisectionPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "solana-mainnet",
             maxAnomalyScore: 90,
             // Attacker wants to secretly pass this unsigned JSON
@@ -315,7 +315,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         });
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "attacker", amount: 100000 }, estimatedValue: 100000 },
             agent: { did: "did:example:666", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address } // The config carries the unsigned 5M
@@ -333,7 +333,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             policyId: "crossChainExploit",
             tenantId: "legitTenant",
             version: "1.0.0",
-            chainId: 1,
+            chainId: 1399811149,
             crossChainTarget: "ethereum", // The user signed this for an EVM chain
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
@@ -355,12 +355,111 @@ describe("AegisPEP Chaos Testing Suite", () => {
         });
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "attacker", amount: 100000 }, estimatedValue: 100000 },
             agent: { did: "did:example:999", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
 
         await expect(aegisPEP.enforce(request)).rejects.toThrow("Cross-Chain Replay Defended");
+    });
+
+    /**
+     * Case 9: VULN-5 Parameter Omission Bypass (Null Type Coercion)
+     */
+    it("denies action when attacker omits estimatedValue to bypass null type coercion limit checks", async () => {
+        const config: any = {
+            policyId: "coercionPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana-mainnet",
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "type-coercion-nonce"
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "attacker", amount: 100000 } }, // estimatedValue OMITTED!
+            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow();
+    });
+
+    /**
+     * Case 10: VULN-6 Asset Substitution (Token Stripping)
+     */
+    it("denies action when token parameter is omitted during solana_transfer, stopping MEV asset substitution", async () => {
+        const config: any = {
+            policyId: "assetPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana-mainnet",
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "asset-substitution-nonce"
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100 }, estimatedValue: 100 },  // 'token' is missing
+            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow();
+    });
+
+    /**
+     * Case 11: VULN-1 2PC Atomic Rollback on Parameter Exception
+     */
+    it("rolls back the nonce if an exception is thrown after evaluatePolicy but before commit", async () => {
+        const config: any = {
+            policyId: "rollbackPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana-mainnet",
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "atomic-rollback-nonce"
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        const request: any = {
+            // Malformed parameters to throw during normalizeParameters
+            action: { toolId: "solana_transfer", parameters: { to: 1234, amount: -100 }, estimatedValue: 100 }, 
+            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow();
+
+        // If rollback works correctly, we should be able to reuse the nonce when we submit a valid request!
+        const validRequest: any = {
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "valid-wallet", amount: 100 }, estimatedValue: 100 }, 
+            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+        
+        const receipt = await aegisPEP.enforce(validRequest);
+        expect(receipt.authorizationNonce).toEqual("atomic-rollback-nonce");
     });
 });

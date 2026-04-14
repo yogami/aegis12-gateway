@@ -36,3 +36,8 @@ jobs:
           
       - name: Deployment Success Notification
         run: echo "🎉 Phala Network CVM Image built and pushed successfully! Ready for Intel SGX Dashboard ingestion."
+
+      - name: Trigger Phala CVM Deployment
+        run: |
+          echo "Initiating Dstack webhook for Phala deployment update..."
+          curl -X POST https://api.phala.network/v1/cvm/deploy             -H "Authorization: Bearer $\{\{ secrets.PHALA_DEPLOY_TOKEN \}\}"             -H "Content-Type: application/json"             -d '{"image": "$\{\{ secrets.DOCKERHUB_USERNAME \}\}/aegis-phala-cvm:latest", "env": ["NODE_ENV=production"]}'

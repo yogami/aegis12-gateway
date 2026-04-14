@@ -13,10 +13,12 @@ const signer = new AegisSigner();
 // we provision a deterministic test wallet exclusively under the 'tenant-e2e' scope.
 const TEST_E2E_WALLET_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
 
-const pep = new AegisPEP(
-    signer,
-    { "tenant-e2e": [TEST_E2E_WALLET_ADDRESS] } // Hardware Trust Store Mapping
-);
+const trustStore: Record<string, string[]> = {};
+if (process.env.NODE_ENV === 'test') {
+    trustStore["tenant-e2e"] = [TEST_E2E_WALLET_ADDRESS];
+}
+
+const pep = new AegisPEP(signer, trustStore);
 
 /**
  * Main entrypoint for the Phala Network JS Enclave.
@@ -45,6 +47,9 @@ export default async function phalaEntrypoint(requestPayload: string): Promise<s
                 attestation = data.quote;
             }
         } catch (err) {
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error("TERMINAL REFUSAL: SECURE ENCLAVE HARDWARE ATTESTATION FAILED. Phala Dstack unreachable.");
+            }
             console.warn("[Aegis TEE] Fetching dstack attestation failed. Running in unprotected mock mode.");
         }
 
@@ -105,6 +110,9 @@ export async function handleHealthtechRequest(requestPayload: string): Promise<s
                 attestation = data.quote;
             }
         } catch (err) {
+            if (process.env.NODE_ENV === 'production') {
+                throw new Error("TERMINAL REFUSAL: SECURE ENCLAVE HARDWARE ATTESTATION FAILED.");
+            }
             console.warn("[Aegis Healthtech] Fetching dstack attestation failed. Running in mock mode.");
         }
 
