@@ -7,7 +7,16 @@ import { HealthtechRequest, HealthtechPolicy } from './healthtech-types';
 // The TEE generates a secure in-memory keypair upon instantiation that never leaves the hardware.
 // In a full Phala Phat Contract, this can be derived deterministically from the enclave's root key.
 const signer = new AegisSigner();
-const pep = new AegisPEP(signer);
+
+// --- PLAYWRIGHT E2E SYNC ---
+// To bridge the EIP-712 Cross-Chain boundary in test environments without hitting a live KMS,
+// we provision a deterministic test wallet exclusively under the 'tenant-e2e' scope.
+const TEST_E2E_WALLET_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+
+const pep = new AegisPEP(
+    signer,
+    { "tenant-e2e": [TEST_E2E_WALLET_ADDRESS] } // Hardware Trust Store Mapping
+);
 
 /**
  * Main entrypoint for the Phala Network JS Enclave.

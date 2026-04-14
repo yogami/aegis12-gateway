@@ -1,7 +1,7 @@
 {
   "config": {
-    "configFile": "/Users/user1000/gitprojects/aegis-core/playwright.config.ts",
-    "rootDir": "/Users/user1000/gitprojects/aegis-core/e2e",
+    "configFile": "/Users/user1000/gitprojects/aegis12-gateway/playwright.config.ts",
+    "rootDir": "/Users/user1000/gitprojects/aegis12-gateway/e2e",
     "forbidOnly": false,
     "fullyParallel": false,
     "globalSetup": null,
@@ -11,20 +11,20 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 2
+      "actualWorkers": 1
     },
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "/Users/user1000/gitprojects/aegis-core/test-results",
+        "outputDir": "/Users/user1000/gitprojects/aegis12-gateway/test-results",
         "repeatEach": 1,
         "retries": 1,
         "metadata": {
-          "actualWorkers": 2
+          "actualWorkers": 1
         },
         "id": "",
         "name": "",
-        "testDir": "/Users/user1000/gitprojects/aegis-core/e2e",
+        "testDir": "/Users/user1000/gitprojects/aegis12-gateway/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -56,162 +56,14 @@
     "updateSourceMethod": "patch",
     "version": "1.58.2",
     "workers": 5,
-    "webServer": null
+    "webServer": {
+      "command": "npx tsx src/server.ts",
+      "port": 8000,
+      "timeout": 15000,
+      "reuseExistingServer": true
+    }
   },
   "suites": [
-    {
-      "title": "healthtech.spec.ts",
-      "file": "healthtech.spec.ts",
-      "column": 0,
-      "line": 0,
-      "specs": [],
-      "suites": [
-        {
-          "title": "Aegis Healthtech API E2E",
-          "file": "healthtech.spec.ts",
-          "line": 6,
-          "column": 6,
-          "specs": [
-            {
-              "title": "should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 172,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-08T17:36:00.924Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f5cce808adf0f6633290-aeea49818b9a5fd845cc",
-              "file": "healthtech.spec.ts",
-              "line": 8,
-              "column": 9
-            },
-            {
-              "title": "should return 403 Forbidden for unauthorized RBAC access",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 73,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.107Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f5cce808adf0f6633290-28228d5ed88501990085",
-              "file": "healthtech.spec.ts",
-              "line": 32,
-              "column": 9
-            },
-            {
-              "title": "should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt)",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 43,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.184Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f5cce808adf0f6633290-a12f5159a09d4949fe8c",
-              "file": "healthtech.spec.ts",
-              "line": 52,
-              "column": 9
-            },
-            {
-              "title": "should return 500 Error for malformed non-JSON requests",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 58,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.231Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "f5cce808adf0f6633290-69bd825d337a6724e249",
-              "file": "healthtech.spec.ts",
-              "line": 75,
-              "column": 9
-            }
-          ]
-        }
-      ]
-    },
     {
       "title": "solana-integration.spec.ts",
       "file": "solana-integration.spec.ts",
@@ -222,7 +74,7 @@
         {
           "title": "Infrastructure Endpoints",
           "file": "solana-integration.spec.ts",
-          "line": 25,
+          "line": 67,
           "column": 6,
           "specs": [
             {
@@ -238,15 +90,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 114,
+                      "duration": 21,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:00.936Z",
+                      "startTime": "2026-04-14T12:37:00.592Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -256,7 +108,7 @@
               ],
               "id": "cca4a3c8928b258fa463-5b16d585954224b12116",
               "file": "solana-integration.spec.ts",
-              "line": 27,
+              "line": 69,
               "column": 9
             },
             {
@@ -272,15 +124,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 72,
+                      "duration": 7,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.061Z",
+                      "startTime": "2026-04-14T12:37:00.620Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -290,7 +142,7 @@
               ],
               "id": "cca4a3c8928b258fa463-02d93d1b0cc99e04494d",
               "file": "solana-integration.spec.ts",
-              "line": 41,
+              "line": 83,
               "column": 9
             }
           ]
@@ -298,7 +150,7 @@
         {
           "title": "Core Policy Enforcement",
           "file": "solana-integration.spec.ts",
-          "line": 76,
+          "line": 118,
           "column": 6,
           "specs": [
             {
@@ -314,15 +166,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 59,
+                      "duration": 45,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.138Z",
+                      "startTime": "2026-04-14T12:37:00.634Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -332,7 +184,7 @@
               ],
               "id": "cca4a3c8928b258fa463-d02707eb6002540ba62e",
               "file": "solana-integration.spec.ts",
-              "line": 78,
+              "line": 120,
               "column": 9
             },
             {
@@ -348,15 +200,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 91,
+                      "duration": 14,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.203Z",
+                      "startTime": "2026-04-14T12:37:00.685Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -366,7 +218,7 @@
               ],
               "id": "cca4a3c8928b258fa463-11dbb1d013886ec493c1",
               "file": "solana-integration.spec.ts",
-              "line": 113,
+              "line": 157,
               "column": 9
             },
             {
@@ -382,15 +234,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 79,
+                      "duration": 13,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.300Z",
+                      "startTime": "2026-04-14T12:37:00.702Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -400,7 +252,7 @@
               ],
               "id": "cca4a3c8928b258fa463-3d51ca14da1a1501250d",
               "file": "solana-integration.spec.ts",
-              "line": 143,
+              "line": 188,
               "column": 9
             }
           ]
@@ -408,7 +260,7 @@
         {
           "title": "Solana Receipt Anchoring",
           "file": "solana-integration.spec.ts",
-          "line": 178,
+          "line": 224,
           "column": 6,
           "specs": [
             {
@@ -424,15 +276,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 35,
+                      "duration": 9,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.384Z",
+                      "startTime": "2026-04-14T12:37:00.722Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -442,7 +294,7 @@
               ],
               "id": "cca4a3c8928b258fa463-40349d0b9360c8d74f1a",
               "file": "solana-integration.spec.ts",
-              "line": 180,
+              "line": 226,
               "column": 9
             },
             {
@@ -458,15 +310,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 141,
+                      "duration": 62,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.423Z",
+                      "startTime": "2026-04-14T12:37:00.737Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -476,7 +328,7 @@
               ],
               "id": "cca4a3c8928b258fa463-ad918d556ebb141da1c8",
               "file": "solana-integration.spec.ts",
-              "line": 190,
+              "line": 236,
               "column": 9
             },
             {
@@ -492,15 +344,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 94,
+                      "duration": 6,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.572Z",
+                      "startTime": "2026-04-14T12:37:00.803Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -510,7 +362,7 @@
               ],
               "id": "cca4a3c8928b258fa463-72ddc3ddbfc629905409",
               "file": "solana-integration.spec.ts",
-              "line": 220,
+              "line": 266,
               "column": 9
             }
           ]
@@ -518,7 +370,7 @@
         {
           "title": "Solana Transaction Firewall",
           "file": "solana-integration.spec.ts",
-          "line": 234,
+          "line": 280,
           "column": 6,
           "specs": [
             {
@@ -534,15 +386,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 67,
+                      "duration": 3,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.675Z",
+                      "startTime": "2026-04-14T12:37:00.813Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -552,7 +404,7 @@
               ],
               "id": "cca4a3c8928b258fa463-e6d6c968ebe7ba15a589",
               "file": "solana-integration.spec.ts",
-              "line": 236,
+              "line": 282,
               "column": 9
             },
             {
@@ -568,15 +420,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 80,
+                      "duration": 5,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.755Z",
+                      "startTime": "2026-04-14T12:37:00.820Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -586,7 +438,7 @@
               ],
               "id": "cca4a3c8928b258fa463-255dcee86a4c751615d7",
               "file": "solana-integration.spec.ts",
-              "line": 246,
+              "line": 292,
               "column": 9
             }
           ]
@@ -594,7 +446,7 @@
         {
           "title": "Squads V4 Governance",
           "file": "solana-integration.spec.ts",
-          "line": 269,
+          "line": 315,
           "column": 6,
           "specs": [
             {
@@ -610,15 +462,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 68,
+                      "duration": 4,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.843Z",
+                      "startTime": "2026-04-14T12:37:00.832Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -628,7 +480,7 @@
               ],
               "id": "cca4a3c8928b258fa463-d72ceb8e1165258903ca",
               "file": "solana-integration.spec.ts",
-              "line": 271,
+              "line": 317,
               "column": 9
             },
             {
@@ -644,15 +496,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 205,
+                      "duration": 3,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:01.922Z",
+                      "startTime": "2026-04-14T12:37:00.840Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -662,7 +514,7 @@
               ],
               "id": "cca4a3c8928b258fa463-6d79bb752742cd7dee44",
               "file": "solana-integration.spec.ts",
-              "line": 284,
+              "line": 330,
               "column": 9
             },
             {
@@ -678,15 +530,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 164,
+                      "duration": 3,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.137Z",
+                      "startTime": "2026-04-14T12:37:00.852Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -696,7 +548,7 @@
               ],
               "id": "cca4a3c8928b258fa463-9e0af1ccaa20ea749030",
               "file": "solana-integration.spec.ts",
-              "line": 306,
+              "line": 352,
               "column": 9
             },
             {
@@ -712,15 +564,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 109,
+                      "duration": 3,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.312Z",
+                      "startTime": "2026-04-14T12:37:00.859Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -730,7 +582,7 @@
               ],
               "id": "cca4a3c8928b258fa463-ea0dbd991fd8cb44ddad",
               "file": "solana-integration.spec.ts",
-              "line": 330,
+              "line": 376,
               "column": 9
             },
             {
@@ -746,15 +598,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 83,
+                      "duration": 2,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.452Z",
+                      "startTime": "2026-04-14T12:37:00.865Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -764,7 +616,7 @@
               ],
               "id": "cca4a3c8928b258fa463-13a1077a665b10294ab3",
               "file": "solana-integration.spec.ts",
-              "line": 351,
+              "line": 397,
               "column": 9
             },
             {
@@ -780,15 +632,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 76,
+                      "duration": 2,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.538Z",
+                      "startTime": "2026-04-14T12:37:00.870Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -798,7 +650,7 @@
               ],
               "id": "cca4a3c8928b258fa463-ab74494475183f549100",
               "file": "solana-integration.spec.ts",
-              "line": 365,
+              "line": 411,
               "column": 9
             }
           ]
@@ -806,7 +658,7 @@
         {
           "title": "TEE Attestation",
           "file": "solana-integration.spec.ts",
-          "line": 389,
+          "line": 435,
           "column": 6,
           "specs": [
             {
@@ -822,15 +674,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 52,
+                      "duration": 3,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.618Z",
+                      "startTime": "2026-04-14T12:37:00.880Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -840,7 +692,7 @@
               ],
               "id": "cca4a3c8928b258fa463-d77ff3721b91e4d45619",
               "file": "solana-integration.spec.ts",
-              "line": 391,
+              "line": 437,
               "column": 9
             }
           ]
@@ -848,7 +700,7 @@
         {
           "title": "x402 Monetization",
           "file": "solana-integration.spec.ts",
-          "line": 415,
+          "line": 461,
           "column": 6,
           "specs": [
             {
@@ -864,15 +716,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 53,
+                      "duration": 2,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.675Z",
+                      "startTime": "2026-04-14T12:37:00.886Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -882,7 +734,7 @@
               ],
               "id": "cca4a3c8928b258fa463-0021edd96d762906c5b8",
               "file": "solana-integration.spec.ts",
-              "line": 417,
+              "line": 463,
               "column": 9
             }
           ]
@@ -890,7 +742,7 @@
         {
           "title": "Healthtech HIPAA Enforcement",
           "file": "solana-integration.spec.ts",
-          "line": 435,
+          "line": 481,
           "column": 6,
           "specs": [
             {
@@ -906,15 +758,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 46,
+                      "duration": 5,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.732Z",
+                      "startTime": "2026-04-14T12:37:00.892Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -924,7 +776,7 @@
               ],
               "id": "cca4a3c8928b258fa463-c76c892243d876818a12",
               "file": "solana-integration.spec.ts",
-              "line": 437,
+              "line": 483,
               "column": 9
             },
             {
@@ -940,15 +792,15 @@
                   "projectName": "",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 52,
+                      "duration": 10,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-08T17:36:02.782Z",
+                      "startTime": "2026-04-14T12:37:00.900Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -958,7 +810,7 @@
               ],
               "id": "cca4a3c8928b258fa463-3c78f586185841d10528",
               "file": "solana-integration.spec.ts",
-              "line": 454,
+              "line": 500,
               "column": 9
             }
           ]
@@ -968,9 +820,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-04-08T17:36:00.339Z",
-    "duration": 2512.426,
-    "expected": 24,
+    "startTime": "2026-04-14T12:36:58.055Z",
+    "duration": 2881.169,
+    "expected": 20,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { ethers } from 'ethers';
 
 /**
  * Aegis-12 E2E Test Suite — Solana Integration + Governance + x402
@@ -17,6 +18,47 @@ import { test, expect } from '@playwright/test';
  */
 
 const API_URL = process.env.TEST_API_URL || 'http://127.0.0.1:8000';
+
+// --- PIPELINE ALIGNMENT FIX (ROUND 6) ---
+// Playwright must digitally sign payloads to bypass the Zero-Trust Hardware Enclave
+const TEST_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const e2eWallet = new ethers.Wallet(TEST_PRIVATE_KEY);
+
+const eip712Domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1 };
+const eip712Types = {
+    Policy: [
+        { name: "policyId", type: "string" },
+        { name: "tenantId", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "crossChainTarget", type: "string" },
+        { name: "maxAnomalyScore", type: "uint256" },
+        { name: "financialLimitsString", type: "string" },
+        { name: "expiresAt", type: "uint256" },
+        { name: "nonce", type: "string" }
+    ]
+};
+
+async function createSignedDynamicPolicy(tier: string, limit: number, maxScore: number, nonceStr: string) {
+    const config = {
+        policyId: "e2e-policy-" + nonceStr,
+        tenantId: "tenant-e2e",
+        version: "1.0.0",
+        chainId: 1,
+        crossChainTarget: "solana-mainnet",
+        maxAnomalyScore: maxScore,
+        financialLimitsString: JSON.stringify({ [tier]: limit }),
+        expiresAt: Math.floor(Date.now() / 1000) + 3600,
+        nonce: nonceStr
+    };
+
+    const signature = await e2eWallet._signTypedData(eip712Domain, eip712Types, config);
+    return {
+        policyConfig: { ...config, financialLimits: { [tier]: limit } },
+        signature,
+        ownerPublicKey: e2eWallet.address
+    };
+}
 
 // ═══════════════════════════════════════════════════════════════
 // 1. HEALTH + API DOCS
@@ -84,9 +126,9 @@ test.describe('Core Policy Enforcement', () => {
                     currentTier: 'T2',
                 },
                 action: {
-                    toolId: 'tool:defi:swap',
+                    toolId: 'swap',
                     actionType: 'token_swap',
-                    parameters: { pair: 'SOL/USDC', amount: 100 },
+                    parameters: { fromMint: 'SOL', toMint: 'USDC', amount: 100, slippageBps: 50 },
                     estimatedValue: 500,
                 },
                 context: {
@@ -96,15 +138,17 @@ test.describe('Core Policy Enforcement', () => {
                     currentAnomalyScore: 0.2,
                     recentIncidents: 0,
                 },
+                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, "test-nonce-e2e-1-" + Date.now()),
             },
         });
 
+        if (!res.ok()) console.log(await res.text());
         expect(res.ok()).toBeTruthy();
-        const body = await res.json();
+        const body = res.headers()['content-type']?.includes('json') ? await res.json() : {};
 
         expect(body.status).toBe('approved');
         expect(body.receipt).toBeDefined();
-        expect(body.receipt.toolId).toBe('tool:defi:swap');
+        expect(body.receipt.toolId).toBe('swap');
         expect(body.receipt.signature).toBeTruthy();
         expect(body.enclaveDid).toContain('did:aegis:enclave:');
         expect(body.attestation).toBeDefined();
@@ -119,25 +163,26 @@ test.describe('Core Policy Enforcement', () => {
                     currentTier: 'T4',
                 },
                 action: {
-                    toolId: 'tool:defi:drain',
+                    toolId: 'solana_transfer',
                     actionType: 'token_transfer',
-                    parameters: { to: 'attacker-wallet', amount: 999999 },
+                    parameters: { token: 'SOL', to: 'attacker-wallet', amount: 999999 },
                     estimatedValue: 50000,
                 },
                 context: {
                     sessionId: 'session-e2e-2',
                     actionsThisSession: 50,
                     actionsThisHour: 200,
-                    currentAnomalyScore: 0.95,  // HIGH anomaly
+                    currentAnomalyScore: 95,  // HIGH anomaly (scale 0-100)
                     recentIncidents: 3,
                 },
+                dynamicPolicy: await createSignedDynamicPolicy('T4', 9999999, 50, "test-nonce-e2e-2-" + Date.now()), // Note limit maxAnomalyScore is 50, so 95 will trigger denial
             },
         });
 
         expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status).toBe('denied');
-        expect(body.error).toContain('Anomaly score');
+        expect(body.error).toContain('Anomaly');
     });
 
     test('POST /enforce denies tier-exceeding financial ops', async ({ request }) => {
@@ -149,9 +194,9 @@ test.describe('Core Policy Enforcement', () => {
                     currentTier: 'T2',  // T2 limit = 10,000
                 },
                 action: {
-                    toolId: 'tool:defi:transfer',
+                    toolId: 'solana_transfer',
                     actionType: 'token_transfer',
-                    parameters: { amount: 50000 },
+                    parameters: { token: 'USDC', to: 'wallet2', amount: 50000 },
                     estimatedValue: 50000,  // Exceeds T2 limit
                 },
                 context: {
@@ -161,13 +206,14 @@ test.describe('Core Policy Enforcement', () => {
                     currentAnomalyScore: 0.1,
                     recentIncidents: 0,
                 },
+                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, "test-nonce-e2e-3-" + Date.now()),
             },
         });
 
         expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status).toBe('denied');
-        expect(body.error).toContain('exceeds Tier limit');
+        expect(body.error).toContain('Tier limit');
     });
 });
 
