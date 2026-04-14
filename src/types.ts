@@ -1,6 +1,18 @@
 // types.ts
 // Ported from pdp-protocol/src/vera/types.ts for Aegis TEE Enclave
 
+export interface SolanaTransferPayload {
+    to: string;
+    amount: number;
+}
+
+export interface SwapPayload {
+    fromMint: string;
+    toMint: string;
+    amount: number;
+    slippageBps: number;
+}
+
 export type ISO8601 = string; // e.g. "2026-02-27T12:00:00Z"
 
 export enum TrustTier {
@@ -34,7 +46,8 @@ export interface ToolExecutionReceipt {
     actionId: string;               // Matches PoE actionId
     toolId: string;                 // Tool's SPIFFE ID or DID
     authorizationNonce: string;     // Nonce issued by PEP at authorization time
-    parameters: Record<string, unknown>; // Canonical parameters received
+    parametersHash: string;         // Keccak256 or SHA256 of the validated/stripped parameters
+    validatedParams?: Record<string, unknown>; // Only the sanitized fields (no raw LLM blob)
     resultHash: string;             // SHA-256 of JCS-canonicalized result
     timestamp: ISO8601;
     signature: string;              // TEE's key (Ed25519)
@@ -91,8 +104,17 @@ export interface PolicyEvaluationRequest {
         recentIncidents: number;
     };
     dynamicPolicy?: {
-        signedJsonPayload: string;
+        policyConfig: {
+            policyId: string;
+            tenantId: string;
+            version?: string;
+            chainId?: number;
+            maxAnomalyScore: number;
+            financialLimits: Record<string, number>;
+            expiresAt: number; // Unix timestamp for Replay Attack Prevention
+            nonce: string; // Cryptographic nonce
+        };
         ownerPublicKey: string; // The hex address that signed the policy
-        signature: string;
+        signature: string; // EIP-712 Signature
     };
 }

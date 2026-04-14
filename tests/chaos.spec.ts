@@ -1,0 +1,195 @@
+import { PolicyEvaluationRequest } from '../src/types';
+import { AegisPEP } from '../src/infrastructure/AegisPEP';
+import { AegisSigner } from '../src/infrastructure/AegisSigner';
+import { ethers } from 'ethers';
+
+describe("AegisPEP Chaos Testing Suite", () => {
+    let enclaveSigner: AegisSigner;
+    let aegisPEP: AegisPEP;
+    let ceoWallet: ethers.Wallet;
+    
+    // EIP-712 Domain
+    const domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1 };
+    const types = {
+        Policy: [
+            { name: "policyId", type: "string" },
+            { name: "tenantId", type: "string" },
+            { name: "maxAnomalyScore", type: "uint256" },
+            { name: "expiresAt", type: "uint256" },
+            { name: "nonce", type: "string" }
+        ]
+    };
+
+    beforeEach(() => {
+        enclaveSigner = new AegisSigner(); 
+        ceoWallet = ethers.Wallet.createRandom();
+
+        // 🛡️ VULNERABILITY 1 FIXED: Hardware Boot-Time KMS Trust Anchoring
+        const hardcodedTrustStore = {
+            "tenant-abc": [ceoWallet.address],
+            "expiredTenant": [ceoWallet.address],
+            "tenantX": [ceoWallet.address],
+            "legitTenant": [ceoWallet.address]
+        };
+
+        aegisPEP = new AegisPEP(enclaveSigner, hardcodedTrustStore);
+    });
+
+    /**
+     * Case 1: EIP-712 Policy Injection - Forged Typed Data (Math Level)
+     */
+    it("denies action when EIP-712 signature is functionally forged (Math Fails)", async () => {
+        const forgedDynamicPolicy = {
+            policyConfig: {
+                policyId: "fakePolicy123",
+                tenantId: "tenant-abc",
+                version: "1.0.0",
+                chainId: 1,
+                maxAnomalyScore: 100,
+                financialLimits: { 'T4': 50000 },
+                expiresAt: Math.floor(Date.now() / 1000) + 60,
+                nonce: "1234-5678"
+            },
+            signature: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12', 
+            ownerPublicKey: ceoWallet.address
+        };
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100 }, estimatedValue: 100 },
+            agent: { did: "did:example:456", purpose: "testing", currentTier: "T1" },
+            context: { currentAnomalyScore: 0 },
+            dynamicPolicy: forgedDynamicPolicy,
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Cryptographic Payload processing failed");
+    });
+
+    /**
+     * Case 1B: The Root of Trust Defense (Self-Signing Attack Blocked)
+     */
+    it("denies action when attacker correctly signs a forged policy using their own key not in Trust Store", async () => {
+        // Attacker generates their own key
+        const attackerWallet = ethers.Wallet.createRandom();
+
+        const config = {
+            policyId: "unauthorizedPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1,
+            maxAnomalyScore: 100,
+            financialLimits: { 'T4': 5000000 }, // Huge limits!
+            expiresAt: Math.floor(Date.now() / 1000) + 60,
+            nonce: "attack-nonce"
+        };
+        
+        // Attacker creates mathematically valid EIP-712 signature using their own key
+        const attackerSig = await attackerWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            maxAnomalyScore: config.maxAnomalyScore,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        const selfSignedPolicy = {
+            policyConfig: config,
+            signature: attackerSig,
+            ownerPublicKey: attackerWallet.address // They self-certify!
+        };
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            agent: { did: "did:example:777", purpose: "testing", currentTier: "T4" },
+            context: { currentAnomalyScore: 0 },
+            dynamicPolicy: selfSignedPolicy
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Signer not found in provisioned TEE Root-of-Trust");
+    });
+
+    /**
+     * Case 2: Expired Policy - Replay Attack Detection
+     */
+    it("denies action when policy expiration timestamp is in the past", async () => {
+        const config = {
+            policyId: "expiredPolicy",
+            tenantId: "expiredTenant",
+            version: "1.0.0",
+            chainId: 1,
+            maxAnomalyScore: 80,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) - 10,
+            nonce: "replay-attack-test"
+        };
+        
+        const sig = await ceoWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            maxAnomalyScore: config.maxAnomalyScore,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "x", amount: 10 }, estimatedValue: 10 },
+            agent: { did: "did:example:567", purpose: "testing", currentTier: "T2" },
+            context: { currentAnomalyScore: 0 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Policy Expired (Replay Attack Detected)");
+    });
+
+    /**
+     * Case 3: Payload Parameter Schema Sanitization (Hallucination stripping)
+     */
+    it("strips LLM hallucinated keys and generates deterministic parameters hash receipt", async () => {
+        const config = {
+            policyId: "legitPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1,
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "sanitizer-nonce"
+        };
+
+        const sig = await ceoWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            maxAnomalyScore: config.maxAnomalyScore,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        // VULNERABILITY 2 FIXED: The LLM hallucinations inside the parameters block
+        const dirtyLLMParameters = {
+            to: "receiver_wallet",
+            amount: 50,
+            hallucinated_note: "I think this trade is great",
+            reasoning: "I calculated the risk and it's 0",
+            injectedAttackerField: true
+        };
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: dirtyLLMParameters, estimatedValue: 50 },
+            agent: { did: "did:example:111", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        const receipt = await aegisPEP.enforce(request);
+
+        // The returned validParams should strictly be stripped down
+        expect((receipt.validatedParams as any).to).toEqual("receiver_wallet");
+        expect((receipt.validatedParams as any).amount).toEqual(50);
+        expect((receipt.validatedParams as any).hallucinated_note).toBeUndefined();
+        expect((receipt.validatedParams as any).reasoning).toBeUndefined();
+        expect((receipt.validatedParams as any).injectedAttackerField).toBeUndefined();
+
+        // The hash must exist instead of raw parameters dumped into canonicalString
+        expect(receipt.parametersHash).toBeDefined();
+        expect(receipt.parametersHash.startsWith('0x')).toBe(true);
+    });
+});
