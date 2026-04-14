@@ -2,6 +2,8 @@ import { PolicyEvaluationRequest } from '../src/types';
 import { AegisPEP } from '../src/infrastructure/AegisPEP';
 import { AegisSigner } from '../src/infrastructure/AegisSigner';
 import { ethers } from 'ethers';
+import * as fs from 'fs';
+import * as path from 'path';
 
 describe("AegisPEP Chaos Testing Suite", () => {
     let enclaveSigner: AegisSigner;
@@ -24,6 +26,11 @@ describe("AegisPEP Chaos Testing Suite", () => {
     };
 
     beforeEach(() => {
+        // Clear the physical WAL file so tests don't permanently Replay-lock each other!
+        try {
+            fs.rmSync(path.resolve(process.cwd(), '.aegis_wal.json'), { force: true });
+        } catch (e) {}
+
         enclaveSigner = new AegisSigner(); 
         ceoWallet = ethers.Wallet.createRandom();
 
@@ -264,5 +271,45 @@ describe("AegisPEP Chaos Testing Suite", () => {
         };
 
         await expect(aegisPEP.enforce(request)).rejects.toThrow("Missing Cryptographic Policy. Zero-Trust Gateway defaults to Fail-Closed");
+    });
+
+    /**
+     * Case 6: Signature Parameter Bisection Attack
+     */
+    it("denies action when attacker signs a small limit string but injects a massive unsigned limit JSON object", async () => {
+        const config: any = {
+            policyId: "bisectionPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1,
+            maxAnomalyScore: 90,
+            // Attacker wants to secretly pass this unsigned JSON
+            financialLimits: { 'T4': 5000000 }, 
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "bisection-attack-nonce"
+        };
+        // But the CEO actually only ever signed a $50 strict limit mathematically
+        config.financialLimitsString = JSON.stringify({ 'T4': 50 });
+
+        const sig = await ceoWallet._signTypedData(domain, types, {
+            policyId: config.policyId,
+            tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
+            maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
+            expiresAt: config.expiresAt,
+            nonce: config.nonce
+        });
+
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { to: "attacker", amount: 100000 }, estimatedValue: 100000 },
+            agent: { did: "did:example:666", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 10 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address } // The config carries the unsigned 5M
+        };
+
+        // Enclave MUST ignore the unsigned `config.financialLimits` object and enforce the signed $50 string boundary, rejecting it.
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Action value 100000 exceeds mathematically signed Tier limit 50");
     });
 });

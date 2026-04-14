@@ -45,16 +45,17 @@ except Exception as e:
     sys.exit(1)
 
 base_prompt = """
-[ROUND 2: POST-AUDIT REDEMPTION]
-The development team has just pushed the FINAL Zero-Trust cryptographic hardening phase of the Aegis-12 Compliance Gateway.
-In response to your previous critiques:
-1. `Math.random()` and `Date.now()` were explicitly removed from the signature generation boundary, ensuring strict hardware receipt determinism.
-2. We implemented a `usedNonces` hardware Set to guarantee physical Replay Attack Tracking and destruction.
-3. We erased the "Fallback allowed" condition and forced a strict Fail-Closed default for missing Envelopes.
+[ROUND 3: THE CISO RED-TEAM LOCKOUT]
+The development team has executed the final structural mandates required for the Phala-backed CVM compliance gateway.
+In response to your previous fatal discoveries:
+1. `financialLimitsString`, `version`, and `chainId` are now strictly bound directly into the EIP-712 typing schema.
+2. The `usedNonces` RAM constraint was obliterated. It is now explicitly backed by a persistent `.aegis_wal.json` (mocking a global Redis/KMS cluster), locking out inter-node replays.
+3. The nonce is only explicitly burned *after* anomaly and limit policies pass to prevent DoS-burning valid policies on limits rejections.
 
 Your objective:
 Review the updated architecture of AegisPEP.ts and the resulting proof-of-work in chaos.spec.ts. 
-Be absolutely brutal. Strip out all sycophancy. Validate if the system is TRULY Go-To-Market ready now that the "Determinism Fraud" and "Nonce Replays" are closed. Is there anything left, or does it finally pass?
+Be absolutely brutal but fair. Have they successfully built the first un-forgeable, deterministically isolated EIP-712 Sovereign Firewall? 
+If there are no fatal logic flaws remaining, you MUST explicitly grant your Greenlight.
 Keep your response under 300 words.
 """
 

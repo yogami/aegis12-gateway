@@ -102,13 +102,6 @@ export class AegisPEP {
                 signature: this.signer.sign(canonicalString)
             };
 
-            // --- VULNERABILITY FIXED: BURN-ON-SUCCESS ---
-            // Only burn the nonce AFTER all validations pass to prevent trivial DoS cycles
-            if (request.dynamicPolicy) {
-                this.usedNonces.add(request.dynamicPolicy.policyConfig.nonce);
-                fs.writeFileSync(WAL_PATH, JSON.stringify(Array.from(this.usedNonces)));
-            }
-
             return receipt;
         });
     }
@@ -165,12 +158,14 @@ export class AegisPEP {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Policy Expired (Replay Attack Detected). Valid time window has closed.', ttl: 0 };
                 }
 
-                // --- VULNERABILITY FIXED: MISSING NONCE STATE ---
-                // Physically track processed nonces to prevent window-based replay attacks
-                // PHYSICALLY EXECUTED LATER ON BURN-ON-SUCCESS
+                // --- ROUND 4 RED-TEAM FIX: TOCTOU RACE ERADICATION ---
+                // Physically track processed nonces synchronously at validation logic, BEFORE
+                // async limits/anomalies to eliminate the Check-to-Use multi-spend gap.
                 if (this.usedNonces.has(dynamicPolicy.policyConfig.nonce)) {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Nonce already used (Double-Spend Replay Attack Detected).', ttl: 0 };
                 }
+                this.usedNonces.add(dynamicPolicy.policyConfig.nonce);
+                fs.writeFileSync(WAL_PATH, JSON.stringify(Array.from(this.usedNonces)));
                 
                 const activePolicy = dynamicPolicy.policyConfig;
 
@@ -178,16 +173,20 @@ export class AegisPEP {
                     return { decision: 'deny', reason: `Anomaly score exceeds Dynamic TEE threshold (>${activePolicy.maxAnomalyScore})`, ttl: 0 };
                 }
 
-                if (agent.purpose === 'financial_operations' && activePolicy.financialLimits) {
-                    const maxAllowedValue = activePolicy.financialLimits[agent.currentTier] || 0;
+                // --- ROUND 4 RED-TEAM FIX: THE SIGNATURE PARAMETER BISECTION ATTACK ---
+                // Never extract financial limits from the mutable unverified JSON layer.
+                const verifiedLimits = JSON.parse(activePolicy.financialLimitsString || "{}");
+
+                if (agent.purpose === 'financial_operations' && Object.keys(verifiedLimits).length > 0) {
+                    const maxAllowedValue = verifiedLimits[agent.currentTier] || 0;
                     const estimatedValue = action.estimatedValue || 0;
 
                     if (estimatedValue > maxAllowedValue) {
-                        return { decision: 'deny', reason: `Action value ${estimatedValue} exceeds Dynamic Tier limit ${maxAllowedValue}`, ttl: 0 };
+                        return { decision: 'deny', reason: `Action value ${estimatedValue} exceeds mathematically signed Tier limit ${maxAllowedValue}`, ttl: 0 };
                     }
                 }
 
-                return { decision: 'allow', reason: 'Action passed Cryptographically Injected configurations', ttl: 60 };
+                return { decision: 'allow', reason: 'Action passed strictly parsed Cryptographic configurations', ttl: 60 };
 
             } catch (err) {
                 return { decision: 'deny', reason: 'Cryptographic Payload processing failed.', ttl: 0 };
