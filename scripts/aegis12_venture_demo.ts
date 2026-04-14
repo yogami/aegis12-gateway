@@ -58,7 +58,7 @@ async function main() {
     // 1. Phala Network (The Web3 Hardware Execution)
     // We expect the user to provide their Phala Cloud URL via Environment variables.
     // If none is provided, it falls back to the default deployed Web2 proxy wrapper.
-    const phalaCloudUrl = process.env.PHALA_CLOUD_URL || "https://gateway.phala.network/evidence";
+    const phalaCloudUrl = process.env.PHALA_CLOUD_URL || "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc.app.phala.network/evidence";
     const phalaAnchor = new PhalaTeeAnchor(phalaCloudUrl);
 
     // 2. Lit Protocol (The Web3 Native JavaScript execution)

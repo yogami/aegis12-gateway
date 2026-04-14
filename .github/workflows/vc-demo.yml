@@ -7,6 +7,7 @@ on:
         description: 'Your physical Phala Cloud CVM Instance Proxy URL (optional)'
         required: false
         type: string
+        default: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc.app.phala.network/evidence'
 
 jobs:
   execute-demo:
