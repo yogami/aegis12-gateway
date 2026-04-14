@@ -90,4 +90,9 @@ export interface PolicyEvaluationRequest {
         currentAnomalyScore: number;
         recentIncidents: number;
     };
+    dynamicPolicy?: {
+        signedJsonPayload: string;
+        ownerPublicKey: string; // The hex address that signed the policy
+        signature: string;
+    };
 }
