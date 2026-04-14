@@ -111,6 +111,7 @@ export interface PolicyEvaluationRequest {
             chainId?: number;
             maxAnomalyScore: number;
             financialLimits: Record<string, number>;
+            financialLimitsString?: string; // VULNERABILITY FIXED: Hardened cryptographic string binding for mutable parameters
             expiresAt: number; // Unix timestamp for Replay Attack Prevention
             nonce: string; // Cryptographic nonce
         };

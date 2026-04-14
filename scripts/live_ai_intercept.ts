@@ -59,13 +59,16 @@ Format exactly: {"toolId": "solana_transfer", "actionType": "WRITE", "parameters
         Policy: [
             { name: "policyId", type: "string" },
             { name: "tenantId", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
             { name: "maxAnomalyScore", type: "uint256" },
+            { name: "financialLimitsString", type: "string" },
             { name: "expiresAt", type: "uint256" },
             { name: "nonce", type: "string" }
         ]
     };
 
-    const policyConfig = {
+    const policyConfig: any = {
         policyId: "POL-LIVE-TEST",
         tenantId: "HEDGE-FUND-X",
         version: "1.0.0",
@@ -75,11 +78,15 @@ Format exactly: {"toolId": "solana_transfer", "actionType": "WRITE", "parameters
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
         nonce: "live-intercept-nonce"
     };
+    policyConfig.financialLimitsString = JSON.stringify(policyConfig.financialLimits);
 
     const signature = await ceoWallet._signTypedData(domain, types, {
         policyId: policyConfig.policyId,
         tenantId: policyConfig.tenantId,
+        version: policyConfig.version,
+        chainId: policyConfig.chainId,
         maxAnomalyScore: policyConfig.maxAnomalyScore,
+        financialLimitsString: policyConfig.financialLimitsString,
         expiresAt: policyConfig.expiresAt,
         nonce: policyConfig.nonce
     });

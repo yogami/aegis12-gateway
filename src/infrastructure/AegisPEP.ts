@@ -2,6 +2,10 @@ import { PolicyEvaluationRequest, PolicyDecision, ToolExecutionReceipt, SolanaTr
 import { getCircuitBreaker } from './CircuitBreaker';
 import { AegisSigner } from './AegisSigner';
 import { ethers } from 'ethers';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const WAL_PATH = path.resolve(process.cwd(), '.aegis_wal.json');
 
 export class AegisPEP {
     private signer: AegisSigner;
@@ -16,7 +20,19 @@ export class AegisPEP {
     constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}) {
         this.signer = signer;
         this.tenantTrustStore = tenantTrustStore;
+        
+        // Load persistent WAL state into physical RAM constraints
         this.usedNonces = new Set<string>();
+        if (fs.existsSync(WAL_PATH)) {
+            try {
+                const stored = JSON.parse(fs.readFileSync(WAL_PATH, 'utf-8'));
+                if (Array.isArray(stored)) {
+                    stored.forEach(n => this.usedNonces.add(n));
+                }
+            } catch (e) {
+                // Failsafe empty initialization
+            }
+        }
     }
 
     /**
@@ -86,6 +102,13 @@ export class AegisPEP {
                 signature: this.signer.sign(canonicalString)
             };
 
+            // --- VULNERABILITY FIXED: BURN-ON-SUCCESS ---
+            // Only burn the nonce AFTER all validations pass to prevent trivial DoS cycles
+            if (request.dynamicPolicy) {
+                this.usedNonces.add(request.dynamicPolicy.policyConfig.nonce);
+                fs.writeFileSync(WAL_PATH, JSON.stringify(Array.from(this.usedNonces)));
+            }
+
             return receipt;
         });
     }
@@ -105,7 +128,11 @@ export class AegisPEP {
                     Policy: [
                         { name: "policyId", type: "string" },
                         { name: "tenantId", type: "string" },
+                        // --- VULNERABILITY FIXED: STRICT CRYPTOGRAPHIC BINDINGS ---
+                        { name: "version", type: "string" },
+                        { name: "chainId", type: "uint256" },
                         { name: "maxAnomalyScore", type: "uint256" },
+                        { name: "financialLimitsString", type: "string" },
                         { name: "expiresAt", type: "uint256" },
                         { name: "nonce", type: "string" }
                     ]
@@ -114,7 +141,10 @@ export class AegisPEP {
                 const value = {
                     policyId: dynamicPolicy.policyConfig.policyId,
                     tenantId: dynamicPolicy.policyConfig.tenantId,
+                    version: dynamicPolicy.policyConfig.version || "1.0.0",
+                    chainId: dynamicPolicy.policyConfig.chainId || 1,
                     maxAnomalyScore: dynamicPolicy.policyConfig.maxAnomalyScore,
+                    financialLimitsString: dynamicPolicy.policyConfig.financialLimitsString || "{}",
                     expiresAt: dynamicPolicy.policyConfig.expiresAt,
                     nonce: dynamicPolicy.policyConfig.nonce
                 };
@@ -137,10 +167,10 @@ export class AegisPEP {
 
                 // --- VULNERABILITY FIXED: MISSING NONCE STATE ---
                 // Physically track processed nonces to prevent window-based replay attacks
+                // PHYSICALLY EXECUTED LATER ON BURN-ON-SUCCESS
                 if (this.usedNonces.has(dynamicPolicy.policyConfig.nonce)) {
                     return { decision: 'deny', reason: '[TERMINAL REFUSAL] Nonce already used (Double-Spend Replay Attack Detected).', ttl: 0 };
                 }
-                this.usedNonces.add(dynamicPolicy.policyConfig.nonce);
                 
                 const activePolicy = dynamicPolicy.policyConfig;
 

@@ -14,7 +14,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
         Policy: [
             { name: "policyId", type: "string" },
             { name: "tenantId", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
             { name: "maxAnomalyScore", type: "uint256" },
+            { name: "financialLimitsString", type: "string" },
             { name: "expiresAt", type: "uint256" },
             { name: "nonce", type: "string" }
         ]
@@ -47,6 +50,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
                 chainId: 1,
                 maxAnomalyScore: 100,
                 financialLimits: { 'T4': 50000 },
+                financialLimitsString: JSON.stringify({ 'T4': 50000 }),
                 expiresAt: Math.floor(Date.now() / 1000) + 60,
                 nonce: "1234-5678"
             },
@@ -71,7 +75,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         // Attacker generates their own key
         const attackerWallet = ethers.Wallet.createRandom();
 
-        const config = {
+        const config: any = {
             policyId: "unauthorizedPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
@@ -81,12 +85,16 @@ describe("AegisPEP Chaos Testing Suite", () => {
             expiresAt: Math.floor(Date.now() / 1000) + 60,
             nonce: "attack-nonce"
         };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
         
         // Attacker creates mathematically valid EIP-712 signature using their own key
         const attackerSig = await attackerWallet._signTypedData(domain, types, {
             policyId: config.policyId,
             tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
             maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
             nonce: config.nonce
         });
@@ -111,7 +119,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
      * Case 2: Expired Policy - Replay Attack Detection
      */
     it("denies action when policy expiration timestamp is in the past", async () => {
-        const config = {
+        const config: any = {
             policyId: "expiredPolicy",
             tenantId: "expiredTenant",
             version: "1.0.0",
@@ -121,11 +129,15 @@ describe("AegisPEP Chaos Testing Suite", () => {
             expiresAt: Math.floor(Date.now() / 1000) - 10,
             nonce: "replay-attack-test"
         };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
         
         const sig = await ceoWallet._signTypedData(domain, types, {
             policyId: config.policyId,
             tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
             maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
             nonce: config.nonce
         });
@@ -144,7 +156,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
      * Case 3: Payload Parameter Schema Sanitization (Hallucination stripping)
      */
     it("strips LLM hallucinated keys and generates deterministic parameters hash receipt", async () => {
-        const config = {
+        const config: any = {
             policyId: "legitPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
@@ -154,11 +166,15 @@ describe("AegisPEP Chaos Testing Suite", () => {
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
             nonce: "sanitizer-nonce"
         };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
 
         const sig = await ceoWallet._signTypedData(domain, types, {
             policyId: config.policyId,
             tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
             maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
             nonce: config.nonce
         });
@@ -198,7 +214,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
      * Case 4: Double-Spend Replay Nonce Tracking
      */
     it("denies action when an attacker successfully broadcasts the exact same signed payload twice", async () => {
-        const config = {
+        const config: any = {
             policyId: "doubleSpendPolicy",
             tenantId: "legitTenant",
             version: "1.0.0",
@@ -208,11 +224,15 @@ describe("AegisPEP Chaos Testing Suite", () => {
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
             nonce: "unique-nonce-1"
         };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
 
         const sig = await ceoWallet._signTypedData(domain, types, {
             policyId: config.policyId,
             tenantId: config.tenantId,
+            version: config.version,
+            chainId: config.chainId,
             maxAnomalyScore: config.maxAnomalyScore,
+            financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
             nonce: config.nonce
         });
