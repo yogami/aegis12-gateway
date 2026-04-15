@@ -83,6 +83,20 @@ Focus exclusively on:
 5. Parameter injection / type coercion / financial limit bypass
 6. Cross-tenant isolation failures
 
+IMPORTANT — The following are DOCUMENTED ACCEPTED RISKS. Do NOT flag these as CRITICAL:
+- Receipt domain ("Aegis-12-Sentinel") differs from policy domain ("Aegis-12-Compliance-Matrix") intentionally — these are separate document types with separate signing contexts.
+- chainId 1399811149 is a synthetic Solana EIP-155 identifier, not a real EVM chain. EIP-712 is used for structured signing only, not for EVM execution.
+- The nonce is committed IMMEDIATELY after evaluatePolicy returns 'allow' (commit-first). There is NO rollback in enforce(). Failed receipt generation burns the nonce intentionally.
+- Remote KV store atomicity for multi-replica is an operational deployment concern, not a code-level vulnerability in the single-instance Phala CVM target.
+- Nonce keys are tenant-scoped via nonceKey(tenantId, nonce) in BOTH evaluatePolicy and enforce.
+- Date.now() for policy expiry uses the TEE host clock. This is a known TEE threat model limitation documented in Intel TDX specs.
+
+Only flag as CRITICAL if you find a NEW vulnerability not listed above that enables:
+- Actual double-spend or funds theft
+- Authentication bypass
+- Signature forgery
+- Cross-tenant data leakage
+
 Output format — use EXACTLY this structure for each finding:
 SEVERITY: CRITICAL | HIGH | MEDIUM
 TITLE: <short title>
