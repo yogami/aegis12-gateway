@@ -13,8 +13,14 @@ const signer = new AegisSigner();
 // we allow dynamic provisioning of a test wallet via a test-only injection function.
 let trustStore: Record<string, string[]> = {};
 try {
-    const rawConfig = process.env.AUTHORIZED_TENANTS;
+    let rawConfig = process.env.AUTHORIZED_TENANTS;
     if (rawConfig) {
+        // Sanitize: strip outer quotes if they exist (common in some CI/CD environments)
+        rawConfig = rawConfig.trim();
+        if ((rawConfig.startsWith("'") && rawConfig.endsWith("'")) || 
+            (rawConfig.startsWith('"') && rawConfig.endsWith('"'))) {
+            rawConfig = rawConfig.substring(1, rawConfig.length - 1);
+        }
         trustStore = JSON.parse(rawConfig);
     }
 } catch (err) {

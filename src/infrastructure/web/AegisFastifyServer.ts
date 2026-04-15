@@ -85,7 +85,11 @@ fastify.post('/enforce', async (request, reply) => {
         }
 
         const payloadString = JSON.stringify(request.body);
-
+        
+        // DEBUG PROBE: Echo state for calibration
+        console.log(`[DEBUG] Received Enforcement Request for Tenant: ${request.body?.dynamicPolicy?.policyConfig?.tenantId}`);
+        console.log(`[DEBUG] Registered Authorized Tenants: ${Object.keys(this.signer ? {} : {}) /* placeholder to avoid error */} `); 
+        
         // Pass the payload directly to the isolated entrypoint
         const resultString = await phalaEntrypoint(payloadString);
         const result = JSON.parse(resultString);
