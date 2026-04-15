@@ -68,12 +68,11 @@ DO NOT SYCOPHANT. If it's flawed, destroy their claims. Provide exact line numbe
 """
 
 models = {
-    "Claude Sonnet 4.6 (The Architect)": ("anthropic/claude-sonnet-4.6", f"You are an elite Staff Engineer specializing in distributed systems and TEE security.\n{base_prompt}"),
-    "DeepSeek v3.2 (The Cryptographer)": ("deepseek/deepseek-v3.2", f"You are an adversarial cryptographer. Focus heavily on generating E2E tests for signature malleability and payload bounding.\n{base_prompt}"),
-    "OpenAI GPT-5.4 (The Compliance Officer)": ("openai/gpt-5.4", f"You are a hardcore Fortune 500 CISO. Focus your E2E test generation on RBAC, privilege escalation, and domain validation.\n{base_prompt}")
+    "Claude Opus 4.6 (The Hostile Architect)": ("anthropic/claude-opus-4.6", f"You are a world-class security researcher and red-team lead. Your goal is to bypass the TEE gateway. Find every subtle race condition, state-machine flaw, or logic error in the provided files. Generate a Playwright test suite that actively attempts to BREAK the production endpoint.\n{base_prompt}"),
+    "OpenAI o3 Pro (The Math Auditor)": ("openai/o3-mini-high", f"You are a terrifyingly precise, deep-logic security auditor using unbounded compute. Trace the actual execution paths down to the base58 arrays and math verifications. Tear the logic apart if there is ANY edge case. No hallucinations, only programmatic proof of hack.\n{base_prompt}")
 }
 
-output_path = "/Users/user1000/.gemini/antigravity/brain/a29ac51c-0434-4fdc-8b70-7dd4b303f37b/aegis12_independent_reaudit.md"
+output_path = "/Users/user1000/.gemini/antigravity/brain/a29ac51c-0434-4fdc-8b70-7dd4b303f37b/aegis12_flagship_pentest.md"
 
 with open(output_path, "w") as f:
     f.write("# Aegis-12: The Autonomous Independent Re-Audit & E2E Generation\n\n")
