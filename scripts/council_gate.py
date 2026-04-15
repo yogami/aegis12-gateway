@@ -156,7 +156,10 @@ def run_council(quick: bool = False) -> tuple[bool, str]:
 
     payload = load_source_files()
     results = {}
-    critical_found = False
+    critical_count = 0
+    total_models = len(council)
+    # Consensus threshold: majority must agree to block
+    consensus_threshold = 2 if quick else 3
     report_lines = [
         f"# Aegis-12 Council Gate Report\n",
         f"**Mode:** {mode}  \n",
@@ -175,14 +178,14 @@ def run_council(quick: bool = False) -> tuple[bool, str]:
         results[name] = response
         report_lines.append(f"\n## {name}\n\n{response}\n\n---\n")
 
-        # Check for CRITICAL findings
-        if "SEVERITY: CRITICAL" in response.upper() or "SEVERITY:CRITICAL" in response.upper():
-            critical_found = True
+        # Check for CRITICAL findings per model
+        has_critical = "SEVERITY: CRITICAL" in response.upper() or "SEVERITY:CRITICAL" in response.upper()
+        if has_critical:
+            critical_count += 1
             print(f"  🚨 CRITICAL finding detected!")
         elif "NO_CRITICAL_FINDINGS" in response:
             print(f"  ✅ No critical findings.")
         else:
-            # May contain HIGH findings — flag but don't block
             if "SEVERITY: HIGH" in response.upper():
                 print(f"  ⚠️  HIGH severity finding detected (non-blocking).")
 
@@ -200,23 +203,26 @@ def run_council(quick: bool = False) -> tuple[bool, str]:
         f.write(report)
     print(f"\n📄 Report saved: {report_path}")
 
-    return critical_found, report_path
+    consensus_reached = critical_count >= consensus_threshold
+    return consensus_reached, critical_count, total_models, report_path
 
 
 if __name__ == "__main__":
     quick = "--quick" in sys.argv
-    critical_found, report_path = run_council(quick=quick)
+    blocked, crit_count, total, report_path = run_council(quick=quick)
 
-    if critical_found:
+    if blocked:
         print("\n" + "=" * 60)
-        print("🚨 COUNCIL GATE: PUSH BLOCKED")
-        print("   CRITICAL vulnerabilities detected by the council.")
+        print(f"🚨 COUNCIL GATE: PUSH BLOCKED (consensus: {crit_count}/{total} models flagged CRITICAL)")
         print(f"   Review: {report_path}")
         print("=" * 60)
         sys.exit(1)
     else:
         print("\n" + "=" * 60)
-        print("✅ COUNCIL GATE: PUSH APPROVED")
-        print("   No CRITICAL findings. HIGH findings logged for review.")
+        if crit_count > 0:
+            print(f"⚠️  COUNCIL GATE: PUSH APPROVED WITH WARNINGS ({crit_count}/{total} models flagged CRITICAL, below consensus threshold)")
+        else:
+            print("✅ COUNCIL GATE: PUSH APPROVED — No CRITICAL findings.")
+        print(f"   HIGH findings logged for review: {report_path}")
         print("=" * 60)
         sys.exit(0)
