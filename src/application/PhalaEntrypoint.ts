@@ -1,5 +1,6 @@
 import { AegisPEP } from '../infrastructure/AegisPEP';
 import { AegisSigner } from '../infrastructure/AegisSigner';
+import { AegisLocalStateStore } from '../infrastructure/AegisLocalStateStore';
 import { PolicyEvaluationRequest } from '../types';
 import { HealthtechPEP } from '../infrastructure/HealthtechPEP';
 import { HealthtechRequest, HealthtechPolicy } from '../healthtech-types';
@@ -30,7 +31,8 @@ try {
     console.warn("Invalid AUTHORIZED_TENANTS fallback initialized.");
 }
 
-const pep = new AegisPEP(signer, trustStore);
+const stateStore = new AegisLocalStateStore();
+const pep = new AegisPEP(signer, trustStore, undefined, stateStore);
 
 /**
  * Main entrypoint for the Phala Network JS Enclave.

@@ -8,9 +8,37 @@ import { KMSProvider } from '../KMSProvider';
 import { X402PayGate } from '../X402PayGate';
 import { JitoBundler } from '../JitoBundler';
 import { TrustTier, ToolExecutionReceipt } from '../../types';
-import crypto from 'crypto'; // for uuid simulation if needed
+import crypto from 'crypto';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 
 const fastify = Fastify({ logger: true });
+
+// --- AGENT-READY HARDENING: OPENAPI & SWAGGER UI ---
+// Fulfilling Berlin AI Rules Section 4: Mandatory Discovery Endpoints
+fastify.register(swagger, {
+    openapi: {
+        info: {
+            title: 'Aegis-12 Honest Sentinel',
+            description: 'Stateful TEE Behavioral Sentinel for Autonomous AI Agents. Hardware-attested intent enforcement and ARS-01+ Honest Receipt generation.',
+            version: '1.0.0'
+        },
+        servers: [{ url: 'http://localhost:8000' }]
+    }
+});
+
+fastify.register(swaggerUi, {
+    routePrefix: '/api/docs',
+    uiConfig: {
+        docExpansion: 'list',
+        deepLinking: false
+    },
+    staticCSP: true
+});
+
+fastify.get('/api/openapi.json', async (request, reply) => {
+    return fastify.swagger();
+});
 
 // Initialize Solana infrastructure
 const connection = new Connection(clusterApiUrl(process.env.SOLANA_CLUSTER as any || 'devnet'), 'confirmed');
@@ -61,8 +89,36 @@ fastify.get('/health', async (request, reply) => {
     };
 });
 
-// The main POST endpoint that receives the Agent's intent
-fastify.post('/enforce', async (request, reply) => {
+fastify.post('/enforce', {
+    schema: {
+        description: 'Evaluates the Agent Intent against the hardware-signed Dynamic Policy.',
+            body: {
+                type: 'object',
+                required: ['action', 'dynamicPolicy'],
+                properties: {
+                    action: { 
+                        type: 'object',
+                        properties: {
+                            toolId: { type: 'string' },
+                            parameters: { type: 'object' }
+                        }
+                    },
+                    dynamicPolicy: { type: 'object' }
+                }
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        status: { type: 'string' },
+                        receipt: { type: 'object' },
+                        enclaveDid: { type: 'string' },
+                        attestation: { type: 'string' }
+                    }
+                }
+            }
+        }
+    }, async (request, reply) => {
     try {
         // x402 Pay Gate check
         const clientIp = request.ip || 'unknown';
