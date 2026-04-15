@@ -1,8 +1,8 @@
-import { AegisPEP } from './infrastructure/AegisPEP';
-import { AegisSigner } from './infrastructure/AegisSigner';
-import { PolicyEvaluationRequest } from './types';
-import { HealthtechPEP } from './infrastructure/HealthtechPEP';
-import { HealthtechRequest, HealthtechPolicy } from './healthtech-types';
+import { AegisPEP } from '../infrastructure/AegisPEP';
+import { AegisSigner } from '../infrastructure/AegisSigner';
+import { PolicyEvaluationRequest } from '../types';
+import { HealthtechPEP } from '../infrastructure/HealthtechPEP';
+import { HealthtechRequest, HealthtechPolicy } from '../healthtech-types';
 
 // The TEE generates a secure in-memory keypair upon instantiation that never leaves the hardware.
 // In a full Phala Phat Contract, this can be derived deterministically from the enclave's root key.
@@ -10,12 +10,18 @@ const signer = new AegisSigner();
 
 // --- PLAYWRIGHT E2E SYNC ---
 // To bridge the EIP-712 Cross-Chain boundary in test environments without hitting a live KMS,
-// we provision a deterministic test wallet exclusively under the 'tenant-e2e' scope.
-const TEST_E2E_WALLET_ADDRESS = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
-
-const trustStore: Record<string, string[]> = {};
-if (process.env.NODE_ENV === 'test') {
-    trustStore["tenant-e2e"] = [TEST_E2E_WALLET_ADDRESS];
+// we allow dynamic provisioning of a test wallet via a test-only injection function.
+let trustStore: Record<string, string[]> = {};
+try {
+    const rawConfig = process.env.AUTHORIZED_TENANTS;
+    if (rawConfig) {
+        trustStore = JSON.parse(rawConfig);
+    }
+} catch (err) {
+    if (process.env.NODE_ENV === 'production') {
+        throw new Error("[FATAL] Production Root-of-Trust initialization failed. Invalid JSON in AUTHORIZED_TENANTS.");
+    }
+    console.warn("Invalid AUTHORIZED_TENANTS fallback initialized.");
 }
 
 const pep = new AegisPEP(signer, trustStore);
@@ -42,10 +48,11 @@ export default async function phalaEntrypoint(requestPayload: string): Promise<s
             const attestationResponse = await fetch('http://127.0.0.1:8090/quote', { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            if (attestationResponse.ok) {
-                const data = await attestationResponse.json();
-                attestation = data.quote;
+            if (!attestationResponse.ok) {
+                throw new Error(`HTTP Error ${attestationResponse.status}`);
             }
+            const data = await attestationResponse.json();
+            attestation = data.quote;
         } catch (err) {
             if (process.env.NODE_ENV === 'production') {
                 throw new Error("TERMINAL REFUSAL: SECURE ENCLAVE HARDWARE ATTESTATION FAILED. Phala Dstack unreachable.");
@@ -105,10 +112,11 @@ export async function handleHealthtechRequest(requestPayload: string): Promise<s
             const attestationResponse = await fetch('http://127.0.0.1:8090/quote', { signal: controller.signal });
             clearTimeout(timeoutId);
 
-            if (attestationResponse.ok) {
-                const data = await attestationResponse.json();
-                attestation = data.quote;
+            if (!attestationResponse.ok) {
+                throw new Error(`HTTP Error ${attestationResponse.status}`);
             }
+            const data = await attestationResponse.json();
+            attestation = data.quote;
         } catch (err) {
             if (process.env.NODE_ENV === 'production') {
                 throw new Error("TERMINAL REFUSAL: SECURE ENCLAVE HARDWARE ATTESTATION FAILED.");

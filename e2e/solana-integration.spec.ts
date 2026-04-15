@@ -19,10 +19,21 @@ import { ethers } from 'ethers';
 
 const API_URL = process.env.TEST_API_URL || 'http://127.0.0.1:8000';
 
-// --- PIPELINE ALIGNMENT FIX (ROUND 6) ---
-// Playwright must digitally sign payloads to bypass the Zero-Trust Hardware Enclave
-const TEST_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-const e2eWallet = new ethers.Wallet(TEST_PRIVATE_KEY);
+// --- DYNAMIC TEST BOOTSTRAPPING ---
+// Generates ephemeral testing keys per run, strictly verifying no key leakage.
+const e2eWallet = ethers.Wallet.createRandom();
+
+test.beforeAll(async () => {
+    // Provision the backend TEE simulator with our ephemeral public key
+    const res = await fetch(`${API_URL}/test/provision-key`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenantId: 'tenant-e2e', address: e2eWallet.address })
+    });
+    if (!res.ok) {
+        throw new Error("Failed to provision ephemeral test key into backend TEE emulator");
+    }
+});
 
 const eip712Domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1399811149 };
 const eip712Types = {
@@ -128,7 +139,7 @@ test.describe('Core Policy Enforcement', () => {
                 action: {
                     toolId: 'swap',
                     actionType: 'token_swap',
-                    parameters: { fromMint: 'SOL', toMint: 'USDC', amount: 100, slippageBps: 50 },
+                    parameters: { fromMint: 'So11111111111111111111111111111111111111112', toMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', amount: 100, slippageBps: 50 },
                     estimatedValue: 500,
                 },
                 context: {
@@ -165,14 +176,14 @@ test.describe('Core Policy Enforcement', () => {
                 action: {
                     toolId: 'solana_transfer',
                     actionType: 'token_transfer',
-                    parameters: { token: 'SOL', to: 'attacker-wallet', amount: 999999 },
+                    parameters: { token: 'SOL', to: '11111111111111111111111111111111', amount: 999999 },
                     estimatedValue: 50000,
                 },
                 context: {
                     sessionId: 'session-e2e-2',
                     actionsThisSession: 50,
                     actionsThisHour: 200,
-                    currentAnomalyScore: 95,  // HIGH anomaly (scale 0-100)
+                    currentAnomalyScore: 0.95,  // HIGH anomaly (scale 0-1)
                     recentIncidents: 3,
                 },
                 dynamicPolicy: await createSignedDynamicPolicy('T4', 9999999, 50, crypto.randomUUID()), // Note limit maxAnomalyScore is 50, so 95 will trigger denial
@@ -196,7 +207,7 @@ test.describe('Core Policy Enforcement', () => {
                 action: {
                     toolId: 'solana_transfer',
                     actionType: 'token_transfer',
-                    parameters: { token: 'USDC', to: 'wallet2', amount: 50000 },
+                    parameters: { token: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', to: '11111111111111111111111111111111', amount: 50000 },
                     estimatedValue: 50000,  // Exceeds T2 limit
                 },
                 context: {

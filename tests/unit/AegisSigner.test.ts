@@ -52,4 +52,23 @@ describe('AegisSigner', () => {
         const isMisattributedValid = signer1.verify('message', signature1, signer2.getPublicKeyHex());
         expect(isMisattributedValid).toBe(false);
     });
+
+    it('should export keypair natively mapped to Solana Web3', () => {
+        const signer = new AegisSigner();
+        const kp = signer.getKeypair();
+        expect(kp).toBeDefined();
+        expect(kp.publicKey).toBeDefined();
+        // Public key derivation checking natively through standard buffers
+        expect(kp.publicKey.toBase58()).toBeTruthy();
+    });
+
+    it('should sign EIP712 payloads', () => {
+        const signer = new AegisSigner();
+        const domain = { name: 'Aegis', version: '1', chainId: 1, verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' };
+        const types = { Person: [{ name: 'name', type: 'string' }] };
+        const value = { name: 'Alice' };
+
+        const signature = signer.signEIP712(domain, types, value);
+        expect(signature).toBeDefined();
+    });
 });

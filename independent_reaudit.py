@@ -36,46 +36,51 @@ def query_model(model, system_prompt, user_prompt):
 try:
     with open('src/infrastructure/AegisPEP.ts', 'r') as f:
         aegis_pep = f.read()
-    with open('src/phala-entry.ts', 'r') as f:
+    with open('src/application/PhalaEntrypoint.ts', 'r') as f:
         phala = f.read()
-    with open('e2e/solana-integration.spec.ts', 'r') as f:
+    with open('src/domain/PolicyValidator.ts', 'r') as f:
+        domain_policy = f.read()
+    with open('src/domain/Eip712Verifier.ts', 'r') as f:
+        eip712 = f.read()
+    with open('src/domain/TierEvaluator.ts', 'r') as f:
+        tier_eval = f.read()
+    with open('e2e/council-security-verification.spec.ts', 'r') as f:
         e2e = f.read()
 except Exception as e:
     print(f"❌ Failed to load source files: {e}")
     sys.exit(1)
 
 base_prompt = """
-[THE BRUTAL REALITY CHECK]
-The architecture team claims they have perfectly secured the Aegis-12 TEE Hardware Gateway against all enterprise vectors.
-Recent 'fixes' include:
-1. Two-Phase Commit Nonce Registry to prevent distributed double-spend load balancer race conditions.
-2. EIP-712 Network Bound execution (`crossChainTarget: 'solana-mainnet'`) to prevent Ethereum/Arbitrum side-chain payload playback.
-3. Sentinel Receipt wrapping with Keccak hashes to prevent execution daylight MEV substitution.
+[THE BRUTAL REALITY CHECK AND QUALITY AUDIT]
+The architecture team has completed a Hexagonal Architecture refactor of the Aegis-12 TEE Gateway codebase.
+We need you to evaluate if this codebase successfully mitigates the 9 critical vulnerabilities previously identified.
 
-Your objective:
-Viciously audit `AegisPEP.ts`, `phala-entry.ts`, and the Playwright `solana-integration.spec.ts` payload constructions. 
-Are there STILL unhandled enterprise vulnerabilities, asynchronous traps, physical execution side-channels, or logical paradoxes in the code?
-DO NOT SYCOPHANT. If it's flawed, destroy their claims. If it's secure, clearly validate it. Give EXACT lines of code if you find a flaw.
+**Your Objective:**
+1. **Security Vulnerability Assessment**: Aggressively re-audit the provided files (AegisPEP, PolicyValidator, PhalaEntrypoint). Confirm if the 9 vulnerabilities have been fully eradicated. Determine if any new vulnerabilities were introduced.
+2. **Code Quality Audit**: Evaluate adherence to SOLID principles, TDD artifacts, exception handling ("Fail-Closed"), and infrastructure-to-domain decoupling.
+3. **E2E Test Generation**: You MUST output a comprehensive Playwright Test Suite (`tests/e2e/council-security-reaudit.spec.ts`). 
+   - These tests MUST target a production environment (no internal mocking/stubbing of the local classes, pure HTTP requests against the `/enforce` and `/solana/enforce-tx` endpoints). 
+   - The test names MUST reflect the exact security vulnerability being verified.
+   - Do NOT duplicate tests that already exist in `solana-integration.spec.ts`.
+   - Output the Playwright test code in a standard ```typescript block.
+
+DO NOT SYCOPHANT. If it's flawed, destroy their claims. Provide exact line numbers.
 """
 
-# Verified model slugs from OpenRouter API (April 2026).
-# 5-model adversarial council with distinct attack surfaces.
 models = {
-    "Claude Sonnet 4.6 (The Architect)": ("anthropic/claude-sonnet-4.6", f"You are an elite Staff Engineer specializing in distributed systems and TEE security. Find any missing logical closures, state machine paradoxes, or structural vulnerabilities.\n{base_prompt}"),
-    "DeepSeek v3.2 (The Cryptographer)": ("deepseek/deepseek-v3.2", f"You are an adversarial cryptographer. Break the TEE boundary. Find signature malleability, EIP-712 domain binding flaws, or playback traps.\n{base_prompt}"),
-    "OpenAI GPT-5.4 (The Compliance Officer)": ("openai/gpt-5.4", f"You are a hardcore Fortune 500 CISO. Look for auditing gaps, liability loopholes, cross-tenant isolation failures, and network traps.\n{base_prompt}"),
-    "Z.ai GLM 5.1 (The Reasoning Engine)": ("z-ai/glm-5.1", f"You are a highly advanced reasoning model. Perform exhaustive multi-step logical derivation of the code to identify hidden paradoxes, semantic authorization gaps, nonce state machine violations, and Solana-specific execution layer exploits.\n{base_prompt}"),
-    "Qwen3 Coder Next (The Solana Code Auditor)": ("qwen/qwen3-coder-next", f"You are an elite cybersecurity code auditor specializing in Solana blockchain, TypeScript smart contract integrations, and DeFi protocol security. Find slippage exploits, cross-chain malleability bugs, parameter injection attacks, and MEV extraction vectors in this codebase.\n{base_prompt}")
+    "Claude Sonnet 4.6 (The Architect)": ("anthropic/claude-sonnet-4.6", f"You are an elite Staff Engineer specializing in distributed systems and TEE security.\n{base_prompt}"),
+    "DeepSeek v3.2 (The Cryptographer)": ("deepseek/deepseek-v3.2", f"You are an adversarial cryptographer. Focus heavily on generating E2E tests for signature malleability and payload bounding.\n{base_prompt}"),
+    "OpenAI GPT-5.4 (The Compliance Officer)": ("openai/gpt-5.4", f"You are a hardcore Fortune 500 CISO. Focus your E2E test generation on RBAC, privilege escalation, and domain validation.\n{base_prompt}")
 }
 
 output_path = "/Users/user1000/.gemini/antigravity/brain/a29ac51c-0434-4fdc-8b70-7dd4b303f37b/aegis12_independent_reaudit.md"
 
 with open(output_path, "w") as f:
-    f.write("# Aegis-12: The Autonomous Independent Re-Audit\n\n")
+    f.write("# Aegis-12: The Autonomous Independent Re-Audit & E2E Generation\n\n")
 
 print("💥 Booting the Independent Multi-Model Re-Audit...")
 
-payload = f"=== AegisPEP.ts ===\n\n```typescript\n{aegis_pep}\n```\n\n=== phala-entry.ts ===\n\n```typescript\n{phala}\n```\n\n=== solana-integration.spec.ts ===\n\n```typescript\n{e2e}\n```"
+payload = f"=== src/infrastructure/AegisPEP.ts ===\n\n```typescript\n{aegis_pep}\n```\n\n=== src/domain/PolicyValidator.ts ===\n\n```typescript\n{domain_policy}\n```\n\n=== src/domain/Eip712Verifier.ts ===\n\n```typescript\n{eip712}\n```\n\n=== src/domain/TierEvaluator.ts ===\n\n```typescript\n{tier_eval}\n```\n\n=== src/application/PhalaEntrypoint.ts ===\n\n```typescript\n{phala}\n```\n\n=== Existing E2E Suite (DO NOT DUPLICATE) ===\n\n```typescript\n{e2e}\n```"
 
 for name, (model_id, sys_prompt) in models.items():
     print(f"-> Engaging {name} ({model_id})...")

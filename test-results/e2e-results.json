@@ -57,7 +57,7 @@
     "version": "1.58.2",
     "workers": 5,
     "webServer": {
-      "command": "npx tsx src/server.ts",
+      "command": "NODE_ENV=test ALLOW_E2E_MOCKING=true AUTHORIZED_TENANTS='{\"tenant-council\": [\"0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A\"], \"TENANT_123\": [\"0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A\"]}' npx tsx src/server.ts",
       "port": 8000,
       "timeout": 15000,
       "reuseExistingServer": true
@@ -65,20 +65,20 @@
   },
   "suites": [
     {
-      "title": "solana-integration.spec.ts",
-      "file": "solana-integration.spec.ts",
+      "title": "reaudit-surviving.spec.ts",
+      "file": "reaudit-surviving.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Infrastructure Endpoints",
-          "file": "solana-integration.spec.ts",
-          "line": 67,
+          "title": "NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 129,
           "column": 6,
           "specs": [
             {
-              "title": "GET /health returns alive with Solana features",
+              "title": "SECURITY: maxAnomalyScore undefined in policyConfig causes isNaN guard to skip anomaly check — high-risk agent (anomalyScore=0.99) must be DENIED not silently passed",
               "ok": true,
               "tags": [],
               "tests": [
@@ -93,12 +93,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 28,
+                      "duration": 36,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.426Z",
+                      "startTime": "2026-04-15T12:29:37.098Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -106,13 +106,301 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-5b16d585954224b12116",
-              "file": "solana-integration.spec.ts",
-              "line": 69,
-              "column": 9
+              "id": "a31c98a5607169a7c699-f7f571cc8d0fee10c850",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 131,
+              "column": 7
             },
             {
-              "title": "GET /api/docs returns full endpoint reference",
+              "title": "SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 22,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.143Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-3557c4e95832d435809b",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 172,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 30,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.168Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-d45b59781944c2230d04",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 197,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.201Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-6e33c11f64e7c58db225",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 219,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 246,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.217Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-39d5273faff2172c06dd",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 248,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: Policy with expired expiresAt timestamp (1 second in the past) must DENY — validating the catch block deny path handles expiry errors correctly",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.227Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-5f016f0028aad283d806",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 291,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: Forged policy signature (valid structure, invalid signature bytes) must DENY via catch-all — confirming cryptographic failure is caught and denies, not swallowed",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.244Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-d59b72d73b6bb444d514",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 315,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 359,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SECURITY: swap tool with attacker-controlled fromMint address (valid Base58, unallowlisted) must DENY — arbitrary mint addresses enable rug-pull token substitution",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.261Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-7433a810e0bbb0710918",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 367,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: swap tool with honeypot token as toMint (valid Base58, zero liquidity token) must DENY — PolicyValidator must enforce an explicit SPL mint allowlist for swap operations",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.271Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-f796913f36a687446cb5",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 417,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: swap tool with excessive slippageBps (10000 = 100% slippage) must DENY — maximum slippage enables sandwich attack / guaranteed worst execution",
               "ok": true,
               "tags": [],
               "tests": [
@@ -132,7 +420,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.462Z",
+                      "startTime": "2026-04-15T12:29:37.286Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -140,21 +428,55 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-02d93d1b0cc99e04494d",
-              "file": "solana-integration.spec.ts",
-              "line": 83,
-              "column": 9
+              "id": "a31c98a5607169a7c699-4e944e555f051bf71936",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 464,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.294Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-4ef3d6e285f23b02c971",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 512,
+              "column": 7
             }
           ]
         },
         {
-          "title": "Core Policy Enforcement",
-          "file": "solana-integration.spec.ts",
-          "line": 118,
+          "title": "NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 564,
           "column": 6,
           "specs": [
             {
-              "title": "POST /enforce approves low-risk financial action",
+              "title": "SECURITY: Cryptographic failure response must NOT contain stack trace, file paths, or line numbers — error oracle enables targeted attack refinement",
               "ok": true,
               "tags": [],
               "tests": [
@@ -169,12 +491,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 43,
+                      "duration": 6,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.470Z",
+                      "startTime": "2026-04-15T12:29:37.303Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -182,13 +504,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-d02707eb6002540ba62e",
-              "file": "solana-integration.spec.ts",
-              "line": 120,
-              "column": 9
+              "id": "a31c98a5607169a7c699-57098cefe9db0b9cffcd",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 566,
+              "column": 7
             },
             {
-              "title": "POST /enforce denies high anomaly score action",
+              "title": "SECURITY: Internal tool normalization error must NOT leak the raw unrecognized toolId value back to the caller — error messages must be sanitized before HTTP response",
               "ok": true,
               "tags": [],
               "tests": [
@@ -203,12 +525,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 13,
+                      "duration": 9,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.517Z",
+                      "startTime": "2026-04-15T12:29:37.314Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -216,13 +538,131 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-11dbb1d013886ec493c1",
-              "file": "solana-integration.spec.ts",
-              "line": 157,
-              "column": 9
+              "id": "a31c98a5607169a7c699-ca02b1fce6cc12044dba",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 600,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 651,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 20,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.330Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-d0e23d30205597ff0bbd",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 653,
+              "column": 7
             },
             {
-              "title": "POST /enforce denies tier-exceeding financial ops",
+              "title": "SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 15,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.354Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-e4f1a573871a8811caa7",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 692,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.372Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-a94a8e8846b0c93e92f7",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 726,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "Prototype Pollution and Structural Injection: financialLimitsString Attack Surface",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 777,
+          "column": 6,
+          "specs": [
+            {
+              "title": "SECURITY: financialLimitsString containing __proto__ prototype pollution payload must DENY — JSON.parse of attacker-controlled string must not pollute Object prototype",
               "ok": true,
               "tags": [],
               "tests": [
@@ -242,7 +682,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.534Z",
+                      "startTime": "2026-04-15T12:29:37.381Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -250,241 +690,89 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-3d51ca14da1a1501250d",
-              "file": "solana-integration.spec.ts",
-              "line": 188,
-              "column": 9
+              "id": "a31c98a5607169a7c699-9b935065aba4826c4d51",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 779,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: financialLimitsString with constructor injection {\"constructor\": {\"prototype\": {\"isAdmin\": true}}} must DENY — alternative prototype pollution vector via constructor property",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.395Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-b8b590fad7b1d6c9c857",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 816,
+              "column": 7
+            },
+            {
+              "title": "SECURITY: financialLimitsString with multiple tier keys must DENY — {\"T1\": 100, \"T_GOD\": 999999} dual-tier bypass vector",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-15T12:29:37.403Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a31c98a5607169a7c699-8f571a6fa07d86d5c113",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 843,
+              "column": 7
             }
           ]
         },
         {
-          "title": "Solana Receipt Anchoring",
-          "file": "solana-integration.spec.ts",
-          "line": 224,
+          "title": "Input Validation Edge Cases: Boundary Conditions and Type Safety",
+          "file": "reaudit-surviving.spec.ts",
+          "line": 881,
           "column": 6,
           "specs": [
             {
-              "title": "POST /anchor-receipt rejects missing fields",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.550Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-40349d0b9360c8d74f1a",
-              "file": "solana-integration.spec.ts",
-              "line": 226,
-              "column": 9
-            },
-            {
-              "title": "POST /anchor-receipt accepts valid receipt structure",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 53,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.556Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-ad918d556ebb141da1c8",
-              "file": "solana-integration.spec.ts",
-              "line": 236,
-              "column": 9
-            },
-            {
-              "title": "GET /verify/:txSig handles non-existent transaction",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 10,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.613Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-72ddc3ddbfc629905409",
-              "file": "solana-integration.spec.ts",
-              "line": 266,
-              "column": 9
-            }
-          ]
-        },
-        {
-          "title": "Solana Transaction Firewall",
-          "file": "solana-integration.spec.ts",
-          "line": 280,
-          "column": 6,
-          "specs": [
-            {
-              "title": "POST /solana/enforce-tx rejects missing fields",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.626Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-e6d6c968ebe7ba15a589",
-              "file": "solana-integration.spec.ts",
-              "line": 282,
-              "column": 9
-            },
-            {
-              "title": "POST /solana/enforce-tx blocks unparseable transaction",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.632Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-255dcee86a4c751615d7",
-              "file": "solana-integration.spec.ts",
-              "line": 292,
-              "column": 9
-            }
-          ]
-        },
-        {
-          "title": "Squads V4 Governance",
-          "file": "solana-integration.spec.ts",
-          "line": 315,
-          "column": 6,
-          "specs": [
-            {
-              "title": "GET /governance/config returns tier limits and EU AI Act mapping",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.638Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-d72ceb8e1165258903ca",
-              "file": "solana-integration.spec.ts",
-              "line": 317,
-              "column": 9
-            },
-            {
-              "title": "POST /governance/evaluate returns AUTONOMOUS for low risk",
+              "title": "SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0",
               "ok": true,
               "tags": [],
               "tests": [
@@ -504,7 +792,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.646Z",
+                      "startTime": "2026-04-15T12:29:37.411Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -512,13 +800,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-6d79bb752742cd7dee44",
-              "file": "solana-integration.spec.ts",
-              "line": 330,
-              "column": 9
+              "id": "a31c98a5607169a7c699-6598184497d02f1ceff2",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 883,
+              "column": 7
             },
             {
-              "title": "POST /governance/evaluate returns REQUIRE_HUMAN for moderate risk",
+              "title": "SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive)",
               "ok": true,
               "tags": [],
               "tests": [
@@ -533,12 +821,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2,
+                      "duration": 8,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.657Z",
+                      "startTime": "2026-04-15T12:29:37.423Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -546,13 +834,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-9e0af1ccaa20ea749030",
-              "file": "solana-integration.spec.ts",
-              "line": 352,
-              "column": 9
+              "id": "a31c98a5607169a7c699-4977feadbbb9408b7b3e",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 903,
+              "column": 7
             },
             {
-              "title": "POST /governance/evaluate returns BLOCKED for high risk",
+              "title": "SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint",
               "ok": true,
               "tags": [],
               "tests": [
@@ -567,12 +855,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2,
+                      "duration": 5,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.663Z",
+                      "startTime": "2026-04-15T12:29:37.436Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -580,89 +868,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-ea0dbd991fd8cb44ddad",
-              "file": "solana-integration.spec.ts",
-              "line": 376,
-              "column": 9
+              "id": "a31c98a5607169a7c699-710f1cafa95038b9ca6a",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 928,
+              "column": 7
             },
             {
-              "title": "POST /governance/evaluate rejects invalid tier",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 2,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.667Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-13a1077a665b10294ab3",
-              "file": "solana-integration.spec.ts",
-              "line": 397,
-              "column": 9
-            },
-            {
-              "title": "POST /governance/evaluate triggers REQUIRE_HUMAN for over-limit T2 spend",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 1,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.672Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-ab74494475183f549100",
-              "file": "solana-integration.spec.ts",
-              "line": 411,
-              "column": 9
-            }
-          ]
-        },
-        {
-          "title": "TEE Attestation",
-          "file": "solana-integration.spec.ts",
-          "line": 435,
-          "column": 6,
-          "specs": [
-            {
-              "title": "GET /attestation/status returns TEE info",
+              "title": "SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool",
               "ok": true,
               "tags": [],
               "tests": [
@@ -682,7 +894,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.677Z",
+                      "startTime": "2026-04-15T12:29:37.450Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -690,21 +902,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-d77ff3721b91e4d45619",
-              "file": "solana-integration.spec.ts",
-              "line": 437,
-              "column": 9
-            }
-          ]
-        },
-        {
-          "title": "x402 Monetization",
-          "file": "solana-integration.spec.ts",
-          "line": 461,
-          "column": 6,
-          "specs": [
+              "id": "a31c98a5607169a7c699-c08e6bfe035eb281abda",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 950,
+              "column": 7
+            },
             {
-              "title": "GET /monetization/status returns x402 config",
+              "title": "SECURITY: solana_transfer with Infinity as amount must DENY — assertSafeFinancialAmount must catch IEEE 754 Infinity injection",
               "ok": true,
               "tags": [],
               "tests": [
@@ -724,7 +928,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.687Z",
+                      "startTime": "2026-04-15T12:29:37.457Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -732,55 +936,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-0021edd96d762906c5b8",
-              "file": "solana-integration.spec.ts",
-              "line": 463,
-              "column": 9
-            }
-          ]
-        },
-        {
-          "title": "Healthtech HIPAA Enforcement",
-          "file": "solana-integration.spec.ts",
-          "line": 481,
-          "column": 6,
-          "specs": [
-            {
-              "title": "POST /healthtech/enforce allows authorized SCHEDULER",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 5,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.692Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "cca4a3c8928b258fa463-c76c892243d876818a12",
-              "file": "solana-integration.spec.ts",
-              "line": 483,
-              "column": 9
+              "id": "a31c98a5607169a7c699-3e86abaa381f5f752e68",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 995,
+              "column": 7
             },
             {
-              "title": "POST /healthtech/enforce blocks SSN exfiltration",
+              "title": "SECURITY: request with action.parameters containing extra fields beyond schema must NOT leak those fields into the validatedParams of the receipt — normalization must strip extraneous keys (no parameter injection into receipt)",
               "ok": true,
               "tags": [],
               "tests": [
@@ -795,12 +957,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5,
+                      "duration": 7,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-04-15T07:33:25.700Z",
+                      "startTime": "2026-04-15T12:29:37.462Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -808,10 +970,10 @@
                   "status": "expected"
                 }
               ],
-              "id": "cca4a3c8928b258fa463-3c78f586185841d10528",
-              "file": "solana-integration.spec.ts",
-              "line": 500,
-              "column": 9
+              "id": "a31c98a5607169a7c699-80e1a40e714735461583",
+              "file": "reaudit-surviving.spec.ts",
+              "line": 1043,
+              "column": 7
             }
           ]
         }
@@ -820,9 +982,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-04-15T07:33:23.994Z",
-    "duration": 1736.8880000000001,
-    "expected": 20,
+    "startTime": "2026-04-15T12:29:34.601Z",
+    "duration": 2892.967,
+    "expected": 25,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

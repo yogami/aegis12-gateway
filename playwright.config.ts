@@ -11,7 +11,7 @@ export default defineConfig({
         },
     },
     webServer: process.env.TEST_API_URL ? undefined : {
-        command: 'npx tsx src/server.ts',
+        command: 'NODE_ENV=test ALLOW_E2E_MOCKING=true AUTHORIZED_TENANTS=\'{"tenant-council": ["0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"], "TENANT_123": ["0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"]}\' npx tsx src/server.ts',
         port: 8000,
         timeout: 15000,
         reuseExistingServer: true,

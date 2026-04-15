@@ -1,12 +1,18 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-export interface INonceRegistry {
-    reserve(nonce: string): Promise<boolean>;
-    commit(nonce: string): Promise<void>;
-    rollback(nonce: string): Promise<void>;
-}
+import { INonceRegistry } from '../ports/INonceRegistry';
 
+/**
+ * AegisLocalNonceRegistry
+ * 
+ * [COUNCIL AUDIT 1.2 ACKNOWLEDGEMENT]
+ * WARNING: This implementation is structurally limited to Single-Pod execution.
+ * It uses local memory and disk WAL for state. In a multi-replica Phala Network
+ * deployment, TOCTOU replay attacks are possible across nodes unless 
+ * KV_STORE_URL is actively configured with a distributed lock manager 
+ * (like Redis or a Solana state layer).
+ */
 export class AegisLocalNonceRegistry implements INonceRegistry {
     private committedNonces: Set<string>;
     private pendingNonces: Set<string>;

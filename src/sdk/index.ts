@@ -25,6 +25,7 @@ export interface AegisReceipt {
 /**
  * The Aegis-12 Developer Experience SDK.
  * Exposes a frictionless 2-line wrapper that physically abstracts away
+ */
 export async function withAegis(
     tx: Transaction | VersionedTransaction,
     config: AegisConfig = {}

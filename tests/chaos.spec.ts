@@ -445,25 +445,25 @@ describe("AegisPEP Chaos Testing Suite", () => {
         const sig = await ceoWallet._signTypedData(domain, types, { ...config });
 
         const request: any = {
-            // Malformed parameters to throw during normalizeParameters
-            action: { toolId: "solana_transfer", parameters: { to: 1234, amount: -100 }, estimatedValue: 100 }, 
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "valid-target", amount: 100 } }, // EstimatedValue will be auto-calculated
             agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
             context: { currentAnomalyScore: 10 },
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
 
-        // First call: policy passes but params fail — nonce is still burned
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Schema Sanitization Failed");
+        // Simulate an infrastructure failure AFTER policy approval
+        const originalSign = aegisPEP['signer'].signEIP712.bind(aegisPEP['signer']);
+        aegisPEP['signer'].signEIP712 = vi.fn().mockImplementation(() => { throw new Error("Infrastructure Failure during signing"); });
 
-        // Second call with VALID params but SAME nonce — must be rejected as double-spend
-        const validRequest: any = {
-            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "valid-wallet", amount: 100 }, estimatedValue: 100 }, 
-            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
-            context: { currentAnomalyScore: 10 },
-            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
-        };
-        
-        // The nonce was irrevocably burned — this MUST fail
-        await expect(aegisPEP.enforce(validRequest)).rejects.toThrow("Nonce already used");
+        // First call: policy passes, but signing throws
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Infrastructure Failure during signing");
+
+        // Restore signer
+        aegisPEP['signer'].signEIP712 = originalSign;
+
+        // Second call with perfectly valid state — must be rejected because nonce was BURNED
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Nonce already used");
+
+
     });
 });
