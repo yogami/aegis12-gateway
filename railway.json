@@ -1,11 +1,10 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm install --prefix nextjs-demo && npm run build --prefix nextjs-demo"
+    "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm start --prefix nextjs-demo",
+    "startCommand": "npm start",
     "restartPolicyType": "ON_FAILURE"
   }
 }
