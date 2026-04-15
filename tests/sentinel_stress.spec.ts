@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { AegisPEP } from '../src/infrastructure/AegisPEP';
 import { AegisSigner } from '../src/infrastructure/AegisSigner';
 import { AegisLocalStateStore } from '../src/infrastructure/AegisLocalStateStore';
+import { AegisLocalNonceRegistry } from '../src/infrastructure/NonceRegistry';
 import { PolicyEvaluationRequest } from '../src/types';
 import { ethers } from 'ethers';
 import * as fs from 'fs';
@@ -13,11 +14,16 @@ describe('Aegis Sentinel: Stateful Behavioral Enforcement', () => {
 
     beforeAll(() => {
         if (fs.existsSync(WAL_PATH)) fs.unlinkSync(WAL_PATH);
+        const nonceWal = '.aegis_nonce_test.json';
+        if (fs.existsSync(nonceWal)) fs.unlinkSync(nonceWal);
+
         signer = new AegisSigner('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
         const stateStore = new AegisLocalStateStore(WAL_PATH);
-        // Tenant trust store with the signer as the human autority
+        const nonceRegistry = new AegisLocalNonceRegistry(nonceWal);
+        
+        // Tenant trust store with the signer as the human authority
         const trustStore = { "tenant-1": [signer.getAddress()] };
-        pep = new AegisPEP(signer, trustStore, undefined, stateStore);
+        pep = new AegisPEP(signer, trustStore, nonceRegistry, stateStore);
     });
 
     afterAll(() => {

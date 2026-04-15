@@ -19,8 +19,8 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
     private readonly walPath: string;
     private readonly kvStoreUrl?: string;
 
-    constructor() {
-        this.walPath = path.resolve(process.cwd(), '.aegis_wal.json');
+    constructor(customWalPath?: string) {
+        this.walPath = customWalPath || path.resolve(process.cwd(), '.aegis_wal.json');
         this.kvStoreUrl = process.env.KV_STORE_URL;
         this.committedNonces = new Set<string>();
         this.pendingNonces = new Set<string>();
@@ -80,5 +80,13 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
 
     private syncWal(): void {
         fs.writeFileSync(this.walPath, JSON.stringify(Array.from(this.committedNonces)));
+    }
+
+    public clear(): void {
+        this.committedNonces.clear();
+        this.pendingNonces.clear();
+        if (fs.existsSync(this.walPath)) {
+            fs.unlinkSync(this.walPath);
+        }
     }
 }
