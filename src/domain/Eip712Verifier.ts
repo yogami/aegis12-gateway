@@ -46,6 +46,12 @@ export class Eip712Verifier {
             nonce: dynamicPolicy.policyConfig.nonce
         };
 
+        // --- COUNCIL GATE FIX: EXPLICIT DOMAIN & CHAIN BINDING ---
+        // Assert the payload targeting matches our TEE deployment manifest
+        if (dynamicPolicy.policyConfig.chainId !== AEGIS_CHAIN_ID || dynamicPolicy.policyConfig.version !== AEGIS_DOMAIN_VERSION) {
+            throw new Error(`[TERMINAL REFUSAL] Policy Target Mismatch: TEE enclave expects version ${AEGIS_DOMAIN_VERSION} on Chain ${AEGIS_CHAIN_ID}.`);
+        }
+
         const recoveredAddress = ethers.utils.verifyTypedData(domain, types, value, dynamicPolicy.signature);
 
         // --- ROOT OF TRUST ASSERTION ---

@@ -100,9 +100,11 @@ export class AegisPEP {
             try {
                 await this.nonceRegistry.commit(scopedNonce);
             } catch (err) {
-                // Pre-commit paradox: if the storage driver fails or commit throws, we MUST rollback
-                await this.nonceRegistry.rollback(scopedNonce);
-                throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Internal TEE State Commit Failure.`);
+                // COUNCIL GATE FIX: REMOVAL OF ROLLBACK WINDOW
+                // If commit fails, we do NOT rollback. The nonce remains in the 'reserved' state
+                // indefinitely (or until TTL expiry). This is the safest posture; a failed
+                // execution must burn the nonce to prevent replay during TEE instability.
+                throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Internal TEE State Commit Failure. Nonce consumed.`);
             }
 
             // From this point forward, the nonce is permanently consumed.
@@ -167,6 +169,13 @@ export class AegisPEP {
         try {
             // STEP 1: Cryptographic Validation
             Eip712Verifier.verifySignature(dynamicPolicy!, this.tenantTrustStore);
+
+            // --- COUNCIL GATE FIX: EXPLICIT DOMAIN & CHAIN BINDING ---
+            // Ensure the payload itself declares the chain and version we are enforcing.
+            // This prevents cross-network policy replay if the same key is used on multiple chains.
+            if (dynamicPolicy!.policyConfig.chainId !== AEGIS_CHAIN_ID || dynamicPolicy!.policyConfig.version !== AEGIS_DOMAIN_VERSION) {
+                 throw new Error(`[TERMINAL REFUSAL] Policy Target Mismatch: This TEE only enforces ${AEGIS_DOMAIN_NAME} v${AEGIS_DOMAIN_VERSION} on Chain ${AEGIS_CHAIN_ID}.`);
+            }
 
             // STEP 2: Nonce Management
             const scopedNonce = this.nonceKey(tenantId, dynamicPolicy!.policyConfig.nonce);
