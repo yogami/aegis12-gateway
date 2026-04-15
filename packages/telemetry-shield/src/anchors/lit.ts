@@ -27,7 +27,7 @@ export class LitProtocolAnchor implements ITeeAnchor {
 
             // Initialize Node Client
             litNodeClient = new LitNodeClientNodeJs({
-                litNetwork: "habanero",
+                litNetwork: "datil-testnet",
                 debug: true
             });
             await litNodeClient.connect();
