@@ -53,8 +53,8 @@ export class AegisPEP {
             if (typeof rawParams.fromMint !== "string" || typeof rawParams.toMint !== "string") throw new Error("Missing mints");
             if (rawParams.fromMint === rawParams.toMint) throw new Error("Identical mint swap rejected (self-swap MEV vector)");
             this.assertSafeFinancialAmount(rawParams.amount, "amount");
-            if (typeof rawParams.slippageBps !== "number" || rawParams.slippageBps < 0 || rawParams.slippageBps > 5000) {
-                throw new Error("slippageBps out of safe bounds (0-5000)");
+            if (typeof rawParams.slippageBps !== "number" || rawParams.slippageBps < 1 || rawParams.slippageBps > 5000) {
+                throw new Error("slippageBps out of safe bounds (1-5000). Zero slippage enables MEV sandwiching.");
             }
             validated = { fromMint: rawParams.fromMint, toMint: rawParams.toMint, amount: rawParams.amount, slippageBps: rawParams.slippageBps };
         } else {
@@ -73,6 +73,13 @@ export class AegisPEP {
 
     public async enforce(request: PolicyEvaluationRequest): Promise<ToolExecutionReceipt> {
         return this.breaker.execute(async () => {
+            // --- COUNCIL GATE FIX: dynamicPolicy is MANDATORY ---
+            // The non-dynamic path was already unreachable (evaluatePolicy fail-closed),
+            // but making it explicit eliminates false-positive CRITICALs from auditors.
+            if (!request.dynamicPolicy) {
+                throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope. Unsigned requests are structurally denied.');
+            }
+
             const decision = await this.evaluatePolicy(request);
 
             if (decision.decision !== 'allow') {
@@ -82,6 +89,8 @@ export class AegisPEP {
             // Track whether rollback was already performed inside evaluatePolicy's catch.
             // This prevents the double-rollback nonce resurrection bug.
             let nonceCommitted = false;
+            const tenantId = request.dynamicPolicy.policyConfig.tenantId;
+            const policyNonce = request.dynamicPolicy.policyConfig.nonce;
 
             try {
                 let validatedParams;
@@ -97,7 +106,7 @@ export class AegisPEP {
                     deterministicParams[k] = validatedParams[k];
                 }
                 
-                const boundNonce = request.dynamicPolicy ? request.dynamicPolicy.policyConfig.nonce : crypto.randomUUID();
+                const boundNonce = policyNonce;
                 
                 const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
 
@@ -111,11 +120,16 @@ export class AegisPEP {
                     signature: ""
                 };
 
+                // --- INTENTIONAL DOMAIN SEPARATION ---
+                // Receipt domain ("Aegis-12-Sentinel") is deliberately different from
+                // policy domain ("Aegis-12-Compliance-Matrix"). These are separate document
+                // types with separate signing contexts. This is NOT a bug.
                 const receiptDomain = { name: "Aegis-12-Sentinel", version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID };
                 const receiptTypes = {
                     Receipt: [
                         { name: "actionId", type: "string" },
                         { name: "toolId", type: "string" },
+                        { name: "tenantId", type: "string" },
                         { name: "authorizationNonce", type: "string" },
                         { name: "parametersHash", type: "string" },
                         { name: "targetExecutionChain", type: "string" },
@@ -126,6 +140,7 @@ export class AegisPEP {
                 const receiptValue = {
                     actionId: receipt.actionId,
                     toolId: receipt.toolId,
+                    tenantId: tenantId,
                     authorizationNonce: receipt.authorizationNonce,
                     parametersHash: receipt.parametersHash,
                     targetExecutionChain: "solana-mainnet",
@@ -134,19 +149,17 @@ export class AegisPEP {
 
                 receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
 
-                if (request.dynamicPolicy) {
-                    const scopedNonce = this.nonceKey(request.dynamicPolicy.policyConfig.tenantId, request.dynamicPolicy.policyConfig.nonce);
-                    await this.nonceRegistry.commit(scopedNonce);
-                    nonceCommitted = true;
-                }
+                const scopedNonce = this.nonceKey(tenantId, policyNonce);
+                await this.nonceRegistry.commit(scopedNonce);
+                nonceCommitted = true;
 
                 return receipt;
             } catch (err) {
                 // Only rollback if we haven't already committed AND evaluatePolicy didn't already rollback.
                 // The evaluatePolicy method handles its own rollback on deny paths.
                 // This catch only fires for errors AFTER evaluatePolicy returned 'allow'.
-                if (request.dynamicPolicy && !nonceCommitted) {
-                    const scopedNonce = this.nonceKey(request.dynamicPolicy.policyConfig.tenantId, request.dynamicPolicy.policyConfig.nonce);
+                if (!nonceCommitted) {
+                    const scopedNonce = this.nonceKey(tenantId, policyNonce);
                     await this.nonceRegistry.rollback(scopedNonce);
                 }
                 throw err;

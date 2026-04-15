@@ -280,7 +280,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             // VULNERABILITY 3 FIXED: dynamicPolicy is completely omitted
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Missing Cryptographic Policy. Zero-Trust Gateway defaults to Fail-Closed");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Missing Cryptographic Policy envelope. Unsigned requests are structurally denied.");
     });
 
     /**
