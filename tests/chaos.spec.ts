@@ -423,9 +423,12 @@ describe("AegisPEP Chaos Testing Suite", () => {
     });
 
     /**
-     * Case 11: VULN-1 2PC Atomic Rollback on Parameter Exception
+     * Case 11: COUNCIL FIX — Commit-First Nonce Burn (Error Injection Replay Defense)
+     * After evaluatePolicy returns 'allow', the nonce is IMMEDIATELY committed.
+     * Even if normalizeParameters throws (e.g. malformed params), the nonce is permanently
+     * consumed. An attacker cannot cause an intentional error to free the nonce for replay.
      */
-    it("rolls back the nonce if an exception is thrown after evaluatePolicy but before commit", async () => {
+    it("permanently burns the nonce even if an exception is thrown after policy approval", async () => {
         const config: any = {
             policyId: "rollbackPolicy",
             tenantId: "legitTenant",
@@ -435,7 +438,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "atomic-rollback-nonce"
+            nonce: "atomic-burn-nonce"
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -449,9 +452,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow();
+        // First call: policy passes but params fail — nonce is still burned
+        await expect(aegisPEP.enforce(request)).rejects.toThrow("Schema Sanitization Failed");
 
-        // If rollback works correctly, we should be able to reuse the nonce when we submit a valid request!
+        // Second call with VALID params but SAME nonce — must be rejected as double-spend
         const validRequest: any = {
             action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "valid-wallet", amount: 100 }, estimatedValue: 100 }, 
             agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
@@ -459,7 +463,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
         
-        const receipt = await aegisPEP.enforce(validRequest);
-        expect(receipt.authorizationNonce).toEqual("atomic-rollback-nonce");
+        // The nonce was irrevocably burned — this MUST fail
+        await expect(aegisPEP.enforce(validRequest)).rejects.toThrow("Nonce already used");
     });
 });

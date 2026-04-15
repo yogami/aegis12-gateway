@@ -86,84 +86,79 @@ export class AegisPEP {
                 throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: ${decision.reason}`);
             }
 
-            // Track whether rollback was already performed inside evaluatePolicy's catch.
-            // This prevents the double-rollback nonce resurrection bug.
-            let nonceCommitted = false;
             const tenantId = request.dynamicPolicy.policyConfig.tenantId;
             const policyNonce = request.dynamicPolicy.policyConfig.nonce;
 
+            // --- COUNCIL GATE FIX: COMMIT NONCE IMMEDIATELY AFTER POLICY APPROVAL ---
+            // The nonce is irrevocably burned the moment evaluatePolicy returns 'allow'.
+            // This eliminates the TOCTOU window where an error during receipt generation
+            // (e.g. normalizeParameters failure) could trigger a rollback, resurrecting
+            // the nonce for a replay attack via intentional error injection.
+            // Trade-off: if receipt generation fails, the nonce is still consumed.
+            // This is the CORRECT security posture — a failed execution burns the nonce.
+            // The client must request a new policy with a fresh nonce.
+            const scopedNonce = this.nonceKey(tenantId, policyNonce);
+            await this.nonceRegistry.commit(scopedNonce);
+
+            // From this point forward, the nonce is permanently consumed.
+            // Errors will NOT free it — this is intentional.
+            let validatedParams;
             try {
-                let validatedParams;
-                try {
-                    validatedParams = this.normalizeParameters(request.action.toolId, request.action.parameters);
-                } catch (err: any) {
-                    throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Schema Sanitization Failed: ${err.message}`);
-                }
-
-                const sortedKeys = Object.keys(validatedParams).sort();
-                const deterministicParams: Record<string, unknown> = {};
-                for (const k of sortedKeys) {
-                    deterministicParams[k] = validatedParams[k];
-                }
-                
-                const boundNonce = policyNonce;
-                
-                const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
-
-                const receipt: ToolExecutionReceipt = {
-                    actionId: `action-${request.action.toolId}-${boundNonce}`,
-                    toolId: request.action.toolId,
-                    authorizationNonce: boundNonce,
-                    parametersHash,
-                    validatedParams: deterministicParams,
-                    resultHash: "pending",
-                    signature: ""
-                };
-
-                // --- INTENTIONAL DOMAIN SEPARATION ---
-                // Receipt domain ("Aegis-12-Sentinel") is deliberately different from
-                // policy domain ("Aegis-12-Compliance-Matrix"). These are separate document
-                // types with separate signing contexts. This is NOT a bug.
-                const receiptDomain = { name: "Aegis-12-Sentinel", version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID };
-                const receiptTypes = {
-                    Receipt: [
-                        { name: "actionId", type: "string" },
-                        { name: "toolId", type: "string" },
-                        { name: "tenantId", type: "string" },
-                        { name: "authorizationNonce", type: "string" },
-                        { name: "parametersHash", type: "string" },
-                        { name: "targetExecutionChain", type: "string" },
-                        { name: "resultHash", type: "string" }
-                    ]
-                };
-
-                const receiptValue = {
-                    actionId: receipt.actionId,
-                    toolId: receipt.toolId,
-                    tenantId: tenantId,
-                    authorizationNonce: receipt.authorizationNonce,
-                    parametersHash: receipt.parametersHash,
-                    targetExecutionChain: "solana-mainnet",
-                    resultHash: receipt.resultHash
-                };
-
-                receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
-
-                const scopedNonce = this.nonceKey(tenantId, policyNonce);
-                await this.nonceRegistry.commit(scopedNonce);
-                nonceCommitted = true;
-
-                return receipt;
-            } catch (err) {
-                // Only rollback if we haven't already committed AND evaluatePolicy didn't already rollback.
-                // The evaluatePolicy method handles its own rollback on deny paths.
-                // This catch only fires for errors AFTER evaluatePolicy returned 'allow'.
-                if (!nonceCommitted) {
-                    const scopedNonce = this.nonceKey(tenantId, policyNonce);
-                    await this.nonceRegistry.rollback(scopedNonce);
-                }
-                throw err;
+                validatedParams = this.normalizeParameters(request.action.toolId, request.action.parameters);
+            } catch (err: any) {
+                throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Schema Sanitization Failed: ${err.message}`);
             }
+
+            const sortedKeys = Object.keys(validatedParams).sort();
+            const deterministicParams: Record<string, unknown> = {};
+            for (const k of sortedKeys) {
+                deterministicParams[k] = validatedParams[k];
+            }
+            
+            const boundNonce = policyNonce;
+            
+            const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
+
+            const receipt: ToolExecutionReceipt = {
+                actionId: `action-${request.action.toolId}-${boundNonce}`,
+                toolId: request.action.toolId,
+                authorizationNonce: boundNonce,
+                parametersHash,
+                validatedParams: deterministicParams,
+                resultHash: "pending",
+                signature: ""
+            };
+
+            // --- INTENTIONAL DOMAIN SEPARATION ---
+            // Receipt domain ("Aegis-12-Sentinel") is deliberately different from
+            // policy domain ("Aegis-12-Compliance-Matrix"). These are separate document
+            // types with separate signing contexts. This is NOT a bug.
+            const receiptDomain = { name: "Aegis-12-Sentinel", version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID };
+            const receiptTypes = {
+                Receipt: [
+                    { name: "actionId", type: "string" },
+                    { name: "toolId", type: "string" },
+                    { name: "tenantId", type: "string" },
+                    { name: "authorizationNonce", type: "string" },
+                    { name: "parametersHash", type: "string" },
+                    { name: "targetExecutionChain", type: "string" },
+                    { name: "resultHash", type: "string" }
+                ]
+            };
+
+            const receiptValue = {
+                actionId: receipt.actionId,
+                toolId: receipt.toolId,
+                tenantId: tenantId,
+                authorizationNonce: receipt.authorizationNonce,
+                parametersHash: receipt.parametersHash,
+                targetExecutionChain: "solana-mainnet",
+                resultHash: receipt.resultHash
+            };
+
+            receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
+
+            return receipt;
         });
     }
 
