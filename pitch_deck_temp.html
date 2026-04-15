@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis-12 | EWOR Pitch</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        
+        body {
+            background-color: #0c0c0c;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box;
+            page-break-after: always;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0) 70%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+            color: #ffffff;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 300px;
+            color: #00ffff;
+            opacity: 0.9;
+        }
+
+        p {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #cccccc;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .highlight {
+            color: #00ffff;
+            font-weight: 400;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 40px;
+            font-size: 0.9rem;
+            color: #555555;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        @media print {
+            .slide {
+                height: 100vh;
+                width: 100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1 -->
+    <div class="slide">
+        <div class="content">
+            <h1>Aegis-12</h1>
+            <h2>The safety net for autonomous AI.</h2>
+        </div>
+        <div class="footer">Confidential | 2026</div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+        <div class="content">
+            <h1>The Nightmare</h1>
+            <p>What happens when your AI agent accidentally spends 10,000 euros instead of 10? Or sends your customer database to the wrong email?</p>
+            <p style="margin-top: 20px;">Right now, there is no way to stop a rogue AI once it starts acting. <span class="highlight">Companies are paralyzed by this risk.</span></p>
+        </div>
+        <div class="footer">Aegis-12 | The Liability Gap</div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+        <div class="content">
+            <h1>The Vault</h1>
+            <p>We built a hardware-based rulebook that an AI cannot break. It is a separate, unhackable wall between the AI and the company safe.</p>
+            <p style="margin-top: 20px;">If the rule says "Max 50 euros per day," the system physically blocks any attempt to spend more. <span class="highlight">The money stays safe, regardless of what the AI thinks.</span></p>
+        </div>
+        <div class="footer">Aegis-12 | The Enforcer</div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide">
+        <div class="content">
+            <h1>Why Now?</h1>
+            <p>Every business is moving from simple chatbots to autonomous agents. But you cannot scale autonomy without trust.</p>
+            <p style="margin-top: 20px;">We provide the foundation that allows CEOs to actually <span class="highlight">give their AI the keys to the business.</span></p>
+        </div>
+        <div class="footer">Aegis-12 | The Market</div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide">
+        <div class="content">
+            <h1>The Next Step</h1>
+            <p>We have solved the technical problem. Now we are building the brand that every CFO trusts to protect their treasury.</p>
+            <p style="margin-top: 20px;"><span class="highlight">We are seeking mentorship on scaling this narrative to reach the leaders who need it most.</span></p>
+        </div>
+        <div class="footer">Aegis-12 | Colosseum 2026</div>
+    </div>
+
+</body>
+</html>

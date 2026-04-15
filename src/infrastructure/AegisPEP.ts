@@ -42,7 +42,9 @@ export class AegisPEP {
      * Build a tenant-scoped nonce key to prevent cross-tenant nonce collisions.
      */
     private nonceKey(tenantId: string, nonce: string): string {
-        return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(tenantId + '\x00' + nonce));
+        // Robust key separation: length-prefixing prevent cross-tenant collisions
+        const prefix = `T${tenantId.length}:${tenantId}`;
+        return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(prefix + '\x00' + nonce));
     }
 
     public async enforce(request: PolicyEvaluationRequest): Promise<ToolExecutionReceipt> {
@@ -53,8 +55,8 @@ export class AegisPEP {
                 throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope. Unsigned requests are structurally denied.');
             }
 
-            if (typeof request.context?.currentAnomalyScore !== 'number' || request.context.currentAnomalyScore < 0 || request.context.currentAnomalyScore > 1.0) {
-                throw new Error('[TERMINAL REFUSAL] Invalid or unscaled contextual anomaly score. Expected 0.0-1.0 float.');
+            if (!request.context || !Number.isFinite(request.context.currentAnomalyScore) || request.context.currentAnomalyScore < 0 || request.context.currentAnomalyScore > 1.0) {
+                throw new Error('[TERMINAL REFUSAL] Invalid or unscaled contextual anomaly score. Expected 0.0-1.0 finite float.');
             }
 
             // --- COUNCIL GATE FIX: PRE-NORMALIZE AND CALCULATE ESTIMATED VALUE internally ---
@@ -110,11 +112,17 @@ export class AegisPEP {
             // From this point forward, the nonce is permanently consumed.
             // Errors will NOT free it — this is intentional.
 
-            const sortedKeys = Object.keys(sanitizedParams).sort();
-            const deterministicParams: Record<string, unknown> = {};
-            for (const k of sortedKeys) {
-                deterministicParams[k] = sanitizedParams[k];
-            }
+            // COUNCIL GATE FIX: RECURSIVE DETERMINISTIC SORTING
+            const getDeterministicParams = (obj: any): any => {
+                if (obj === null || typeof obj !== 'object') return obj;
+                if (Array.isArray(obj)) return obj.map(getDeterministicParams);
+                return Object.keys(obj).sort().reduce((acc: any, key: string) => {
+                    acc[key] = getDeterministicParams(obj[key]);
+                    return acc;
+                }, {});
+            };
+
+            const deterministicParams = getDeterministicParams(sanitizedParams);
             
             const boundNonce = policyNonce;
             
