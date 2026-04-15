@@ -138,7 +138,7 @@ test.describe('Core Policy Enforcement', () => {
                     currentAnomalyScore: 0.2,
                     recentIncidents: 0,
                 },
-                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, "test-nonce-e2e-1-" + Date.now()),
+                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, crypto.randomUUID()),
             },
         });
 
@@ -175,7 +175,7 @@ test.describe('Core Policy Enforcement', () => {
                     currentAnomalyScore: 95,  // HIGH anomaly (scale 0-100)
                     recentIncidents: 3,
                 },
-                dynamicPolicy: await createSignedDynamicPolicy('T4', 9999999, 50, "test-nonce-e2e-2-" + Date.now()), // Note limit maxAnomalyScore is 50, so 95 will trigger denial
+                dynamicPolicy: await createSignedDynamicPolicy('T4', 9999999, 50, crypto.randomUUID()), // Note limit maxAnomalyScore is 50, so 95 will trigger denial
             },
         });
 
@@ -206,7 +206,7 @@ test.describe('Core Policy Enforcement', () => {
                     currentAnomalyScore: 0.1,
                     recentIncidents: 0,
                 },
-                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, "test-nonce-e2e-3-" + Date.now()),
+                dynamicPolicy: await createSignedDynamicPolicy('T2', 10000, 50, crypto.randomUUID()),
             },
         });
 

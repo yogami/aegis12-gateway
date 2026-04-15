@@ -58,11 +58,14 @@ Are there STILL unhandled enterprise vulnerabilities, asynchronous traps, physic
 DO NOT SYCOPHANT. If it's flawed, destroy their claims. If it's secure, clearly validate it. Give EXACT lines of code if you find a flaw.
 """
 
-# Let's map real models capable of deep architectural auditing.
+# Verified model slugs from OpenRouter API (April 2026).
+# 5-model adversarial council with distinct attack surfaces.
 models = {
-    "Claude Sonnet 4.6 (The Architect)": ("anthropic/claude-sonnet-4.6", f"You are an elite Staff Engineer. Find any missing logical closures or structural vulnerabilities.\n{base_prompt}"),
-    "DeepSeek v3.2 (The Cryptographer)": ("deepseek/deepseek-v3.2", f"You are an adversarial cryptographer. Break the TEE boundary. Find signature malleability or playback traps.\n{base_prompt}"),
-    "OpenAI GPT-5.4 (The Compliance Officer)": ("openai/gpt-5.4", f"You are a hardcore Fortune 500 CISO. Look for auditing gaps, liability loopholes, and network traps.\n{base_prompt}")
+    "Claude Sonnet 4.6 (The Architect)": ("anthropic/claude-sonnet-4.6", f"You are an elite Staff Engineer specializing in distributed systems and TEE security. Find any missing logical closures, state machine paradoxes, or structural vulnerabilities.\n{base_prompt}"),
+    "DeepSeek v3.2 (The Cryptographer)": ("deepseek/deepseek-v3.2", f"You are an adversarial cryptographer. Break the TEE boundary. Find signature malleability, EIP-712 domain binding flaws, or playback traps.\n{base_prompt}"),
+    "OpenAI GPT-5.4 (The Compliance Officer)": ("openai/gpt-5.4", f"You are a hardcore Fortune 500 CISO. Look for auditing gaps, liability loopholes, cross-tenant isolation failures, and network traps.\n{base_prompt}"),
+    "Z.ai GLM 5.1 (The Reasoning Engine)": ("z-ai/glm-5.1", f"You are a highly advanced reasoning model. Perform exhaustive multi-step logical derivation of the code to identify hidden paradoxes, semantic authorization gaps, nonce state machine violations, and Solana-specific execution layer exploits.\n{base_prompt}"),
+    "Qwen3 Coder Next (The Solana Code Auditor)": ("qwen/qwen3-coder-next", f"You are an elite cybersecurity code auditor specializing in Solana blockchain, TypeScript smart contract integrations, and DeFi protocol security. Find slippage exploits, cross-chain malleability bugs, parameter injection attacks, and MEV extraction vectors in this codebase.\n{base_prompt}")
 }
 
 output_path = "/Users/user1000/.gemini/antigravity/brain/a29ac51c-0434-4fdc-8b70-7dd4b303f37b/aegis12_independent_reaudit.md"
