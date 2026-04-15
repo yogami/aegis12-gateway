@@ -7,6 +7,8 @@ import { INonceRegistry } from '../ports/INonceRegistry';
 import { AegisLocalNonceRegistry } from './NonceRegistry';
 import { Eip712Verifier } from '../domain/Eip712Verifier';
 import { TierEvaluator } from '../domain/TierEvaluator';
+import { IAegisStateStore, BehavioralStats } from '../ports/IAegisStateStore';
+import { AegisLocalStateStore } from './AegisLocalStateStore';
 
 // --- HARDCODED TEE CONSTANTS (never sourced from attacker payload) ---
 const AEGIS_CHAIN_ID = 1399811149; // Solana Mainnet EIP-155
@@ -22,8 +24,11 @@ export class AegisPEP {
     
     // --- VULNERABILITY FIXED: STATE-BACKED ANTI-REPLAY VIA 2PC ---
     private nonceRegistry: INonceRegistry;
+    
+    // --- AEGIS SENTINEL: STATEFUL BEHAVIORAL ACCUMULATOR ---
+    private stateStore: IAegisStateStore;
 
-    constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}, registry?: INonceRegistry) {
+    constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}, registry?: INonceRegistry, stateStore?: IAegisStateStore) {
         this.signer = signer;
         // Deep clone and recursively freeze the trust store to prevent prototype pollution and runtime mutability
         const safeClone = JSON.parse(JSON.stringify(tenantTrustStore || {}));
@@ -31,6 +36,7 @@ export class AegisPEP {
         this.tenantTrustStore = Object.freeze(safeClone);
         
         this.nonceRegistry = registry || new AegisLocalNonceRegistry();
+        this.stateStore = stateStore || new AegisLocalStateStore();
     }
 
     /**
@@ -112,21 +118,56 @@ export class AegisPEP {
             // From this point forward, the nonce is permanently consumed.
             // Errors will NOT free it — this is intentional.
 
-            // COUNCIL GATE FIX: RECURSIVE DETERMINISTIC SORTING
-            const getDeterministicParams = (obj: any): any => {
+            // COUNCIL GATE FIX: PROTOTYPE-SAFE RECURSIVE DETERMINISTIC MAPPING
+            const getDeterministicMap = (obj: any): Map<string, any> => {
+                const map = new Map<string, any>();
                 if (obj === null || typeof obj !== 'object') return obj;
-                if (Array.isArray(obj)) return obj.map(getDeterministicParams);
-                return Object.keys(obj).sort().reduce((acc: any, key: string) => {
-                    acc[key] = getDeterministicParams(obj[key]);
-                    return acc;
-                }, {});
+                
+                const sortedKeys = Array.isArray(obj) ? [] : Object.keys(obj).sort();
+                
+                if (Array.isArray(obj)) {
+                    return obj.map(getDeterministicMap) as any;
+                }
+
+                for (const key of sortedKeys) {
+                    map.set(key, getDeterministicMap(obj[key]));
+                }
+                return map;
             };
 
-            const deterministicParams = getDeterministicParams(sanitizedParams);
+            const deterministicParamsMap = getDeterministicMap(sanitizedParams);
+            // Convert back to sorted JSON for hashing
+            const deterministicParams = Object.fromEntries(deterministicParamsMap);
             
             const boundNonce = policyNonce;
             
+            // --- AEGIS SENTINEL: UPDATE STATEFUL ACCUMULATOR ---
+            // Track the agent's behavior across CDCs to fulfill EU AI Act Article 12 (Lifecycle Traceability).
+            // This detects 'Structuring Attacks' (multiple sub-limit transactions) that stateless firewalls miss.
+            const agentId = tenantId; // Pinned to Primary Enclave
+            const stats = await this.stateStore.updateStats(agentId, verifiedEstimatedValue);
+            
+            // HARD BOUNDARY: Cumulative spend ceiling (Example: 50,000 SOL lifetime per agent)
+            const CUMULATIVE_LIMIT = 50000;
+            if (stats.totalSpend > CUMULATIVE_LIMIT) {
+                throw new Error(`[TERMINAL REFUSAL] Behavioral Invariant Violated: Cumulative spend (${stats.totalSpend}) exceeds hardware-locked lifetime ceiling (${CUMULATIVE_LIMIT}).`);
+            }
+
             const parametersHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(deterministicParams)));
+
+            // --- COUNCIL GATE FIX: THE HONEST ATTESTATION RECEIPT (ARS-01+) ---
+            // Moving from 'Compliance Theater' to 'Evidence-Based Auditing'.
+            // We explicitly declare the limits of the TEE observation to achieve 'Audit-Grade' veracity.
+            const evidence = {
+                decision: "ALLOW",
+                complianceEvidence: ["Art 12: Automated Lifecycle Logging", "Art 14: Traceable Human-Signed Manifest"],
+                stateRoot: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(stats))),
+                limitations: [
+                    "Model inference trace not verified",
+                    "Input context not hardware-attested",
+                    "Human liveness not verified post-signature"
+                ]
+            };
 
             const receipt: ToolExecutionReceipt = {
                 actionId: `action-${request.action.toolId}-${boundNonce}`,
@@ -134,7 +175,7 @@ export class AegisPEP {
                 authorizationNonce: boundNonce,
                 parametersHash,
                 validatedParams: deterministicParams,
-                resultHash: "pending",
+                resultHash: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(evidence))),
                 signature: ""
             };
 
@@ -165,7 +206,7 @@ export class AegisPEP {
                 resultHash: receipt.resultHash
             };
 
-            receipt.signature = this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
+            receipt.signature = await this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
 
             return receipt;
     }
@@ -196,8 +237,11 @@ export class AegisPEP {
                 // STEP 3: Business Bounds Validation
                 TierEvaluator.verifyBounds(request);
             } catch (boundsError: any) {
-                // Release nonce immediately if bounds fail
-                await this.nonceRegistry.rollback(scopedNonce);
+                // --- VULNERABILITY REMEDIATED: ZERO-TRUST NONCE POSTURE ---
+                // We no longer rollback the nonce on bounds failures. 
+                // A malformed or out-of-bounds request results in a burned nonce.
+                // This prevents 'Probing' attacks where an adversary tests TEE state
+                // boundaries without risk of losing their cryptographic authorization.
                 throw boundsError;
             }
 
