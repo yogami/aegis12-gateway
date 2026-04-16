@@ -70,6 +70,7 @@ export interface AegisComplianceReceipt {
     limitations: string[];          // "Honest Sentinel" declarations of TEE observation gaps
     
     authorizationNonce: string;     // Irrevocable nonce (burned at execution)
+    validatedParams?: Record<string, unknown>; // [AUDIT-GRADE] Sanitized whitelisted parameters
     zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
         journal: any;
         seal: string;               // Base64 encoded ZK-Proof bytes

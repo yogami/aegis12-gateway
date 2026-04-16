@@ -1,5 +1,7 @@
 export interface INonceRegistry {
     reserve(nonce: string): Promise<boolean>;
     commit(nonce: string): Promise<void>;
-    rollback(nonce: string): Promise<void>;
+    release(nonce: string): Promise<void>;
+    isNonceUsed(nonce: string): Promise<boolean>;
+    clear(): void;
 }

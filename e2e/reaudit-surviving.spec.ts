@@ -61,6 +61,7 @@ async function buildSignedPolicy(opts: {
   const financialLimitsString =
     financialLimitsStringOverride ?? JSON.stringify({ [tier]: limit });
 
+  const cleanNonce = nonce.replace(/\D/g, "") || Date.now().toString();
   const value = {
     policyId: "POL_REAUDIT_001",
     tenantId,
@@ -70,7 +71,7 @@ async function buildSignedPolicy(opts: {
     maxAnomalyScore,
     financialLimitsString,
     expiresAt,
-    nonce,
+    nonce: cleanNonce,
   };
 
   const signature = await e2eWallet._signTypedData(

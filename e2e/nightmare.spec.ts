@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Aegis-12 Nightmare Mode Production Bombardment', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Go directly to the Railway production /demo endpoint
-        await page.goto(process.env.TEST_API_URL + '/demo' || 'https://aegis-core-production.up.railway.app/demo');
+        const target = process.env.TEST_API_URL || 'https://aegis12-gateway.up.railway.app';
+        await page.goto(`${target}/demo`);
     });
 
     test('Verify TEE UI loads and is secure initially', async ({ page }) => {

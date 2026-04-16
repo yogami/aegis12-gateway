@@ -23,6 +23,7 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
     // If limits limit is -1, simulate a parser bomb
     const limitString = limit === -1 ? '9'.repeat(1025) : JSON.stringify({ [tier]: limit });
 
+    const cleanNonce = nonceStr.replace(/\D/g, "") || (Date.now() + Math.floor(Math.random() * 1000)).toString();
     const value = {
         policyId: "POL_999",
         tenantId: "TENANT_123", // Matches AUTHORIZED_TENANTS mapping in PW config
@@ -32,7 +33,7 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
         maxAnomalyScore: maxScore,
         financialLimitsString: limitString,
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
-        nonce: nonceStr,
+        nonce: cleanNonce,
         ...customFields
     };
 
