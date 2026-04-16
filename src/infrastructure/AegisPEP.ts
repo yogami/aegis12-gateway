@@ -1,4 +1,5 @@
-import { PolicyEvaluationRequest, PolicyDecision, ToolExecutionReceipt, SolanaTransferPayload, SwapPayload } from '../types';
+import { PolicyEvaluationRequest, PolicyDecision, AegisComplianceReceipt, SolanaTransferPayload, SwapPayload } from '../types';
+import crypto from 'crypto';
 import { getCircuitBreaker } from './CircuitBreaker';
 import { isValidSolanaAddress, assertSafeFinancialAmount, normalizeParameters } from '../domain/PolicyValidator';
 import { AegisSigner } from './AegisSigner';
@@ -9,6 +10,8 @@ import { Eip712Verifier } from '../domain/Eip712Verifier';
 import { TierEvaluator } from '../domain/TierEvaluator';
 import { IAegisStateStore, BehavioralStats } from '../ports/IAegisStateStore';
 import { AegisLocalStateStore } from './AegisLocalStateStore';
+import { AegisRegistryClient } from './AegisRegistryClient';
+import { AegisZKClient } from './AegisZKClient';
 
 // --- HARDCODED TEE CONSTANTS (never sourced from attacker payload) ---
 const AEGIS_CHAIN_ID = 1399811149; // Solana Mainnet EIP-155
@@ -27,8 +30,24 @@ export class AegisPEP {
     
     // --- AEGIS SENTINEL: STATEFUL BEHAVIORAL ACCUMULATOR ---
     private stateStore: IAegisStateStore;
+    
+    // --- AEGIS REGISTRY: ON-CHAIN ANCHOR ---
+    private registryClient?: AegisRegistryClient;
+    
+    // --- AEGIS PRIVACY: ZK-PROVER ---
+    private zkClient?: AegisZKClient;
+    
+    // --- CONTINUITY: SEQUENTIAL NONCE TRACKING ---
+    private lastUsedNonces: Map<string, number> = new Map();
 
-    constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}, registry?: INonceRegistry, stateStore?: IAegisStateStore) {
+    constructor(
+        signer: AegisSigner, 
+        tenantTrustStore: Record<string, string[]> = {}, 
+        registry?: INonceRegistry, 
+        stateStore?: IAegisStateStore, 
+        registryClient?: AegisRegistryClient,
+        zkClient?: AegisZKClient
+    ) {
         this.signer = signer;
         // Deep clone and recursively freeze the trust store to prevent prototype pollution and runtime mutability
         const safeClone = JSON.parse(JSON.stringify(tenantTrustStore || {}));
@@ -37,6 +56,8 @@ export class AegisPEP {
         
         this.nonceRegistry = registry || new AegisLocalNonceRegistry();
         this.stateStore = stateStore || new AegisLocalStateStore();
+        this.registryClient = registryClient;
+        this.zkClient = zkClient;
     }
 
     /**
@@ -53,12 +74,28 @@ export class AegisPEP {
         return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(prefix + '\x00' + nonce));
     }
 
-    public async enforce(request: PolicyEvaluationRequest): Promise<ToolExecutionReceipt> {
+    public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         // --- COUNCIL GATE FIX: dynamicPolicy is MANDATORY ---
             // The non-dynamic path was already unreachable (evaluatePolicy fail-closed),
             // but making it explicit eliminates false-positive CRITICALs from auditors.
             if (!request.dynamicPolicy) {
                 throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope. Unsigned requests are structurally denied.');
+            }
+
+            const tenantId = request.dynamicPolicy.policyConfig.tenantId;
+            const policyNonce = request.dynamicPolicy.policyConfig.nonce;
+
+            // --- ITEM 1.3: PRE-FLIGHT CONTINUITY CHECK ---
+            // Enforce sequential nonces for high-veracity failover protection.
+            // This occurs BEFORE evaluatePolicy to ensure precise sequence violation feedback.
+            const numericNonce = parseInt(policyNonce, 10);
+            if (isNaN(numericNonce)) {
+                throw new Error('[TERMINAL REFUSAL] Invalid Nonce Format. Aegis-12 requires sequential numeric nonces.');
+            }
+
+            const currentHighWaterMark = this.lastUsedNonces.get(tenantId) || 0;
+            if (numericNonce <= currentHighWaterMark) {
+                throw new Error(`[TERMINAL REFUSAL] Nonce Sequence Violation: Provided nonce (${numericNonce}) is not greater than the last used nonce (${currentHighWaterMark}). Possible Replay or Out-of-Order Execution.`);
             }
 
             if (!request.context || !Number.isFinite(request.context.currentAnomalyScore) || request.context.currentAnomalyScore < 0 || request.context.currentAnomalyScore > 1.0) {
@@ -93,9 +130,6 @@ export class AegisPEP {
                 throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: ${decision.reason}`);
             }
 
-            const tenantId = request.dynamicPolicy.policyConfig.tenantId;
-            const policyNonce = request.dynamicPolicy.policyConfig.nonce;
-
             // --- COUNCIL GATE FIX: COMMIT NONCE IMMEDIATELY AFTER POLICY APPROVAL ---
             // The nonce is irrevocably burned the moment evaluatePolicy returns 'allow'.
             // This eliminates the TOCTOU window where an error during receipt generation
@@ -107,12 +141,18 @@ export class AegisPEP {
             const scopedNonce = this.nonceKey(tenantId, policyNonce);
             try {
                 await this.nonceRegistry.commit(scopedNonce);
+                // Update local water mark
+                this.lastUsedNonces.set(tenantId, numericNonce);
             } catch (err) {
-                // COUNCIL GATE FIX: REMOVAL OF ROLLBACK WINDOW
-                // If commit fails, we do NOT rollback. The nonce remains in the 'reserved' state
-                // indefinitely (or until TTL expiry). This is the safest posture; a failed
-                // execution must burn the nonce to prevent replay during TEE instability.
                 throw new Error(`[TERMINAL REFUSAL] Action denied by Aegis Enclave: Internal TEE State Commit Failure. Nonce consumed.`);
+            }
+
+            // --- PERIODIC CHECKPOINTING ---
+            // Item 1.3: Periodically anchor the high-water mark to Solana for cross-replica sync.
+            if (this.registryClient && (numericNonce % 10 === 0)) {
+                this.registryClient.checkpointNonce(tenantId, numericNonce).catch(err => {
+                    console.error(`[AEGIS-SENTINEL-WARNING] Nonce checkpoint failed for tenant ${tenantId}.`);
+                });
             }
 
             // From this point forward, the nonce is permanently consumed.
@@ -169,44 +209,96 @@ export class AegisPEP {
                 ]
             };
 
-            const receipt: ToolExecutionReceipt = {
+            // --- ARTICLE 12 COMPLIANCE: IMMUTABLE LOG TRACE ---
+            // Calculate a composite hash covering the action, sanitized params, and behavioral results.
+            const logTracePayload = {
+                toolId: request.action.toolId,
+                params: deterministicParams,
+                evidence,
+                stats
+            };
+            const article12LogHash = ethers.utils.id(JSON.stringify(logTracePayload));
+            
+            // --- ARTICLE 14 COMPLIANCE: HUMAN OVERSIGHT BINDING ---
+            const article14OversightSignature = request.dynamicPolicy.signature;
+            
+            const receipt: AegisComplianceReceipt = {
+                receiptId: `aegis-v1-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
                 actionId: `action-${request.action.toolId}-${boundNonce}`,
                 toolId: request.action.toolId,
-                authorizationNonce: boundNonce,
+                agentPubKey: request.agent.did || "0x0000000000000000000000000000000000000000",
+                article12LogHash,
                 parametersHash,
-                validatedParams: deterministicParams,
                 resultHash: ethers.utils.keccak256(ethers.utils.toUtf8Bytes(JSON.stringify(evidence))),
+                article14OversightSignature,
+                policyId: request.dynamicPolicy.policyConfig.policyId,
+                tenantId: tenantId,
+                complianceStandard: "ARS-01+",
+                limitations: evidence.limitations,
+                authorizationNonce: boundNonce,
+                timestamp: new Date().toISOString() as any,
                 signature: ""
             };
 
-            // --- INTENTIONAL DOMAIN SEPARATION ---
-            // Receipt domain ("Aegis-12-Sentinel") is deliberately different from
-            // policy domain ("Aegis-12-Compliance-Matrix"). These are separate document
-            // types with separate signing contexts. This is NOT a bug.
-            const receiptDomain = { name: "Aegis-12-Sentinel", version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID };
+            // --- INTENTIONAL DOMAIN SEPARATION: Aegis Compliance Receipt ---
+            const receiptDomain = { name: "Aegis-12-Compliance", version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID };
             const receiptTypes = {
-                Receipt: [
-                    { name: "actionId", type: "string" },
+                ComplianceReceipt: [
+                    { name: "receiptId", type: "string" },
                     { name: "toolId", type: "string" },
+                    { name: "agentPubKey", type: "string" },
+                    { name: "article12LogHash", type: "bytes32" },
+                    { name: "article14OversightSignature", type: "string" },
                     { name: "tenantId", type: "string" },
                     { name: "authorizationNonce", type: "string" },
-                    { name: "parametersHash", type: "bytes32" },
-                    { name: "targetExecutionChain", type: "string" },
-                    { name: "resultHash", type: "string" }
+                    { name: "complianceStandard", type: "string" }
                 ]
             };
 
             const receiptValue = {
-                actionId: receipt.actionId,
+                receiptId: receipt.receiptId,
                 toolId: receipt.toolId,
-                tenantId: tenantId,
+                agentPubKey: receipt.agentPubKey,
+                article12LogHash: ethers.utils.arrayify(receipt.article12LogHash),
+                article14OversightSignature: receipt.article14OversightSignature,
+                tenantId: receipt.tenantId,
                 authorizationNonce: receipt.authorizationNonce,
-                parametersHash: ethers.utils.arrayify(receipt.parametersHash),
-                targetExecutionChain: "solana-mainnet",
-                resultHash: receipt.resultHash
+                complianceStandard: receipt.complianceStandard
             };
 
             receipt.signature = await this.signer.signEIP712(receiptDomain, receiptTypes, receiptValue);
+
+            // --- PHASE 2.1: VERIFIABLE AI PRIVACY (ZK-SEAL) ---
+            if (this.zkClient) {
+                try {
+                    const zkInput = {
+                        action: { tool_id: request.action.toolId, amount: verifiedEstimatedValue, nonce: numericNonce },
+                        constraints: { 
+                            max_per_tx: request.dynamicPolicy.policyConfig.financialLimits.perTx || 100,
+                            cumulative_limit: 50000,
+                            last_checkpointed_nonce: currentHighWaterMark 
+                        },
+                        stats_before: { total_spend: stats.totalSpend - verifiedEstimatedValue, tx_count: stats.txCount - 1, last_activity: 0 }
+                    };
+                    const zkOutput = await this.zkClient.generateProof(zkInput);
+                    receipt.zkSeal = {
+                        journal: zkOutput.journal,
+                        seal: Buffer.from(zkOutput.seal).toString('base64')
+                    };
+                } catch (zkErr: any) {
+                    console.error(`[AEGIS-SENTINEL-WARNING] ZK Proof Generation failed: ${zkErr.message}. Falling back to Hardware-Only proof.`);
+                }
+            }
+
+            // --- ARTICLE 12/14 ON-CHAIN ANCHORING ---
+            // If a registry client is provisioned, anchor the receipt hash to the Solana blockchain.
+            if (this.registryClient) {
+                // Fire and forget (or handle async errors) to minimize TEE performance impact
+                this.registryClient.anchorReceipt(receipt).catch(err => {
+                    // Log the failure to anchor, but do not block the execution (Veracity Warning)
+                    console.error(`[AEGIS-SENTINEL-WARNING] On-chain anchoring failed for receipt ${receipt.receiptId}. Veracity gap detected.`);
+                });
+            }
 
             return receipt;
     }

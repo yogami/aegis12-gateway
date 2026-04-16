@@ -1,28 +1,52 @@
 use anchor_lang::prelude::*;
 
-declare_id!("AEGiS12xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+declare_id!("5dPzR96rEawRNuB4ZViFu2we8JguC1eqMGi9HPbWDgiQ");
 
 #[program]
 pub mod aegis12_registry {
     use super::*;
 
-    pub fn unmocked_attest_compliance(
+    pub fn anchor_compliance_receipt(
         ctx: Context<AttestCompliance>,
-        hardware_enclave_signature: String,
-        sha256_intent_hash: String,
+        receipt_id: String,
+        article_12_log_hash: [u8; 32],
+        article_14_oversight_signature: String,
+        tee_signature: [u8; 64],
     ) -> Result<()> {
         let registry_entry = &mut ctx.accounts.registry_entry;
         
-        // Ensure strictly validated data lengths
-        require!(hardware_enclave_signature.len() == 64, AegisError::InvalidSignatureSize);
-        require!(sha256_intent_hash.len() == 64, AegisError::InvalidHashSize);
+        // Strict boundary validation for regulatory auditability
+        require!(receipt_id.len() <= 64, AegisError::InvalidIdSize);
+        require!(article_14_oversight_signature.len() >= 130, AegisError::InvalidSignatureSize); // ETH-style hex check
 
         registry_entry.agent_pubkey = ctx.accounts.agent_signer.key();
-        registry_entry.tee_attestation = hardware_enclave_signature;
-        registry_entry.intent_hash = sha256_intent_hash;
+        registry_entry.receipt_id = receipt_id;
+        registry_entry.article_12_log_hash = article_12_log_hash;
+        registry_entry.article_14_oversight_signature = article_14_oversight_signature;
+        registry_entry.tee_signature = tee_signature;
         registry_entry.timestamp = Clock::get()?.unix_timestamp;
 
-        msg!("AEGIS-12 TEE COMPLIANCE ANCHORED: {}", registry_entry.intent_hash);
+        msg!("AEGIS-12 COMPLIANCE ANCHORED: {}", registry_entry.receipt_id);
+        Ok(())
+    }
+
+    pub fn checkpoint_nonce(
+        ctx: Context<CheckpointNonce>,
+        tenant_id: String,
+        last_nonce: u64,
+    ) -> Result<()> {
+        let checkpoint = &mut ctx.accounts.nonce_checkpoint;
+        
+        // Only allow monotonic increments to prevent replay resurrection
+        if checkpoint.last_nonce > 0 {
+            require!(last_nonce > checkpoint.last_nonce, AegisError::InvalidNonceSequence);
+        }
+
+        checkpoint.tenant_id = tenant_id;
+        checkpoint.last_nonce = last_nonce;
+        checkpoint.last_updated = Clock::get()?.unix_timestamp;
+
+        msg!("AEGIS-12 NONCE CHECKPOINT SYNCED: {} -> {}", checkpoint.tenant_id, checkpoint.last_nonce);
         Ok(())
     }
 }
@@ -32,8 +56,8 @@ pub struct AttestCompliance<'info> {
     #[account(
         init,
         payer = agent_signer,
-        space = 8 + 32 + 64 + 64 + 8, // Discriminator + Pubkey + Strings + Timestamp
-        seeds = [b"aegis_compliance", agent_signer.key().as_ref()],
+        space = 8 + 32 + 64 + 32 + 132 + 64 + 8, // Discriminator + Agent + ID + Hash + Sig + TEE + TS
+        seeds = [b"aegis_compliance_v1", agent_signer.key().as_ref(), receipt_id.as_bytes()],
         bump
     )]
     pub registry_entry: Account<'info, ComplianceEntry>,
@@ -44,18 +68,49 @@ pub struct AttestCompliance<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+#[instruction(tenant_id: String)]
+pub struct CheckpointNonce<'info> {
+    #[account(
+        init_if_needed,
+        payer = authority,
+        space = 8 + 32 + 8 + 8, // Discriminator + TenantID + Nonce + TS
+        seeds = [b"aegis_nonce_checkpoint", tenant_id.as_bytes()],
+        bump
+    )]
+    pub nonce_checkpoint: Account<'info, NonceCheckpoint>,
+    
+    #[account(mut)]
+    pub authority: Signer<'info>,
+    
+    pub system_program: Program<'info, System>,
+}
+
 #[account]
 pub struct ComplianceEntry {
     pub agent_pubkey: Pubkey,
-    pub tee_attestation: String,
-    pub intent_hash: String,
+    pub receipt_id: String,
+    pub article_12_log_hash: [u8; 32],
+    pub article_14_oversight_signature: String,
+    pub tee_signature: [u8; 64],
     pub timestamp: i64,
+}
+
+#[account]
+pub struct NonceCheckpoint {
+    pub tenant_id: String,
+    pub last_nonce: u64,
+    pub last_updated: i64,
 }
 
 #[error_code]
 pub enum AegisError {
-    #[msg("The provided TEE hardware signature length is invalid.")]
+    #[msg("The provided ID length is invalid.")]
+    InvalidIdSize,
+    #[msg("The provided signature length is invalid.")]
     InvalidSignatureSize,
-    #[msg("The provided SHA256 intent hash length is invalid.")]
+    #[msg("The provided hash length is invalid.")]
     InvalidHashSize,
+    #[msg("The provided nonce is not greater than the checkpoint. Replay detected.")]
+    InvalidNonceSequence,
 }

@@ -1,16 +1,17 @@
+[toolchain]
+
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
-[programs.localnet]
-aegis12_registry = "AEGiS12xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
-[registry]
-url = "https://api.apr.dev"
+[programs.devnet]
+aegis12_registry = "5dPzR96rEawRNuB4ZViFu2we8JguC1eqMGi9HPbWDgiQ"
 
 [provider]
-cluster = "mainnet-beta"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[hooks]

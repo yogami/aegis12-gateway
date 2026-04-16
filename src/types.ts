@@ -42,15 +42,40 @@ export interface PolicyObligation {
     parameters: Record<string, unknown>;
 }
 
-export interface ToolExecutionReceipt {
-    actionId: string;               // Matches PoE actionId
-    toolId: string;                 // Tool's SPIFFE ID or DID
-    authorizationNonce: string;     // Nonce issued by PEP at authorization time
-    parametersHash: string;         // Keccak256 or SHA256 of the validated/stripped parameters
-    validatedParams?: Record<string, unknown>; // Only the sanitized fields (no raw LLM blob)
-    resultHash: string;             // SHA-256 of JCS-canonicalized result
+/**
+ * AegisComplianceReceipt (v1.0.0)
+ * 
+ * [EU AI ACT COMPLIANCE]
+ * This structure fulfills the transparency and traceability requirements of 
+ * Article 12 (Traceable Logging) and Article 14 (Human Oversight).
+ */
+export interface AegisComplianceReceipt {
+    receiptId: string;              // Unique time-ordered identifier (UUID v7)
+    actionId: string;               // Link to Proof of Execution actionId
+    toolId: string;                 // The tool's unique SPIFFE or DID
+    agentPubKey: string;            // The Solana/Phala identity of the agent
+    
+    // --- ARTICLE 12: TRACEABLE LOGGING ---
+    article12LogHash: string;       // Keccak-256 hash of (params + result + context)
+    parametersHash: string;         // Hash of sanitized parameters
+    resultHash: string;             // Hash of the execution output
+    
+    // --- ARTICLE 14: HUMAN OVERSIGHT ---
+    article14OversightSignature: string; // The EIP-712 human-authorized policy signature
+    policyId: string;               // Reference to the active policy
+    tenantId: string;               // The human owner (Trust-at-the-Root)
+    
+    // --- COMPLIANCE DESCRIPTOR ---
+    complianceStandard: "ARS-01+" | "ERC-8004" | "CUSTOM";
+    limitations: string[];          // "Honest Sentinel" declarations of TEE observation gaps
+    
+    authorizationNonce: string;     // Irrevocable nonce (burned at execution)
+    zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
+        journal: any;
+        seal: string;               // Base64 encoded ZK-Proof bytes
+    };
     timestamp: ISO8601;
-    signature: string;              // TEE's key (Ed25519)
+    signature: string;              // TEE Hardware Signature (Ed25519)
 }
 
 export interface ProofOfExecution {

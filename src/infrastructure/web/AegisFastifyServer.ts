@@ -111,7 +111,29 @@ fastify.post('/enforce', {
                     type: 'object',
                     properties: {
                         status: { type: 'string' },
-                        receipt: { type: 'object' },
+                        receipt: { 
+                            type: 'object',
+                            properties: {
+                                receiptId: { type: 'string' },
+                                actionId: { type: 'string' },
+                                toolId: { type: 'string' },
+                                agentPubKey: { type: 'string' },
+                                article12LogHash: { type: 'string' },
+                                article14OversightSignature: { type: 'string' },
+                                complianceStandard: { type: 'string' },
+                                limitations: { type: 'array', items: { type: 'string' } },
+                                authorizationNonce: { type: 'string' },
+                                zkSeal: {
+                                    type: 'object',
+                                    properties: {
+                                        journal: { type: 'object', additionalProperties: true },
+                                        seal: { type: 'string' }
+                                    }
+                                },
+                                timestamp: { type: 'string' },
+                                signature: { type: 'string' }
+                            }
+                        },
                         enclaveDid: { type: 'string' },
                         attestation: { type: 'string' }
                     }

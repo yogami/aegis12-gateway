@@ -71,15 +71,23 @@ describe('Aegis Sentinel: Stateful Behavioral Enforcement', () => {
         };
 
         // 1. First transaction: 30,000 SOL (Total: 30k, Limit: 50k) -> ALLOW
-        const r1 = await pep.enforce(await createRequest("nonce-1", 30000));
-        expect(r1.actionId).toBeDefined();
+        const r1 = await pep.enforce(await createRequest("1001", 30000));
+        expect(r1.receiptId).toBeDefined();
+        expect(r1.article12LogHash).toBeDefined();
+        expect(r1.article14OversightSignature).toBeDefined();
 
         // 2. Second transaction: 15,000 SOL (Total: 45k, Limit: 50k) -> ALLOW
-        const r2 = await pep.enforce(await createRequest("nonce-2", 15000));
-        expect(r2.actionId).toBeDefined();
+        const r2 = await pep.enforce(await createRequest("1002", 15000));
+        expect(r2.receiptId).toBeDefined();
+        expect(r2.article12LogHash).not.toBe(r1.article12LogHash); // Unique trace per action
+
+        // --- ITEM 1.3 REPLAY TEST ---
+        // Attempt to reuse nonce 1002 -> DENY
+        await expect(pep.enforce(await createRequest("1002", 1000)))
+            .rejects.toThrow(/Nonce Sequence Violation/);
 
         // 3. Third transaction: 10,000 SOL (Total: 55k, Limit: 50k) -> DENY (TERMINAL REFUSAL)
-        await expect(pep.enforce(await createRequest("nonce-3", 10000)))
+        await expect(pep.enforce(await createRequest("1003", 10000)))
             .rejects.toThrow(/Cumulative spend \(55000\) exceeds hardware-locked lifetime ceiling/);
             
         console.log("--- Sentinel Stress Test: PASS ---");
