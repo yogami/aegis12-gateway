@@ -115,7 +115,7 @@ export class X402PayGate {
         if (paymentHeader) return null;
 
         const now = Date.now();
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging') {
             const tracker = freeTierTracker.get(clientIp);
 
             if (!tracker || tracker.resetAt < now) {
