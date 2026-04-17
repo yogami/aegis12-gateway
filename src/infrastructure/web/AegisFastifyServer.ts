@@ -58,6 +58,8 @@ fastify.post('/governance/evaluate', async (request, reply) => {
         });
     }
     return { decision: 'AUTONOMOUS', anomalyScore: score, agentTier: tier, governanceProtocol: 'squads-v4', euAiActCompliance: { article14: 'MONITORING' } };
+});
+
 fastify.get('/attestation/status', async () => ({
     teeProvider: 'Phala Network Dstack (Intel SGX)',
     enclaveDid: aegisSigner.enclaveDid, 

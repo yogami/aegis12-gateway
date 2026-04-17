@@ -1,84 +1,88 @@
-import os
-import sys
+import time
 import json
 import urllib.request
-import time
+import urllib.error
+import sys
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    print("❌ [Auth] OPENROUTER_API_KEY environment variable is missing. Terminal execution aborted.")
-    sys.exit(1)
+# Aegis-12 Gateway Production Endpoint
+AEGIS_GATEWAY_URL = "https://aegis12-gateway-production.up.railway.app/enforce"
 
-GATEWAY_URL = "https://aegis12-gateway.up.railway.app/api/execute"
+# ANSI Terminal Colors for the "Killer Pitch" visualization
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+CYAN = "\033[96m"
+RESET = "\033[0m"
+BOLD = "\033[1m"
 
-def think_and_generate_strategy():
-    print("🧠 [Agent_Worker] Initializing LangChain-style reasoning loop via OpenRouter...")
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
+def print_banner():
+    print(f"\n{CYAN}{BOLD}=== [ AEGIS-12 AUTONOMOUS AGENT WORKER ] ==={RESET}")
+    print(f"{CYAN}Solana Network: Mainnet-Beta | Hardware: Phala SGX{RESET}\n")
+
+def simulate_ai_reasoning():
+    print(f"{YELLOW}[*] AI Worker Context:{RESET} Arbitrage opportunity detected on Raydium.")
+    print(f"{YELLOW}[*] AI Worker Intent:{RESET} Swap 500 USDC for 3.2 SOL.")
+    time.sleep(1)
+
+    # The raw, naked payload that an agent normally sends directly to QuickNode/Helius
+    raw_payload = {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "sendTransaction",
+        "params": [
+            "base64_encoded_tx_data_USDC_SOL_SWAP_500",
+            {"encoding": "base64"}
+        ]
     }
     
-    sys_prompt = "You are a quantitative Solana trading agent. Return EXACTLY a raw JSON object and absolutely nothing else. Format: {\"agent_id\": \"qwen-alpha-2026\", \"intent\": \"arbitrage\", \"target_pool\": \"RAY-USDC\", \"target_rate\": [float]}"
+    print(f"\n{RED}{BOLD}=== [ THE PROBLEM: STRATEGY LEAKAGE ] ==={RESET}")
+    print(f"{RED}If we send this directly to the RPC, MEV Searchers will decode it and front-run us:{RESET}")
+    print(f"{RED}{json.dumps(raw_payload, indent=2)}{RESET}\n")
+    time.sleep(2)
     
-    data = {
-        "model": "qwen/qwen-max",
-        "messages": [
-            {"role": "system", "content": sys_prompt},
-            {"role": "user", "content": "Analyze current volatility. Output your tactical AMM routing strategy JSON."}
-        ],
-        "temperature": 0.4
+    return raw_payload
+
+def shield_via_aegis(raw_payload):
+    print(f"{GREEN}{BOLD}=== [ THE SOLUTION: AEGIS-12 SHIELDING ] ==={RESET}")
+    print(f"{GREEN}[+] Routing transaction intent to Aegis-12 Phala TEE Enclave...{RESET}")
+    
+    aegis_payload = {
+        "agentId": "solana_arbitrage_bot_01",
+        "payload": raw_payload
     }
     
-    req = urllib.request.Request(url, headers=headers, data=json.dumps(data).encode("utf-8"))
+    start_time = time.time()
+    
     try:
+        req = urllib.request.Request(
+            AEGIS_GATEWAY_URL, 
+            json.dumps(aegis_payload).encode('utf-8'), 
+            {"Content-Type": "application/json"}
+        )
         with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode("utf-8"))
-            content = result["choices"][0]["message"]["content"]
-            content = content.replace("```json", "").replace("```", "").strip()
-            print(f"✅ [Agent_Worker] Strategy Locked: {content}")
-            return json.loads(content)
-    except Exception as e:
-        print(f"❌ [Agent_Worker] Strategy Generation Failed: {e}")
-        return {"agent_id": "fallback_worker", "intent": "obfuscate"}
-
-def execute_through_aegis_gateway(payload):
-    print("🛡️ [Agent_Worker] Routing payload through Aegis-12 Compliance Gateway...")
-    headers = {"Content-Type": "application/json"}
-    req = urllib.request.Request(GATEWAY_URL, headers=headers, data=json.dumps(payload).encode("utf-8"), method="POST")
-    try:
-        with urllib.request.urlopen(req) as response:
-            result = json.loads(response.read().decode("utf-8"))
-            print("✅ [Aegis-12 Response] Execution Successful!")
-            print(json.dumps(result, indent=2))
-            return result
-    except Exception as e:
-        print(f"❌ [Aegis-12 Response] Gateway Error: {e}")
-        return None
+            result = json.loads(response.read().decode())
+    except urllib.error.URLError as e:
+        print(f"{RED}[!] Error reaching Aegis-12 Gateway: {e}{RESET}")
+        print("Ensure the production gateway is online or switch to localhost:3000.")
+        sys.exit(1)
+        
+    latency = (time.time() - start_time) * 1000
+    
+    print(f"{GREEN}[+] TEE Attestation & Execution Complete ({latency:.2f}ms){RESET}")
+    
+    # Extract the obfuscated anchored receipt
+    if result.get("enforcementDecision") == "APPROVED":
+        anchor = result.get("anchorDetails", {})
+        print(f"\n{CYAN}{BOLD}=== [ ON-CHAIN VERIFICATION ] ==={RESET}")
+        print(f"{CYAN}Transaction Signature:{RESET} {anchor.get('txSignature')}")
+        print(f"{CYAN}Post-Quantum Receipt Hash (SHA-512):{RESET} {anchor.get('receiptHash')}")
+        print(f"{CYAN}Status:{RESET} {anchor.get('attestationState')}")
+        print(f"{CYAN}Solana Explorer:{RESET} {anchor.get('explorerUrl')}")
+        print(f"\n{GREEN}{BOLD}SUCCESS: Alpha protected. MEV searchers only see an opaque SHA-512 hash on-chain.{RESET}\n")
+    else:
+        print(f"{RED}[!] Transaction Rejected by Aegis Enclave Policy.{RESET}")
 
 if __name__ == "__main__":
-    strategy_payload = think_and_generate_strategy()
-    
-    gateway_response = execute_through_aegis_gateway(strategy_payload)
-    
-    if gateway_response and gateway_response.get("status") == 200:
-        print(f"\n🔐 HASH TRACE: {gateway_response['compliance']['sha256_anchor']}")
-        print(f"🔗 EXPLORER LINK: {gateway_response['compliance']['explorer_url']}")
-        
-        signature = gateway_response["compliance"].get("signature")
-        if signature:
-            print("\n🔎 Verifying Compliance via public /api/verify endpoint...")
-            verify_url = "https://aegis12-gateway.up.railway.app/api/verify"
-            verify_data = {
-                "signature": signature,
-                "payload": strategy_payload
-            }
-            v_req = urllib.request.Request(verify_url, headers={"Content-Type": "application/json"}, data=json.dumps(verify_data).encode("utf-8"), method="POST")
-            try:
-                 with urllib.request.urlopen(v_req) as v_res:
-                     v_result = json.loads(v_res.read().decode("utf-8"))
-                     print("✅ [Verifier] " + json.dumps(v_result, indent=2))
-            except Exception as e:
-                 print("⚠️ [Verifier] Could not dynamically verify via API. Rate limit or missing signature.")
-        else:
-            print("\n⚠️ [Verifier] Skipping verification: no valid signature returned (Faucet Rate Limits locked Devnet loop). Inject Mainnet Key to unleash.")
+    print_banner()
+    payload = simulate_ai_reasoning()
+    shield_via_aegis(payload)
