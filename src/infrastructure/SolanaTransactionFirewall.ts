@@ -53,9 +53,9 @@ const TOKEN_IX = {
     APPROVE_CHECKED: 13,
 };
 
-export type FirewallDecision = 'ALLOW' | 'BLOCK' | 'REQUIRE_HUMAN';
+type FirewallDecision = 'ALLOW' | 'BLOCK' | 'REQUIRE_HUMAN';
 
-export interface FirewallResult {
+interface FirewallResult {
     decision: FirewallDecision;
     reason: string;
     riskScore: number;          // 0.0 - 1.0
@@ -63,15 +63,16 @@ export interface FirewallResult {
     receipt?: ToolExecutionReceipt;
     euAiActArticles: string[];
     mitreTechniques: string[];
+    executedPrograms: string[];
 }
 
-export interface FirewallFlag {
+interface FirewallFlag {
     severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     rule: string;
     detail: string;
 }
 
-export interface FirewallConfig {
+interface FirewallConfig {
     maxTransferLamports: number;        // Max SOL transfer (in lamports)
     maxTokenAmount: number;             // Max SPL token amount
     allowedPrograms: string[];          // Allowlist of program IDs (base58)
@@ -114,9 +115,220 @@ export class SolanaTransactionFirewall {
     /**
      * Inspect a serialized Solana transaction and enforce policy rules.
      */
+    private inspectInstructions(instructions: TransactionInstruction[], flags: FirewallFlag[], euArticles: string[], mitreTechniques: string[]): number {
+        let riskScore = 0;
+        
+        if (instructions.length > this.config.maxInstructions) {
+            flags.push({
+                severity: 'HIGH',
+                rule: 'INSTRUCTION_OVERFLOW',
+                detail: `Transaction has ${instructions.length} instructions (limit: ${this.config.maxInstructions}). Possible batch attack.`
+            });
+            riskScore += 0.3;
+            euArticles.push('Article 9 (Risk Management)');
+            mitreTechniques.push('T1059 (Command Scripting)');
+        }
+
+        for (let i = 0; i < instructions.length; i++) {
+            const ix = instructions[i];
+            const programId = ix.programId.toBase58();
+
+            if (this.config.blockUnknownPrograms && !this.config.allowedPrograms.includes(programId)) {
+                flags.push({
+                    severity: 'CRITICAL',
+                    rule: 'UNKNOWN_PROGRAM',
+                    detail: `Instruction ${i} calls unknown program ${programId}. Possible malicious contract interaction.`
+                });
+                riskScore += 0.5;
+                euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
+                mitreTechniques.push('T1203 (Exploitation for Client Execution)');
+            }
+
+            if (programId === SystemProgram.programId.toBase58()) {
+                const transferAmount = this.parseSystemTransfer(ix);
+                if (transferAmount !== null && transferAmount > this.config.maxTransferLamports) {
+                    flags.push({
+                        severity: 'CRITICAL',
+                        rule: 'HIGH_VALUE_TRANSFER',
+                        detail: `SOL transfer of ${transferAmount / LAMPORTS_PER_SOL} SOL exceeds limit of ${this.config.maxTransferLamports / LAMPORTS_PER_SOL} SOL.`
+                    });
+                    riskScore += 0.4;
+                    euArticles.push('Article 14 (Human Oversight)');
+                    mitreTechniques.push('T1537 (Transfer Data to Cloud Account)');
+                }
+            }
+
+            if (programId === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' ||
+                programId === 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb') {
+                const initialCriticalCount = flags.filter(f => f.severity === 'CRITICAL').length;
+                this.analyzeSplTokenInstruction(ix, i, flags, euArticles, mitreTechniques);
+                if (flags.filter(f => f.severity === 'CRITICAL').length > initialCriticalCount) {
+                    riskScore += 0.3;
+                }
+            }
+
+            if (programId === 'ComputeBudget111111111111111111111111111111') {
+                const units = this.parseComputeBudget(ix);
+                if (units !== null && units > this.config.maxComputeUnits) {
+                    flags.push({
+                        severity: 'MEDIUM',
+                        rule: 'HIGH_COMPUTE_BUDGET',
+                        detail: `Compute budget set to ${units} units (limit: ${this.config.maxComputeUnits}). Possible resource exhaustion.`
+                    });
+                    riskScore += 0.1;
+                }
+            }
+        }
+        
+        return riskScore;
+    }
+
+    private checkTierRestrictions(instructions: TransactionInstruction[], flags: FirewallFlag[], euArticles: string[]): number {
+        if (this.config.agentTier === 'T1') {
+            const hasWrite = instructions.some(ix =>
+                ix.programId.toBase58() !== 'ComputeBudget111111111111111111111111111111' &&
+                ix.programId.toBase58() !== 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
+            );
+            if (hasWrite) {
+                flags.push({
+                    severity: 'HIGH',
+                    rule: 'TIER_RESTRICTION',
+                    detail: 'T1 agents are restricted to read-only operations. Transaction contains write instructions.'
+                });
+                euArticles.push('Article 14 (Human Oversight)');
+                return 0.4;
+            }
+        }
+        return 0;
+    }
+
+    private async performBFTSimulation(tx: Transaction, flags: FirewallFlag[], euArticles: string[], mitreTechniques: string[], executedPrograms: Set<string>): Promise<number> {
+        let riskScore = 0;
+        try {
+            const BFT_TIMEOUT_MS = 400;
+            
+            const simPromises = this.connections.map(conn => {
+                return Promise.race([
+                    conn.simulateTransaction(tx),
+                    new Promise<never>((_, reject) => 
+                        setTimeout(() => reject(new Error('RPC Timeout')), BFT_TIMEOUT_MS)
+                    )
+                ]);
+            });
+
+            const settledResults = await Promise.allSettled(simPromises);
+            
+            const validSimulations = settledResults.filter(
+                (res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && !res.value.value.err
+            );
+            
+            const errSimulations = settledResults.filter(
+                (res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && !!res.value.value.err
+            );
+
+            const totalNodes = this.connections.length;
+            const f = Math.floor((totalNodes - 1) / 3);
+            const requiredQuorum = Math.max((2 * f) + 1, Math.ceil((totalNodes * 2) / 3));
+
+            const logHashes = new Map<string, number>();
+            let consensusLogs: string[] = [];
+            let maxLogVoters = 0;
+
+            for (const sim of validSimulations) {
+                const simLogs = sim.value.value.logs || [];
+                const hashStr = simLogs.join('');
+                const currentVotes = (logHashes.get(hashStr) || 0) + 1;
+                logHashes.set(hashStr, currentVotes);
+
+                if (currentVotes > maxLogVoters) {
+                    maxLogVoters = currentVotes;
+                    consensusLogs = simLogs;
+                }
+            }
+
+            if (maxLogVoters < requiredQuorum) {
+                flags.push({
+                    severity: 'CRITICAL',
+                    rule: 'RPC_QUORUM_FAILURE',
+                    detail: `Failed to achieve BFT consensus among RPC nodes. Maximum matching state: ${maxLogVoters}/${totalNodes}. Failing closed to prevent eclipse attack.`
+                });
+                euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
+                mitreTechniques.push('T1565 (Data Manipulation: Stored Data Manipulation)');
+                riskScore = 1.0;
+                consensusLogs = [];
+            }
+            
+            if (errSimulations.length >= requiredQuorum) {
+                flags.push({
+                    severity: 'HIGH',
+                    rule: 'SIMULATION_ERROR',
+                    detail: `Transaction simulation failed quorum: ${JSON.stringify(errSimulations[0].value.value.err)}`
+                });
+                riskScore += 0.3;
+                euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
+            }
+
+            const programInvokeRegex = /Program (\w+) invoke/g;
+            for (const logLine of consensusLogs) {
+                let match;
+                while ((match = programInvokeRegex.exec(logLine)) !== null) {
+                    executedPrograms.add(match[1]);
+                }
+            }
+
+            if (this.config.blockUnknownPrograms) {
+                for (const pid of executedPrograms) {
+                    if (!this.config.allowedPrograms.includes(pid)) {
+                        flags.push({
+                            severity: 'CRITICAL',
+                            rule: 'HIDDEN_CPI_UNKNOWN_PROGRAM',
+                            detail: `Simulation revealed hidden CPI to unknown program ${pid}. Critical supply chain risk.`
+                        });
+                        euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
+                        mitreTechniques.push('T1203 (Exploitation for Client Execution)');
+                        return 1.0;
+                    }
+                }
+            }
+        } catch (simError: any) {
+            flags.push({
+                severity: 'CRITICAL',
+                rule: 'SIMULATION_UNAVAILABLE',
+                detail: `Could not reach RPC for pre-flight simulation: ${simError.message}. Failing closed to prevent eclipse attack.`
+            });
+            return 1.0;
+        }
+        return riskScore;
+    }
+
+    private generateReceiptData(instructions: TransactionInstruction[], walletPubkey: string, decision: FirewallDecision, riskScore: number, flags: FirewallFlag[]): ToolExecutionReceipt {
+        const receiptData = {
+            actionId: `solana-tx-${Date.now()}`,
+            toolId: 'solana-transaction-firewall',
+            authorizationNonce: `nonce-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
+            parameters: {
+                wallet: walletPubkey,
+                instructionCount: instructions.length,
+                programs: [...new Set(instructions.map(ix => ix.programId.toBase58()))],
+                decision,
+                riskScore,
+                flagCount: flags.length,
+            },
+            resultHash: createHash('sha256')
+                .update(JSON.stringify({ decision, flags, riskScore }))
+                .digest('hex'),
+            timestamp: new Date().toISOString(),
+            signature: '',
+        };
+
+        const canonical = JSON.stringify(receiptData, Object.keys(receiptData).sort());
+        receiptData.signature = this.signer.sign(canonical);
+        return receiptData;
+    }
+
     public async inspectTransaction(
-        serializedTx: string,       // Base64-encoded serialized transaction
-        walletPubkey: string,       // Agent's wallet public key
+        serializedTx: string,
+        walletPubkey: string,
         context?: { sessionId?: string; actionsThisSession?: number }
     ): Promise<FirewallResult> {
         const flags: FirewallFlag[] = [];
@@ -126,248 +338,36 @@ export class SolanaTransactionFirewall {
         const executedPrograms = new Set<string>();
 
         try {
-            // Deserialize the transaction
             const txBuffer = Buffer.from(serializedTx, 'base64');
             const tx = Transaction.from(txBuffer);
             const instructions = tx.instructions;
 
-            // Rule 1: Instruction count limit
-            if (instructions.length > this.config.maxInstructions) {
-                flags.push({
-                    severity: 'HIGH',
-                    rule: 'INSTRUCTION_OVERFLOW',
-                    detail: `Transaction has ${instructions.length} instructions (limit: ${this.config.maxInstructions}). Possible batch attack.`
-                });
-                riskScore += 0.3;
-                euArticles.push('Article 9 (Risk Management)');
-                mitreTechniques.push('T1059 (Command Scripting)');
-            }
-
-            // Analyze each instruction
-            for (let i = 0; i < instructions.length; i++) {
-                const ix = instructions[i];
-                const programId = ix.programId.toBase58();
-
-                // Rule 2: Unknown program ID
-                if (this.config.blockUnknownPrograms && !this.config.allowedPrograms.includes(programId)) {
-                    flags.push({
-                        severity: 'CRITICAL',
-                        rule: 'UNKNOWN_PROGRAM',
-                        detail: `Instruction ${i} calls unknown program ${programId}. Possible malicious contract interaction.`
-                    });
-                    riskScore += 0.5;
-                    euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
-                    mitreTechniques.push('T1203 (Exploitation for Client Execution)');
-                }
-
-                // Rule 3: System Program — SOL transfers
-                if (programId === SystemProgram.programId.toBase58()) {
-                    const transferAmount = this.parseSystemTransfer(ix);
-                    if (transferAmount !== null && transferAmount > this.config.maxTransferLamports) {
-                        flags.push({
-                            severity: 'CRITICAL',
-                            rule: 'HIGH_VALUE_TRANSFER',
-                            detail: `SOL transfer of ${transferAmount / LAMPORTS_PER_SOL} SOL exceeds limit of ${this.config.maxTransferLamports / LAMPORTS_PER_SOL} SOL.`
-                        });
-                        riskScore += 0.4;
-                        euArticles.push('Article 14 (Human Oversight)');
-                        mitreTechniques.push('T1537 (Transfer Data to Cloud Account)');
-                    }
-                }
-
-                // Rule 4: SPL Token dangerous operations
-                if (programId === 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' ||
-                    programId === 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb') {
-                    this.analyzeSplTokenInstruction(ix, i, flags, euArticles, mitreTechniques);
-                    if (flags.some(f => f.severity === 'CRITICAL')) {
-                        riskScore += 0.3;
-                    }
-                }
-
-                // Rule 5: Compute Budget anomalies
-                if (programId === 'ComputeBudget111111111111111111111111111111') {
-                    const units = this.parseComputeBudget(ix);
-                    if (units !== null && units > this.config.maxComputeUnits) {
-                        flags.push({
-                            severity: 'MEDIUM',
-                            rule: 'HIGH_COMPUTE_BUDGET',
-                            detail: `Compute budget set to ${units} units (limit: ${this.config.maxComputeUnits}). Possible resource exhaustion.`
-                        });
-                        riskScore += 0.1;
-                    }
-                }
-            }
-
-            // Rule 6: Tier-based restrictions
-            if (this.config.agentTier === 'T1') {
-                // T1 agents: read-only, no transfers at all
-                const hasWrite = instructions.some(ix =>
-                    ix.programId.toBase58() !== 'ComputeBudget111111111111111111111111111111' &&
-                    ix.programId.toBase58() !== 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
-                );
-                if (hasWrite) {
-                    flags.push({
-                        severity: 'HIGH',
-                        rule: 'TIER_RESTRICTION',
-                        detail: 'T1 agents are restricted to read-only operations. Transaction contains write instructions.'
-                    });
-                    riskScore += 0.4;
-                    euArticles.push('Article 14 (Human Oversight)');
-                }
-            }
-
-            // Clamp risk score
+            riskScore += this.inspectInstructions(instructions, flags, euArticles, mitreTechniques);
+            riskScore += this.checkTierRestrictions(instructions, flags, euArticles);
+            
             riskScore = Math.min(riskScore, 1.0);
 
-            // SIMULATION: Pre-Flight BFT RPC Consensus
-            try {
-                // Execute simulateTransaction concurrently with 400ms timeout
-                const BFT_TIMEOUT_MS = 400;
-                
-                const simPromises = this.connections.map(conn => {
-                    return Promise.race([
-                        conn.simulateTransaction(tx),
-                        new Promise<never>((_, reject) => 
-                            setTimeout(() => reject(new Error('RPC Timeout')), BFT_TIMEOUT_MS)
-                        )
-                    ]);
-                });
-
-                const settledResults = await Promise.allSettled(simPromises);
-                
-                const validSimulations = settledResults.filter(
-                    (res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && !res.value.value.err
-                );
-                
-                const errSimulations = settledResults.filter(
-                    (res): res is PromiseFulfilledResult<any> => res.status === 'fulfilled' && !!res.value.value.err
-                );
-
-                const totalNodes = this.connections.length;
-                const f = Math.floor((totalNodes - 1) / 3);
-                const requiredQuorum = Math.max((2 * f) + 1, Math.ceil((totalNodes * 2) / 3));
-
-                // Hash logs to detect splits
-                const logHashes = new Map<string, number>();
-                let consensusLogs: string[] = [];
-                let maxLogVoters = 0;
-
-                for (const sim of validSimulations) {
-                    const simLogs = sim.value.value.logs || [];
-                    const hashStr = simLogs.join('');
-                    const currentVotes = (logHashes.get(hashStr) || 0) + 1;
-                    logHashes.set(hashStr, currentVotes);
-
-                    if (currentVotes > maxLogVoters) {
-                        maxLogVoters = currentVotes;
-                        consensusLogs = simLogs;
-                    }
-                }
-
-                // If BFT Quorum fails (too many timeouts, or divided logs)
-                if (maxLogVoters < requiredQuorum) {
-                    // Fail closed if we cannot reach a supermajority on safety
-                    flags.push({
-                        severity: 'CRITICAL',
-                        rule: 'RPC_QUORUM_FAILURE',
-                        detail: `Failed to achieve BFT consensus among RPC nodes. Maximum matching state: ${maxLogVoters}/${totalNodes}. Failing closed to prevent eclipse attack.`
-                    });
-                    riskScore = 1.0;
-                    euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
-                    mitreTechniques.push('T1565 (Data Manipulation: Stored Data Manipulation)');
-                    
-                    // Fallback logs to empty to trigger hard block processing later
-                    consensusLogs = [];
-                }
-                
-                if (errSimulations.length >= requiredQuorum) {
-                    flags.push({
-                        severity: 'HIGH',
-                        rule: 'SIMULATION_ERROR',
-                        detail: `Transaction simulation failed quorum: ${JSON.stringify(errSimulations[0].value.value.err)}`
-                    });
-                    riskScore += 0.3;
-                    euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
-                }
-
-                // Parse logs from the CONCENSUS state to find ALL executed programs (including CPIs)
-                const logs = consensusLogs;
-                
-                const programInvokeRegex = /Program (\w+) invoke/g;
-                for (const logLine of logs) {
-                    let match;
-                    while ((match = programInvokeRegex.exec(logLine)) !== null) {
-                        executedPrograms.add(match[1]);
-                    }
-                }
-
-                if (this.config.blockUnknownPrograms) {
-                    for (const pid of executedPrograms) {
-                        if (!this.config.allowedPrograms.includes(pid)) {
-                            flags.push({
-                                severity: 'CRITICAL',
-                                rule: 'HIDDEN_CPI_UNKNOWN_PROGRAM',
-                                detail: `Simulation revealed hidden CPI to unknown program ${pid}. Critical supply chain risk.`
-                            });
-                            riskScore = 1.0; // Instant hard block
-                            euArticles.push('Article 15 (Accuracy, Robustness, Cybersecurity)');
-                            mitreTechniques.push('T1203 (Exploitation for Client Execution)');
-                        }
-                    }
-                }
-            } catch (simError: any) {
-                // FAIL-CLOSED: Network failure during simulation must block the transaction
-                flags.push({
-                    severity: 'CRITICAL',
-                    rule: 'SIMULATION_UNAVAILABLE',
-                    detail: `Could not reach RPC for pre-flight simulation: ${simError.message}. Failing closed to prevent eclipse attack.`
-                });
-                riskScore = 1.0;
+            if (riskScore < 1.0) {
+                const simRisk = await this.performBFTSimulation(tx, flags, euArticles, mitreTechniques, executedPrograms);
+                riskScore = Math.max(riskScore, simRisk); 
+                // Using max ensures if sim returns 1.0, it becomes 1.0, otherwise it preserves riskScore or higher
+                // wait, actually we were adding it:
+                if (simRisk === 1.0) riskScore = 1.0;
+                else riskScore += simRisk;
             }
 
-            // Clamp risk score again just in case simulation spiked it
             riskScore = Math.min(riskScore, 1.0);
 
-            // Determine decision
             let decision: FirewallDecision;
-            if (flags.some(f => f.severity === 'CRITICAL')) {
-                decision = 'BLOCK';
-            } else if (riskScore >= this.config.requireHumanAboveRisk) {
-                decision = 'REQUIRE_HUMAN';
-            } else {
-                decision = 'ALLOW';
-            }
+            if (flags.some(f => f.severity === 'CRITICAL')) decision = 'BLOCK';
+            else if (riskScore >= this.config.requireHumanAboveRisk) decision = 'REQUIRE_HUMAN';
+            else decision = 'ALLOW';
 
-            // Generate signed receipt
-            const receiptData = {
-                actionId: `solana-tx-${Date.now()}`,
-                toolId: 'solana-transaction-firewall',
-                authorizationNonce: `nonce-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
-                parameters: {
-                    wallet: walletPubkey,
-                    instructionCount: instructions.length,
-                    programs: [...new Set(instructions.map(ix => ix.programId.toBase58()))],
-                    decision,
-                    riskScore,
-                    flagCount: flags.length,
-                },
-                resultHash: createHash('sha256')
-                    .update(JSON.stringify({ decision, flags, riskScore }))
-                    .digest('hex'),
-                timestamp: new Date().toISOString(),
-                signature: '',
-            };
-
-            const canonical = JSON.stringify(receiptData, Object.keys(receiptData).sort());
-            receiptData.signature = this.signer.sign(canonical);
+            const receiptData = this.generateReceiptData(instructions, walletPubkey, decision, riskScore, flags);
 
             return {
                 decision,
-                reason: decision === 'ALLOW'
-                    ? 'Transaction passed all firewall rules.'
-                    : decision === 'REQUIRE_HUMAN'
-                        ? `Risk score ${riskScore.toFixed(2)} exceeds threshold. Human approval required.`
-                        : `Transaction blocked: ${flags.filter(f => f.severity === 'CRITICAL').map(f => f.rule).join(', ')}`,
+                reason: decision === 'ALLOW' ? 'Transaction passed all firewall rules.' : (decision === 'REQUIRE_HUMAN' ? `Risk score ${riskScore.toFixed(2)} exceeds threshold. Human approval required.` : `Transaction blocked: ${flags.filter(f => f.severity === 'CRITICAL').map(f => f.rule).join(', ')}`),
                 riskScore,
                 flags,
                 receipt: receiptData,

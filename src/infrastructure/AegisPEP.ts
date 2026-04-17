@@ -31,21 +31,16 @@ export class AegisPEP {
 
 
 
-    public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
+    private async validateNonceAndScore(request: PolicyEvaluationRequest, scopedNonce: string): Promise<void> {
         if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
         
-        const tenantId = request.dynamicPolicy.policyConfig.tenantId;
-        const nonce = request.dynamicPolicy.policyConfig.nonce;
-        const scopedNonce = `${tenantId}::${nonce}`;
-
-        // ATOMIC RESERVATION: Fixes TOCTOU race condition enabling double-spend
         if (!(await this.nonceRegistry.reserve(scopedNonce))) {
              throw new Error('[TERMINAL REFUSAL] Nonce already used or reservation failed. Replay detected.');
         }
 
         const score = request.context?.currentAnomalyScore;
-        // Test 904 requires score=1.0 to pass Entry Gate
-        if (score === undefined || !Number.isFinite(score) || score < 0 || score > 1.0) {
+        const isScoreInvalid = score === undefined || !Number.isFinite(score) || score < 0 || score > 1.0;
+        if (isScoreInvalid) {
             await this.nonceRegistry.release(scopedNonce);
             throw new Error('[TERMINAL REFUSAL] Invalid or unscaled contextual anomaly score.');
         }
@@ -54,20 +49,18 @@ export class AegisPEP {
             await this.nonceRegistry.release(scopedNonce);
             throw new Error('[TERMINAL REFUSAL] Policy Expired.');
         }
+    }
 
-        let sanit = normalizeParameters(request.action.toolId, request.action.parameters);
-        
-        let estimatedValueBig = 0n;
+    private getEstimatedValue(sanit: Record<string, unknown>, scopedNonce: string): bigint {
         try {
-            estimatedValueBig = BigInt(sanit.amount || 0);
+            return BigInt(sanit.amount as any || 0);
         } catch (e) {
-            await this.nonceRegistry.release(scopedNonce);
+            this.nonceRegistry.release(scopedNonce).catch(() => {});
             throw new Error(`[TERMINAL REFUSAL] Invalid amount format. Must be a valid BigInt string.`);
         }
-        const estimatedValue = Number(estimatedValueBig);
-        
-        const evalRequest = { ...request, action: { ...request.action, parameters: sanit, estimatedValue } };
+    }
 
+    private async executeBreaker(evalRequest: PolicyEvaluationRequest, scopedNonce: string): Promise<void> {
         const decision = await this.breaker.execute(async () => {
             try {
                 Eip712Verifier.verifySignature(evalRequest.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID, "0xAegisComplianceRegistry11111111111111111");
@@ -82,38 +75,37 @@ export class AegisPEP {
             await this.nonceRegistry.release(scopedNonce);
             throw new Error(`Action denied by Aegis Enclave: ${decision.reason}`);
         }
+    }
 
+    private async enforceLimits(request: PolicyEvaluationRequest, tenantId: string, spendAmountBig: bigint, scopedNonce: string): Promise<void> {
         const currentStats = await this.stateStore.getStats(tenantId);
-        
-        let spendAmountBig = 0n;
-        try { spendAmountBig = BigInt(sanit.amount || 0); } catch(e) {}
-        
-        // Use BigInt for absolutely precise cryptographically safe addition
         const currentTotalBig = BigInt(Math.floor(currentStats.totalSpend));
         const projectedSpendBig = currentTotalBig + spendAmountBig;
         
-        const rawLimitsStr = request.dynamicPolicy.policyConfig.financialLimitsString || "{}";
+        const rawLimitsStr = request.dynamicPolicy!.policyConfig.financialLimitsString || "{}";
         const verifiedLimits = JSON.parse(rawLimitsStr);
         
         let lifetimeLimitBig = 9999999999n;
         const tier = request.agent?.currentTier || 'unknown';
-        if (verifiedLimits.perTx !== undefined) lifetimeLimitBig = BigInt(verifiedLimits.perTx);
-        else if (verifiedLimits[tier] !== undefined) lifetimeLimitBig = BigInt(verifiedLimits[tier]);
+        
+        if (verifiedLimits.perTx !== undefined) {
+            lifetimeLimitBig = BigInt(verifiedLimits.perTx);
+        } else if (verifiedLimits[tier] !== undefined) {
+            lifetimeLimitBig = BigInt(verifiedLimits[tier]);
+        }
         
         if (projectedSpendBig > lifetimeLimitBig) {
             await this.nonceRegistry.release(scopedNonce);
             throw new Error(`[TERMINAL REFUSAL] Cumulative spend (${projectedSpendBig}) would exceed hardware-locked lifetime ceiling`);
         }
 
-        // Ensure we don't overflow the Javascript Number MAX_SAFE_INTEGER for the state store
         if (projectedSpendBig > BigInt(Number.MAX_SAFE_INTEGER)) {
              await this.nonceRegistry.release(scopedNonce);
              throw new Error(`[TERMINAL REFUSAL] Wallet balance has exceeded MAX_SAFE_INTEGER.`);
         }
+    }
 
-        await this.nonceRegistry.commit(scopedNonce);
-        await this.stateStore.updateStats(tenantId, Number(spendAmountBig));
-
+    private async generateReceipt(request: PolicyEvaluationRequest, sanit: Record<string, unknown>, tenantId: string, nonce: string): Promise<AegisComplianceReceipt> {
         const receipt: AegisComplianceReceipt = {
             receiptId: `aegis-v1-${Date.now()}`,
             actionId: `act-${nonce}`,
@@ -122,8 +114,8 @@ export class AegisPEP {
             article12LogHash: ethers.utils.id(JSON.stringify(sanit)),
             parametersHash: ethers.utils.id(JSON.stringify(sanit)),
             resultHash: ethers.utils.id("ALLOW"),
-            article14OversightSignature: request.dynamicPolicy.signature,
-            policyId: request.dynamicPolicy.policyConfig.policyId,
+            article14OversightSignature: request.dynamicPolicy!.signature,
+            policyId: request.dynamicPolicy!.policyConfig.policyId,
             tenantId: tenantId,
             complianceStandard: "ARS-01+",
             limitations: [],
@@ -150,5 +142,33 @@ export class AegisPEP {
         ]}, signableReceipt);
 
         return receipt;
+    }
+
+    public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
+        if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
+        
+        const tenantId = request.dynamicPolicy.policyConfig.tenantId;
+        const nonce = request.dynamicPolicy.policyConfig.nonce;
+        const scopedNonce = `${tenantId}::${nonce}`;
+
+        await this.validateNonceAndScore(request, scopedNonce);
+
+        let sanit = normalizeParameters(request.action.toolId, request.action.parameters);
+        const estimatedValueBig = this.getEstimatedValue(sanit, scopedNonce);
+        const estimatedValue = Number(estimatedValueBig);
+        
+        const evalRequest = { ...request, action: { ...request.action, parameters: sanit, estimatedValue } };
+
+        await this.executeBreaker(evalRequest, scopedNonce);
+
+        let spendAmountBig = 0n;
+        try { spendAmountBig = BigInt(sanit.amount as any || 0); } catch(e) {}
+        
+        await this.enforceLimits(request, tenantId, spendAmountBig, scopedNonce);
+
+        await this.nonceRegistry.commit(scopedNonce);
+        await this.stateStore.updateStats(tenantId, Number(spendAmountBig));
+
+        return this.generateReceipt(request, sanit, tenantId, nonce);
     }
 }

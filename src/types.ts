@@ -23,8 +23,6 @@ export enum TrustTier {
 }
 
 export enum AgentPurpose {
-    DATA_ANALYSIS = 'data_analysis',
-    CUSTOMER_SERVICE = 'customer_service',
     FINANCIAL_OPERATIONS = 'financial_operations', // Aegis Focus
 }
 
@@ -144,4 +142,14 @@ export interface PolicyEvaluationRequest {
         ownerPublicKey: string; // The hex address that signed the policy
         signature: string; // EIP-712 Signature
     };
+}
+
+export interface ToolExecutionReceipt {
+    actionId: string;
+    toolId: string;
+    authorizationNonce: string;
+    parameters: Record<string, unknown>;
+    resultHash: string;
+    timestamp: string;
+    signature: string;
 }

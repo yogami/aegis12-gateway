@@ -33,7 +33,7 @@ import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { createHash } from 'crypto';
 import fetch from 'node-fetch';
 
-export interface X402Config {
+interface X402Config {
     /** Enable/disable pay-per-inference gate */
     enabled: boolean;
     /** USDC amount per enforcement call */
@@ -47,7 +47,7 @@ export interface X402Config {
     /** Skip payment verification in dev mode - ERADICATED for strict enforcement */
 }
 
-export interface X402PaymentRequirement {
+interface X402PaymentRequirement {
     status: 402;
     protocol: 'x402-v2';
     network: string;
@@ -60,7 +60,7 @@ export interface X402PaymentRequirement {
     endpoint: string;
 }
 
-export interface X402PaymentVerification {
+interface X402PaymentVerification {
     valid: boolean;
     paidAmount: number;
     payer: string;

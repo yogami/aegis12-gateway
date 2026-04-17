@@ -8,7 +8,7 @@
 
 import { Connection, PublicKey } from '@solana/web3.js';
 
-export interface AnchoredEvidence {
+interface AnchoredEvidence {
     signature: string;
     blockTime?: number | null;
     status: 'Success' | 'Failed';

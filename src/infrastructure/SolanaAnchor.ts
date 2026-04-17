@@ -22,16 +22,18 @@ import { createHash } from 'crypto';
 import { ToolExecutionReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 
-export interface AnchorResult {
+interface AnchorResult {
     txSignature: string;
     receiptHash: string;
     slot: number;
     cluster: string;
     explorerUrl: string;
     anchoredAt: string;
+    isZkSharded?: boolean;
+    attestationState?: string;
 }
 
-export interface VerificationResult {
+interface VerificationResult {
     verified: boolean;
     txSignature: string;
     onChainMemo: string | null;
@@ -61,9 +63,17 @@ export class SolanaAnchor {
         if (payerSecretKey) {
             this.payer = Keypair.fromSecretKey(payerSecretKey);
         } else if (process.env.SOLANA_PAYER_SECRET) {
-            // Accept base64-encoded secret key from env
-            const decoded = Buffer.from(process.env.SOLANA_PAYER_SECRET, 'base64');
-            this.payer = Keypair.fromSecretKey(new Uint8Array(decoded));
+            try {
+                // Accept base64-encoded secret key from env
+                const decoded = Buffer.from(process.env.SOLANA_PAYER_SECRET, 'base64');
+                this.payer = Keypair.fromSecretKey(new Uint8Array(decoded));
+                
+                // Zero out the buffer immediately after use for memory safety
+                decoded.fill(0);
+            } catch (e: any) {
+                // Throw sanitized error to prevent stack trace leaks of the secret
+                throw new Error('[SolanaAnchor] ❌ Failed to initialize from SOLANA_PAYER_SECRET. The key may be malformed. Memory scrubbed.');
+            }
         } else {
             // Generate ephemeral keypair for devnet demo
             this.payer = Keypair.generate();

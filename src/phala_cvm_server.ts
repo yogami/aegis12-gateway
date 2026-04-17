@@ -1,5 +1,5 @@
 import * as http from "http";
-import phalaEntrypoint from "./phala-entry";
+import phalaEntrypoint from "./application/PhalaEntrypoint";
 
 const PORT = process.env.PORT || 8000;
 
@@ -41,6 +41,6 @@ const server = http.createServer(async (req, res) => {
     }
 });
 
-server.listen(PORT, "0.0.0.0", () => {
+server.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`[Aegis-12 Phala Enclave] Secure dStack CVM Instance online and bound to ${PORT}`);
 });

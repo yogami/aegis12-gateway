@@ -11,7 +11,7 @@ export function assertSafeFinancialAmount(value: unknown, fieldName: string): nu
     return value;
 }
 
-export function isValidSolanaAddress(addr: string): boolean {
+function isValidSolanaAddress(addr: string): boolean {
     return typeof addr === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
 }
 

@@ -30,7 +30,7 @@ import * as multisig from '@sqds/multisig';
 import { createHash } from 'crypto';
 import { TrustTier, ToolExecutionReceipt } from '../types';
 
-export interface GovernanceConfig {
+interface GovernanceConfig {
     /** Solana cluster */
     cluster: string;
     /** Multisig account public key (already created) */
@@ -43,9 +43,9 @@ export interface GovernanceConfig {
     tierSpendingLimits: Record<TrustTier, number>;
 }
 
-export type GovernanceDecision = 'AUTONOMOUS' | 'REQUIRE_HUMAN' | 'BLOCKED';
+type GovernanceDecision = 'AUTONOMOUS' | 'REQUIRE_HUMAN' | 'BLOCKED';
 
-export interface GovernanceResult {
+interface GovernanceResult {
     decision: GovernanceDecision;
     reason: string;
     anomalyScore: number;

@@ -4,11 +4,8 @@ import { EvidenceWAL } from "./wal";
 
 export * from "./types";
 export * from "./anchors/phala";
-export * from "./anchors/nitro";
 export * from "./anchors/lit";
-export * from "./anchors/magicblock";
 export * from "./anchors/zk_hybrid";
-export * from "./anchors/solana_memo";
 export * from "./wal";
 
 export interface TelemetryConfig {
@@ -139,23 +136,4 @@ export class AegisShield {
     }
 }
 
-/**
- * Extends the raw Solana Connection object for seamless generic integration with Agent Kits.
- */
-export const wrapRpc = (connection: Connection, config: TelemetryConfig = {}): Connection => {
-    const shield = new AegisShield(config);
-    const originalGetLatestBlockhash = connection.getLatestBlockhash.bind(connection);
 
-    // Proxy the getLatestBlockhash to transparently fire the jammer off-path.
-    connection.getLatestBlockhash = async (...args) => {
-        const result = await originalGetLatestBlockhash(...args);
-        // Non-blocking asynchronous chaff deployment
-        shield.deployDecoyTraffic(result.blockhash).catch(() => {});
-        return result;
-    };
-    
-    // We attach the shield instance to the connection so developers can call logIntent easily
-    (connection as any).aegisShield = shield;
-
-    return connection;
-};

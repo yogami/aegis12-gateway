@@ -22,7 +22,7 @@ export class AegisRegistryClient {
         
         // Load the IDL from the local build artifact (to be generated)
         const idl = require('../../aegis12-registry/target/idl/aegis12_registry.json');
-        this.program = new Program(idl, new PublicKey(programId), this.provider);
+        this.program = new Program(idl as any, this.provider);
     }
 
     /**
@@ -110,7 +110,7 @@ export class AegisRegistryClient {
         );
 
         try {
-            const account: any = await this.program.account.nonceCheckpoint.fetch(checkpointPda);
+            const account: any = await (this.program.account as any).nonceCheckpoint.fetch(checkpointPda);
             return account.lastNonce.toNumber();
         } catch (error) {
             return 0; // Assume new tenant
