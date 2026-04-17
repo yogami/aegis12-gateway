@@ -2,3 +2,5 @@
 .agent_rules.md
 node_modules
 nextjs-demo/node_modules
+*.log
+.aegis*

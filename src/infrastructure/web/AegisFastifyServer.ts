@@ -61,7 +61,7 @@ fastify.post('/governance/evaluate', async (request, reply) => {
 });
 
 fastify.get('/attestation/status', async () => ({
-    teeProviders: ['Intel SGX (Phala)', 'AMD SEV-SNP (Azure)', 'ARM CCA'], activeProvider: 'Intel SGX (Phala)', enclaveDid: aegisSigner.enclaveDid, enclavePublicKey: '0xabc123', signatureAlgorithm: 'Ed25519 (TweetNaCl)',
+    teeProvider: 'Phala Network Dstack (Intel SGX)', enclaveDid: aegisSigner.enclaveDid, enclavePublicKey: '0xabc123', signatureAlgorithm: 'Ed25519 (TweetNaCl)',
     attestationStatus: 'HARDWARE_ATTESTED', compliance: { euAiActArticle12: 'Record Keeping (Audit Log)', euAiActArticle15: 'Cybersecurity Robustness' }
 }));
 

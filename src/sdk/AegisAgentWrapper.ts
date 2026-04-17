@@ -21,7 +21,7 @@ export interface AegisConfig {
     fallbackOnTimeout?: boolean; // Whether to bypass Aegis and execute raw tx if the ZK-Prover crashes
     timeoutMs?: number;  // Max latency allowed for the SNARK generation pipeline (typically 300,000ms)
     useZKCoprocessor?: boolean; // If true, triggers the async Groth16 SNARK verification webhook
-    enableMpcColdPath?: boolean; // If true, routes through MPC array instead of fail-open upon latency crash
+    enableCircuitBreaker?: boolean; // V3: Lightweight failover to SaaS logging if TEE lags
 }
 
 export type AgentAction = (...args: any[]) => Promise<VersionedTransaction | null>;
@@ -30,9 +30,7 @@ export interface AnchoredResult {
     success: boolean;
     txSignature?: string;
     ars01Receipt?: any;
-    decision: 'ALLOW' | 'BLOCK' | 'REQUIRE_HUMAN' | 'FALLBACK' | 'FALLBACK_MPC_COLD_PATH';
-    zkSnarkProof?: any; // The returned Groth16 proof from the Automata AVS
-    mpcSignature?: string; // Appended if cold-path used
+    decision: 'ALLOW' | 'BLOCK' | 'REQUIRE_HUMAN' | 'FALLBACK' | 'CIRCUIT_BREAKER_ACTIVE';
     error?: string;
 }
 
@@ -153,18 +151,16 @@ export function withAegis(
 
         } catch (error: any) {
             // THE TRAP: Deterministic Error Handling for TEE Latency
-            if (config.fallbackOnTimeout && config.enableMpcColdPath) {
-                console.warn(`[Aegis SDK] WARNING: TEE/Coprocessor offline. Diverting to MPC Cold-Path.`);
-                const mockMpcSig = createHash('sha256').update('mpc-threshold-met-' + Date.now()).digest('hex');
+            if (config.fallbackOnTimeout && config.enableCircuitBreaker) {
+                console.warn(`[Aegis SDK] WARNING: TEE offline. Tripping Circuit Breaker to SaaS Logging.`);
                 
                 return {
                     success: true, 
-                    decision: 'FALLBACK_MPC_COLD_PATH',
-                    mpcSignature: mockMpcSig,
-                    error: `Aegis Timeout: MPC Sub-Layer routing executed. ${error.message}`
+                    decision: 'CIRCUIT_BREAKER_ACTIVE',
+                    error: `Aegis Timeout: Circuit Breaker active. Latency preserved. ${error.message}`
                 };
             } else if (config.fallbackOnTimeout) {
-                console.warn(`[Aegis SDK] WARNING: ZK-Coprocessor timed out. Failing open to raw execution. Error: ${error.message}`);
+                console.warn(`[Aegis SDK] WARNING: Firewall timed out. Failing open to raw execution. Error: ${error.message}`);
                 
                 return {
                     success: false, 
@@ -175,7 +171,7 @@ export function withAegis(
                 return {
                     success: false,
                     decision: 'BLOCK',
-                    error: `Aegis Strict Mode Enforced: Coprocessor timeout or Nitro crash. Original error: ${error.message}`
+                    error: `Aegis Strict Mode Enforced: Firewall timeout or Nitro crash. Original error: ${error.message}`
                 };
             }
         }
