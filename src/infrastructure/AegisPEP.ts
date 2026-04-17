@@ -41,23 +41,23 @@ export class AegisPEP {
         
         const tenantId = request.dynamicPolicy.policyConfig.tenantId;
         const nonce = request.dynamicPolicy.policyConfig.nonce;
+        const scopedNonce = `${tenantId}::${nonce}`;
 
-        if (await this.nonceRegistry.isNonceUsed(nonce)) {
-            throw new Error('[TERMINAL REFUSAL] Nonce already used. Replay detected.');
+        // ATOMIC RESERVATION: Fixes TOCTOU race condition enabling double-spend
+        if (!(await this.nonceRegistry.reserve(scopedNonce))) {
+             throw new Error('[TERMINAL REFUSAL] Nonce already used or reservation failed. Replay detected.');
         }
 
         const score = request.context?.currentAnomalyScore;
         // Test 904 requires score=1.0 to pass Entry Gate
         if (score === undefined || !Number.isFinite(score) || score < 0 || score > 1.0) {
+            await this.nonceRegistry.release(scopedNonce);
             throw new Error('[TERMINAL REFUSAL] Invalid or unscaled contextual anomaly score.');
         }
 
         if (request.dynamicPolicy.policyConfig.expiresAt < Math.floor(Date.now() / 1000)) {
+            await this.nonceRegistry.release(scopedNonce);
             throw new Error('[TERMINAL REFUSAL] Policy Expired.');
-        }
-
-        if (!(await this.nonceRegistry.reserve(nonce))) {
-             throw new Error('[TERMINAL REFUSAL] Nonce reservation failed.');
         }
 
         let sanit = normalizeParameters(request.action.toolId, request.action.parameters);
@@ -74,11 +74,11 @@ export class AegisPEP {
         });
 
         if (decision.decision !== 'allow') {
-            await this.nonceRegistry.release(nonce);
+            await this.nonceRegistry.release(scopedNonce);
             throw new Error(`Action denied by Aegis Enclave: ${decision.reason}`);
         }
 
-        await this.nonceRegistry.commit(nonce);
+        await this.nonceRegistry.commit(scopedNonce);
         const stats = await this.stateStore.updateStats(tenantId, Number(sanit.amount) || 0);
         if (stats.totalSpend > 9999999999) throw new Error('[TERMINAL REFUSAL] Tier limit exceeded');
 
