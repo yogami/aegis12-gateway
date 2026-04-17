@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@solana/web3.js": "1.98.4",
-    "aegis-core": "file:..",
     "autoprefixer": "^10.4.27",
     "next": "^14.2.35",
     "react": "^18",
