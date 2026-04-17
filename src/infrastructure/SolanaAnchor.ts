@@ -188,7 +188,8 @@ export class SolanaAnchor {
             cluster: this.cluster,
             explorerUrl,
             anchoredAt: new Date().toISOString(),
-            isZkSharded
+            isZkSharded,
+            attestationState: isZkSharded ? 'PENDING_ZK_VERIFICATION' : 'FINALIZED'
         };
     }
 
