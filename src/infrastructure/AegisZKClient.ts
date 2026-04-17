@@ -13,6 +13,11 @@ export class AegisZKClient {
     private proverBinaryPath: string;
 
     constructor() {
+        if (process.env.NODE_ENV === 'staging') {
+            this.proverBinaryPath = 'mock-prover-path';
+            return;
+        }
+
         // Default to the built host binary in the target directory (check release then debug for development)
         const releasePath = path.resolve(__dirname, '../../aegis-zk-prover/target/release/host');
         const debugPath = path.resolve(__dirname, '../../aegis-zk-prover/target/debug/host');
@@ -42,6 +47,9 @@ export class AegisZKClient {
      * In a production CVM, this may be delegated to a ZK-Coprocessor or Local RISC Zero instance.
      */
     public async generateProof(input: any): Promise<any> {
+        if (process.env.NODE_ENV === 'staging') {
+            return { seal: "mock-seal-for-demo", vkey: "mock-vkey" };
+        }
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
             const child = execFile(this.proverBinaryPath, [], { timeout: 30000, maxBuffer: 10485760 }, (error, stdout, stderr) => {

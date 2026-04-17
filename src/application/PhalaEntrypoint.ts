@@ -12,7 +12,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         const receipt = await pep.enforce(payload);
         
         let attestation = "not_available_in_mock";
-        let pcr0 = process.env.ENCLAVE_PCR0_MOCK;
+        let pcr0 = process.env.ENCLAVE_PCR0_MOCK || "0000000000000000000000000000000000000000000000000000000000000000";
         try {
             // @ts-ignore
             const data = globalThis.phala?.getQuote?.(signer.enclaveDid);
