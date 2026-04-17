@@ -11,7 +11,17 @@ vi.mock('../../src/infrastructure/AegisPEP', () => {
         }
     };
 });
-import phalaEntrypoint, { handleHealthtechRequest, injectTestTrust } from '../../src/application/PhalaEntrypoint';
+
+vi.mock('../../src/infrastructure/AegisZKClient', () => {
+    return {
+        AegisZKClient: class {
+            async generateProof() {
+                return { seal: 'mock_seal', vkey: 'mock_vkey' };
+            }
+        }
+    };
+});
+import phalaEntrypoint from '../../src/application/PhalaEntrypoint';
 
 describe('phala-entry (Unit)', () => {
     beforeEach(() => {
@@ -34,13 +44,6 @@ describe('phala-entry (Unit)', () => {
         expect(res.receipt.toolId).toBe('swap');
     });
 
-    it('denies an invalid request via handleHealthtechRequest', async () => {
-        const reqStr = JSON.stringify({ action: { toolId: 'health_tool' } });
-        const resStr = await handleHealthtechRequest(reqStr);
-        const res = JSON.parse(resStr);
-        expect(res.status).toBe('denied');
-    });
-
     it('denies when enforce throws', async () => {
         mockEnforce.mockRejectedValue(new Error('Policy breached'));
         const reqStr = JSON.stringify({ action: { toolId: 'bad_tool' } });
@@ -48,14 +51,5 @@ describe('phala-entry (Unit)', () => {
         const res = JSON.parse(resStr);
         expect(res.status).toBe('denied');
         expect(res.error).toContain('Policy breached');
-    });
-
-    it('throws fatals if test node config is not present during trust injection', () => {
-        const tempNodeEnv = process.env.NODE_ENV;
-        const tempAllow = process.env.ALLOW_E2E_MOCKING;
-        process.env.NODE_ENV = 'production';
-        expect(() => injectTestTrust('t-1', 'addr')).toThrow('[FATAL]');
-        process.env.NODE_ENV = tempNodeEnv;
-        process.env.ALLOW_E2E_MOCKING = tempAllow;
     });
 });

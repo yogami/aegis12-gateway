@@ -1,14 +1,12 @@
 import Fastify from 'fastify';
 import phalaEntrypoint, { pep, signer as aegisSigner } from '../../application/PhalaEntrypoint';
+import { X402PayGate } from '../X402PayGate';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 
-const fastify = Fastify({ logger: false });
+const fastify = Fastify({ logger: false, bodyLimit: 1048576 }); // 1MB strict limit
 
-fastify.setErrorHandler((error, request, reply) => {
-    return reply.status(403).send({ status: 'denied', error: 'Fail-Closed Sentinel: Malformed payload rejected' });
-});
-
+// Removed global error handler to prevent swallowing real error messages
 fastify.register(swagger, {
     openapi: {
         info: { title: 'Aegis-12 Honest Sentinel', version: '2.0.0' },
@@ -18,17 +16,7 @@ fastify.register(swagger, {
 
 fastify.get('/health', async () => ({ status: 'alive', enclaveDid: aegisSigner.enclaveDid }));
 
-fastify.get('/demo', async (request, reply) => {
-    reply.type('text/html');
-    return `
-        <html><body style="background:#000;color:#0f0;font-family:monospace;">
-            <h1 id="terminal-title">Agent Terminal</h1><div id="status-badge">KMS ONLINE</div><div id="logs"></div>
-            <button onclick="document.getElementById('terminal-title').innerText='FATAL BREACH DETECTED';document.getElementById('logs').innerHTML+='<div class=\'log-entry block\'>ERR_SIG_NON_STANDARD</div>'">[1] Quantum Curve Factorization</button>
-            <button onclick="document.getElementById('logs').innerHTML+='<div class=\'log-entry allow\'>Execution Boundary Secure</div><div class=\'log-entry allow\'>Cognitive Boundary Compromised</div>'">[6] Semantic Memory Poisoning (RAG)</button>
-            <button onclick="document.getElementById('logs').innerHTML+='<div class=\'log-entry alert\'>Out-of-Band Execution</div><div class=\'log-entry alert\'>Shadow outflow detected outside Squads vault</div>'">[7] Shadow Wallet Bypass</button>
-        </body></html>`;
-});
-
+// Demo endpoint eradicated
 fastify.get('/api/docs', async () => ({
     name: 'Aegis-12 Compliance Gateway', version: '2.0.0', status: 'ONLINE', enclaveDid: aegisSigner.enclaveDid,
     endpoints: { 'POST /enforce': 'Policy Enforcement' }
@@ -36,109 +24,55 @@ fastify.get('/api/docs', async () => ({
 
 fastify.register(swaggerUi, { routePrefix: '/api/docs/ui' });
 
-fastify.get('/governance/config', async () => ({
-    protocol: 'squads-v4', thresholds: { humanReview: 0.60, hardBlock: 0.80 },
-    tierSpendingLimits: { T1: '0 SOL', T2: '1 SOL', T3: '10 SOL', T4: '100 SOL' },
-    euAiActMapping: { 'Article 14': 'Squads multisig-based human supervision' }
-}));
+// Removed /governance/config and /governance/evaluate mocks
+// Removed /attestation/status, /verify-zk-proof, and /monetization/status mocks
+// Removed unauthenticated /test/provision-key backdoor
 
-fastify.post('/governance/evaluate', async (request, reply) => {
-    const body = request.body as any;
-    const score = body.anomalyScore || 0;
-    const tier = body.agentTier || 'T1';
-    const value = body.estimatedValue || 0;
+const payGate = new X402PayGate({ enabled: true, pricePerCall: 0.005 });
 
-    if (tier === 'T99') return reply.status(400).send({ error: 'Invalid agentTier' });
-    if (score >= 0.80) return reply.status(403).send({ decision: 'BLOCKED', reason: 'Hard block threshold exceeded', euAiActCompliance: { article14: 'ENFORCED' } });
-    if (score >= 0.60 || (tier === 'T2' && value > 1000000000)) {
-        return reply.status(202).send({
-            decision: 'REQUIRE_HUMAN',
-            proposal: { proposalId: 'aegis-proposal-123', euAiActArticle: 'Article 14 (Human Oversight)', requiredApprovals: 1 },
-            governanceProtocol: 'squads-v4', euAiActCompliance: { article14: 'ACTIVE' }, reason: 'exceeds limit'
-        });
+const enforceSchema = {
+    body: {
+        type: 'object',
+        required: ['action', 'dynamicPolicy'],
+        properties: {
+            agent: { type: 'object' },
+            action: { type: 'object' },
+            context: { type: 'object' },
+            dynamicPolicy: { type: 'object' }
+        }
     }
-    return { decision: 'AUTONOMOUS', anomalyScore: score, agentTier: tier, governanceProtocol: 'squads-v4', euAiActCompliance: { article14: 'MONITORING' } };
-});
+};
 
-fastify.get('/attestation/status', async () => ({
-    teeProvider: 'Phala Network Dstack (Intel SGX)',
-    enclaveDid: aegisSigner.enclaveDid, 
-    enclavePublicKey: '0xabc123', 
-    signatureAlgorithm: 'Ed25519 (TweetNaCl)',
-    attestationStatus: 'HARDWARE_ATTESTED', 
-    compliance: { euAiActArticle12: 'Record Keeping (Audit Log)', euAiActArticle15: 'Cybersecurity Robustness' }
-}));
-
-// V5 Colosseum Upgrade: Dedicated endpoint to verify the asynchronous ZK proof, closing the "verification gap"
-fastify.post('/verify-zk-proof', async (request, reply) => {
-    const { receiptHash, zkProof } = request.body as any;
-    if (!receiptHash || !zkProof) {
-        return reply.status(400).send({ error: 'Missing receiptHash or zkProof' });
-    }
-    
-    // Simulate robust cryptographic Groth16 verification against the public inputs
-    const isValid = zkProof.protocol === 'groth16';
-    
-    return {
-        verificationStatus: isValid ? 'VERIFIED' : 'FAILED',
-        receiptHash,
-        timestamp: new Date().toISOString(),
-        message: isValid ? 'Zero-Knowledge Proof mathematically verified. State finalized.' : 'Invalid ZK Proof detected.'
-    };
-});
-
-fastify.get('/monetization/status', async () => ({
-    protocol: 'x402-v2', currency: 'USDC', pricePerCall: 0.005, freeTierLimit: 100,
-    howItWorks: [1,2,3,4,5]
-}));
-
-fastify.post('/test/provision-key', async (request) => {
-    const { tenantId, address } = request.body as any;
-    pep.provisionTestKey(tenantId, address);
-    return { status: 'success' };
-});
-
-fastify.post('/enforce', async (request, reply) => {
+fastify.post('/enforce', { schema: enforceSchema }, async (request, reply) => {
     try {
-        const body = request.body as any;
-        if (typeof body !== 'object' || body === null) return reply.status(403).send({ status: 'denied', error: 'Invalid' });
-        const receipt = await pep.enforce(body);
-        return reply.status(200).send({ status: 'approved', receipt });
+        const ip = request.ip || '0.0.0.0';
+        const paymentHeader = request.headers['x-payment'] as string | undefined;
+
+        if (paymentHeader) {
+            const verification = await payGate.verifyPayment(paymentHeader);
+            if (!verification.valid) {
+                return reply.status(402).send({ error: verification.error });
+            }
+        } else {
+            const requirement = await payGate.checkPaymentRequired(ip);
+            if (requirement) {
+                return reply.status(402).send(requirement);
+            }
+        }
+
+        const payloadStr = typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
+        const resultJson = await phalaEntrypoint(payloadStr);
+        const result = JSON.parse(resultJson);
+        if (result.status === 'denied') {
+            return reply.status(403).send(result);
+        }
+        return reply.status(200).send(result);
     } catch (err: any) {
-        return reply.status(403).send({ status: 'denied', error: err.message });
+        return reply.status(500).send({ status: 'error', error: 'Internal Enclave Error. See secure logs for details.' });
     }
 });
 
-fastify.post('/healthtech/enforce', async (request, reply) => {
-    const body = request.body as any;
-    if (typeof body !== 'object' || body === null) return reply.status(403).send({ status: 'denied', error: 'Invalid' });
-    const content = JSON.stringify(body);
-    if (body.agentRole === 'intern') return reply.status(403).send({ status: 'denied', evidencePack: { decisionReason: 'interns not authorized' } });
-    if (body.targetAction === 'READ_ONCOLOGY_RECORD' && body.agentRole === 'SCHEDULER') return reply.status(403).send({ status: 'denied', evidencePack: { decisionReason: 'not authorized', regulatoryMapping: 'HIPAA_MINIMUM_NECESSARY_STANDARD' } });
-    if (content.includes('SSN') || content.includes('888-22-1111')) return reply.status(403).send({ status: 'denied', evidencePack: { status: 'denied', decisionReason: 'Payload contains restricted PII/PHI matching pattern', regulatoryMapping: 'HIPAA_PRIVACY_RULE_164.502' } });
-    return reply.status(200).send({
-        status: 'approved', evidencePack: { decisionReason: 'Action complies with active RBAC policy' },
-        cryptographicReceipt: 'aegis-receipt-mock-1', hardwareAttestation: 'mock-ht-quote'
-    });
-});
-
-fastify.post('/solana/enforce-tx', async (request, reply) => {
-    const { serializedTx } = request.body as any;
-    if (serializedTx && serializedTx.length > 50000) return reply.status(403).send({ status: 'denied', error: 'Oversized' });
-    if (serializedTx === 'bm90YXJlYWx0cmFuc2FjdGlvbg==') return reply.status(403).send({ decision: 'BLOCK', flags: [{ rule: 'PARSE_FAILURE' }], euAiActArticles: ['Article 15 (Accuracy, Robustness, Cybersecurity)'], mitreTechniques: ['T1027 (Obfuscated Files or Information)'] });
-    return reply.status(200).send({ status: 'approved', decision: 'ALLOW' });
-});
-
-fastify.post('/anchor-receipt', async (request, reply) => {
-    const { receiptId, actionId, signature } = request.body as any;
-    if (!receiptId || !actionId || !signature) return reply.status(400).send({ error: 'Missing required fields' });
-    return { status: 'anchored', txSignature: '0xmock-onchain-sig' };
-});
-
-fastify.get('/verify/:txSignature', async (request) => {
-    return { status: 'verified', receiptFound: false, message: 'Transaction not found on Aegis-12 Indexer' };
-});
-
+// Removed /healthtech/enforce, /solana/enforce-tx, /anchor-receipt, /verify/:txSignature mocks
 fastify.listen({ port: parseInt(process.env.PORT || '8000'), host: '0.0.0.0' }).catch((err) => {
     console.error(err);
     process.exit(1);

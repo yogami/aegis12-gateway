@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -14,6 +14,13 @@ describe('TDD: Zero-Knowledge Circuit Verification Parity', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ zk_vkey: 'legacy_vulnerable_vkey' })
+        }));
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     it('Should block the payload if the Enclave attempts to use a deprecated, vulnerable, or unauthorized ZK Circuit Hash', async () => {
@@ -26,6 +33,7 @@ describe('TDD: Zero-Knowledge Circuit Verification Parity', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         // The secure mathematically audited SP1 vkey we trust:
         const SAFE_VKEY = "vkey_cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e";

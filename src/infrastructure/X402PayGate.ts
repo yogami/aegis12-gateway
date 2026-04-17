@@ -44,8 +44,7 @@ export interface X402Config {
     recipientAddress: string;
     /** Free tier: max free requests per hour per IP */
     freeTierLimit: number;
-    /** Skip payment verification in dev mode */
-    devMode: boolean;
+    /** Skip payment verification in dev mode - ERADICATED for strict enforcement */
 }
 
 export interface X402PaymentRequirement {
@@ -78,7 +77,6 @@ const DEFAULT_CONFIG: X402Config = {
     cluster: (process.env.SOLANA_CLUSTER as any) || 'devnet',
     recipientAddress: process.env.X402_RECIPIENT || '',
     freeTierLimit: parseInt(process.env.X402_FREE_LIMIT || '100'),
-    devMode: process.env.NODE_ENV !== 'production',
 };
 
 export class X402PayGate {
@@ -90,6 +88,9 @@ export class X402PayGate {
     private lastPriceFetch: number = 0;
     private readonly EXPECTED_NETWORK_FEE_LAMPORTS = 5_000 + 10_000; // Base Tx + Priority
     private readonly MARGIN_PERCENT = 200; // 200% margin
+    
+    // Replay Protection
+    private usedSignatures: Set<string> = new Set();
 
     constructor(config?: Partial<X402Config>) {
         this.config = { ...DEFAULT_CONFIG, ...config };
@@ -113,22 +114,23 @@ export class X402PayGate {
         // If payment header is present, verify it (handled separately)
         if (paymentHeader) return null;
 
-        // Free tier check
         const now = Date.now();
-        const tracker = freeTierTracker.get(clientIp);
+        if (process.env.NODE_ENV === 'development') {
+            const tracker = freeTierTracker.get(clientIp);
 
-        if (!tracker || tracker.resetAt < now) {
-            // Reset or create tracker
-            freeTierTracker.set(clientIp, { count: 1, resetAt: now + 3600_000 });
-            return null; // Free tier has capacity
+            if (!tracker || tracker.resetAt < now) {
+                // Reset or create tracker
+                freeTierTracker.set(clientIp, { count: 1, resetAt: now + 3600_000 });
+                return null; // Free tier has capacity
+            }
+
+            if (tracker.count < this.config.freeTierLimit) {
+                tracker.count++;
+                return null; // Still within free tier
+            }
         }
 
-        if (tracker.count < this.config.freeTierLimit) {
-            tracker.count++;
-            return null; // Still within free tier
-        }
-
-        // Free tier exhausted — require payment
+        // Free tier exhausted or production mode — require payment
         
         // Oracle: Fetch dynamic SOL price and calculate cost
         const dynamicPriceUsdc = await this.getDynamicPrice();
@@ -205,17 +207,6 @@ export class X402PayGate {
         if (!paymentHeader) {
             return { valid: false, paidAmount: 0, payer: '', error: 'No payment header' };
         }
-
-        // Dev mode: accept any non-empty payment header
-        if (this.config.devMode) {
-            return {
-                valid: true,
-                paidAmount: this.config.pricePerCall,
-                payer: 'dev-mode-payer',
-                txSignature: paymentHeader,
-            };
-        }
-
         // Production: Verify the Solana transaction
         try {
             const tx = await this.connection.getParsedTransaction(
@@ -227,14 +218,45 @@ export class X402PayGate {
                 return { valid: false, paidAmount: 0, payer: '', error: 'Transaction not found' };
             }
 
-            // Check the transaction transferred USDC to our recipient
-            // This is a simplified verification — production would use x402 facilitator
             const isConfirmed = tx.meta?.err === null;
             const payer = tx.transaction.message.accountKeys[0]?.pubkey?.toBase58() || '';
 
+            if (!isConfirmed) {
+                return { valid: false, paidAmount: 0, payer, error: 'Transaction failed on-chain' };
+            }
+
+            let validTransfer = false;
+            let actualAmount = 0;
+
+            const preBalances = tx.meta?.preTokenBalances || [];
+            const postBalances = tx.meta?.postTokenBalances || [];
+            
+            const preRecip = preBalances.find(b => b.owner === this.config.recipientAddress && b.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+            const postRecip = postBalances.find(b => b.owner === this.config.recipientAddress && b.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+            
+            const requiredUsdc = Math.max(this.config.pricePerCall, await this.getDynamicPrice());
+            
+            if (postRecip) {
+                const preAmt = preRecip ? preRecip.uiTokenAmount.uiAmount || 0 : 0;
+                const postAmt = postRecip.uiTokenAmount.uiAmount || 0;
+                actualAmount = postAmt - preAmt;
+                if (actualAmount >= requiredUsdc) {
+                    validTransfer = true;
+                }
+            }
+
+            if (!validTransfer) {
+                return { valid: false, paidAmount: actualAmount, payer, error: `Invalid payment: expected at least ${requiredUsdc} canonical USDC to ${this.config.recipientAddress}, found ${actualAmount}` };
+            }
+            
+            if (this.usedSignatures.has(paymentHeader)) {
+                 return { valid: false, paidAmount: actualAmount, payer, error: 'Payment signature replay detected' };
+            }
+            this.usedSignatures.add(paymentHeader);
+
             return {
-                valid: isConfirmed,
-                paidAmount: this.config.pricePerCall,
+                valid: true,
+                paidAmount: actualAmount,
                 payer,
                 txSignature: paymentHeader,
             };

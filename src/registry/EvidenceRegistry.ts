@@ -45,17 +45,37 @@ export class EvidenceRegistry {
         const evidenceList: AnchoredEvidence[] = [];
 
         for (const sigInfo of signatures) {
-            // In a real production indexer, we would fetch the parsed transaction
-            // const tx = await this.connection.getParsedTransaction(sigInfo.signature);
-            // and decode the Memo instruction for the specific ARS-01 payload.
+            let agentDid = "Unknown";
+            let memoInstruction = "";
+
+            try {
+                const tx = await this.connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
+                if (tx && tx.transaction.message.instructions) {
+                    const memoIx = tx.transaction.message.instructions.find((ix: any) => 
+                        ix.programId.toBase58() === 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' || 
+                        ix.programId.toBase58() === 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo'
+                    );
+                    if (memoIx && 'parsed' in memoIx) {
+                        memoInstruction = typeof memoIx.parsed === 'string' ? memoIx.parsed : JSON.stringify(memoIx.parsed);
+                        try {
+                            const receiptMatch = memoInstruction.match(/({.*})/);
+                            if (receiptMatch) {
+                                const receipt = JSON.parse(receiptMatch[1]);
+                                if (receipt.agentPubKey) agentDid = receipt.agentPubKey;
+                            }
+                        } catch (e) {}
+                    }
+                }
+            } catch (e) {
+                // Ignore fetching errors
+            }
             
-            // For the hackathon demo, we construct the evidence block from the signature metadata
             evidenceList.push({
                 signature: sigInfo.signature,
                 blockTime: sigInfo.blockTime,
                 status: sigInfo.err ? 'Failed' : 'Success',
-                agentDid: 'did:key:mockAgentIdentity123', // Derived from specific instruction parsing natively
-                memoInstruction: `[ARS-01] Anchored Decision metadata for ${sigInfo.signature}`,
+                agentDid: agentDid,
+                memoInstruction: memoInstruction || `[ARS-01] Anchored Decision metadata for ${sigInfo.signature}`,
             });
         }
 

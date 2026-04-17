@@ -105,8 +105,8 @@ export class SolanaTransactionFirewall {
     ) {
         this.signer = signer;
         this.connections = connections;
-        if (!this.connections || this.connections.length === 0) {
-            throw new Error("At least one RPC connection is required");
+        if (!this.connections || this.connections.length < 4) {
+            throw new Error("[TERMINAL REFUSAL] True BFT Quorum requires a minimum of 4 RPC nodes.");
         }
         this.config = { ...DEFAULT_CONFIG, ...config };
     }
@@ -123,6 +123,7 @@ export class SolanaTransactionFirewall {
         let riskScore = 0;
         const euArticles: string[] = [];
         const mitreTechniques: string[] = [];
+        const executedPrograms = new Set<string>();
 
         try {
             // Deserialize the transaction
@@ -243,7 +244,8 @@ export class SolanaTransactionFirewall {
                 );
 
                 const totalNodes = this.connections.length;
-                const requiredQuorum = Math.floor(totalNodes / 2) + 1;
+                const f = Math.floor((totalNodes - 1) / 3);
+                const requiredQuorum = Math.max((2 * f) + 1, Math.ceil((totalNodes * 2) / 3));
 
                 // Hash logs to detect splits
                 const logHashes = new Map<string, number>();
@@ -290,7 +292,6 @@ export class SolanaTransactionFirewall {
 
                 // Parse logs from the CONCENSUS state to find ALL executed programs (including CPIs)
                 const logs = consensusLogs;
-                const executedPrograms = new Set<string>();
                 
                 const programInvokeRegex = /Program (\w+) invoke/g;
                 for (const logLine of logs) {
@@ -315,12 +316,13 @@ export class SolanaTransactionFirewall {
                     }
                 }
             } catch (simError: any) {
-                // We don't hard block on network failure of simulation, but we flag it
+                // FAIL-CLOSED: Network failure during simulation must block the transaction
                 flags.push({
-                    severity: 'MEDIUM',
+                    severity: 'CRITICAL',
                     rule: 'SIMULATION_UNAVAILABLE',
-                    detail: `Could not reach RPC for pre-flight simulation: ${simError.message}`
+                    detail: `Could not reach RPC for pre-flight simulation: ${simError.message}. Failing closed to prevent eclipse attack.`
                 });
+                riskScore = 1.0;
             }
 
             // Clamp risk score again just in case simulation spiked it

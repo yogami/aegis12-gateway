@@ -3,5 +3,5 @@ export interface INonceRegistry {
     commit(nonce: string): Promise<void>;
     release(nonce: string): Promise<void>;
     isNonceUsed(nonce: string): Promise<boolean>;
-    clear(): void;
+    clear(): Promise<void>;
 }

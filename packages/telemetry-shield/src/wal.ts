@@ -13,9 +13,9 @@ export class EvidenceWAL {
     private readonly inMemoryQueue: Map<string, QueuedEvidence> = new Map();
     private isNode: boolean;
     
-    // Mutex Write-Lock to prevent OS file-system JSON corruption under concurrent async loading
     private isSyncing = false;
     private writeQueued = false;
+    private evictedCount = 0;
 
     constructor() {
         this.isNode = typeof process !== "undefined" && process.versions != null && process.versions.node != null;
@@ -46,7 +46,9 @@ export class EvidenceWAL {
         if (fs) {
             try {
                 const data = JSON.stringify(Array.from(this.inMemoryQueue.entries()));
-                await fs.writeFile(this.walPath, data, "utf-8");
+                const tempPath = `${this.walPath}.tmp`;
+                await fs.writeFile(tempPath, data, "utf-8");
+                await fs.rename(tempPath, this.walPath);
             } catch (e) {
                 // Fail gracefully without crashing the trading loop
             }
@@ -70,7 +72,10 @@ export class EvidenceWAL {
             // Primitive FIFO: Drop oldest trace to secure active memory thread
             const oldestKey = this.inMemoryQueue.keys().next().value;
             if (oldestKey) this.inMemoryQueue.delete(oldestKey);
-            console.warn(`[Aegis-12 WAL] Severe Network Degration: Memory Overflow Prevented. Oldest Trace Evicted.`);
+            this.evictedCount++;
+            if (this.evictedCount % 1000 === 1) {
+                console.warn(`[Aegis-12 WAL] Severe Network Degration: Memory Overflow Prevented. Oldest Trace Evicted.`);
+            }
         }
 
         const id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(7);

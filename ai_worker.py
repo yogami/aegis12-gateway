@@ -5,7 +5,7 @@ import urllib.error
 import sys
 
 # Aegis-12 Gateway Production Endpoint
-AEGIS_GATEWAY_URL = "https://aegis12-gateway-production.up.railway.app/enforce"
+AEGIS_GATEWAY_URL = "http://localhost:8000/enforce"
 
 # ANSI Terminal Colors for the "Killer Pitch" visualization
 RED = "\033[91m"

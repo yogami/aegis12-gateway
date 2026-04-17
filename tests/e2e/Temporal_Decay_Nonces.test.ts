@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -16,6 +16,14 @@ describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'REQUIRE_HUMAN', ars_anchor: 'mock-ars' })
+        }));
+        mockNonceAccount = Keypair.generate();
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
         mockNonceAccount = Keypair.generate(); // Represents an active nonce account
     });
 
@@ -30,6 +38,7 @@ describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         expect(rawTx.instructions.length).toBe(1);
 

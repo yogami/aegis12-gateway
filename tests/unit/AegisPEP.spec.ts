@@ -47,20 +47,20 @@ describe('AegisPEP (Unit)', () => {
 
     it('rejects enforce when anomaly score is not properly scaled', async () => {
         const req: any = { 
-            dynamicPolicy: {}, 
+            dynamicPolicy: { policyConfig: { tenantId: 'tenant-1', nonce: 'nonce-1', expiresAt: Math.floor(Date.now() / 1000) + 1000 } }, 
             action: { toolId: 'solana_transfer', parameters: {} }, 
             context: { currentAnomalyScore: 100 } // out of bounds > 1.0!
         };
-        await expect(pep.enforce(req)).rejects.toThrow('Expected 0.0-1.0 float');
+        await expect(pep.enforce(req)).rejects.toThrow(/Invalid or unscaled contextual anomaly score/);
     });
 
     it('denies unknown tools during parameter normalization', async () => {
         const req: any = { 
-            dynamicPolicy: { policyConfig: { tenantId: 'tenant-1' } }, 
+            dynamicPolicy: { policyConfig: { tenantId: 'tenant-1', nonce: crypto.randomUUID(), policyId: '1' } }, 
             action: { toolId: 'hacker_tool', parameters: {} }, 
             context: { currentAnomalyScore: 0.1 }
         };
-        await expect(pep.enforce(req)).rejects.toThrow('Unrecognized tool execution request: hacker_tool');
+        await expect(pep.enforce(req)).rejects.toThrow(/Unrecognized tool execution request/);
     });
 
     it('approves a valid solana_transfer action', async () => {
@@ -72,7 +72,7 @@ describe('AegisPEP (Unit)', () => {
                     policyId: 'pol-1',
                     nonce: crypto.randomUUID(),
                     version: '1',
-                    crossChainTarget: 'solana-mainnet',
+                    crossChainTarget: 'solana:devnet',
                     maxAnomalyScore: 50,
                     financialLimitsString: '{"T2": 1000}',
                     expiresAt: Math.floor(Date.now() / 1000) + 1000
@@ -81,7 +81,7 @@ describe('AegisPEP (Unit)', () => {
             agent: { purpose: 'financial_operations', currentTier: 'T2' },
             action: {
                 toolId: 'solana_transfer',
-                parameters: { to: '11111111111111111111111111111111', token: 'SOL', amount: 50 },
+                parameters: { to: '11111111111111111111111111111111', token: 'SOL', amount: 50, estimatedValue: 50 },
             },
             context: { currentAnomalyScore: 0.1 }
         };
@@ -93,11 +93,11 @@ describe('AegisPEP (Unit)', () => {
 
     it('rejects solana_transfer if token is not SOL', async () => {
         const req: any = {
-            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: 'nonce-string-2' } },
+            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID() } },
             agent: { purpose: 'financial_operations', currentTier: 'T2' },
             action: {
                 toolId: 'solana_transfer',
-                parameters: { to: '11111111111111111111111111111111', token: 'FAKE', amount: 50 },
+                parameters: { to: '11111111111111111111111111111111', token: 'FAKE', amount: 50, estimatedValue: 50 },
             },
             context: { currentAnomalyScore: 0.1 }
         };
@@ -106,11 +106,11 @@ describe('AegisPEP (Unit)', () => {
 
     it('approves a valid swap action', async () => {
         const req: any = {
-            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana-mainnet', maxAnomalyScore: 50, financialLimitsString: '{"T2": 1000}', expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
+            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana:devnet', maxAnomalyScore: 50, financialLimitsString: '{"T2": 1000}', expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
             agent: { purpose: 'financial_operations', currentTier: 'T2' },
             action: {
                 toolId: 'swap',
-                parameters: { fromMint: '11111111111111111111111111111111', toMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', amount: 50, slippageBps: 50 },
+                parameters: { fromMint: 'So11111111111111111111111111111111111111112', toMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', amount: 50, slippageBps: 50, estimatedValue: 50 },
             },
             context: { currentAnomalyScore: 0.1 }
         };
@@ -120,11 +120,11 @@ describe('AegisPEP (Unit)', () => {
 
     it('denies swap if mints are identical', async () => {
         const req: any = {
-            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana-mainnet', maxAnomalyScore: 50, financialLimitsString: '{"T2": 1000}', expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
+            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana:devnet', maxAnomalyScore: 50, financialLimitsString: '{"T2": 1000}', expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
             agent: { purpose: 'financial_operations', currentTier: 'T2' },
             action: {
                 toolId: 'swap',
-                parameters: { fromMint: 'SOL', toMint: 'SOL', amount: 50, slippageBps: 50 },
+                parameters: { fromMint: 'SOL', toMint: 'SOL', amount: 50, slippageBps: 50, estimatedValue: 50 },
             },
             context: { currentAnomalyScore: 0.1 }
         };
@@ -134,14 +134,14 @@ describe('AegisPEP (Unit)', () => {
     it('denies if financialLimitsString exceeds bounds', async () => {
         const giantString = '{"T2": 1000' + ' '.repeat(1030) + '}';
         const req: any = {
-            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana-mainnet', maxAnomalyScore: 50, financialLimitsString: giantString, expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
+            dynamicPolicy: { signature: '0xabc', policyConfig: { tenantId: 'tenant-1', policyId: '1', nonce: crypto.randomUUID(), version: '1', crossChainTarget: 'solana:devnet', maxAnomalyScore: 50, financialLimitsString: giantString, expiresAt: Math.floor(Date.now() / 1000) + 1000 } },
             agent: { purpose: 'financial_operations', currentTier: 'T2' },
             action: {
                 toolId: 'solana_transfer',
-                parameters: { to: '11111111111111111111111111111111', token: 'SOL', amount: 50 },
+                parameters: { to: '11111111111111111111111111111111', token: 'SOL', amount: 50, estimatedValue: 50 },
             },
             context: { currentAnomalyScore: 0.1 }
         };
-        await expect(pep.enforce(req)).rejects.toThrow('Cryptographic Payload processing failed');
+        await expect(pep.enforce(req)).rejects.toThrow(/financialLimitsString exceeds 1024 byte safety bound/);
     });
 });

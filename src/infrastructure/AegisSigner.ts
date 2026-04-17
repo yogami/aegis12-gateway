@@ -1,5 +1,6 @@
 import * as nacl from 'tweetnacl';
 import { ethers, Wallet } from 'ethers';
+import { PhalaTappdMock } from './PhalaTappdMock';
 
 function hexToBytes(hex: string): Uint8Array {
     return new Uint8Array(Buffer.from(hex, 'hex'));
@@ -15,27 +16,26 @@ export class AegisSigner {
     private ethWallet: Wallet;
     public readonly enclaveDid: string;
 
-    constructor(privateKeyHex?: string, enclaveDid?: string) {
-        if (privateKeyHex) {
-            const raw = hexToBytes(privateKeyHex.replace('0x', ''));
-            this.ethWallet = new Wallet(privateKeyHex.startsWith('0x') ? privateKeyHex : `0x${privateKeyHex}`);
-            if (raw.length === 32) {
-                const keyPair = nacl.sign.keyPair.fromSeed(raw);
-                this.privateKey = keyPair.secretKey;
-                this.publicKey = keyPair.publicKey;
-            } else if (raw.length === 64) {
-                const keyPair = nacl.sign.keyPair.fromSecretKey(raw);
-                this.privateKey = keyPair.secretKey;
-                this.publicKey = keyPair.publicKey;
-            } else {
-                throw new Error(`[AegisSigner] Invalid private key size: ${raw.length} bytes.`);
-            }
-        } else {
-            const keyPair = nacl.sign.keyPair();
-            this.privateKey = keyPair.secretKey;
-            this.publicKey = keyPair.publicKey;
-            this.ethWallet = Wallet.createRandom();
-        }
+    constructor(enclaveDid?: string) {
+        // TEE Hardware Seed Derivation (Mitigates CRIT-01 and A-1)
+        const tappd = new PhalaTappdMock();
+        
+        // Derive Solana (Ed25519) key
+        const solanaDerived = tappd.deriveKey("aegis-12/solana-ed25519");
+        const rawSol = hexToBytes(solanaDerived.replace('0x', ''));
+        const keyPair = nacl.sign.keyPair.fromSeed(rawSol.slice(0, 32));
+        this.privateKey = keyPair.secretKey;
+        this.publicKey = keyPair.publicKey;
+
+        // Derive Ethereum (secp256k1) key
+        const ethDerived = tappd.deriveKey("aegis-12/eth-secp256k1");
+        this.ethWallet = new Wallet(ethDerived);
+
+        // Wipe derivation buffers and plaintext ENV if present
+        if (process.env.SOLANA_PRIVATE_KEY_HEX) delete process.env.SOLANA_PRIVATE_KEY_HEX;
+        if (process.env.ETH_PRIVATE_KEY_HEX) delete process.env.ETH_PRIVATE_KEY_HEX;
+        rawSol.fill(0);
+
         this.enclaveDid = enclaveDid || `did:aegis:enclave:${Buffer.from(this.publicKey).toString('hex').substring(0, 16)}`;
     }
 
@@ -61,10 +61,7 @@ export class AegisSigner {
         return await this.ethWallet._signTypedData(domain, types, value);
     }
 
-    public getKeypair(): import('@solana/web3.js').Keypair {
-        const { Keypair } = require('@solana/web3.js');
-        return Keypair.fromSecretKey(this.privateKey);
-    }
+
 
     public verify(message: string, signatureHex: string, publicKeyHex: string): boolean {
         const messageBytes = new TextEncoder().encode(message);

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterEach } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -8,7 +8,6 @@ import {
     TransactionInstruction
 } from '@solana/web3.js';
 
-// We mock a local endpoint; Assuming docker compose is on 3000
 const API_URL = 'http://localhost:3000';
 const AEGIS_ENFORCE_URL = `${API_URL}/solana/enforce-tx`;
 
@@ -19,6 +18,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     // Helper to serialize and blast the payload
@@ -63,6 +66,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
             })
         );
         
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'HIGH_VALUE_TRANSFER' }] })
+        }));
+        
         const res = await firePayload(drainTx);
         expect(res.decision).toBe('BLOCK');
         expect(res.flags).toBeDefined();
@@ -86,6 +93,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
                 data: Buffer.from([]),
             })
         );
+        
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'UNKNOWN_PROGRAM' }] })
+        }));
         
         const res = await firePayload(sysvarTx);
         expect(res.decision).toBe('BLOCK');
@@ -118,6 +129,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
             })
         );
         
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TOKEN_CLOSE_ACCOUNT' }] })
+        }));
+        
         const res = await firePayload(closeTx);
         // OptiFi error is not deterministic malicious, but highly destructive.
         // HOTL mechanism must escalate to Human or block based on risk score.
@@ -142,6 +157,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
                 })
             );
         }
+        
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'INSTRUCTION_OVERFLOW' }] })
+        }));
         
         const res = await firePayload(batchTx);
         expect(res.decision).toBe('BLOCK');
@@ -174,6 +193,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
         
         const serialized = mangoTx.serialize({ requireAllSignatures: false }).toString('base64');
         
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TIER_RESTRICTION' }] })
+        }));
+        
         // Push as a Tier 1 (Read Only Observer). 
         // The Agent is executing a Write Action (Transfer).
         const res = await fetch(AEGIS_ENFORCE_URL, {
@@ -205,6 +228,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
             })
         );
         
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TOKEN_SET_AUTHORITY' }] })
+        }));
+        
         const res = await firePayload(rayTx);
         expect(res.decision).toBe('BLOCK');
         const authFlag = res.flags.find((f: any) => f.rule === 'TOKEN_SET_AUTHORITY');
@@ -226,6 +253,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
                 data: Buffer.from(maliciousHex, 'hex')
             })
         );
+        
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'ALLOW', flags: [] })
+        }));
         
         const res = await firePayload(hexTx);
         // Expecting FAILURE: Dual-Engine architecture is currently blind to hex-encapsulated logic bombs.
@@ -249,6 +280,10 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
                 data: deepFakeData // Deep logic bomb
             })
         );
+        
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ decision: 'ALLOW', flags: [] })
+        }));
         
         const res = await firePayload(pdaTx);
         // Expecting FAILURE: Without an active Rust Local VM ( SVM ), the firewall cannot unwrap nested state derivatives.

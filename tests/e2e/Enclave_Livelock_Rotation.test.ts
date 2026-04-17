@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -14,6 +14,16 @@ describe('TDD: Enclave Circuit-Breaker Fallback (Livelock Prevention)', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        let fetchCallCount = 0;
+        vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => {
+            fetchCallCount++;
+            if (fetchCallCount === 1) throw new Error('Primary node down');
+            return { json: async () => ({ ars_anchor: 'mock-ars' }) };
+        }));
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     it('Should trigger an 800ms AbortController timeout if primary endpoint hangs, rerouting to fallback automatically', async () => {
@@ -26,6 +36,7 @@ describe('TDD: Enclave Circuit-Breaker Fallback (Livelock Prevention)', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         const startTime = Date.now();
 

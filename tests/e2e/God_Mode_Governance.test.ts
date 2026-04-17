@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -14,6 +14,13 @@ describe('TDD: God-Mode Governance (PCR0 Allowance Registry)', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ pcr0: 'some_rogue_hash' })
+        }));
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     it('Should cleanly DESTROY the payload transaction if the remote Enclave returns an unregistered PCR0 Measurement Hash', async () => {
@@ -26,6 +33,7 @@ describe('TDD: God-Mode Governance (PCR0 Allowance Registry)', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         // The exact allowed enclave binary hash established by the DAO Multisig
         const VALID_SQUADS_PCR0_WHITELIST = [

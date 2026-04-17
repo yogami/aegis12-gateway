@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -14,6 +14,13 @@ describe('TDD: SVM State Desync & Temporal Versioning', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ simulatedSlot: 250000000, simulatedBlockhash: '11111111111111111111111111111111' })
+        }));
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     it('Should explicitly expose the exact Slot and Blockhash the physical simulation was evaluated against', async () => {
@@ -26,6 +33,7 @@ describe('TDD: SVM State Desync & Temporal Versioning', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         const { receipt } = await withAegis(rawTx, {
             enclaveUrl: "http://localhost:3000/solana/enforce-tx"

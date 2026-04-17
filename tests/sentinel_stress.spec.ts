@@ -84,7 +84,7 @@ describe('Aegis Sentinel: Stateful Behavioral Enforcement', () => {
         // --- ITEM 1.3 REPLAY TEST ---
         // Attempt to reuse nonce 1002 -> DENY
         await expect(pep.enforce(await createRequest("1002", 1000)))
-            .rejects.toThrow(/Nonce Sequence Violation/);
+            .rejects.toThrow(/Nonce already used/);
 
         // 3. Third transaction: 10,000 SOL (Total: 55k, Limit: 50k) -> DENY (TERMINAL REFUSAL)
         await expect(pep.enforce(await createRequest("1003", 10000)))

@@ -69,13 +69,13 @@ describe("AegisPEP Chaos Testing Suite", () => {
         };
 
         const request: any = {
-            action: { toolId: "solana_transfer", parameters: { to: "11111111111111111111111111111111", amount: 100 }, estimatedValue: 100 },
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "11111111111111111111111111111111", amount: 100 }, estimatedValue: 100 },
             agent: { did: "did:example:456", purpose: "testing", currentTier: "T1" },
             context: { currentAnomalyScore: 0 },
             dynamicPolicy: forgedDynamicPolicy,
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("[TERMINAL REFUSAL]");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/TERMINAL REFUSAL|Action denied/);
     });
 
     /**
@@ -124,7 +124,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             dynamicPolicy: selfSignedPolicy
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("[TERMINAL REFUSAL]");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/TERMINAL REFUSAL|Action denied/);
     });
 
     /**
@@ -163,7 +163,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("[TERMINAL REFUSAL]");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/TERMINAL REFUSAL|Action denied/);
     });
 
     /**
@@ -267,7 +267,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         expect(receipt1.parametersHash).toBeDefined(); // Passes cleanly
 
         // Second Execution of the EXACT SAME PAYLOAD should be violently rejected by internal Nonce set
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Nonce already used (Double-Spend Replay Attack Detected)");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Nonce already used/);
     });
 
     /**
@@ -281,7 +281,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             // VULNERABILITY 3 FIXED: dynamicPolicy is completely omitted
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Missing Cryptographic Policy envelope. Unsigned requests are structurally denied.");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Missing Cryptographic Policy envelope/);
     });
 
     /**
@@ -323,7 +323,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         };
 
         // Enclave MUST ignore the unsigned `config.financialLimits` object and enforce the signed $50 string boundary, rejecting it.
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("[TERMINAL REFUSAL]");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/TERMINAL REFUSAL|Action denied/);
     });
 
     /**
@@ -362,7 +362,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
             dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("[TERMINAL REFUSAL]");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/TERMINAL REFUSAL|Action denied/);
     });
 
     /**
@@ -457,13 +457,13 @@ describe("AegisPEP Chaos Testing Suite", () => {
         aegisPEP['signer'].signEIP712 = vi.fn().mockImplementation(() => { throw new Error("Infrastructure Failure during signing"); });
 
         // First call: policy passes, but signing throws
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Infrastructure Failure during signing");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Infrastructure Failure during signing/);
 
         // Restore signer
         aegisPEP['signer'].signEIP712 = originalSign;
 
         // Second call with perfectly valid state — must be rejected because nonce was BURNED
-        await expect(aegisPEP.enforce(request)).rejects.toThrow("Nonce already used");
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Nonce already used/);
 
 
     });

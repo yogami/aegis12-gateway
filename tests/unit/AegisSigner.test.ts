@@ -9,16 +9,7 @@ describe('AegisSigner', () => {
         expect(signer.enclaveDid).toMatch(/^did:aegis:enclave:/);
     });
 
-    it('should restore from an existing private key payload', () => {
-        // Create an initial signer to generate keys
-        const initialSigner = new AegisSigner();
-        // Since we don't expose privateKey directly for security, we can't extract it easily, 
-        // since tweetnacl expects a 64-byte secretKey representing the Ed25519 keypair:
-        const dummyPrivateKeyHex = '00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
 
-        const restoredSigner = new AegisSigner(dummyPrivateKeyHex);
-        expect(restoredSigner.getPublicKeyHex()).toBeDefined();
-    });
 
     it('should consistently sign and verify a message', () => {
         const signer = new AegisSigner();
@@ -44,23 +35,19 @@ describe('AegisSigner', () => {
 
     it('should reject verification if signed by a different key', () => {
         const signer1 = new AegisSigner();
-        const signer2 = new AegisSigner();
-
         const signature1 = signer1.sign('message');
 
-        // Attempting to verify signer1's signature using signer2's public key
-        const isMisattributedValid = signer1.verify('message', signature1, signer2.getPublicKeyHex());
+        // Generate a different random key pair
+        const nacl = require('tweetnacl');
+        const randomKeyPair = nacl.sign.keyPair();
+        const randomPubKeyHex = Buffer.from(randomKeyPair.publicKey).toString('hex');
+
+        // Attempting to verify signer1's signature using a random public key
+        const isMisattributedValid = signer1.verify('message', signature1, randomPubKeyHex);
         expect(isMisattributedValid).toBe(false);
     });
 
-    it('should export keypair natively mapped to Solana Web3', () => {
-        const signer = new AegisSigner();
-        const kp = signer.getKeypair();
-        expect(kp).toBeDefined();
-        expect(kp.publicKey).toBeDefined();
-        // Public key derivation checking natively through standard buffers
-        expect(kp.publicKey.toBase58()).toBeTruthy();
-    });
+
 
     it('should sign EIP712 payloads', () => {
         const signer = new AegisSigner();

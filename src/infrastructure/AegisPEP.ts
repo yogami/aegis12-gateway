@@ -29,12 +29,7 @@ export class AegisPEP {
         this.breaker.reset();
     }
 
-    public provisionTestKey(tenantId: string, address: string): void {
-        const current = this.tenantTrustStore[tenantId] || [];
-        if (!current.includes(address)) {
-            this.tenantTrustStore[tenantId] = [...current, address];
-        }
-    }
+
 
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
@@ -61,11 +56,21 @@ export class AegisPEP {
         }
 
         let sanit = normalizeParameters(request.action.toolId, request.action.parameters);
-        const evalRequest = { ...request, action: { ...request.action, parameters: sanit, estimatedValue: Number(sanit.amount) || 0 } };
+        
+        let estimatedValueBig = 0n;
+        try {
+            estimatedValueBig = BigInt(sanit.amount || 0);
+        } catch (e) {
+            await this.nonceRegistry.release(scopedNonce);
+            throw new Error(`[TERMINAL REFUSAL] Invalid amount format. Must be a valid BigInt string.`);
+        }
+        const estimatedValue = Number(estimatedValueBig);
+        
+        const evalRequest = { ...request, action: { ...request.action, parameters: sanit, estimatedValue } };
 
         const decision = await this.breaker.execute(async () => {
             try {
-                Eip712Verifier.verifySignature(evalRequest.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID);
+                Eip712Verifier.verifySignature(evalRequest.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID, "0xAegisComplianceRegistry11111111111111111");
                 TierEvaluator.verifyBounds(evalRequest);
                 return { decision: 'allow', reason: 'pass' };
             } catch (e: any) {
@@ -78,9 +83,36 @@ export class AegisPEP {
             throw new Error(`Action denied by Aegis Enclave: ${decision.reason}`);
         }
 
+        const currentStats = await this.stateStore.getStats(tenantId);
+        
+        let spendAmountBig = 0n;
+        try { spendAmountBig = BigInt(sanit.amount || 0); } catch(e) {}
+        
+        // Use BigInt for absolutely precise cryptographically safe addition
+        const currentTotalBig = BigInt(Math.floor(currentStats.totalSpend));
+        const projectedSpendBig = currentTotalBig + spendAmountBig;
+        
+        const rawLimitsStr = request.dynamicPolicy.policyConfig.financialLimitsString || "{}";
+        const verifiedLimits = JSON.parse(rawLimitsStr);
+        
+        let lifetimeLimitBig = 9999999999n;
+        const tier = request.agent?.currentTier || 'unknown';
+        if (verifiedLimits.perTx !== undefined) lifetimeLimitBig = BigInt(verifiedLimits.perTx);
+        else if (verifiedLimits[tier] !== undefined) lifetimeLimitBig = BigInt(verifiedLimits[tier]);
+        
+        if (projectedSpendBig > lifetimeLimitBig) {
+            await this.nonceRegistry.release(scopedNonce);
+            throw new Error(`[TERMINAL REFUSAL] Cumulative spend (${projectedSpendBig}) would exceed hardware-locked lifetime ceiling`);
+        }
+
+        // Ensure we don't overflow the Javascript Number MAX_SAFE_INTEGER for the state store
+        if (projectedSpendBig > BigInt(Number.MAX_SAFE_INTEGER)) {
+             await this.nonceRegistry.release(scopedNonce);
+             throw new Error(`[TERMINAL REFUSAL] Wallet balance has exceeded MAX_SAFE_INTEGER.`);
+        }
+
         await this.nonceRegistry.commit(scopedNonce);
-        const stats = await this.stateStore.updateStats(tenantId, Number(sanit.amount) || 0);
-        if (stats.totalSpend > 9999999999) throw new Error('[TERMINAL REFUSAL] Tier limit exceeded');
+        await this.stateStore.updateStats(tenantId, Number(spendAmountBig));
 
         const receipt: AegisComplianceReceipt = {
             receiptId: `aegis-v1-${Date.now()}`,
@@ -93,7 +125,7 @@ export class AegisPEP {
             article14OversightSignature: request.dynamicPolicy.signature,
             policyId: request.dynamicPolicy.policyConfig.policyId,
             tenantId: tenantId,
-            complianceStandard: "ARS-01",
+            complianceStandard: "ARS-01+",
             limitations: [],
             authorizationNonce: nonce,
             validatedParams: sanit,
@@ -101,13 +133,21 @@ export class AegisPEP {
             signature: ""
         };
 
-        receipt.signature = await this.signer.signEIP712({ name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID }, { AegisComplianceReceipt: [
+        const signableReceipt = {
+            ...receipt,
+            validatedParamsJson: JSON.stringify(sanit),
+            limitationsJson: JSON.stringify(receipt.limitations),
+            zkSeal: (receipt as any).zkSeal || "none"
+        };
+
+        receipt.signature = await this.signer.signEIP712({ name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID, verifyingContract: "0xAegisComplianceRegistry11111111111111111" }, { AegisComplianceReceipt: [
             { name: 'receiptId', type: 'string' }, { name: 'actionId', type: 'string' }, { name: 'toolId', type: 'string' },
             { name: 'agentPubKey', type: 'string' }, { name: 'article12LogHash', type: 'string' }, { name: 'parametersHash', type: 'string' },
             { name: 'resultHash', type: 'string' }, { name: 'article14OversightSignature', type: 'string' }, { name: 'policyId', type: 'string' },
             { name: 'tenantId', type: 'string' }, { name: 'complianceStandard', type: 'string' }, { name: 'authorizationNonce', type: 'string' },
-            { name: 'timestamp', type: 'string' }
-        ]}, receipt);
+            { name: 'timestamp', type: 'string' }, { name: 'validatedParamsJson', type: 'string' }, { name: 'limitationsJson', type: 'string' },
+            { name: 'zkSeal', type: 'string' }
+        ]}, signableReceipt);
 
         return receipt;
     }

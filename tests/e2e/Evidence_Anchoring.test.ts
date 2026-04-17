@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi, afterAll } from 'vitest';
 import { 
     Connection, 
     Keypair, 
@@ -14,6 +14,13 @@ describe('TDD: Evidence Anchoring MVP (SPL Memo Injection)', () => {
     beforeAll(() => {
         connection = new Connection('https://api.devnet.solana.com', 'confirmed');
         agentKeypair = Keypair.generate();
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+            json: async () => ({ ars_anchor: 'mock-ars-zk-snark-8df99a1' })
+        }));
+    });
+
+    afterAll(() => {
+        vi.unstubAllGlobals();
     });
 
     it('Should append an SPL Memo Instruction containing the ARS Receipt ZK constraint to the payload', async () => {
@@ -27,6 +34,7 @@ describe('TDD: Evidence Anchoring MVP (SPL Memo Injection)', () => {
         );
         rawTx.recentBlockhash = '11111111111111111111111111111111';
         rawTx.feePayer = agentKeypair.publicKey;
+        rawTx.sign(agentKeypair);
 
         // Ensure the original rawTx only has 1 instruction
         expect(rawTx.instructions.length).toBe(1);
