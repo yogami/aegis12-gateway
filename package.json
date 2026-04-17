@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "demo:agent": "tsx scripts/demo_agent.ts",
     "test": "vitest run",
     "test:e2e": "npx playwright test --config playwright.config.ts",
     "test:e2e:prod": "TEST_API_URL=$TEST_API_URL npx playwright test --config playwright.config.ts",
