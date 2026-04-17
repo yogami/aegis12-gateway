@@ -1,35 +1,54 @@
-# Aegis-12: The Autonomous Agent Compliance Gateway
+# Aegis-12: The Sovereign Kill Switch for Agentic Capital
 
-Aegis-12 is the definitive off-path **Telemetry Shield & Compliance Engine** engineered specifically for High-Risk Autonomous Financial Agents operating on Solana in 2026. 
+**The missing security primitive for the Solana Developer Platform (SDP).**
 
-After exhaustive DeepResearch evaluations and adversarial testing against the **Alpenglow consensus** physics limit (150ms finality), we mathematically proved that "in-line behavioral firewalls" or proxy execution gateways are physically impossible without guaranteeing missed execution slots. Furthermore, critical on-chain security vectors are already dominated by massive incumbents (Lit Protocol governs key custody / static policies, and Jito dominates execution layer MEV-protection). 
+As the Solana Foundation heavily pushes to onboard enterprise financial institutions (Mastercard, Western Union, Worldpay) via the SDP, the ecosystem faces a catastrophic vulnerability: **Autonomous Agents.** If institutions deploy multi-million dollar liquidity pools via autonomous agents, a single prompt-injection or algorithmic drift can drain the entire protocol. 
 
-Rather than competing in fatal red oceans, Aegis-12 solves the two exact unaddressed gaps in 2026 Agentic Finance: **Strategy Leakage via Telemetry Interception** and **EU AI Act (Article 12) Compliance**.
+Institutions will not deploy capital to agents without a mathematically guaranteed kill switch.
 
-## The Problem: Ephemeral Strategy Leakage & Regulatory Hell
+**Aegis-12** is that kill switch. It is a sovereign, hardware-enforced blast door for AI agents on Solana. It physically severs malicious execution paths in a Confidential Virtual Machine (CVM) before they ever reach the Solana RPC, preventing identity spoofing and high-velocity capital drains.
 
-Autonomous agents run multi-stage execution pipelines. While incumbents heavily guard Phases 3 and 4 (transaction signing and execution inclusion), Phases 1 and 2 operate completely exposed. 
+## The Problem: Ephemeral Agent Security
 
-1. **Telemetry Interception (The Leak):** As AI agents continuously ingest data from Solana RPC nodes via Yellowstone gRPC firehoses, adversaries co-located within the same data centers intercept these traffic patterns. By observing what liquidity pools or oracles the agent tracks, competitors reverse-engineer the agent's algorithmic alpha *before* a transaction is ever synthesized.
-2. **The Compliance Hammer (EU AI Act):** By August 2026, algorithmic financial operations are legally classified as High-Risk AI Systems. Article 12 of the EU AI Act demands completely tamper-evident, cryptographically secure logging of *why* an agent made a decision, capturing the specific reference data queried and intermediate reasoning. If local application logs are submitted instead of cryptographically-anchored forensic evidence, deployers risk fines mapping up to 7% of global turnover.
+Currently, agent frameworks rely on soft guardrails—API-level prompt filtering or off-chain risk limits that run adjacent to the agent. If the agent gets prompt-injected or the host server is compromised, those soft guardrails are easily bypassed, resulting in fatal transactions being signed and broadcasted.
 
-## The Solution: Aegis-12 Off-Path Brokering
+By the time on-chain analytics identify the anomaly, the funds are gone.
 
-By acting as a localized, out-of-band data broker adjacent to the agent, Aegis-12 shields operations without adding a single millisecond of latency to the actual transaction execution phase.
+## The Solution: Hardware-Enforced Interdiction
 
-### 1. Intelligent Telemetry Shielding (The Chaff Injector)
-Aegis-12 locally ingests the entire Yellowstone gRPC datastream from premium RPC providers as a wide-band funnel. It filters and feeds only the required parameters to the localized agent environment. Simultaneously, it injects synthetic "decoy queries" (chaff) to the RPCs. To external network observers monitoring RPC ingresses, the agent's specific strategic footprint is perfectly masked in the aggregate noise.
+Aegis-12 solves this by requiring all agent transactions to pass through a **Phala Network dStack TEE (Trusted Execution Environment)** before interacting with the chain. 
 
-### 2. EU AI Act Article 12 Compliance Engine
-To bridge the forensic transparency gap, Aegis-12 intrinsically logs the entire decision pipeline in the background. As it brokers data to the agent, it structures every state parameter, data input reference, and model output into standard JSON templates. These logs are stamped with deterministically anchored cryptographic identifiers (SHA-256 hashes) and transmitted to an append-only archive. This provides the exact legal defense mechanism required by the strict tamper-evident tracking mandates of European regulators.
+1. **The Exploit Attempt:** A hacked or prompt-injected agent attempts to execute a malicious transaction (e.g., identity spoofing to bypass limits, or a catastrophic spend velocity breach).
+2. **The Hardware Interdiction:** The Aegis-12 Phala TEE intercepts the EIP-712 intent payload. The hardware enclave physically evaluates the transaction against the immutable policy parameters. Because the enclave is mathematically isolated, it cannot be bypassed or tampered with by the agent's host server. 
+3. **The Sovereign Kill Switch:** If a breach is detected, the TEE physically severs the execution path, returning a `Hardware Panic` and refusing to synthesize the final transaction.
 
-> [!IMPORTANT]
-> The Aegis-12 architecture relies on extreme off-path optimization. Because we obfuscate strategy at Phase 1 (Ingestion) rather than Phase 4 (Execution), we preserve absolute compliance with the Solana 150-millisecond finality deadline.
+## The Trojan Horse: Frictionless Enterprise Compliance
+
+A hardware kill switch secures the capital, but we provide an unprecedented secondary value for institutions: **Frictionless Compliance.**
+
+Whenever Aegis-12 approves *or* denies an agent transaction, the Phala TEE generates a cryptographic receipt and natively writes an `aegis:v4-pq` formatted SPL Memo directly to the Solana devnet. 
+
+This creates a completely tamper-evident, unalterable on-chain logging trail. This zero-overhead mechanism perfectly and automatically satisfies the rigorous logging requirements of **Article 12 of the EU AI Act** (which legally classifies algorithmic financial bots as High-Risk AI Systems) and SOC2 compliance.
+
+Aegis-12 doesn't just stop the attack—it gives you the cryptographic, on-chain proof required by European regulators that you did everything in your power to prevent it.
 
 ## Hackathon Codebase Overview
 
-This repository acts as the central Aegis-12 demonstration hub, establishing the off-path data shielding and logging mechanics for the Colosseum Frontier hackathon. 
+This repository contains the live Aegis-12 backend and the terminal agent demo built for the Colosseum Frontier Hackathon.
 
-- `/src/sdk/AegisTelemetryBroker.ts`: Handles the local ingestion and filtering of structured network data while injecting intelligent decoy requests.
-- `/src/compliance/Article12Logger.ts`: Automatically synthesizes agent transactions and inputs into the regulatory JSON format with verifiable SHA-256 hash chaining.
-- `/src/server.ts`: The primary dashboard routing instance displaying the compliance logs and shielded data feeds in real-time.
+- `/src/application/PhalaEntrypoint.ts`: The core Confidential Virtual Machine (CVM) entrypoint that enforces hardware isolation and root-of-trust execution.
+- `/src/infrastructure/SolanaAnchor.ts`: The SPL Memo module that creates the immutable on-chain footprint of all agent approvals and interdictions.
+- `/src/infrastructure/SolanaTransactionFirewall.ts`: The complex BFT-consensus based firewall logic for high-velocity limit detection.
+- `/scripts/demo_agent.ts`: A live autonomous agent test script demonstrating both compliant operations and the "Oh Shit" moment of a rogue transaction being thwarted by the hardware enclave.
+- `/nextjs-demo/`: The frontend visualizer representing the Honey-Pot Dashboard for the Sovereign Kill Switch.
+
+### Running the Live "Rogue Agent" Demo
+To watch the Aegis-12 TEE sever a malicious agent in real-time:
+```bash
+# Terminal 1: Boot the TEE Backend
+npm run start:cvm
+
+# Terminal 2: Run the Autonomous Agent script
+npm run demo:agent
+```
+You will see the agent complete a safe 500 USDC swap, followed by a simulated prompt-injection attempt to drain 10,000,000 USDC. Watch the TEE physically reject the rogue transaction and verify the immutable Denial SPL Memo anchored on the Solana Devnet Explorer.
