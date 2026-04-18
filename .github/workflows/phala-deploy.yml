@@ -34,42 +34,56 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
 
-      - name: Trigger Phala Cloud Update (v1 API)
+      - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
         run: |
-          APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
-          echo "Fetching latest revision for App $APP_ID..."
+          CVM_ID="9fc2cfd41a334dcb408b19a648c2d3c7386e4afb"
+          COMPOSE_CONTENT=$(cat docker-compose.phala.yml)
           
-      - name: Trigger Phala Cloud Update (Verified v1 API)
-        run: |
-          APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
-          echo "Fetching latest revision for App $APP_ID..."
+          echo "Step 1: Provisioning new configuration for CVM $CVM_ID..."
+          PROVISION_PAYLOAD=$(jq -n \
+            --arg name "aegis12-gateway" \
+            --arg compose "$COMPOSE_CONTENT" \
+            '{
+              name: $name,
+              docker_compose_file: $compose,
+              runner: "docker-compose",
+              manifest_version: 2,
+              kms_enabled: true,
+              gateway_enabled: true,
+              public_logs: true,
+              public_sysinfo: true,
+              public_tcbinfo: true
+            }')
           
-          # Get the latest revision ID using the verified X-API-Key method
-          REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-                      "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
+          PROVISION_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/compose_file/provision" \
+               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
+               -H "Content-Type: application/json" \
+               -d "$PROVISION_PAYLOAD")
           
-          REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].revision_id')
+          COMPOSE_HASH=$(echo $PROVISION_RES | jq -r '.compose_hash')
           
-          if [ "$REVISION_ID" == "null" ] || [ -z "$REVISION_ID" ]; then
-            echo "❌ Error: Could not fetch Revision ID. API Response: $REVISIONS"
+          if [ "$COMPOSE_HASH" == "null" ] || [ -z "$COMPOSE_HASH" ]; then
+            echo "❌ Error: Provision failed. Response: $PROVISION_RES"
             exit 1
           fi
           
-          echo "Triggering redeploy for Revision $REVISION_ID..."
-          
-          curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
+          echo "Step 2: Submitting update with Compose Hash $COMPOSE_HASH..."
+          SUBMIT_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/compose_file/submit" \
                -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-               -H "Content-Type: application/json"
+               -H "Content-Type: application/json" \
+               -d "{\"compose_hash\": \"$COMPOSE_HASH\"}")
+          
+          echo "Submit Response: $SUBMIT_RES"
 
       - name: Verify Live Deployment
         run: |
-          echo "Waiting for enclave to reboot (150s)..."
-          sleep 150
+          echo "Waiting for hardware enclave to pull image and boot (180s)..."
+          sleep 180
           RESPONSE=$(curl -s -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
           echo "Enclave Response: $RESPONSE"
           if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
-            echo "✅ VERIFIED: New unmocked code is live in hardware!"
+            echo "✅ VERIFIED: Hardware enclave is now running the LATEST unmocked code!"
           else
-            echo "❌ FAILURE: Enclave is still running old code or is offline."
+            echo "❌ FAILURE: Enclave is still running old code or is offline. Please check Phala Cloud logs."
             exit 1
           fi
