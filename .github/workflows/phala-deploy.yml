@@ -64,9 +64,22 @@ jobs:
              AUTH_HEADER="Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}"
           fi
 
-          curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
+          echo "Using Auth Method: $(echo $AUTH_HEADER | cut -d: -f1)"
+          
+          # Try App-level redeploy
+          REDEPLOY_RESPONSE=$(curl -s -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
                -H "$AUTH_HEADER" \
-               -H "Content-Type: application/json"
+               -H "Content-Type: application/json")
+          
+          if [[ "$REDEPLOY_RESPONSE" == *"404"* ]] || [[ "$REDEPLOY_RESPONSE" == *"401"* ]]; then
+            echo "⚠️ App-level redeploy failed. Trying Project-level fallback..."
+            # Note: Project ID is derived from the App's project context
+            curl -i -X POST "https://cloud-api.phala.com/api/v1/projects/yogamis-projects/apps/$APP_ID/redeploy" \
+                 -H "$AUTH_HEADER" \
+                 -H "Content-Type: application/json"
+          else
+            echo "$REDEPLOY_RESPONSE"
+          fi
 
       - name: Verify Live Deployment
         run: |
