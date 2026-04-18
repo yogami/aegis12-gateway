@@ -37,7 +37,7 @@ jobs:
 
       - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
         run: |
-          CVM_ID="9fc2cfd41a334dcb408b19a648c2d3c7386e4afb"
+          CVM_ID="cvm_D6gWka68"
           IMAGE_DIGEST="${{ steps.docker_build.outputs.digest }}"
           IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm"
           
