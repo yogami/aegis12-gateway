@@ -12,6 +12,7 @@ COPY tsconfig.json ./
 
 # Phala CVM runs typically on port 8000
 ENV PORT=8000
+ENV NODE_ENV=staging
 EXPOSE 8000
 
 # Execute natively using TSX to bypass strict Type-checking crashes
