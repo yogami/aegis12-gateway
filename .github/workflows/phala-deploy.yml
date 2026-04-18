@@ -53,6 +53,7 @@ jobs:
               environment:
                 - TEE_ENV=phala
                 - NODE_ENV=production
+                - AUTHORIZED_TENANTS='{"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}'
               volumes:
                 - /var/run/dstack.sock:/var/run/dstack.sock
           EOF
@@ -119,12 +120,55 @@ jobs:
         run: |
           echo "Waiting for hardware enclave to pull image and boot (180s)..."
           sleep 180
-          # Using --max-time to prevent pipeline hang on server crash
-          RESPONSE=$(curl -s --max-time 15 -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
+          
+          VALID_PAYLOAD='{
+            "agent": {
+              "did": "did:solana:agent-001",
+              "purpose": "financial_operations",
+              "currentTier": "T4"
+            },
+            "action": {
+              "toolId": "solana_transfer",
+              "actionType": "transfer",
+              "parameters": {
+                "to": "ReceiverPublicAddress",
+                "amount": "100"
+              }
+            },
+            "context": {
+              "sessionId": "s-test-001",
+              "actionsThisSession": 1,
+              "actionsThisHour": 1,
+              "currentAnomalyScore": 0.1,
+              "recentIncidents": 0
+            },
+            "dynamicPolicy": {
+              "policyConfig": {
+                "policyId": "p-test-001",
+                "tenantId": "tenant-001",
+                "version": "1.0.0",
+                "chainId": 1399811149,
+                "crossChainTarget": "solana:devnet",
+                "maxAnomalyScore": 100,
+                "financialLimitsString": "{\"T4\":1000000}",
+                "expiresAt": 1900000000,
+                "nonce": "n-test-001"
+              },
+              "ownerPublicKey": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+              "signature": "0xa710a6ea6a7905bba937022d6ca57d7e17ff1b608cb2a55ba1fefead56e5f4474cb432a73b549dd3cf7407bea5b2f8946cb9705e02fe7e7e2426d946de19ae481b"
+            }
+          }'
+
+          echo "Sending Cryptographically Validated Enforcement Request..."
+          RESPONSE=$(curl -s --max-time 30 -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce \
+            -d "$VALID_PAYLOAD" \
+            -H "Content-Type: application/json")
+          
           echo "Enclave Response: $RESPONSE"
-          if [[ "$RESPONSE" == *"approved"* ]]; then
-            echo "✅ VERIFIED: Hardware enclave is now running and PRODUCING APPROVED ATTESTATIONS!"
+          
+          if [[ "$RESPONSE" == *"approved"* ]] && [[ "$RESPONSE" == *"ars_anchor"* ]]; then
+            echo "✅ VERIFIED: Hardware enclave is now FULLY OPERATIONAL with ZK-SEALED ATTESTATIONS!"
           else
-            echo "❌ FAILURE: Enclave response invalid or offline. Response: $RESPONSE"
+            echo "❌ FAILURE: Enclave failed to produce a valid ZK-sealed approved response. Check logs."
             exit 1
           fi
