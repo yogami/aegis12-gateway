@@ -34,17 +34,32 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
 
-      - name: Trigger Phala Cloud Update (v2 - App ID)
+      - name: Trigger Phala Cloud Update (v1 API)
         run: |
-          echo "Triggering Phala Cloud Deployment for App c27b0861a2bf2891f43f3556d3aa9526d704f7bc..."
-          curl -i -X POST https://cloud-api.phala.network/v2/apps/c27b0861a2bf2891f43f3556d3aa9526d704f7bc/redeploy \
-               -H "Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+          APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
+          echo "Fetching latest revision for App $APP_ID..."
+          
+          # Get the latest revision ID
+          REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+                      "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
+          
+          REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].id')
+          
+          if [ "$REVISION_ID" == "null" ] || [ -z "$REVISION_ID" ]; then
+            echo "❌ Error: Could not fetch Revision ID. API Response: $REVISIONS"
+            exit 1
+          fi
+          
+          echo "Triggering redeploy for Revision $REVISION_ID..."
+          
+          curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
+               -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
                -H "Content-Type: application/json"
 
       - name: Verify Live Deployment
         run: |
-          echo "Waiting for enclave to reboot (60s)..."
-          sleep 60
+          echo "Waiting for enclave to reboot (90s)..."
+          sleep 90
           RESPONSE=$(curl -s -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
           echo "Enclave Response: $RESPONSE"
           if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
