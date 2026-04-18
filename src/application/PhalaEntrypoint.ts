@@ -9,10 +9,23 @@ let pep: AegisPEP;
 let anchor: SolanaAnchor;
 
 async function initializeHardware() {
-    if (!signer) {
-        signer = await AegisSigner.create();
-        pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
-        anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+        try {
+            if (!signer) {
+                signer = await AegisSigner.create();
+                pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
+                anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+            }
+            return;
+        } catch (err: any) {
+            attempts++;
+            console.warn(`[Aegis-12] Hardware initialization attempt ${attempts}/${maxAttempts} failed: ${err.message}`);
+            if (attempts >= maxAttempts) throw err;
+            await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+        }
     }
 }
 
@@ -26,7 +39,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         let pcr0 = process.env.ENCLAVE_PCR0_MOCK || "0000000000000000000000000000000000000000000000000000000000000000";
         try {
             // @ts-ignore
-            const data = globalThis.phala?.getQuote?.(signer.enclaveDid);
+            const data = globalThis.phala?.getQuote?.(signer?.enclaveDid || "unknown");
             if (data) {
                 attestation = data.quote;
                 pcr0 = data.measurement || pcr0;
@@ -47,7 +60,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
 
         let solanaReceipt = null;
         try {
-            solanaReceipt = await anchor.anchorReceipt(receipt, 'approved', signer.enclaveDid);
+            solanaReceipt = await anchor.anchorReceipt(receipt, 'approved', signer?.enclaveDid || "unknown");
         } catch (e: any) {
             console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor receipt. Error: ${e.message}`);
         }
@@ -55,7 +68,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         return JSON.stringify({
             status: "approved",
             receipt,
-            enclaveDid: signer.enclaveDid,
+            enclaveDid: signer?.enclaveDid || "unknown",
             attestation,
             pcr0: pcr0,
             ars_anchor: zkProofData.seal,
@@ -66,9 +79,11 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
     } catch (e: any) {
         let solanaReceipt = null;
         try {
-            // Anchor the denial to create an immutable record of the blocked transaction
-            const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
-            solanaReceipt = await anchor.anchorReceipt(dummyReceipt, 'denied', signer.enclaveDid);
+            if (signer && anchor) {
+                // Anchor the denial to create an immutable record of the blocked transaction
+                const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
+                solanaReceipt = await anchor.anchorReceipt(dummyReceipt, 'denied', signer.enclaveDid);
+            }
         } catch (err: any) {
              console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor denial. Error: ${err.message}`);
         }
@@ -76,7 +91,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         return JSON.stringify({
             status: "denied",
             error: e.message,
-            enclaveDid: signer.enclaveDid,
+            enclaveDid: signer?.enclaveDid || "unknown",
             solana_tx: solanaReceipt?.txSignature,
             explorer_url: solanaReceipt?.explorerUrl
         });
