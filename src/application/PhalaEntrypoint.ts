@@ -14,17 +14,19 @@ async function initializeHardware() {
     
     while (attempts < maxAttempts) {
         try {
+            console.log(`[Aegis-12] Hardware Init: Attempting to connect to Tappd socket (Try ${attempts + 1}/${maxAttempts})...`);
             if (!signer) {
                 signer = await AegisSigner.create();
+                console.log(`[Aegis-12] Hardware Init: Signer established. DID: ${signer.enclaveDid}`);
                 pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
                 anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
             }
             return;
         } catch (err: any) {
             attempts++;
-            console.warn(`[Aegis-12] Hardware initialization attempt ${attempts}/${maxAttempts} failed: ${err.message}`);
+            console.error(`[Aegis-12] Hardware Init Failure: ${err.message}`);
             if (attempts >= maxAttempts) throw err;
-            await new Promise(r => setTimeout(r, 1000)); // Wait 1s before retry
+            await new Promise(r => setTimeout(r, 1000));
         }
     }
 }
@@ -32,6 +34,11 @@ async function initializeHardware() {
 export default async function phalaEntrypoint(payloadStr: string): Promise<string> {
     try {
         await initializeHardware();
+        
+        if (!signer || !pep || !anchor) {
+            throw new Error("[Aegis-12] CRITICAL_INIT_FAILURE: Hardware components not initialized after retries.");
+        }
+
         const payload: PolicyEvaluationRequest = JSON.parse(payloadStr);
         const receipt = await pep.enforce(payload);
         
@@ -80,9 +87,8 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         let solanaReceipt = null;
         try {
             if (signer && anchor) {
-                // Anchor the denial to create an immutable record of the blocked transaction
                 const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
-                solanaReceipt = await anchor.anchorReceipt(dummyReceipt, 'denied', signer.enclaveDid);
+                solanaReceipt = await anchor.anchorReceipt(dummyReceipt, 'denied', signer?.enclaveDid || "unknown");
             }
         } catch (err: any) {
              console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor denial. Error: ${err.message}`);
