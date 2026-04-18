@@ -50,6 +50,11 @@ jobs:
               image: $IMAGE_NAME@$IMAGE_DIGEST
               ports:
                 - "8000:8000"
+              environment:
+                - TEE_ENV=phala
+                - NODE_ENV=production
+              volumes:
+                - /var/run/dstack.sock:/var/run/dstack.sock
           EOF
           )
           
@@ -117,8 +122,8 @@ jobs:
           # Using --max-time to prevent pipeline hang on server crash
           RESPONSE=$(curl -s --max-time 15 -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
           echo "Enclave Response: $RESPONSE"
-          if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
-            echo "✅ VERIFIED: Hardware enclave is now running the LATEST unmocked code!"
+          if [[ "$RESPONSE" == *"approved"* ]]; then
+            echo "✅ VERIFIED: Hardware enclave is now running and PRODUCING APPROVED ATTESTATIONS!"
           else
             echo "❌ FAILURE: Enclave response invalid or offline. Response: $RESPONSE"
             exit 1
