@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "Triggering Phala Cloud Deployment..."
           curl -X POST https://cloud-api.phala.network/v2/instances/2cb69b02-0b15-4870-af8e-5e032ab0e680/redeploy \
-               -H "Authorization: Bearer ${{ secrets.PHALA_CLOUD_API_KEY }}" \
+               -H "Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
                -H "Content-Type: application/json"
 
       - name: Verify Live Deployment
