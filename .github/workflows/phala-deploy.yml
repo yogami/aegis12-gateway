@@ -39,9 +39,15 @@ jobs:
           APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
           echo "Fetching latest revision for App $APP_ID..."
           
-          # Get the latest revision ID
+          # Get the latest revision ID - Try X-API-Key first, then Bearer fallback
           REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
                       "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
+          
+          if [[ "$REVISIONS" == *"Not authenticated"* ]]; then
+            echo "⚠️ X-API-Key failed. Retrying with Authorization: Bearer..."
+            REVISIONS=$(curl -s -H "Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+                        "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
+          fi
           
           REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].id')
           
@@ -52,8 +58,14 @@ jobs:
           
           echo "Triggering redeploy for Revision $REVISION_ID..."
           
+          # Use the auth method that worked
+          AUTH_HEADER="X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}"
+          if [[ "$(curl -s -o /dev/null -w "%{http_code}" -H "$AUTH_HEADER" "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")" != "200" ]]; then
+             AUTH_HEADER="Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}"
+          fi
+
           curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
-               -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+               -H "$AUTH_HEADER" \
                -H "Content-Type: application/json"
 
       - name: Verify Live Deployment
