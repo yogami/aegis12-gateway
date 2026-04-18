@@ -13,8 +13,12 @@ export class TappdClient {
     private readonly isTee: boolean;
 
     constructor() {
-        // Detect TEE environment via Unix socket presence or environment signals
-        this.isTee = process.env.TEE_ENV === 'phala' || require('fs').existsSync(this.socketPath);
+        const envSignal = process.env.TEE_ENV === 'phala';
+        const socketSignal = require('fs').existsSync(this.socketPath);
+        
+        console.log(`[TappdClient] Detection: TEE_ENV_SIGNAL=${envSignal}, SOCKET_SIGNAL=${socketSignal} (path: ${this.socketPath})`);
+        
+        this.isTee = envSignal || socketSignal;
         if (this.isTee) {
             console.log('[TappdClient] ✅ Phala Hardware dStack detected. Initializing Secure HAL.');
         } else {

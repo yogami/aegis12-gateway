@@ -58,6 +58,7 @@ export class SolanaAnchor {
             'https://api.mainnet-beta.solana.com', // Fallback 1
             'https://solana-api.projectserum.com' // Fallback 2
         ];
+        console.log(`[SolanaAnchor] Connecting to RPC: ${primaryRpc}`);
         this.connection = new Connection(primaryRpc, 'confirmed');
 
         if (payerSecretKey) {

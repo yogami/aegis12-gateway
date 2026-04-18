@@ -18,13 +18,32 @@ async function initializeHardware() {
             if (!signer) {
                 signer = await AegisSigner.create();
                 console.log(`[Aegis-12] Hardware Init: Signer established. DID: ${signer.enclaveDid}`);
-                pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
-                anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
             }
+
+            if (!pep) {
+                const rawTenants = process.env.AUTHORIZED_TENANTS || '{}';
+                console.log(`[Aegis-12] Hardware Init: Parsing AUTHORIZED_TENANTS (length: ${rawTenants.length})`);
+                try {
+                    const tenants = JSON.parse(rawTenants);
+                    pep = new AegisPEP(signer, tenants);
+                    console.log(`[Aegis-12] Hardware Init: PEP initialized with ${Object.keys(tenants).length} tenants.`);
+                } catch (pe) {
+                    console.error(`[Aegis-12] Hardware Init: JSON Parse Error on AUTHORIZED_TENANTS: ${rawTenants}`);
+                    throw pe;
+                }
+            }
+
+            if (!anchor) {
+                console.log(`[Aegis-12] Hardware Init: Initializing SolanaAnchor for cluster: ${process.env.SOLANA_CLUSTER || 'devnet'}`);
+                anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+                console.log(`[Aegis-12] Hardware Init: SolanaAnchor established.`);
+            }
+
             return;
         } catch (err: any) {
             attempts++;
-            console.error(`[Aegis-12] Hardware Init Failure: ${err.message}`);
+            console.error(`[Aegis-12] Hardware Init Failure [Attempt ${attempts}]: ${err.message}`);
+            console.error(err.stack);
             if (attempts >= maxAttempts) throw err;
             await new Promise(r => setTimeout(r, 1000));
         }

@@ -61,6 +61,7 @@ RUN chmod +x /app/bin/aegis-zk-prover
 ENV PORT=8000
 # Transition to production mode now that the binary is included
 ENV NODE_ENV=production
+ENV TEE_ENV=phala
 EXPOSE 8000
 
 # Entrypoint script to calculate hash and start the enclave
