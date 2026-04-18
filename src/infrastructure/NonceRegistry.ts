@@ -12,7 +12,7 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
     private walEngine: WALEngine;
 
     constructor(customWalPath?: string) {
-        const basePath = customWalPath ? customWalPath.replace('.json', '') : path.resolve(process.cwd(), '.aegis_wal');
+        const basePath = customWalPath ? customWalPath.replace('.json', '') : path.resolve('/tmp', '.aegis_wal');
         this.committedWalPath = `${basePath}_committed.json`;
         this.pendingWalPath = `${basePath}_pending.json`;
         this.lockPath = `${basePath}.lock`;
