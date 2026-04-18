@@ -1,5 +1,5 @@
 # STAGE 1: Build the RISC Zero ZK Prover (Rust)
-FROM rust:1.81-bookworm AS prover-builder
+FROM rust:1.82-bookworm AS prover-builder
 WORKDIR /build
 
 # Install dependencies for RISC Zero
@@ -10,9 +10,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install RISC Zero toolchain and cargo-risczero
-RUN cargo install cargo-binstall && \
-    cargo binstall -y cargo-risczero
+# Install cargo-risczero directly (binstall has edition conflicts)
+RUN cargo install cargo-risczero
 
 # Note: We don't run `cargo risczero install` here as it might be too heavy for some CI environments
 # but the host build will trigger guest compilation if needed.
