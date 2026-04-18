@@ -32,12 +32,24 @@ jobs:
           context: .
           file: ./Dockerfile.phala_cvm
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:v1,${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
-          
-      - name: Deployment Success Notification
-        run: echo "🎉 Phala Network CVM Image built and pushed successfully! Ready for Intel SGX Dashboard ingestion."
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
 
-      - name: Trigger Phala CVM Deployment
+      - name: Trigger Phala Cloud Update (v2)
         run: |
-          echo "Initiating Dstack webhook for Phala deployment update..."
-          curl -X POST https://api.phala.network/v1/cvm/deploy             -H "Authorization: Bearer $\{\{ secrets.PHALA_DEPLOY_TOKEN \}\}"             -H "Content-Type: application/json"             -d '{"image": "$\{\{ secrets.DOCKERHUB_USERNAME \}\}/aegis-phala-cvm:latest", "env": ["NODE_ENV=production"]}'
+          echo "Triggering Phala Cloud Deployment..."
+          curl -X POST https://cloud-api.phala.network/v2/instances/2cb69b02-0b15-4870-af8e-5e032ab0e680/redeploy \
+               -H "Authorization: Bearer ${{ secrets.PHALA_CLOUD_API_KEY }}" \
+               -H "Content-Type: application/json"
+
+      - name: Verify Live Deployment
+        run: |
+          echo "Waiting for enclave to reboot (60s)..."
+          sleep 60
+          RESPONSE=$(curl -s -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
+          echo "Enclave Response: $RESPONSE"
+          if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
+            echo "✅ VERIFIED: New unmocked code is live in hardware!"
+          else
+            echo "❌ FAILURE: Enclave is still running old code or is offline."
+            exit 1
+          fi
