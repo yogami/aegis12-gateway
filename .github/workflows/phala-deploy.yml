@@ -43,7 +43,6 @@ jobs:
           
           echo "Step 1: Provisioning new configuration for CVM $CVM_ID with digest $IMAGE_DIGEST..."
           
-          # Construct Docker Compose with the specific digest to force a new hash
           COMPOSE_WITH_DIGEST=$(cat <<EOF
           version: '3.8'
           services:
@@ -89,23 +88,38 @@ jobs:
           
           echo "Submit Response: $SUBMIT_RES"
 
-          echo "Step 3: Triggering Force Restart to apply new hardware image..."
-          RESTART_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/restart" \
-               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-               -H "Content-Type: application/json" \
-               -d "{\"force\": true}")
-          
-          echo "Restart Response: $RESTART_RES"
+          echo "Step 3: Triggering Force Restart with Retry Logic..."
+          for i in {1..5}; do
+            echo "Attempt $i: Requesting Force Restart..."
+            RESTART_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/restart" \
+                 -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
+                 -H "Content-Type: application/json" \
+                 -d "{\"force\": true}")
+            
+            echo "Restart Response: $RESTART_RES"
+            
+            if [[ "$RESTART_RES" == *"Another operation is already in progress"* ]]; then
+              echo "⚠️ CVM is busy. Waiting 30s before retry..."
+              sleep 30
+            elif [[ "$RESTART_RES" == *"null"* ]] || [[ -z "$RESTART_RES" ]]; then
+              echo "✅ Restart command accepted (received null/empty success)."
+              break
+            else
+              echo "✅ Restart initiated successfully."
+              break
+            fi
+          done
 
       - name: Verify Live Deployment
         run: |
           echo "Waiting for hardware enclave to pull image and boot (180s)..."
           sleep 180
-          RESPONSE=$(curl -s -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
+          # Using --max-time to prevent pipeline hang on server crash
+          RESPONSE=$(curl -s --max-time 15 -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
           echo "Enclave Response: $RESPONSE"
           if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
             echo "✅ VERIFIED: Hardware enclave is now running the LATEST unmocked code!"
           else
-            echo "❌ FAILURE: Enclave is still running old code or is offline. Please check Phala Cloud logs."
+            echo "❌ FAILURE: Enclave response invalid or offline. Response: $RESPONSE"
             exit 1
           fi
