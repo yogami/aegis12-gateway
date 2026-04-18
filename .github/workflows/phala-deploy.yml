@@ -89,6 +89,14 @@ jobs:
           
           echo "Submit Response: $SUBMIT_RES"
 
+          echo "Step 3: Triggering Force Restart to apply new hardware image..."
+          RESTART_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/restart" \
+               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
+               -H "Content-Type: application/json" \
+               -d "{\"force\": true}")
+          
+          echo "Restart Response: $RESTART_RES"
+
       - name: Verify Live Deployment
         run: |
           echo "Waiting for hardware enclave to pull image and boot (180s)..."
