@@ -4,8 +4,8 @@ import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest } from '../types';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
 
-let signer: AegisSigner;
-let pep: AegisPEP;
+export let signer: AegisSigner;
+export let pep: AegisPEP;
 let anchor: SolanaAnchor;
 
 async function initializeHardware() {

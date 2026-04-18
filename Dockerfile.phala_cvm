@@ -1,19 +1,72 @@
-FROM node:20-alpine
+# STAGE 1: Build the RISC Zero ZK Prover (Rust)
+FROM rust:1.81-bookworm AS prover-builder
+WORKDIR /build
+
+# Install dependencies for RISC Zero
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install RISC Zero toolchain and cargo-risczero
+RUN cargo install cargo-binstall && \
+    cargo binstall -y cargo-risczero
+
+# Note: We don't run `cargo risczero install` here as it might be too heavy for some CI environments
+# but the host build will trigger guest compilation if needed.
+
+COPY aegis-zk-prover/ /build/aegis-zk-prover/
+WORKDIR /build/aegis-zk-prover
+
+# Build the host binary in release mode
+# This will also compile the guest methods.
+RUN cargo build --release
+
+# STAGE 2: Build the Node.js Application
+FROM node:20-bookworm AS app-builder
 WORKDIR /app
 
-# Install project dependencies definitively
 COPY package*.json ./
 RUN npm ci
 
-# Copy the server logic and SDK wrapper
-COPY src/ ./src/
-COPY packages/ ./packages/
-COPY tsconfig.json ./
+COPY . .
 
-# Phala CVM runs typically on port 8000
+# Build the TypeScript source to dist/
+RUN npm run build
+
+# STAGE 3: Final Production Image
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+# Install runtime dependencies (e.g., for child_process execution of the prover)
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy compiled application
+COPY --from=app-builder /app/dist ./dist
+COPY --from=app-builder /app/node_modules ./node_modules
+COPY --from=app-builder /app/package.json ./
+
+# Copy the ZK Prover binary to the standardized production path
+RUN mkdir -p /app/bin
+COPY --from=prover-builder /build/aegis-zk-prover/target/release/host /app/bin/aegis-zk-prover
+RUN chmod +x /app/bin/aegis-zk-prover
+
+# Environment Configuration
 ENV PORT=8000
-ENV NODE_ENV=staging
+# Transition to production mode now that the binary is included
+ENV NODE_ENV=production
 EXPOSE 8000
 
-# Execute natively using TSX to bypass strict Type-checking crashes
-CMD ["npx", "tsx", "src/phala_cvm_server.ts"]
+# Entrypoint script to calculate hash and start the enclave
+RUN echo '#!/bin/sh\n\
+export AEGIS_ZK_PROVER_HASH=$(sha256sum /app/bin/aegis-zk-prover | cut -d" " -f1)\n\
+echo "[Aegis-12] Calculated Prover Hash: $AEGIS_ZK_PROVER_HASH"\n\
+exec node dist/phala_cvm_server.js' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

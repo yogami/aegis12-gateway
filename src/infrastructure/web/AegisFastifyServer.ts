@@ -14,11 +14,11 @@ fastify.register(swagger, {
     }
 });
 
-fastify.get('/health', async () => ({ status: 'alive', enclaveDid: aegisSigner.enclaveDid }));
+fastify.get('/health', async () => ({ status: 'alive', enclaveDid: aegisSigner?.enclaveDid || "initializing" }));
 
 // Demo endpoint eradicated
 fastify.get('/api/docs', async () => ({
-    name: 'Aegis-12 Compliance Gateway', version: '2.0.0', status: 'ONLINE', enclaveDid: aegisSigner.enclaveDid,
+    name: 'Aegis-12 Compliance Gateway', version: '2.0.0', status: 'ONLINE', enclaveDid: aegisSigner?.enclaveDid || "initializing",
     endpoints: { 'POST /enforce': 'Policy Enforcement' }
 }));
 

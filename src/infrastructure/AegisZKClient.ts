@@ -21,8 +21,13 @@ export class AegisZKClient {
         // Default to the built host binary in the target directory (check release then debug for development)
         const releasePath = path.resolve(__dirname, '../../aegis-zk-prover/target/release/host');
         const debugPath = path.resolve(__dirname, '../../aegis-zk-prover/target/debug/host');
+        const prodPath = '/app/bin/aegis-zk-prover';
         
-        this.proverBinaryPath = (fs.existsSync(releasePath) ? releasePath : debugPath);
+        if (fs.existsSync(prodPath)) {
+            this.proverBinaryPath = prodPath;
+        } else {
+            this.proverBinaryPath = (fs.existsSync(releasePath) ? releasePath : debugPath);
+        }
 
         if (fs.existsSync(this.proverBinaryPath)) {
             const fileBuffer = fs.readFileSync(this.proverBinaryPath);
