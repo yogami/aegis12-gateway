@@ -8,12 +8,14 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     build-essential \
     curl \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Use rzup to install the RISC Zero toolchain (official method)
 RUN curl -L https://risczero.com/install | bash
-ENV PATH="/root/.risc0/bin:${PATH}"
-RUN rzup install
+ENV PATH="/root/.risc0/bin:/root/.cargo/bin:${PATH}"
+RUN rzup install rust
+RUN rzup install cargo-risczero
 
 # Note: We don't run `cargo risczero install` here as it might be too heavy for some CI environments
 # but the host build will trigger guest compilation if needed.
