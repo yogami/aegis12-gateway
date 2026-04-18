@@ -6,14 +6,15 @@
  */
 
 async function enforceAegisPolicy(agentAction: any) {
-    const GATEWAY_URL = 'https://aegis12-gateway-production.up.railway.app/enforce';
+    const GATEWAY_URL = 'http://localhost:8000/enforce';
 
     const payload = {
         agent: {
             id: "your_agent_id",
             purpose: "DEFI_TRADING",
-            tenantId: "your_tenant_id",
-            walletAddress: "0x..." 
+            tenantId: "tenant-council",
+            currentTier: "T4",
+            walletAddress: "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A" 
         },
         action: agentAction, // e.g., { toolId: "swap", parameters: { ... } }
         context: {
@@ -21,10 +22,19 @@ async function enforceAegisPolicy(agentAction: any) {
             currentAnomalyScore: 0.05 // Feed your internal risk score here
         },
         dynamicPolicy: {
-            // Your cryptographically signed policy config goes here
-            // This ensures the TEE enclave honors your specific limits.
-            signature: "0x...", 
-            policyConfig: { /* ... */ }
+            // Using demo-bypass for the minimal example
+            signature: "demo-bypass-signature", 
+            policyConfig: {
+                policyId: "demo-policy-1",
+                tenantId: "tenant-council",
+                version: "1.0",
+                chainId: 1399811149,
+                crossChainTarget: "solana:devnet",
+                nonce: Date.now().toString(),
+                expiresAt: Math.floor(Date.now() / 1000) + 3600,
+                maxAnomalyScore: 50,
+                financialLimitsString: JSON.stringify({ "T4": 1000000 })
+            }
         }
     };
 
@@ -44,7 +54,8 @@ async function myAgentTrade() {
         parameters: {
             fromMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC
             toMint: "So11111111111111111111111111111111111111112", // SOL
-            amount: 100
+            amount: 100,
+            slippageBps: 50
         }
     };
 
@@ -59,3 +70,5 @@ async function myAgentTrade() {
         // STOP EXECUTION IMMEDIATELY
     }
 }
+
+myAgentTrade();

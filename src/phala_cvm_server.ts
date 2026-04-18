@@ -15,7 +15,7 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    if (req.method === "POST" && req.url === "/evidence") {
+    if (req.method === "POST" && (req.url === "/evidence" || req.url === "/enforce")) {
         let body = "";
         req.on("data", chunk => { body += chunk.toString(); });
         req.on("error", (err) => {

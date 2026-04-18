@@ -10,33 +10,52 @@ function bytesToHex(bytes: Uint8Array): string {
     return Buffer.from(bytes).toString('hex');
 }
 
-export class AegisSigner {
-    private privateKey: Uint8Array;
-    private publicKey: Uint8Array;
-    private ethWallet: Wallet;
-    public readonly enclaveDid: string;
+import { TappdClient } from './TappdClient';
 
-    constructor(enclaveDid?: string) {
-        // TEE Hardware Seed Derivation (Mitigates CRIT-01 and A-1)
-        const tappd = new PhalaTappdMock();
+export class AegisSigner {
+    private privateKey!: Uint8Array;
+    private publicKey!: Uint8Array;
+    private ethWallet!: Wallet;
+    public enclaveDid!: string;
+
+    private constructor() {}
+
+    public static async create(enclaveDid?: string): Promise<AegisSigner> {
+        const instance = new AegisSigner();
+        const tappd = new TappdClient();
         
         // Derive Solana (Ed25519) key
+        const solanaDerived = await tappd.deriveKey("aegis-12/solana-ed25519", 'ed25519');
+        const rawSol = hexToBytes(solanaDerived.replace('0x', ''));
+        const keyPair = nacl.sign.keyPair.fromSeed(rawSol.slice(0, 32));
+        instance.privateKey = keyPair.secretKey;
+        instance.publicKey = keyPair.publicKey;
+
+        // Derive Ethereum (secp256k1) key
+        const ethDerived = await tappd.deriveKey("aegis-12/eth-secp256k1", 'secp256k1');
+        instance.ethWallet = new Wallet(ethDerived);
+
+        // Wipe derivation buffers
+        rawSol.fill(0);
+
+        instance.enclaveDid = enclaveDid || `did:aegis:enclave:${Buffer.from(instance.publicKey).toString('hex').substring(0, 16)}`;
+        return instance;
+    }
+
+    // Keep the sync constructor for backward compatibility with mocks if needed, 
+    // but warn that it uses the mock.
+    public static createSync(enclaveDid?: string): AegisSigner {
+        const instance = new AegisSigner();
+        const tappd = new PhalaTappdMock();
         const solanaDerived = tappd.deriveKey("aegis-12/solana-ed25519");
         const rawSol = hexToBytes(solanaDerived.replace('0x', ''));
         const keyPair = nacl.sign.keyPair.fromSeed(rawSol.slice(0, 32));
-        this.privateKey = keyPair.secretKey;
-        this.publicKey = keyPair.publicKey;
-
-        // Derive Ethereum (secp256k1) key
+        instance.privateKey = keyPair.secretKey;
+        instance.publicKey = keyPair.publicKey;
         const ethDerived = tappd.deriveKey("aegis-12/eth-secp256k1");
-        this.ethWallet = new Wallet(ethDerived);
-
-        // Wipe derivation buffers and plaintext ENV if present
-        if (process.env.SOLANA_PRIVATE_KEY_HEX) delete process.env.SOLANA_PRIVATE_KEY_HEX;
-        if (process.env.ETH_PRIVATE_KEY_HEX) delete process.env.ETH_PRIVATE_KEY_HEX;
-        rawSol.fill(0);
-
-        this.enclaveDid = enclaveDid || `did:aegis:enclave:${Buffer.from(this.publicKey).toString('hex').substring(0, 16)}`;
+        instance.ethWallet = new Wallet(ethDerived);
+        instance.enclaveDid = enclaveDid || `did:aegis:enclave:${Buffer.from(instance.publicKey).toString('hex').substring(0, 16)}`;
+        return instance;
     }
 
     public getAddress(): string {

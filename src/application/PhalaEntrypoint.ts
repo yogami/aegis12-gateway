@@ -4,12 +4,21 @@ import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest } from '../types';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
 
-export const signer = new AegisSigner();
-export const pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
-export const anchor = new SolanaAnchor('devnet');
+let signer: AegisSigner;
+let pep: AegisPEP;
+let anchor: SolanaAnchor;
+
+async function initializeHardware() {
+    if (!signer) {
+        signer = await AegisSigner.create();
+        pep = new AegisPEP(signer, JSON.parse(process.env.AUTHORIZED_TENANTS || '{}'));
+        anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+    }
+}
 
 export default async function phalaEntrypoint(payloadStr: string): Promise<string> {
     try {
+        await initializeHardware();
         const payload: PolicyEvaluationRequest = JSON.parse(payloadStr);
         const receipt = await pep.enforce(payload);
         
