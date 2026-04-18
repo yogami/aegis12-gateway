@@ -45,7 +45,7 @@ jobs:
           echo "Fetching latest revision for App $APP_ID..."
           
           # Get the latest revision ID using the verified X-API-Key method
-          REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+          REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
                       "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
           
           REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].revision_id')
@@ -58,7 +58,7 @@ jobs:
           echo "Triggering redeploy for Revision $REVISION_ID..."
           
           curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
-               -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
                -H "Content-Type: application/json"
 
       - name: Verify Live Deployment
