@@ -63,8 +63,8 @@ jobs:
 
       - name: Verify Live Deployment
         run: |
-          echo "Waiting for enclave to reboot (90s)..."
-          sleep 90
+          echo "Waiting for enclave to reboot (150s)..."
+          sleep 150
           RESPONSE=$(curl -s -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce -d '{"action":"verify"}' -H "Content-Type: application/json")
           echo "Enclave Response: $RESPONSE"
           if [[ "$RESPONSE" == *"v1.0.1-unmocked"* ]]; then
