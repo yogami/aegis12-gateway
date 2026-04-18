@@ -39,17 +39,16 @@ jobs:
           APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
           echo "Fetching latest revision for App $APP_ID..."
           
-          # Get the latest revision ID - Try X-API-Key first, then Bearer fallback
+      - name: Trigger Phala Cloud Update (Verified v1 API)
+        run: |
+          APP_ID="c27b0861a2bf2891f43f3556d3aa9526d704f7bc"
+          echo "Fetching latest revision for App $APP_ID..."
+          
+          # Get the latest revision ID using the verified X-API-Key method
           REVISIONS=$(curl -s -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
                       "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
           
-          if [[ "$REVISIONS" == *"Not authenticated"* ]]; then
-            echo "⚠️ X-API-Key failed. Retrying with Authorization: Bearer..."
-            REVISIONS=$(curl -s -H "Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
-                        "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")
-          fi
-          
-          REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].id')
+          REVISION_ID=$(echo $REVISIONS | jq -r '.revisions[0].revision_id')
           
           if [ "$REVISION_ID" == "null" ] || [ -z "$REVISION_ID" ]; then
             echo "❌ Error: Could not fetch Revision ID. API Response: $REVISIONS"
@@ -58,28 +57,9 @@ jobs:
           
           echo "Triggering redeploy for Revision $REVISION_ID..."
           
-          # Use the auth method that worked
-          AUTH_HEADER="X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}"
-          if [[ "$(curl -s -o /dev/null -w "%{http_code}" -H "$AUTH_HEADER" "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions")" != "200" ]]; then
-             AUTH_HEADER="Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}"
-          fi
-
-          echo "Using Auth Method: $(echo $AUTH_HEADER | cut -d: -f1)"
-          
-          # Try App-level redeploy
-          REDEPLOY_RESPONSE=$(curl -s -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
-               -H "$AUTH_HEADER" \
-               -H "Content-Type: application/json")
-          
-          if [[ "$REDEPLOY_RESPONSE" == *"404"* ]] || [[ "$REDEPLOY_RESPONSE" == *"401"* ]]; then
-            echo "⚠️ App-level redeploy failed. Trying Project-level fallback..."
-            # Note: Project ID is derived from the App's project context
-            curl -i -X POST "https://cloud-api.phala.com/api/v1/projects/yogamis-projects/apps/$APP_ID/redeploy" \
-                 -H "$AUTH_HEADER" \
-                 -H "Content-Type: application/json"
-          else
-            echo "$REDEPLOY_RESPONSE"
-          fi
+          curl -i -X POST "https://cloud-api.phala.com/api/v1/apps/$APP_ID/revisions/$REVISION_ID/redeploy" \
+               -H "X-API-Key: ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
+               -H "Content-Type: application/json"
 
       - name: Verify Live Deployment
         run: |
