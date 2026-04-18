@@ -27,6 +27,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and Push Phala CVM Image
+        id: docker_build
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -37,12 +38,25 @@ jobs:
       - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
         run: |
           CVM_ID="9fc2cfd41a334dcb408b19a648c2d3c7386e4afb"
-          COMPOSE_CONTENT=$(cat docker-compose.phala.yml)
+          IMAGE_DIGEST="${{ steps.docker_build.outputs.digest }}"
+          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm"
           
-          echo "Step 1: Provisioning new configuration for CVM $CVM_ID..."
+          echo "Step 1: Provisioning new configuration for CVM $CVM_ID with digest $IMAGE_DIGEST..."
+          
+          # Construct Docker Compose with the specific digest to force a new hash
+          COMPOSE_WITH_DIGEST=$(cat <<EOF
+          version: '3.8'
+          services:
+            aegis12-tee:
+              image: $IMAGE_NAME@$IMAGE_DIGEST
+              ports:
+                - "8000:8000"
+          EOF
+          )
+          
           PROVISION_PAYLOAD=$(jq -n \
             --arg name "aegis12-gateway" \
-            --arg compose "$COMPOSE_CONTENT" \
+            --arg compose "$COMPOSE_WITH_DIGEST" \
             '{
               name: $name,
               docker_compose_file: $compose,
@@ -67,7 +81,7 @@ jobs:
             exit 1
           fi
           
-          echo "Step 2: Submitting update with Compose Hash $COMPOSE_HASH..."
+          echo "Step 2: Submitting update with NEW Compose Hash $COMPOSE_HASH..."
           SUBMIT_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/compose_file/submit" \
                -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
                -H "Content-Type: application/json" \
