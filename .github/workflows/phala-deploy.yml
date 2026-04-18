@@ -121,8 +121,26 @@ jobs:
 
       - name: Verify Live Deployment
         run: |
-          echo "Waiting for hardware enclave to pull image and boot (180s)..."
-          sleep 180
+          echo "Waiting for hardware enclave to boot (Polling)..."
+          ENCLAVE_URL="https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/"
+          MAX_RETRIES=30
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL" || echo "000")
+            if [ "$RESPONSE_CODE" != "000" ]; then
+              echo "✅ Enclave Gateway is LIVE (HTTP $RESPONSE_CODE). Proceeding to cryptographic verification..."
+              break
+            fi
+            RETRY_COUNT=$((RETRY_COUNT+1))
+            echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Enclave not ready yet. Sleeping 10s..."
+            sleep 10
+          done
+
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "❌ Error: Enclave failed to boot within 5 minutes."
+            exit 1
+          fi
           
           echo "Generating Dynamic EIP-712 Verification Payload..."
           cat <<'EOF' > generate_payload.ts
