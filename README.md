@@ -52,3 +52,30 @@ npm run start:cvm
 npm run demo:agent
 ```
 You will see the agent complete a safe 500 USDC swap, followed by a simulated prompt-injection attempt to drain 10,000,000 USDC. Watch the TEE physically reject the rogue transaction and verify the immutable Denial SPL Memo anchored on the Solana Devnet Explorer.
+
+---
+
+## 🤝 For Partners: 60-Second Integration
+
+If you are building an autonomous agent for the Colosseum Hackathon, you can protect your liquidity and satisfy EU AI Act logging requirements by routing your intents through the Aegis-12 gateway.
+
+**Endpoint:** `https://aegis12-gateway-production.up.railway.app/enforce`
+
+### Minimal Example (TypeScript)
+```typescript
+const decision = await fetch('https://aegis12-gateway-production.up.railway.app/enforce', {
+    method: 'POST',
+    body: JSON.stringify({
+        agent: { id: "my_bot" },
+        action: { toolId: "swap", parameters: { amount: 100 } }
+    })
+}).then(res => res.json());
+
+if (decision.status === "approved") {
+    // Proceed with trade
+} else {
+    console.error("TEE Blocked Transaction:", decision.error);
+}
+```
+
+See the full [Minimal Integration Example](file:///Users/user1000/gitprojects/aegis12-gateway/examples/minimal_agent_integration.ts) for details.
