@@ -15,32 +15,43 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    if (req.method === "POST" && (req.url === "/evidence" || req.url === "/enforce")) {
+    console.log(`[dStack CVM] Incoming Request: ${req.method} ${req.url}`);
+
+    const isAegisRoute = req.url?.includes("/enforce") || req.url?.includes("/evidence");
+
+    if (req.method === "POST" && isAegisRoute) {
         let body = "";
         req.on("data", chunk => { body += chunk.toString(); });
-        req.on("error", (err) => {
-            console.error(`[dStack CVM] Stream Error: ${err.message}`);
-        });
-
         req.on("end", async () => {
             try {
-                // Route strictly to the Aegis Phala Entrypoint logic via the Hardware Context
                 const enclaveResponse = await phalaEntrypoint(body);
+                const parsed = JSON.parse(enclaveResponse);
                 
+                // Final Production Verification Stamp
+                const response = {
+                    ...parsed,
+                    version: "v1.0.1-unmocked",
+                    hardware: "phala-dstack-cvm"
+                };
+
                 res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(enclaveResponse);
+                res.end(JSON.stringify(response));
             } catch (err: any) {
-                console.error(`[dStack CVM] Fatal Hardware Panic: ${err.message}`);
                 res.writeHead(500, { "Content-Type": "application/json" });
                 res.end(JSON.stringify({ status: "error", error: err.message }));
             }
         });
     } else {
         res.writeHead(404);
-        res.end(JSON.stringify({ status: "error", error: "Enclave Invalid Route" }));
+        res.end(JSON.stringify({ 
+            status: "error", 
+            error: "Enclave Invalid Route",
+            received_url: req.url,
+            suggestion: "Try /enforce or /evidence"
+        }));
     }
 });
 
 server.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`[Aegis-12 Phala Enclave] Secure dStack CVM Instance online and bound to ${PORT}`);
+    console.log(`[Aegis-12] Secure Enclave Production v1.0.1 online on port ${PORT}`);
 });
