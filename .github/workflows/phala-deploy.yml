@@ -34,10 +34,10 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
 
-      - name: Trigger Phala Cloud Update (v2)
+      - name: Trigger Phala Cloud Update (v2 - App ID)
         run: |
-          echo "Triggering Phala Cloud Deployment..."
-          curl -X POST https://cloud-api.phala.network/v2/instances/2cb69b02-0b15-4870-af8e-5e032ab0e680/redeploy \
+          echo "Triggering Phala Cloud Deployment for App c27b0861a2bf2891f43f3556d3aa9526d704f7bc..."
+          curl -i -X POST https://cloud-api.phala.network/v2/apps/c27b0861a2bf2891f43f3556d3aa9526d704f7bc/redeploy \
                -H "Authorization: Bearer ${{ secrets.PHALA_DEPLOY_TOKEN }}" \
                -H "Content-Type: application/json"
 
