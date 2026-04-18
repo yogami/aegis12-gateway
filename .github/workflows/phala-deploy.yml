@@ -116,48 +116,93 @@ jobs:
             fi
           done
 
+      - name: Install verification dependencies
+        run: npm install ethers tsx
+
       - name: Verify Live Deployment
         run: |
           echo "Waiting for hardware enclave to pull image and boot (180s)..."
           sleep 180
           
-          VALID_PAYLOAD='{
-            "agent": {
-              "did": "did:solana:agent-001",
-              "purpose": "financial_operations",
-              "currentTier": "T4"
-            },
-            "action": {
-              "toolId": "solana_transfer",
-              "actionType": "transfer",
-              "parameters": {
-                "to": "ReceiverPublicAddress",
-                "amount": "100"
-              }
-            },
-            "context": {
-              "sessionId": "s-test-001",
-              "actionsThisSession": 1,
-              "actionsThisHour": 1,
-              "currentAnomalyScore": 0.1,
-              "recentIncidents": 0
-            },
-            "dynamicPolicy": {
-              "policyConfig": {
-                "policyId": "p-test-001",
-                "tenantId": "tenant-001",
-                "version": "1.0.0",
-                "chainId": 1399811149,
-                "crossChainTarget": "solana:devnet",
-                "maxAnomalyScore": 100,
-                "financialLimitsString": "{\"T4\":1000000}",
-                "expiresAt": 1900000000,
-                "nonce": "n-test-001"
+          echo "Generating Dynamic EIP-712 Verification Payload..."
+          cat <<'EOF' > generate_payload.ts
+          import { ethers } from 'ethers';
+
+          async function main() {
+            const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+            const wallet = new ethers.Wallet(privateKey);
+            const nonce = "n-" + Date.now();
+            
+            const domain = {
+              name: "Aegis-12-Compliance-Matrix",
+              version: "1.0.0",
+              chainId: 1399811149,
+              verifyingContract: "0x1111111111111111111111111111111111111111"
+            };
+
+            const types = {
+              Policy: [
+                { name: 'policyId', type: 'string' },
+                { name: 'tenantId', type: 'string' },
+                { name: 'version', type: 'string' },
+                { name: 'chainId', type: 'uint256' },
+                { name: 'crossChainTarget', type: 'string' },
+                { name: 'maxAnomalyScore', type: 'uint256' },
+                { name: 'financialLimitsString', type: 'string' },
+                { name: 'expiresAt', type: 'uint256' },
+                { name: 'nonce', type: 'string' }
+              ]
+            };
+
+            const policyConfig = {
+              policyId: "p-test-001",
+              tenantId: "tenant-001",
+              version: "1.0.0",
+              chainId: 1399811149,
+              crossChainTarget: "solana:devnet",
+              maxAnomalyScore: 100,
+              financialLimitsString: "{\"T4\":1000000}",
+              expiresAt: Math.floor(Date.now() / 1000) + 3600,
+              nonce: nonce
+            };
+
+            const signature = await wallet._signTypedData(domain, types, policyConfig);
+
+            const payload = {
+              agent: {
+                did: "did:solana:agent-001",
+                purpose: "financial_operations",
+                currentTier: "T4"
               },
-              "ownerPublicKey": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-              "signature": "0xa710a6ea6a7905bba937022d6ca57d7e17ff1b608cb2a55ba1fefead56e5f4474cb432a73b549dd3cf7407bea5b2f8946cb9705e02fe7e7e2426d946de19ae481b"
-            }
-          }'
+              action: {
+                toolId: "solana_transfer",
+                actionType: "transfer",
+                parameters: {
+                  to: "ReceiverPublicAddress",
+                  amount: "100"
+                }
+              },
+              context: {
+                sessionId: "s-test-" + Date.now(),
+                actionsThisSession: 1,
+                actionsThisHour: 1,
+                currentAnomalyScore: 0.1,
+                recentIncidents: 0
+              },
+              dynamicPolicy: {
+                policyConfig,
+                ownerPublicKey: wallet.address,
+                signature
+              }
+            };
+
+            console.log(JSON.stringify(payload));
+          }
+
+          main();
+          EOF
+
+          VALID_PAYLOAD=$(npx tsx generate_payload.ts)
 
           echo "Sending Cryptographically Validated Enforcement Request..."
           RESPONSE=$(curl -s --max-time 30 -X POST https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce \
