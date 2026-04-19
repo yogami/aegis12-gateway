@@ -125,7 +125,7 @@ jobs:
         run: |
           echo "Waiting for hardware enclave to boot (Polling)..."
           ENCLAVE_URL="https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network"
-          MAX_RETRIES=30
+          MAX_RETRIES=90
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
