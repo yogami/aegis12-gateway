@@ -22,8 +22,7 @@ async function verify() {
     const domain = {
         name: "Aegis-12-Compliance-Matrix",
         version: "1.0.0",
-        chainId: 1399811149,
-        verifyingContract: "0x1111111111111111111111111111111111111111"
+        chainId: 1399811149
     };
 
     const types = {
@@ -56,7 +55,7 @@ async function verify() {
 
     const payload = {
         agent: { did: "did:solana:auditor", purpose: "financial_operations", currentTier: "T4" },
-        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "AuditorAddress", amount: "1" } },
+        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 1, token: "SOL" } },
         context: { sessionId: "audit-" + Date.now(), actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
         dynamicPolicy: { policyConfig, ownerPublicKey: wallet.address, signature }
     };
@@ -74,7 +73,7 @@ async function verify() {
     }
 
     const body = await response.json();
-    console.log(`[Auditor] ✅ Enforcement Approved. Status: ${body.status}`);
+    console.log(`[Auditor] ✅ Enforcement Approved. Status: ${body.status}`, body);
 
     // SUBSTANCE AUDIT 1: SOLANA ANCHOR
     const solanaTx = body.solana_tx;
