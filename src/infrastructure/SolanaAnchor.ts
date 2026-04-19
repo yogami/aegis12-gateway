@@ -185,6 +185,20 @@ export class SolanaAnchor {
             createMemoInstruction(memo, [this.payer.publicKey])
         );
 
+        // Auto-fund ephemeral keypairs on devnet
+        if (!process.env.SOLANA_PAYER_SECRET && this.cluster !== 'mainnet-beta') {
+            try {
+                const balance = await this.connection.getBalance(this.payer.publicKey);
+                if (balance < 5000000) {
+                    console.log(`[SolanaAnchor] ⚠️ Ephemeral key balance low (${balance}). Requesting devnet airdrop...`);
+                    await this.requestAirdrop(2_000_000_000);
+                    console.log(`[SolanaAnchor] ✅ Airdrop successful.`);
+                }
+            } catch (e: any) {
+                console.warn(`[SolanaAnchor] ⚠️ Airdrop failed: ${e.message}`);
+            }
+        }
+
         // Resilient blockhash retrieval
         let blockhash = null;
         for (let i = 0; i < 3; i++) {
