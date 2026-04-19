@@ -213,6 +213,29 @@ async function anchorToLedger(receipt: any, decision: 'approved' | 'denied'): Pr
     }
 }
 
+/**
+ * [PHASE 2.2: SUBSTANCE DISCOVERY]
+ * Allows the Auditor to retrieve the status of a background ZK computation.
+ */
+export async function getEvidenceStatus(receiptId: string): Promise<string> {
+    await initializeHardware();
+    if (!pep) throw new Error("[Aegis-12] PEP not initialized.");
+    
+    const evidence = await (pep as any).stateStore.getEvidenceByReceiptId(receiptId);
+    if (!evidence) {
+        return JSON.stringify({ status: "NOT_FOUND", receiptId });
+    }
+
+    // Map the internal state to the Auditor's expected protocol
+    return JSON.stringify({
+        status: evidence.ars_anchor && evidence.ars_anchor !== "pending" ? "COMPLETED" : "pending",
+        receiptId: evidence.receiptId,
+        ars_anchor: evidence.ars_anchor,
+        zk_vkey: evidence.zk_vkey,
+        solana_tx: evidence.solana_tx
+    });
+}
+
 async function handleEntrypointError(e: any): Promise<string> {
     const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
     const solanaReceipt = await anchorToLedger(dummyReceipt, 'denied');

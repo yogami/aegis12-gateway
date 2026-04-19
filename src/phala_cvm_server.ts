@@ -1,5 +1,5 @@
 import * as http from "http";
-import phalaEntrypoint, { initializeHardware, anchor, signer } from "./application/PhalaEntrypoint";
+import phalaEntrypoint, { initializeHardware, anchor, signer, getEvidenceStatus } from "./application/PhalaEntrypoint";
 
 const PORT = process.env.PORT || 8000;
 
@@ -33,6 +33,25 @@ const server = http.createServer(async (req, res) => {
         } catch (err: any) {
             res.writeHead(500, { "Content-Type": "application/json" });
             res.end(JSON.stringify({ status: "error", error: "Hardware Init Failed", details: err.message }));
+        }
+        return;
+    }
+
+    // [PHASE 2.2: SUBSTANCE DISCOVERY]
+    // Manual URL Routing for GET /evidence/:receiptId
+    if (req.method === "GET" && req.url?.startsWith("/evidence/")) {
+        try {
+            const receiptId = req.url.split("/evidence/")[1];
+            if (!receiptId) throw new Error("Missing Receipt ID in evidence lookup.");
+            
+            console.log(`[dStack CVM] Evidence Lookup: ${receiptId}`);
+            const status = await getEvidenceStatus(receiptId);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(status);
+        } catch (err: any) {
+            console.error(`[dStack CVM] Lookup Error: ${err.message}`);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ status: "error", error: err.message }));
         }
         return;
     }
