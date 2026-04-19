@@ -29,6 +29,7 @@ fastify.post('/enforce', controller.enforce.bind(controller));
 // 3. SOLANA RECEIPT ANCHORING
 fastify.post('/anchor-receipt', controller.anchorReceipt.bind(controller));
 fastify.get('/verify/:txSignature', controller.verifySignature.bind(controller));
+fastify.get('/evidence/:receiptId', controller.getEvidenceStatus.bind(controller));
 
 // 4. SOLANA TRANSACTION FIREWALL
 fastify.post('/solana/enforce-tx', controller.enforceSolanaTx.bind(controller));

@@ -161,6 +161,10 @@ export class AegisPEP {
         return await this.stateStore.getEvidence(txSignature);
     }
 
+    public async getEvidenceByReceiptId(receiptId: string): Promise<any | null> {
+        return await this.stateStore.getEvidenceByReceiptId(receiptId);
+    }
+
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
         

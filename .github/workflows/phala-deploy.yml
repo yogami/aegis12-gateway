@@ -34,6 +34,8 @@ jobs:
           file: ./Dockerfile.phala_cvm
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
         run: |

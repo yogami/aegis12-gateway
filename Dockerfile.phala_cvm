@@ -59,6 +59,11 @@ RUN mkdir -p /app/bin
 COPY --from=prover-builder /build/aegis-zk-prover/target/release/host /app/bin/aegis-zk-prover
 RUN chmod +x /app/bin/aegis-zk-prover
 
+# Copy RISC Zero IPC prover dependencies (r0vm)
+COPY --from=prover-builder /root/.risc0 /root/.risc0
+COPY --from=prover-builder /root/.cargo /root/.cargo
+ENV PATH="/root/.cargo/bin:/root/.risc0/bin:${PATH}"
+
 # Create data directory for WAL Engine state persistence and lock files
 RUN mkdir -p /var/data
 

@@ -86,6 +86,32 @@ export class AegisLocalStateStore implements IAegisStateStore {
         return this.evidence.get(txSignature) || null;
     }
 
+    public async getEvidenceByReceiptId(receiptId: string): Promise<any | null> {
+        for (const v of this.evidence.values()) {
+            if (v.receiptId === receiptId) {
+                return v;
+            }
+        }
+        return null;
+    }
+
+    public async updateZkSeal(receiptId: string, zkSealData: { seal?: string, vkey?: string }): Promise<void> {
+        let foundKey: string | null = null;
+        for (const [k, v] of this.evidence.entries()) {
+            if (v.receiptId === receiptId) {
+                foundKey = k;
+                break;
+            }
+        }
+        if (foundKey) {
+            const receipt = this.evidence.get(foundKey);
+            receipt.ars_anchor = zkSealData.seal;
+            receipt.zk_vkey = zkSealData.vkey;
+            this.evidence.set(foundKey, receipt);
+            await this.persist();
+        }
+    }
+
     public async checkpoint(): Promise<void> {
         await this.persist();
     }

@@ -11,5 +11,7 @@ export interface IAegisStateStore {
     updateStats(agentId: string, deltaSpend: number): Promise<BehavioralStats>;
     saveEvidence(receipt: any, solanaTx?: string): Promise<void>;
     getEvidence(txSignature: string): Promise<any | null>;
+    getEvidenceByReceiptId(receiptId: string): Promise<any | null>;
+    updateZkSeal(receiptId: string, zkSealData: { seal?: string, vkey?: string }): Promise<void>;
     checkpoint(): Promise<void>; // Anchoring hook for Solana
 }

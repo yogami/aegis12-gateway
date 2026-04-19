@@ -124,8 +124,19 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             throw new Error(`[TERMINAL REFUSAL] Genuine Enclave measurement (PCR0) is strictly required for this High-Veracity session. Boot aborted.`);
         }
 
-        const zkProofData = await generateZkProof(receipt);
         const solanaReceipt = await anchorToLedger(receipt, 'approved');
+
+        // Asynchronous ZK Proving Pipeline
+        // We offload the 3-minute ZK-STARK computation to the background so we can instantly 
+        // return the HTTP response without getting dropped by the ingress proxy timeout.
+        generateZkProof(receipt).then(zkProofData => {
+            console.log(`[Aegis-12] ZK Computation Complete. Updating state store for ${receipt.receiptId}`);
+            if ((pep as any).stateStore) {
+                (pep as any).stateStore.updateZkSeal(receipt.receiptId, zkProofData).catch((e: any) => console.error(e));
+            }
+        }).catch(err => {
+            console.error(`[Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: ${err.message}`);
+        });
 
         return JSON.stringify({
             status: "approved",
@@ -133,8 +144,8 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             enclaveDid: signer?.enclaveDid || "unknown",
             attestation,
             pcr0: pcr0,
-            ars_anchor: zkProofData.seal,
-            zk_vkey: zkProofData.vkey,
+            ars_anchor: "pending",
+            zk_vkey: "pending",
             solana_tx: solanaReceipt?.txSignature,
             explorer_url: solanaReceipt?.explorerUrl
         });

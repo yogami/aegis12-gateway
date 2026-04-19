@@ -122,6 +122,31 @@ export class AegisController {
         }
     }
 
+    public async getEvidenceStatus(request: FastifyRequest<{ Params: { receiptId: string } }>, reply: FastifyReply) {
+        try {
+            await initializeHardware();
+            const { receiptId } = request.params;
+            console.log(`[Aegis-12] Retrieving evidence for receipt: ${receiptId}`);
+            
+            const evidence = await pep.getEvidenceByReceiptId(receiptId);
+            
+            if (!evidence) {
+                return reply.status(404).send({ error: `Receipt ${receiptId} not found in state store.` });
+            }
+            
+            return reply.status(200).send({
+                receiptId: evidence.receiptId,
+                status: evidence.ars_anchor && evidence.ars_anchor !== "pending" ? "COMPLETED" : "PENDING_ASYNC_COMPUTATION",
+                ars_anchor: evidence.ars_anchor || "pending",
+                zk_vkey: evidence.zk_vkey || "pending",
+                solana_tx: evidence.solana_tx || "pending",
+                timestamp: evidence.timestamp
+            });
+        } catch (err: any) {
+            return reply.status(500).send({ status: 'error', error: err.message });
+        }
+    }
+
     public async enforceSolanaTx(request: FastifyRequest, reply: FastifyReply) {
         try {
             await initializeHardware();
