@@ -185,8 +185,7 @@ export class SolanaAnchor {
             createMemoInstruction(memo, [this.payer.publicKey])
         );
 
-        // Auto-fund ephemeral keypairs on devnet
-        let faucetDry = false;
+        // Auto-fund ephemeral keypairs on devnet (Legacy fallback warning only)
         if (!process.env.SOLANA_PAYER_SECRET && this.cluster !== 'mainnet-beta') {
             try {
                 const balance = await this.connection.getBalance(this.payer.publicKey);
@@ -197,22 +196,8 @@ export class SolanaAnchor {
                 }
             } catch (e: any) {
                 console.warn(`[SolanaAnchor] ⚠️ Airdrop failed: ${e.message}`);
-                faucetDry = true;
+                // Hard fail logic preserved. If the wallet is empty and airdrop fails, transaction building will throw an error natively.
             }
-        }
-
-        if (faucetDry) {
-            console.warn(`[SolanaAnchor] 🛑 Devnet Faucet is DRY (HTTP 429). Triggering Degraded Fallback Protocol.`);
-            return {
-                txSignature: "ARS_FAUCET_DRY_FALLBACK_" + pQHashStr.substring(0, 16),
-                receiptHash: pQHashStr,
-                slot: 0,
-                cluster: this.cluster,
-                explorerUrl: "https://faucet.solana.com/dry",
-                anchoredAt: new Date().toISOString(),
-                isZkSharded,
-                attestationState: 'DEGRADED_FAUCET_DRY'
-            };
         }
 
         // Resilient blockhash retrieval
@@ -264,19 +249,6 @@ export class SolanaAnchor {
         receipt?: ToolExecutionReceipt,
         signer?: AegisSigner
     ): Promise<VerificationResult> {
-        if (txSignature.startsWith("ARS_FAUCET_DRY_FALLBACK_")) {
-            return {
-                verified: true, // Degraded verification
-                txSignature,
-                onChainMemo: "FAUCET_DRY_OFFCHAIN_FALLBACK",
-                recomputedHash: receipt ? this.computeReceiptHash(receipt) : null,
-                enclaveSignatureValid: true, // Bypass for demo fallback
-                slot: 0,
-                blockTime: Math.floor(Date.now() / 1000),
-                error: "WARNING: Solana Devnet Faucet Dry. Operating in Degraded High-Veracity Mode."
-            };
-        }
-
         try {
             const tx: ParsedTransactionWithMeta | null =
                 await this.connection.getParsedTransaction(txSignature, {

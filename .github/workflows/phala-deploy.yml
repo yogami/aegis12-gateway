@@ -56,6 +56,7 @@ jobs:
                 - TEE_ENV=phala
                 - NODE_ENV=production
                 - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
+                - SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
               volumes:
                 - /var/run/dstack.sock:/var/run/dstack.sock
           EOF
