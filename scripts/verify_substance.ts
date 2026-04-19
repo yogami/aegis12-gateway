@@ -13,7 +13,8 @@ import { ethers } from 'ethers';
 
 async function verify() {
     const url = process.argv[2] || "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/";
-    console.log(`[Auditor] 🔍 Auditing Substance at ${url}...`);
+    const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+    console.log(`[Auditor] 🔍 Auditing Substance at ${baseUrl}...`);
 
     const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
     const wallet = new ethers.Wallet(privateKey);
@@ -60,7 +61,7 @@ async function verify() {
         dynamicPolicy: { policyConfig, ownerPublicKey: wallet.address, signature }
     };
 
-    const response = await fetch(`${url}/enforce`, {
+    const response = await fetch(`${baseUrl}/enforce`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -118,7 +119,7 @@ async function verify() {
             attempts++;
             console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/${maxAttempts})`);
             try {
-                const evidenceRes = await fetch(`${url}/evidence/${receiptId}`);
+                const evidenceRes = await fetch(`${baseUrl}/evidence/${receiptId}`);
                 if (evidenceRes.ok) {
                     const evidenceBody = await evidenceRes.json();
                     if (evidenceBody.status === "COMPLETED") {

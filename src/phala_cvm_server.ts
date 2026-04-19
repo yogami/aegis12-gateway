@@ -39,7 +39,8 @@ const server = http.createServer(async (req, res) => {
 
     // [PHASE 2.2: SUBSTANCE DISCOVERY]
     // Manual URL Routing for GET /evidence/:receiptId
-    if (req.method === "GET" && req.url?.startsWith("/evidence/")) {
+    // Resilient to double-slashes or proxy prefixes
+    if (req.method === "GET" && req.url?.includes("/evidence/")) {
         try {
             const receiptId = req.url.split("/evidence/")[1];
             if (!receiptId) throw new Error("Missing Receipt ID in evidence lookup.");
