@@ -50,12 +50,12 @@ export class AegisZKClient {
     public async generateProof(input: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
-            // Increased timeout to 5 minutes (300,000ms) because ZK proofs take a long time on CPU
-            const child = execFile(this.proverBinaryPath, [], { timeout: 300000, maxBuffer: 10485760 }, (error, stdout, stderr) => {
+            // Increased timeout to 15 minutes (900,000ms) because ZK proofs take a long time on CPU
+            const child = execFile(this.proverBinaryPath, [], { timeout: 900000, maxBuffer: 10485760 }, (error, stdout, stderr) => {
                 if (error) {
                     // Check if it was killed by our timeout
                     if (error.killed) {
-                        reject(new Error(`[AEGIS-ZK-ERROR] Prover timed out after 5 minutes and was killed.`));
+                        reject(new Error(`[AEGIS-ZK-ERROR] Prover timed out after 15 minutes and was killed.`));
                         return;
                     }
                     reject(new Error(`[AEGIS-ZK-ERROR] Prover exited with code ${error.code}. Stderr: ${stderr}`));

@@ -112,16 +112,19 @@ async function verify() {
         const receiptId = body.receipt.receiptId;
         
         let attempts = 0;
-        while (zkSeal === "pending" && attempts < 45) {
+        while (zkSeal === "pending" && attempts < 90) {
             await new Promise(r => setTimeout(r, 10000));
             attempts++;
-            console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/45)`);
+            console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/90)`);
             try {
                 const evidenceRes = await fetch(`${url}/evidence/${receiptId}`);
                 if (evidenceRes.ok) {
                     const evidenceBody = await evidenceRes.json();
                     if (evidenceBody.status === "COMPLETED") {
                         zkSeal = evidenceBody.ars_anchor;
+                    } else if (evidenceBody.ars_anchor === "FAILED") {
+                        zkSeal = "FAILED";
+                        break;
                     }
                 }
             } catch (e) {
@@ -130,7 +133,7 @@ async function verify() {
         }
     }
 
-    if (!zkSeal || zkSeal === "mock-seal-for-demo" || zkSeal === "pending" || zkSeal.length < 100) {
+    if (!zkSeal || zkSeal === "mock-seal-for-demo" || zkSeal === "pending" || zkSeal === "FAILED" || zkSeal.length < 100) {
         console.error(`[Auditor] ❌ SUBSTANCE FAILURE: ZK Seal is missing, pending, or mocked: ${zkSeal}`);
         process.exit(1);
     }

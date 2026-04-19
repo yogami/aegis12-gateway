@@ -136,6 +136,9 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             }
         }).catch(err => {
             console.error(`[Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: ${err.message}`);
+            if ((pep as any).stateStore) {
+                (pep as any).stateStore.updateZkSeal(receipt.receiptId, { seal: "FAILED", vkey: "FAILED" }).catch((e: any) => console.error(e));
+            }
         });
 
         return JSON.stringify({
