@@ -17,6 +17,10 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
         this.pendingWalPath = `${basePath}_pending.json`;
         this.lockPath = `${basePath}.lock`;
         this.walEngine = new WALEngine("aegis-12/wal-encryption-key");
+    }
+
+    public async initialize(): Promise<void> {
+        await this.walEngine.initialize();
 
         const committed = this.walEngine.loadWalSync(this.committedWalPath);
         if (committed) {

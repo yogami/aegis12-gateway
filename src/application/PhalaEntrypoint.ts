@@ -53,10 +53,20 @@ async function doInitialize() {
                 console.log(`[Aegis-12] Hardware Init: Parsing AUTHORIZED_TENANTS (length: ${rawTenants.length})`);
                 try {
                     const tenants = JSON.parse(rawTenants);
-                    pep = new AegisPEP(signer, tenants);
+                    
+                    const { AegisLocalNonceRegistry } = await import('../infrastructure/NonceRegistry');
+                    const { AegisLocalStateStore } = await import('../infrastructure/AegisLocalStateStore');
+                    
+                    const nonceReg = new AegisLocalNonceRegistry("/var/data/nonce_registry.json");
+                    await nonceReg.initialize();
+                    
+                    const stateStore = new AegisLocalStateStore("/var/data/state_store.json");
+                    await stateStore.initialize();
+
+                    pep = new AegisPEP(signer, tenants, nonceReg, stateStore);
                     console.log(`[Aegis-12] Hardware Init: PEP initialized with ${Object.keys(tenants).length} tenants.`);
                 } catch (pe) {
-                    console.error(`[Aegis-12] Hardware Init: JSON Parse Error on AUTHORIZED_TENANTS: ${rawTenants}`);
+                    console.error(`[Aegis-12] Hardware Init: JSON Parse Error or DB Init Error:`, pe);
                     throw pe;
                 }
             }

@@ -16,6 +16,10 @@ export class AegisLocalStateStore implements IAegisStateStore {
         this.evidencePath = path.resolve(process.cwd(), '.aegis_evidence.json');
         this.lockPath = `${this.walPath}.lock`;
         this.walEngine = new WALEngine("aegis-12/wal-state-encryption-key");
+    }
+
+    public async initialize(): Promise<void> {
+        await this.walEngine.initialize();
         this.load();
     }
 

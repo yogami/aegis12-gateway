@@ -127,13 +127,16 @@ jobs:
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL" || echo "000")
-            if [ "$RESPONSE_CODE" != "000" ]; then
+            # Use curl to get the HTTP status code, discarding output and errors. Default to 000 if curl fails.
+            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
+            
+            if [ "$RESPONSE_CODE" == "200" ]; then
               echo "✅ Enclave Gateway is LIVE (HTTP $RESPONSE_CODE). Initiating Cryptographic Substance Audit..."
               break
             fi
+            
             RETRY_COUNT=$((RETRY_COUNT+1))
-            echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Enclave not ready yet. Sleeping 10s..."
+            echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Enclave not ready (HTTP $RESPONSE_CODE). Sleeping 10s..."
             sleep 10
           done
 

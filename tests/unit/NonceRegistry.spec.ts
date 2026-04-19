@@ -27,12 +27,14 @@ describe('NonceRegistry (Unit)', () => {
 
     test('reserves new nonce', async () => {
         const registry = new AegisLocalNonceRegistry(testWalPath);
+        await registry.initialize();
         const res = await registry.reserve('nonce-1');
         expect(res).toBe(true);
     });
 
     test('fails resolving duplicate pending nonce', async () => {
         const registry = new AegisLocalNonceRegistry(testWalPath);
+        await registry.initialize();
         await registry.reserve('nonce-1');
         const res = await registry.reserve('nonce-1');
         expect(res).toBe(false);
@@ -40,6 +42,7 @@ describe('NonceRegistry (Unit)', () => {
 
     test('commits nonce and writes to WAL', async () => {
         const registry = new AegisLocalNonceRegistry(testWalPath);
+        await registry.initialize();
         const res1 = await registry.reserve('nonce-2');
         expect(res1).toBe(true);
         await registry.commit('nonce-2');
@@ -57,15 +60,18 @@ describe('NonceRegistry (Unit)', () => {
 
     test('recovers from WAL', async () => {
         const registry1 = new AegisLocalNonceRegistry(testWalPath);
+        await registry1.initialize();
         await registry1.reserve('prev-nonce-1');
         await registry1.commit('prev-nonce-1');
 
         const registry2 = new AegisLocalNonceRegistry(testWalPath);
+        await registry2.initialize();
         expect(await registry2.reserve('prev-nonce-1')).toBe(false);
     });
 
     test('rolls back pending nonce', async () => {
         const registry = new AegisLocalNonceRegistry(testWalPath);
+        await registry.initialize();
         await registry.reserve('nonce-3');
         await registry.release('nonce-3');
         const res = await registry.reserve('nonce-3');

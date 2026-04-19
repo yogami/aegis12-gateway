@@ -6,6 +6,7 @@ export interface BehavioralStats {
 }
 
 export interface IAegisStateStore {
+    initialize?(): Promise<void>;
     getStats(agentId: string): Promise<BehavioralStats>;
     updateStats(agentId: string, deltaSpend: number): Promise<BehavioralStats>;
     saveEvidence(receipt: any, solanaTx?: string): Promise<void>;
