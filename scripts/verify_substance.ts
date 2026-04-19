@@ -112,23 +112,30 @@ async function verify() {
         const receiptId = body.receipt.receiptId;
         
         let attempts = 0;
-        while (zkSeal === "pending" && attempts < 90) {
+        const maxAttempts = 120; // 20 minutes total (120 * 10s)
+        while (zkSeal === "pending" && attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 10000));
             attempts++;
-            console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/90)`);
+            console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/${maxAttempts})`);
             try {
                 const evidenceRes = await fetch(`${url}/evidence/${receiptId}`);
                 if (evidenceRes.ok) {
                     const evidenceBody = await evidenceRes.json();
                     if (evidenceBody.status === "COMPLETED") {
                         zkSeal = evidenceBody.ars_anchor;
-                    } else if (evidenceBody.ars_anchor === "FAILED") {
+                        console.log(`[Auditor] ✨ ZK-Seal Discovered!`);
+                    } else if (evidenceBody.ars_anchor === "FAILED" || evidenceBody.status === "FAILED") {
                         zkSeal = "FAILED";
+                        console.error(`[Auditor] ❌ ZK-Prover reported a failure inside the enclave.`);
                         break;
+                    } else if (evidenceBody.status === "NOT_FOUND") {
+                        console.log(`[Auditor] ⚠️ Receipt not yet indexed. Retrying...`);
                     }
+                } else {
+                    console.log(`[Auditor] ⚠️ Gateway responded with ${evidenceRes.status}. The enclave might be busy or rebooting...`);
                 }
             } catch (e) {
-                console.log(`[Auditor] ⚠️ Polling error (retrying): ${e}`);
+                console.log(`[Auditor] ⚠️ Network error (enclave might be under high load): ${e}`);
             }
         }
     }

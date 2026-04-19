@@ -51,7 +51,12 @@ export class AegisZKClient {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
             // Increased timeout to 15 minutes (900,000ms) because ZK proofs take a long time on CPU
-            const child = execFile(this.proverBinaryPath, [], { timeout: 900000, maxBuffer: 10485760 }, (error, stdout, stderr) => {
+            // We throttle RAYON_NUM_THREADS to 1 to ensure stability in the TEE environment.
+            const child = execFile(this.proverBinaryPath, [], { 
+                timeout: 900000, 
+                maxBuffer: 10485760,
+                env: { ...process.env, RAYON_NUM_THREADS: '1' }
+            }, (error, stdout, stderr) => {
                 if (error) {
                     // Check if it was killed by our timeout
                     if (error.killed) {
@@ -96,6 +101,12 @@ export class AegisZKClient {
             if (child.stdin) {
                 child.stdin.write(inputStr);
                 child.stdin.end();
+            }
+
+            if (child.stderr) {
+                child.stderr.on('data', (data) => {
+                    console.error(`[AEGIS-ZK-PROVER-STDERR] ${data.toString()}`);
+                });
             }
         });
     }
