@@ -29,6 +29,15 @@ export class AegisPEP {
         this.breaker.reset();
     }
 
+    public provisionTenant(tenantId: string, address: string): void {
+        if (!this.tenantTrustStore[tenantId]) {
+            this.tenantTrustStore[tenantId] = [];
+        }
+        if (!this.tenantTrustStore[tenantId].includes(address)) {
+            this.tenantTrustStore[tenantId].push(address);
+        }
+    }
+
 
 
     private async validateNonceAndScore(request: PolicyEvaluationRequest, scopedNonce: string): Promise<void> {
@@ -63,7 +72,7 @@ export class AegisPEP {
     private async executeBreaker(evalRequest: PolicyEvaluationRequest, scopedNonce: string): Promise<void> {
         const decision = await this.breaker.execute(async () => {
             try {
-                Eip712Verifier.verifySignature(evalRequest.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID, "0x1111111111111111111111111111111111111111");
+                Eip712Verifier.verifySignature(evalRequest.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID);
                 TierEvaluator.verifyBounds(evalRequest);
                 return { decision: 'allow', reason: 'pass' };
             } catch (e: any) {
@@ -132,7 +141,7 @@ export class AegisPEP {
             zkSeal: (receipt as any).zkSeal || "none"
         };
 
-        receipt.signature = await this.signer.signEIP712({ name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID, verifyingContract: "0x1111111111111111111111111111111111111111" }, { AegisComplianceReceipt: [
+        receipt.signature = await this.signer.signEIP712({ name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID }, { AegisComplianceReceipt: [
             { name: 'receiptId', type: 'string' }, { name: 'actionId', type: 'string' }, { name: 'toolId', type: 'string' },
             { name: 'agentPubKey', type: 'string' }, { name: 'article12LogHash', type: 'string' }, { name: 'parametersHash', type: 'string' },
             { name: 'resultHash', type: 'string' }, { name: 'article14OversightSignature', type: 'string' }, { name: 'policyId', type: 'string' },
@@ -144,6 +153,14 @@ export class AegisPEP {
         return receipt;
     }
 
+    public async saveEvidence(receipt: AegisComplianceReceipt, solanaTx?: string): Promise<void> {
+        await this.stateStore.saveEvidence(receipt, solanaTx);
+    }
+
+    public async getEvidence(txSignature: string): Promise<any | null> {
+        return await this.stateStore.getEvidence(txSignature);
+    }
+
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
         
@@ -153,7 +170,13 @@ export class AegisPEP {
 
         await this.validateNonceAndScore(request, scopedNonce);
 
-        let sanit = normalizeParameters(request.action.toolId, request.action.parameters);
+        let sanit;
+        try {
+            sanit = normalizeParameters(request.action.toolId, request.action.parameters);
+        } catch (e: any) {
+            await this.nonceRegistry.release(scopedNonce);
+            throw new Error(`Action denied by Aegis Enclave: ${e.message}`);
+        }
         const estimatedValueBig = this.getEstimatedValue(sanit, scopedNonce);
         const estimatedValue = Number(estimatedValueBig);
         

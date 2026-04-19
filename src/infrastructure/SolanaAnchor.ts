@@ -50,13 +50,13 @@ export class SolanaAnchor {
     private cluster: string;
     private rpcEndpoints: string[];
 
-    constructor(cluster: string = 'devnet', payerSecretKey?: Uint8Array) {
+    constructor(cluster: string = process.env.SOLANA_CLUSTER || 'devnet', payerSecretKey?: Uint8Array) {
         this.cluster = cluster;
         const primaryRpc = process.env.SOLANA_RPC_URL || clusterApiUrl(cluster as any);
         this.rpcEndpoints = [
             primaryRpc,
-            'https://api.mainnet-beta.solana.com', // Fallback 1
-            'https://solana-api.projectserum.com' // Fallback 2
+            'https://api.devnet.solana.com',
+            'https://api.testnet.solana.com'
         ];
         console.log(`[SolanaAnchor] Connecting to RPC: ${primaryRpc}`);
         this.connection = new Connection(primaryRpc, 'confirmed');
@@ -76,6 +76,9 @@ export class SolanaAnchor {
                 throw new Error('[SolanaAnchor] ❌ Failed to initialize from SOLANA_PAYER_SECRET. The key may be malformed. Memory scrubbed.');
             }
         } else {
+            if (cluster === 'mainnet-beta') {
+                throw new Error('[SolanaAnchor] ❌ TERMINAL REFUSAL: SOLANA_PAYER_SECRET is strictly required for mainnet-beta. Ephemeral keys are not permitted.');
+            }
             // Generate ephemeral keypair for devnet demo
             this.payer = Keypair.generate();
             console.warn('[SolanaAnchor] ⚠️ Using ephemeral keypair. Set SOLANA_PAYER_SECRET for persistence.');
@@ -181,6 +184,24 @@ export class SolanaAnchor {
         const transaction = new Transaction().add(
             createMemoInstruction(memo, [this.payer.publicKey])
         );
+
+        // Resilient blockhash retrieval
+        let blockhash = null;
+        for (let i = 0; i < 3; i++) {
+            try {
+                blockhash = (await this.connection.getLatestBlockhash('confirmed')).blockhash;
+                break;
+            } catch (bhErr: any) {
+                console.warn(`[SolanaAnchor] ⚠️ Failed to get blockhash (attempt ${i+1}): ${bhErr.message}`);
+                if (i === 2) throw bhErr;
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+        if (!blockhash) {
+            throw new Error('[SolanaAnchor] ❌ Failed to obtain blockhash after 3 attempts.');
+        }
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = this.payer.publicKey;
 
         const txSignature = await this.sendTxWithFailover(transaction);
 

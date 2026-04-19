@@ -349,11 +349,7 @@ export class SolanaTransactionFirewall {
 
             if (riskScore < 1.0) {
                 const simRisk = await this.performBFTSimulation(tx, flags, euArticles, mitreTechniques, executedPrograms);
-                riskScore = Math.max(riskScore, simRisk); 
-                // Using max ensures if sim returns 1.0, it becomes 1.0, otherwise it preserves riskScore or higher
-                // wait, actually we were adding it:
-                if (simRisk === 1.0) riskScore = 1.0;
-                else riskScore += simRisk;
+                riskScore = simRisk >= 1.0 ? 1.0 : Math.min(riskScore + simRisk, 1.0);
             }
 
             riskScore = Math.min(riskScore, 1.0);

@@ -115,7 +115,7 @@ export class X402PayGate {
         if (paymentHeader) return null;
 
         const now = Date.now();
-        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging') {
+        if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'test') {
             const tracker = freeTierTracker.get(clientIp);
 
             if (!tracker || tracker.resetAt < now) {
@@ -196,10 +196,45 @@ export class X402PayGate {
         return amountRequired;
     }
 
+
+    /**
+     * Validate that a USDC token transfer was received by the configured recipient.
+     * Returns the actual transferred amount, or 0 if no valid transfer found.
+     */
+    private validateTokenTransfer(
+        tx: any,
+        requiredUsdc: number
+    ): { valid: boolean; actualAmount: number } {
+        const preBalances = tx.meta?.preTokenBalances || [];
+        const postBalances = tx.meta?.postTokenBalances || [];
+        const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+        const preRecip = preBalances.find((b: any) => b.owner === this.config.recipientAddress && b.mint === USDC_MINT);
+        const postRecip = postBalances.find((b: any) => b.owner === this.config.recipientAddress && b.mint === USDC_MINT);
+
+        if (!postRecip) return { valid: false, actualAmount: 0 };
+
+        const preAmt = preRecip ? preRecip.uiTokenAmount.uiAmount || 0 : 0;
+        const postAmt = postRecip.uiTokenAmount.uiAmount || 0;
+        const actualAmount = postAmt - preAmt;
+
+        return { valid: actualAmount >= requiredUsdc, actualAmount };
+    }
+
+    /**
+     * Check for payment signature replay attacks.
+     */
+    private checkReplay(paymentHeader: string): string | null {
+        if (this.usedSignatures.has(paymentHeader)) {
+            return 'Payment signature replay detected';
+        }
+        this.usedSignatures.add(paymentHeader);
+        return null;
+    }
+
     /**
      * Verify that a payment was made correctly.
-     * In production: verify the Solana transaction signature.
-     * In dev mode: accept any non-empty header.
+     * Validates the Solana transaction signature against on-chain state.
      */
     public async verifyPayment(
         paymentHeader: string
@@ -207,59 +242,29 @@ export class X402PayGate {
         if (!paymentHeader) {
             return { valid: false, paidAmount: 0, payer: '', error: 'No payment header' };
         }
-        // Production: Verify the Solana transaction
+
         try {
             const tx = await this.connection.getParsedTransaction(
                 paymentHeader,
                 { commitment: 'confirmed', maxSupportedTransactionVersion: 0 }
             );
 
-            if (!tx) {
-                return { valid: false, paidAmount: 0, payer: '', error: 'Transaction not found' };
-            }
+            if (!tx) return { valid: false, paidAmount: 0, payer: '', error: 'Transaction not found' };
 
-            const isConfirmed = tx.meta?.err === null;
             const payer = tx.transaction.message.accountKeys[0]?.pubkey?.toBase58() || '';
+            if (tx.meta?.err !== null) return { valid: false, paidAmount: 0, payer, error: 'Transaction failed on-chain' };
 
-            if (!isConfirmed) {
-                return { valid: false, paidAmount: 0, payer, error: 'Transaction failed on-chain' };
-            }
-
-            let validTransfer = false;
-            let actualAmount = 0;
-
-            const preBalances = tx.meta?.preTokenBalances || [];
-            const postBalances = tx.meta?.postTokenBalances || [];
-            
-            const preRecip = preBalances.find(b => b.owner === this.config.recipientAddress && b.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-            const postRecip = postBalances.find(b => b.owner === this.config.recipientAddress && b.mint === 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-            
             const requiredUsdc = Math.max(this.config.pricePerCall, await this.getDynamicPrice());
-            
-            if (postRecip) {
-                const preAmt = preRecip ? preRecip.uiTokenAmount.uiAmount || 0 : 0;
-                const postAmt = postRecip.uiTokenAmount.uiAmount || 0;
-                actualAmount = postAmt - preAmt;
-                if (actualAmount >= requiredUsdc) {
-                    validTransfer = true;
-                }
-            }
+            const { valid, actualAmount } = this.validateTokenTransfer(tx, requiredUsdc);
 
-            if (!validTransfer) {
+            if (!valid) {
                 return { valid: false, paidAmount: actualAmount, payer, error: `Invalid payment: expected at least ${requiredUsdc} canonical USDC to ${this.config.recipientAddress}, found ${actualAmount}` };
             }
-            
-            if (this.usedSignatures.has(paymentHeader)) {
-                 return { valid: false, paidAmount: actualAmount, payer, error: 'Payment signature replay detected' };
-            }
-            this.usedSignatures.add(paymentHeader);
 
-            return {
-                valid: true,
-                paidAmount: actualAmount,
-                payer,
-                txSignature: paymentHeader,
-            };
+            const replayError = this.checkReplay(paymentHeader);
+            if (replayError) return { valid: false, paidAmount: actualAmount, payer, error: replayError };
+
+            return { valid: true, paidAmount: actualAmount, payer, txSignature: paymentHeader };
         } catch (e: any) {
             return { valid: false, paidAmount: 0, payer: '', error: e.message };
         }

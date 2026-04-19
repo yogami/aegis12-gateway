@@ -21,7 +21,7 @@ export class EvidenceRegistry {
     private aegisPda: PublicKey;
 
     constructor(
-        cluster: string = 'devnet',
+        cluster: string = process.env.SOLANA_CLUSTER || 'devnet',
         aegisPda: string = 'AegisStakingPooL11111111111111111111111111111'
     ) {
         // Use a generic public RPC for the indexer unless specified

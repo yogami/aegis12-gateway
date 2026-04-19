@@ -71,7 +71,7 @@ interface GovernanceResult {
 const LAMPORTS_PER_SOL = 1_000_000_000;
 
 const DEFAULT_CONFIG: GovernanceConfig = {
-    cluster: 'devnet',
+    cluster: process.env.SOLANA_CLUSTER || 'devnet',
     humanReviewThreshold: 0.60,
     hardBlockThreshold: 0.80,
     tierSpendingLimits: {
@@ -85,10 +85,11 @@ const DEFAULT_CONFIG: GovernanceConfig = {
 export class SquadsGovernance {
     private connection: Connection;
     private config: GovernanceConfig;
-    private proposalCounter: number = 0;
+
 
     constructor(config?: Partial<GovernanceConfig>) {
         this.config = { ...DEFAULT_CONFIG, ...config };
+        // Priority: SOLANA_RPC_URL > clusterApiUrl(config.cluster)
         const rpcUrl = process.env.SOLANA_RPC_URL || clusterApiUrl(this.config.cluster as any);
         this.connection = new Connection(rpcUrl, 'confirmed');
     }
@@ -134,13 +135,19 @@ export class SquadsGovernance {
 
         if (moderateRisk || exceedsTierLimit) {
             const proposalId = this.generateProposalId(actionContext, timestamp);
-            this.proposalCounter++;
+            // Deterministic transaction index: derived from proposal hash to avoid
+            // relying on volatile in-memory state that resets on enclave restart (G-05).
+            const transactionIndex = parseInt(proposalId.replace('aegis-proposal-', '').slice(0, 8), 16) % 1_000_000;
 
             const reason = moderateRisk
                 ? `Anomaly score ${anomalyScore.toFixed(3)} triggers human oversight per EU AI Act Article 14. ` +
                   `Squads V4 multisig proposal created for compliance officer review.`
                 : `Estimated value ${estimatedValue} lamports exceeds ${agentTier} spending limit of ${spendingLimit} lamports. ` +
                   `Requires human approval via Squads V4 multisig.`;
+
+            if (!this.config.multisigPda) {
+                throw new Error('[TERMINAL REFUSAL] Squads multisigPda is not configured. Cannot create governance proposal without an on-chain multisig account.');
+            }
 
             return {
                 decision: 'REQUIRE_HUMAN',
@@ -150,8 +157,8 @@ export class SquadsGovernance {
                 spendingLimit,
                 proposal: {
                     proposalId,
-                    multisigPda: this.config.multisigPda || 'NOT_CONFIGURED',
-                    transactionIndex: this.proposalCounter,
+                    multisigPda: this.config.multisigPda,
+                    transactionIndex,
                     requiredApprovals: this.getRequiredApprovals(agentTier, anomalyScore),
                     expiresAt: new Date(Date.now() + 3600_000).toISOString(), // 1 hour expiry
                     euAiActArticle: 'Article 14 (Human Oversight)',

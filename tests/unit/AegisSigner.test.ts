@@ -3,7 +3,7 @@ import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 
 describe('AegisSigner', () => {
     it('should generate a new keypair if no private key is provided', () => {
-        const signer = new AegisSigner();
+        const signer = AegisSigner.createSync();
         expect(signer.getPublicKeyHex()).toBeDefined();
         expect(signer.getPublicKeyHex().length).toBeGreaterThan(0);
         expect(signer.enclaveDid).toMatch(/^did:aegis:enclave:/);
@@ -12,7 +12,7 @@ describe('AegisSigner', () => {
 
 
     it('should consistently sign and verify a message', () => {
-        const signer = new AegisSigner();
+        const signer = AegisSigner.createSync();
         const message = 'validate_transaction_50000';
 
         const signature = signer.sign(message);
@@ -26,7 +26,7 @@ describe('AegisSigner', () => {
     });
 
     it('should reject verification if message is altered', () => {
-        const signer = new AegisSigner();
+        const signer = AegisSigner.createSync();
         const signature = signer.sign('original_message');
 
         const isForgedValid = signer.verify('tampered_message', signature, signer.getPublicKeyHex());
@@ -34,7 +34,7 @@ describe('AegisSigner', () => {
     });
 
     it('should reject verification if signed by a different key', () => {
-        const signer1 = new AegisSigner();
+        const signer1 = AegisSigner.createSync();
         const signature1 = signer1.sign('message');
 
         // Generate a different random key pair
@@ -50,7 +50,7 @@ describe('AegisSigner', () => {
 
 
     it('should sign EIP712 payloads', () => {
-        const signer = new AegisSigner();
+        const signer = AegisSigner.createSync();
         const domain = { name: 'Aegis', version: '1', chainId: 1, verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' };
         const types = { Person: [{ name: 'name', type: 'string' }] };
         const value = { name: 'Alice' };

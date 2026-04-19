@@ -42,9 +42,15 @@ export class AegisSigner {
         return instance;
     }
 
-    // Keep the sync constructor for backward compatibility with mocks if needed, 
-    // but warn that it uses the mock.
+    /**
+     * @deprecated Use AegisSigner.create() for production. This method uses PhalaTappdMock
+     * (simulated HKDF keys) and exists ONLY for synchronous unit test compatibility.
+     * Calling this in production will produce keys that are NOT hardware-attested.
+     */
     public static createSync(enclaveDid?: string): AegisSigner {
+        if (process.env.NODE_ENV === 'production') {
+            console.error('[AegisSigner] ⛔ CRITICAL: createSync() called in production. This uses simulated keys. Use AegisSigner.create() instead.');
+        }
         const instance = new AegisSigner();
         const tappd = new PhalaTappdMock();
         const solanaDerived = tappd.deriveKey("aegis-12/solana-ed25519");

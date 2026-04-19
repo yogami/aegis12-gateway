@@ -13,6 +13,7 @@ vi.mock('@solana/web3.js', async (importOriginal) => {
             confirmTransaction = vi.fn().mockResolvedValue(true);
             getSlot = vi.fn().mockResolvedValue(12345);
             getParsedTransaction = vi.fn();
+            getLatestBlockhash = vi.fn().mockResolvedValue({ blockhash: 'mock-blockhash', lastValidBlockHeight: 1000 });
         }
     };
 });

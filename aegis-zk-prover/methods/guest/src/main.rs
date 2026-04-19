@@ -92,12 +92,21 @@ fn main() {
     // 5. ITEM 2.3: PRIVACY-PRESERVING POLICY COMMITMENT
     // We do NOT commit the raw limits to the journal (Privacy).
     // Instead, we commit a HASH of the constraints, proving we used the authorized set.
-    // In production, we would use a more robust Keccak/SHA-256 of the struct.
-    let policy_hash_commitment = [0u8; 32]; 
+    use sha2::{Digest, Sha256};
+    let mut hasher = Sha256::new();
+    hasher.update(constraints.max_per_tx.to_le_bytes());
+    hasher.update(constraints.cumulative_limit.to_le_bytes());
+    hasher.update(constraints.last_checkpointed_nonce.to_le_bytes());
+    let policy_hash_commitment: [u8; 32] = hasher.finalize().into();
 
     // 6. GENERIC ARTICLE 12 COMPLIANCE EVIDENCE
     // Calculate a composite hash covering the action and behavioral results.
-    let article_12_log_hash_seal = [0u8; 32];
+    let mut hasher = Sha256::new();
+    hasher.update(action.tool_id.as_bytes());
+    hasher.update(action.amount.to_le_bytes());
+    hasher.update(action.nonce.to_le_bytes());
+    hasher.update(new_total_spend.to_le_bytes());
+    let article_12_log_hash_seal: [u8; 32] = hasher.finalize().into();
 
     // 7. MATHEMATICAL COMMIT
     // The RISC Zero receipt journal acts as the 'Blind Auditor' seal.

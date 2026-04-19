@@ -23,7 +23,24 @@ export class PhalaTappdMock {
             throw new Error('[TERMINAL REFUSAL] TEE root seed lacks sufficient entropy (requires 256-bit minimum).');
         }
 
-        this.rootSeed = Buffer.from(seedStr.replace('0x', ''), 'hex');
+        // Shannon entropy check: reject trivially predictable seeds (e.g., 0xaaaa... or 0x1234123412341234...)
+        const hexBody = seedStr.replace('0x', '');
+        const freq = new Map<string, number>();
+        for (const ch of hexBody) {
+            freq.set(ch, (freq.get(ch) || 0) + 1);
+        }
+        let shannonEntropy = 0;
+        for (const count of freq.values()) {
+            const p = count / hexBody.length;
+            shannonEntropy -= p * Math.log2(p);
+        }
+        // A truly random 64-char hex string has ~4.0 bits/char entropy.
+        // Threshold of 2.0 rejects obvious patterns while accepting any reasonable seed.
+        if (shannonEntropy < 2.0) {
+            throw new Error(`[TERMINAL REFUSAL] TEE root seed has insufficient Shannon entropy (${shannonEntropy.toFixed(2)} bits/char). Seed appears trivially predictable.`);
+        }
+
+        this.rootSeed = Buffer.from(hexBody, 'hex');
     }
 
     /**

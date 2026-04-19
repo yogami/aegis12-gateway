@@ -32,7 +32,7 @@ describe('Eip712Verifier (Unit)', () => {
         const trustStore = { 'tenant-1': ['0xTrusted'] };
 
         expect(() => Eip712Verifier.verifySignature(policy, trustStore, 'domain', '1', 1, '0xContract'))
-            .toThrow('Signer not found in provisioned TEE Root-of-Trust. Found: 0xMalicious');
+            .toThrow('Signer not found in provisioned TEE Root-of-Trust. Found: 0xmalicious');
     });
 
     it('throws if crossChainTarget does not match environment', () => {

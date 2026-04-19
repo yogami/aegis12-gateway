@@ -75,7 +75,7 @@ describe('phala_cvm_server (Unit)', () => {
 
         expect(mockPhalaEntrypoint).toHaveBeenCalledWith('payload-data');
         expect(res.writeHead).toHaveBeenCalledWith(200, { 'Content-Type': 'application/json' });
-        expect(res.end).toHaveBeenCalledWith('{"status":"approved"}');
+        expect(res.end).toHaveBeenCalledWith(expect.stringContaining('"status":"approved"'));
     });
 
     it('handles POST /evidence error', async () => {

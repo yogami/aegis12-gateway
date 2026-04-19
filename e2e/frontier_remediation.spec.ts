@@ -1,25 +1,26 @@
-import { expect } from 'chai';
-import fetch from 'node-fetch';
+import { test, expect } from '@playwright/test';
 import { SolanaAnchor } from '../src/infrastructure/SolanaAnchor';
 import { withAegis } from '../src/sdk/AegisAgentWrapper';
-import { sendAndConfirmTransaction, VersionedTransaction } from '@solana/web3.js';
 import * as sinon from 'sinon';
 
-describe('Frontier Council Remediation Suite (TDD)', () => {
+test.describe('Frontier Council Remediation Suite (TDD)', () => {
     let anchor: SolanaAnchor;
 
-    beforeEach(() => {
+    test.beforeEach(() => {
         anchor = new SolanaAnchor('devnet');
     });
 
-    afterEach(() => {
+    test.afterEach(() => {
         sinon.restore();
     });
 
-    describe('State Sharding (ZK Proof Memo)', () => {
-        it('should structure memo as aegis:v2-zkp with snark proof', async () => {
-            const stub = sinon.stub(anchor['connection'], 'sendTransaction').resolves('mock_tx_sig');
+    test.describe('State Sharding (ZK Proof Memo)', () => {
+        test('should structure memo as aegis:v2-zkp with snark proof', async () => {
+            // @ts-ignore
+            sinon.stub(anchor['connection'], 'sendTransaction').resolves('mock_tx_sig');
+            // @ts-ignore
             sinon.stub(anchor['connection'], 'confirmTransaction').resolves({ context: { slot: 1 }, value: { err: null } } as any);
+            // @ts-ignore
             sinon.stub(anchor['connection'], 'getSlot').resolves(1);
 
             const receipt = {
@@ -32,19 +33,15 @@ describe('Frontier Council Remediation Suite (TDD)', () => {
             };
 
             const result = await anchor.anchorReceipt(receipt as any, 'approved', 'did:phala:test');
-            expect(result.receiptHash).to.not.equal(receipt.payloadHash); // Replaced by ZKP
-            expect(result.txSignature).to.equal('mock_tx_sig');
+            expect(result.receiptHash).not.toBe(receipt.payloadHash); // Replaced by ZKP
+            expect(result.txSignature).toBe('mock_tx_sig');
             
-            // We expect the anchor logic to extract zkSnarkProof to string and prefix 'aegis:v2-zkp'
-            // We will mock this test logic by extracting the memo from transaction internally during test if possible,
-            // or just asserting that anchorReceipt succeeds with zk proofs enabled.
-            expect(result).to.have.property('isZkSharded', true);
+            expect(result).toHaveProperty('isZkSharded', true);
         });
     });
 
-    describe('Decentralized RPC Fallback', () => {
-        it('should failover to fallback RPC if primary throws 429 Too Many Requests', async () => {
-            // Mock connection throwing an error once, then succeeding
+    test.describe('Decentralized RPC Fallback', () => {
+        test('should failover to fallback RPC if primary throws 429 Too Many Requests', async () => {
             const error = new Error('429 Too Many Requests');
             let calls = 0;
             sinon.stub(anchor as any, 'sendTxWithFailover').callsFake(async () => {
@@ -53,31 +50,31 @@ describe('Frontier Council Remediation Suite (TDD)', () => {
                 return 'fallback_success_tx';
             });
 
-            try {
-                const res = await (anchor as any).sendTxWithFailover('mock_tx');
-                expect(res).to.equal('fallback_success_tx');
-                expect(calls).to.equal(2);
-            } catch (e) {}
+            const res = await (anchor as any).sendTxWithFailover('mock_tx');
+            expect(res).toBe('fallback_success_tx');
+            expect(calls).toBe(2);
         });
     });
 
-    describe('Dual-Mode Sensor MPC Cold-Path', () => {
-        it('should execute MPC cold-path if TEE drops connection (timeout)', async () => {
-            const mockAction = async () => ({ serialize: () => Buffer.from('mock_tx') } as any);
+    test.describe('Dual-Mode Sensor MPC Cold-Path', () => {
+        test('should execute MPC cold-path if TEE drops connection (timeout)', async () => {
+            const mockAction = async () => ({ toolId: 'test_action', parameters: { data: 'mock' } } as any);
             
             const config = {
-                firewallUrl: 'http://localhost:invalid-port',
+                gatewayUrl: 'http://localhost:9999', // Invalid port to trigger timeout/refusal
+                agentId: 'test-agent',
+                tenantId: 'tenant-council',
                 fallbackOnTimeout: true,
-                timeoutMs: 10,
+                timeoutMs: 50,
                 enableMpcColdPath: true
             };
 
             const wrapped = withAegis(mockAction, config);
             
             const result = await wrapped();
-            expect(result.decision).to.equal('FALLBACK_MPC_COLD_PATH');
-            expect(result.success).to.equal(true); 
-            expect(result).to.have.property('mpcSignature');
+            expect(result.decision).toBe('FALLBACK_MPC_COLD_PATH');
+            expect(result.success).toBe(true); 
+            expect(result).toHaveProperty('mpcSignature');
         });
     });
 });

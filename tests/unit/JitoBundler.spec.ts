@@ -18,8 +18,8 @@ describe('JitoBundler (Unit)', () => {
 
     it('returns devnet mock when not on mainnet', async () => {
         const res = await bundler.broadcastAtomicBundle('tx1', 'tx2');
-        expect(res.status).toBe('success');
-        expect(res.bundleId).toMatch(/^jito-mock-/);
+        expect(res.status).toBe('simulated');
+        expect(res.bundleId).toMatch(/^jito-devnet-sim-/);
         expect(mockFetch).not.toHaveBeenCalled();
     });
 

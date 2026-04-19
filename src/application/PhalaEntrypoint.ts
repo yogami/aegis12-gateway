@@ -4,11 +4,39 @@ import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest } from '../types';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
 
+declare global {
+    var phala: { getQuote?: (did: string) => { quote: string; measurement: string } } | undefined;
+}
+
 export let signer: AegisSigner;
 export let pep: AegisPEP;
-let anchor: SolanaAnchor;
+export let anchor: SolanaAnchor;
 
-async function initializeHardware() {
+/**
+ * Initialization mutex: ensures only one init runs at a time.
+ * All concurrent callers await the same Promise.
+ */
+let initPromise: Promise<void> | null = null;
+
+export async function initializeHardware() {
+    // Fast path: already initialized
+    if (signer && pep && anchor) return;
+
+    // Mutex: if init is in progress, await it instead of starting a new one
+    if (initPromise) {
+        await initPromise;
+        return;
+    }
+
+    initPromise = doInitialize();
+    try {
+        await initPromise;
+    } finally {
+        initPromise = null;
+    }
+}
+
+async function doInitialize() {
     let attempts = 0;
     const maxAttempts = 3;
     
@@ -50,6 +78,20 @@ async function initializeHardware() {
     }
 }
 
+export async function getHardwareMetadata() {
+    await initializeHardware();
+    let attestation = "unknown";
+    let pcr0 = "";
+    try {
+        const data = globalThis.phala?.getQuote?.(signer?.enclaveDid || "unknown");
+        if (data) {
+            attestation = data.quote;
+            pcr0 = data.measurement;
+        }
+    } catch (e) {}
+    return { attestation, pcr0 };
+}
+
 export default async function phalaEntrypoint(payloadStr: string): Promise<string> {
     try {
         await initializeHardware();
@@ -61,35 +103,13 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         const payload: PolicyEvaluationRequest = JSON.parse(payloadStr);
         const receipt = await pep.enforce(payload);
         
-        let attestation = "not_available_in_mock";
-        let pcr0 = process.env.ENCLAVE_PCR0_MOCK || "0000000000000000000000000000000000000000000000000000000000000000";
-        try {
-            // @ts-ignore
-            const data = globalThis.phala?.getQuote?.(signer?.enclaveDid || "unknown");
-            if (data) {
-                attestation = data.quote;
-                pcr0 = data.measurement || pcr0;
-            }
-        } catch (e) {}
-
-        if (!pcr0) {
-            throw new Error(`[TERMINAL REFUSAL] Missing enclave measurement (PCR0). Boot aborted.`);
+        const { attestation, pcr0 } = await getHardwareMetadata();
+        if (!pcr0 || pcr0 === "") {
+            throw new Error(`[TERMINAL REFUSAL] Genuine Enclave measurement (PCR0) is strictly required for this High-Veracity session. Boot aborted.`);
         }
 
-        const zkClient = new AegisZKClient();
-        let zkProofData: any = {};
-        try {
-            zkProofData = await zkClient.generateProof({ receiptId: receipt.receiptId, policyHash: receipt.parametersHash });
-        } catch (err: any) {
-            throw new Error(`[Aegis-12 Override]: ZK_PROVER_FAILURE. The RISC Zero prover failed to generate a cryptographic seal. Error: ${err.message}`);
-        }
-
-        let solanaReceipt = null;
-        try {
-            solanaReceipt = await anchor.anchorReceipt(receipt, 'approved', signer?.enclaveDid || "unknown");
-        } catch (e: any) {
-            console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor receipt. Error: ${e.message}`);
-        }
+        const zkProofData = await generateZkProof(receipt.receiptId, receipt.parametersHash);
+        const solanaReceipt = await anchorToLedger(receipt, 'approved');
 
         return JSON.stringify({
             status: "approved",
@@ -103,22 +123,42 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             explorer_url: solanaReceipt?.explorerUrl
         });
     } catch (e: any) {
-        let solanaReceipt = null;
-        try {
-            if (signer && anchor) {
-                const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
-                solanaReceipt = await anchor.anchorReceipt(dummyReceipt, 'denied', signer?.enclaveDid || "unknown");
-            }
-        } catch (err: any) {
-             console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor denial. Error: ${err.message}`);
-        }
-
-        return JSON.stringify({
-            status: "denied",
-            error: e.message,
-            enclaveDid: signer?.enclaveDid || "unknown",
-            solana_tx: solanaReceipt?.txSignature,
-            explorer_url: solanaReceipt?.explorerUrl
-        });
+        return handleEntrypointError(e);
     }
+}
+
+async function generateZkProof(receiptId: string, policyHash: string): Promise<{ seal?: string, vkey?: string }> {
+    const zkClient = new AegisZKClient();
+    try {
+        return await zkClient.generateProof({ receiptId, policyHash });
+    } catch (err: any) {
+        throw new Error(`[Aegis-12 Override]: ZK_PROVER_FAILURE. The RISC Zero prover failed to generate a cryptographic seal. Error: ${err.message}`);
+    }
+}
+
+async function anchorToLedger(receipt: any, decision: 'approved' | 'denied'): Promise<{ txSignature?: string, explorerUrl?: string } | null> {
+    if (!signer || !anchor) return null;
+    try {
+        const solanaReceipt = await anchor.anchorReceipt(receipt, decision, signer.enclaveDid);
+        if (decision === 'approved') {
+            await pep.saveEvidence(receipt, solanaReceipt.txSignature);
+        }
+        return solanaReceipt;
+    } catch (e: any) {
+        console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor ${decision}. Error: ${e.message}`);
+        return null;
+    }
+}
+
+async function handleEntrypointError(e: any): Promise<string> {
+    const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
+    const solanaReceipt = await anchorToLedger(dummyReceipt, 'denied');
+
+    return JSON.stringify({
+        status: "denied",
+        error: e.message,
+        enclaveDid: signer?.enclaveDid || "unknown",
+        solana_tx: solanaReceipt?.txSignature,
+        explorer_url: solanaReceipt?.explorerUrl
+    });
 }

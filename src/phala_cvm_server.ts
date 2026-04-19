@@ -1,5 +1,5 @@
 import * as http from "http";
-import phalaEntrypoint from "./application/PhalaEntrypoint";
+import phalaEntrypoint, { initializeHardware, anchor, signer } from "./application/PhalaEntrypoint";
 
 const PORT = process.env.PORT || 8000;
 
@@ -16,12 +16,37 @@ const server = http.createServer(async (req, res) => {
     }
 
     console.log(`[dStack CVM] Incoming Request: ${req.method} ${req.url}`);
+    
+    if (req.method === "GET" && req.url === "/health") {
+        try {
+            await initializeHardware();
+            const health = {
+                status: "alive",
+                solanaPayer: anchor?.getPayerPublicKey(),
+                enclaveDid: signer?.enclaveDid,
+                version: "v1.0.1-unmocked",
+                hardware: "phala-dstack-cvm",
+                timestamp: new Date().toISOString()
+            };
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(health));
+        } catch (err: any) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ status: "error", error: "Hardware Init Failed", details: err.message }));
+        }
+        return;
+    }
 
     const isAegisRoute = req.url?.includes("/enforce") || req.url?.includes("/evidence");
 
     if (req.method === "POST" && isAegisRoute) {
         let body = "";
         req.on("data", chunk => { body += chunk.toString(); });
+        req.on("error", (err: Error) => {
+            console.error(`[dStack CVM] Stream Error: ${err.message}`);
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ status: "error", error: `Stream Error: ${err.message}` }));
+        });
         req.on("end", async () => {
             console.log(`[dStack CVM] Request body received (${body.length} bytes). Processing...`);
             try {

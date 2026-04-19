@@ -16,7 +16,7 @@ describe('SquadsGovernance (Unit)', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        gov = new SquadsGovernance();
+        gov = new SquadsGovernance({ multisigPda: 'TestMultisigPda11111111111111111111111111111' });
     });
 
     it('blocks if anomaly score >= hardBlockThreshold', async () => {

@@ -8,6 +8,9 @@ vi.mock('../../src/infrastructure/AegisPEP', () => {
     return {
         AegisPEP: class {
             enforce = mockEnforce;
+            provisionTenant = vi.fn();
+            saveEvidence = vi.fn();
+            getEvidence = vi.fn();
         }
     };
 });
@@ -21,11 +24,37 @@ vi.mock('../../src/infrastructure/AegisZKClient', () => {
         }
     };
 });
+
+vi.mock('../../src/infrastructure/AegisSigner', () => {
+    return {
+        AegisSigner: {
+            create: vi.fn().mockResolvedValue({
+                enclaveDid: 'did:aegis:test',
+                sign: vi.fn().mockReturnValue('mock-sig'),
+                getPublicKeyHex: vi.fn().mockReturnValue('deadbeef'),
+                signEIP712: vi.fn().mockResolvedValue('mock-eip712-sig')
+            })
+        }
+    };
+});
+
+vi.mock('../../src/infrastructure/SolanaAnchor', () => {
+    return {
+        SolanaAnchor: class {
+            getPayerPublicKey = vi.fn().mockReturnValue('MockPayerPubkey');
+            anchorReceipt = vi.fn().mockResolvedValue({ txSignature: 'mock-tx', explorerUrl: 'https://mock' });
+        }
+    };
+});
 import phalaEntrypoint from '../../src/application/PhalaEntrypoint';
 
 describe('phala-entry (Unit)', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        // Mock TEE hardware attestation (required by PCR0 check in phalaEntrypoint)
+        globalThis.phala = {
+            getQuote: (_did: string) => ({ quote: 'mock-attestation-quote', measurement: 'mock-pcr0-hash' })
+        };
     });
 
     it('denies invalid JSON payload', async () => {

@@ -1,5 +1,7 @@
 import * as http from 'http';
 
+import { PhalaTappdMock } from './PhalaTappdMock';
+
 /**
  * TappdClient — Production-Grade Phala TEE Hardware Connector
  * 
@@ -32,7 +34,6 @@ export class TappdClient {
     public async deriveKey(path: string, algorithm: 'secp256k1' | 'ed25519' = 'secp256k1'): Promise<string> {
         if (!this.isTee) {
             // Fallback to Mock implementation
-            const { PhalaTappdMock } = require('./PhalaTappdMock');
             return new PhalaTappdMock().deriveKey(path);
         }
 

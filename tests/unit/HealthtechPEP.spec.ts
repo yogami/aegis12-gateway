@@ -9,7 +9,7 @@ describe('HealthtechPEP (Unit)', () => {
     let signer: AegisSigner;
 
     beforeEach(() => {
-        signer = new AegisSigner();
+        signer = AegisSigner.createSync();
         mockPolicy = {
             allowedActions: {
                 'doctor': ['read_ehr', 'write_ehr'],

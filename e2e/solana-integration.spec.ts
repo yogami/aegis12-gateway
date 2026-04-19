@@ -245,14 +245,12 @@ test.describe('Solana Receipt Anchoring', () => {
     });
 
     test('POST /anchor-receipt accepts valid receipt structure', async ({ request }) => {
-        // This test validates the endpoint accepts the right structure
-        // Actual Solana anchoring will fail without funded payer (expected on CI)
         const res = await request.post(`${API_URL}/anchor-receipt`, {
             data: {
                 receipt: {
-                    actionId: 'action-e2e-test',
+                    actionId: 'action-e2e-' + Date.now(),
                     toolId: 'tool:test',
-                    authorizationNonce: 'nonce-123',
+                    authorizationNonce: 'nonce-' + Date.now(),
                     parameters: { test: true },
                     resultHash: 'abc123',
                     timestamp: new Date().toISOString(),
@@ -262,25 +260,21 @@ test.describe('Solana Receipt Anchoring', () => {
             },
         });
 
-        // Will be 200 on funded devnet, 500 on unfunded (expected)
+        // HARDENED: We no longer accept 500 or "hint" responses as success.
+        // This test MUST fail if anchoring fails, proving the system is operational.
+        expect(res.status()).toBe(200);
         const body = await res.json();
-        if (res.ok()) {
-            expect(body.status).toBe('anchored');
-            expect(body.txSignature).toBeTruthy();
-            expect(body.explorerUrl).toContain('explorer.solana.com');
-        } else {
-            // Expected on CI without funded wallet
-            expect(body.hint).toContain('payer has SOL balance');
-        }
+        expect(body.status).toBe('anchored');
+        expect(body.txSignature).toBeTruthy();
+        expect(body.explorerUrl).toContain('explorer.solana.com');
     });
 
     test('GET /verify/:txSig handles non-existent transaction', async ({ request }) => {
         const res = await request.get(`${API_URL}/verify/FakeTransactionSignature12345`);
         const body = await res.json();
 
-        // Should return verification result (failed is expected for fake sig)
         expect(body.txSignature).toBe('FakeTransactionSignature12345');
-        expect(body.verifierVersion).toBe('aegis-v1');
+        expect(body.verified).toBeFalsy();
     });
 });
 
@@ -455,9 +449,12 @@ test.describe('TEE Attestation', () => {
         expect(body.enclavePublicKey).toBeTruthy();
         expect(body.signatureAlgorithm).toBe('Ed25519 (TweetNaCl)');
 
-        // Should be mock on non-TEE environments
-        expect(body.attestationStatus).toBeDefined();
-        expect(['HARDWARE_ATTESTED', 'LOCAL_MOCK']).toContain(body.attestationStatus);
+        // HARDENED: Forbidden to return LOCAL_MOCK in production/staging environments
+        if (process.env.TEST_API_URL) {
+            expect(body.attestationStatus).toBe('HARDWARE_ATTESTED');
+        } else {
+            expect(body.attestationStatus).toBeDefined();
+        }
 
         // EU AI Act compliance
         expect(body.compliance.euAiActArticle12).toContain('Record Keeping');

@@ -102,7 +102,7 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     recentIncidents: 0,
   };
 
-  it("allows a correctly signed policy the first time", async () => {
+  it("allows a correctly signed policy the first time and produces a verifiable receipt", async () => {
     const req: PolicyEvaluationRequest = {
       agent: baseAgent,
       action: baseAction,
@@ -112,6 +112,17 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
 
     const receipt = await pep.enforce(req);
     expect(receipt.signature.length).toBeGreaterThan(0);
+
+    // SUBSTANCE AUDIT: Verify Enclave Signature on Receipt
+    const { Eip712Verifier } = require("./src/domain/Eip712Verifier");
+    const isValid = Eip712Verifier.verifyReceipt(
+        receipt, 
+        enclaveSigner.getAddress(), 
+        "Aegis-12-Compliance-Matrix", 
+        "1.0.0", 
+        1399811149
+    );
+    expect(isValid).toBe(true);
   });
 
   it("blocks the exact same nonce (replay attack)", async () => {
