@@ -76,12 +76,7 @@ fn main() {
     // 3. Obtain the prover and generate the proof (the 'Seal')
     let prover = default_prover();
     
-    // First, execute the guest to get the cycle count and verify correctness
-    let executor = risc0_zkvm::ExecutorImpl::from_elf(env.clone(), AEGIS_GUEST_ELF).unwrap();
-    let session = executor.run().expect("Guest execution failed");
-    tracing::info!("[AEGIS-HOST] Guest Execution Complete. Cycles: {}", session.user_cycles);
-
-    // Now, generate the cryptographic proof
+    // Generate the cryptographic proof directly (saves cycles on 2GB RAM)
     let prove_info = prover.prove(env, AEGIS_GUEST_ELF).expect("ZK Proof Generation Failed");
     let receipt = prove_info.receipt;
 
