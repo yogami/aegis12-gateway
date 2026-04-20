@@ -54,8 +54,12 @@ export class AegisZKClient {
             // We throttle RAYON_NUM_THREADS to 1 to ensure stability in the TEE environment.
             const child = execFile(this.proverBinaryPath, [], { 
                 timeout: 900000, 
-                maxBuffer: 10485760,
-                env: { ...process.env, RAYON_NUM_THREADS: '1' }
+                maxBuffer: 52428800, // 50MB for verbose logs
+                env: { 
+                    ...process.env, 
+                    RAYON_NUM_THREADS: '1',
+                    RUST_LOG: 'info,risc0_zkvm=info'
+                }
             }, (error, stdout, stderr) => {
                 if (error) {
                     // Check if it was killed by our timeout

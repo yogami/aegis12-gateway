@@ -55,6 +55,13 @@ pub struct ZKOutput {
 }
 
 fn main() {
+    // Initialize tracing for better visibility in the Node.js logs
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
+    tracing::info!("[AEGIS-HOST] Starting compliance proving cycle...");
+
     // 1. Read ZKInput from STDIN as JSON
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).expect("Failed to read from STDIN");
@@ -68,6 +75,13 @@ fn main() {
 
     // 3. Obtain the prover and generate the proof (the 'Seal')
     let prover = default_prover();
+    
+    // First, execute the guest to get the cycle count and verify correctness
+    let executor = risc0_zkvm::ExecutorImpl::from_elf(env.clone(), AEGIS_GUEST_ELF).unwrap();
+    let session = executor.run().expect("Guest execution failed");
+    tracing::info!("[AEGIS-HOST] Guest Execution Complete. Cycles: {}", session.user_cycles);
+
+    // Now, generate the cryptographic proof
     let prove_info = prover.prove(env, AEGIS_GUEST_ELF).expect("ZK Proof Generation Failed");
     let receipt = prove_info.receipt;
 
