@@ -12,6 +12,8 @@ import * as crypto from 'crypto';
 export class AegisZKClient {
     private proverBinaryPath: string;
 
+    private static isVerified = false;
+
     constructor() {
 
         // Default to the built host binary in the target directory (check release then debug for development)
@@ -26,17 +28,21 @@ export class AegisZKClient {
         }
 
         if (fs.existsSync(this.proverBinaryPath)) {
-            const fileBuffer = fs.readFileSync(this.proverBinaryPath);
-            const hashSum = crypto.createHash('sha256');
-            hashSum.update(fileBuffer);
-            const hex = hashSum.digest('hex');
-            
-            const expectedHash = process.env.AEGIS_ZK_PROVER_HASH;
-            if (!expectedHash) {
-                throw new Error(`[TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.`);
-            }
-            if (expectedHash !== hex) {
-                throw new Error(`[TERMINAL REFUSAL] Prover binary checksum mismatch! Expected ${expectedHash}, got ${hex}`);
+            if (!AegisZKClient.isVerified) {
+                const fileBuffer = fs.readFileSync(this.proverBinaryPath);
+                const hashSum = crypto.createHash('sha256');
+                hashSum.update(fileBuffer);
+                const hex = hashSum.digest('hex');
+                
+                const expectedHash = process.env.AEGIS_ZK_PROVER_HASH;
+                if (!expectedHash) {
+                    throw new Error(`[TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.`);
+                }
+                if (expectedHash !== hex) {
+                    throw new Error(`[TERMINAL REFUSAL] Prover binary checksum mismatch! Expected ${expectedHash}, got ${hex}`);
+                }
+                AegisZKClient.isVerified = true;
+                console.log(`[Aegis-12] ZK Prover Binary Verified: ${hex}`);
             }
         } else {
              throw new Error(`[TERMINAL REFUSAL] ZK Prover binary not found at ${this.proverBinaryPath}`);
