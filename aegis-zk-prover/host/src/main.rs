@@ -55,8 +55,9 @@ pub struct ZKOutput {
 }
 
 fn main() {
-    // Initialize tracing for better visibility in the Node.js logs
+    // Initialize tracing to stderr so it doesn't pollute the JSON output on stdout
     tracing_subscriber::fmt()
+        .with_writer(io::stderr)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
 
