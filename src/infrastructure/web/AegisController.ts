@@ -38,7 +38,8 @@ export class AegisController {
                 programs: ['SPL Memo (receipt anchoring)', 'Squads V4 (human-in-the-loop governance)', 'x402 USDC (pay-per-inference)']
             },
             compliance: {
-                euAiAct: ['Article 12 (Record Keeping)', 'Article 14 (Human Oversight)', 'Article 15 (Cybersecurity)']
+                euAiAct: ['Article 12 (Record Keeping)', 'Article 14 (Human Oversight)', 'Article 15 (Cybersecurity)'],
+                cryptographicStandards: ['ML-DSA-65 (NIST FIPS 204)', 'SHA-512 (v4-pq resilient)', 'RISC Zero (STARK)']
             }
         };
     }
@@ -199,10 +200,16 @@ export class AegisController {
             enclaveDid: aegisSigner?.enclaveDid || "unknown",
             enclavePublicKey: aegisSigner?.getPublicKeyHex(),
             signatureAlgorithm: 'Ed25519 (TweetNaCl)',
+            pqAlgorithm: 'ML-DSA-65 (NIST FIPS 204)',
+            pqPublicKey: aegisSigner?.getPQPublicKeyHex(),
             attestationStatus: attestation === "unknown" ? "SIMULATED" : "HARDWARE_ATTESTED",
             quote: attestation,
             pcr0,
-            compliance: { euAiActArticle12: 'Record Keeping via Phala log-seal', euAiActArticle15: 'Cybersecurity via Hardware TEE' }
+            compliance: { 
+                euAiActArticle12: 'Record Keeping via Phala log-seal', 
+                euAiActArticle15: 'Cybersecurity via Hardware TEE',
+                postQuantumResilience: 'FIPS 204 Compliant Signatures'
+            }
         };
     }
 

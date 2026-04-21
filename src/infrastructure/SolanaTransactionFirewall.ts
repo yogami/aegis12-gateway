@@ -20,7 +20,7 @@ import {
     LAMPORTS_PER_SOL,
     Connection,
 } from '@solana/web3.js';
-import { ToolExecutionReceipt } from '../types';
+import { AegisComplianceReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 import { createHash } from 'crypto';
 
@@ -60,7 +60,7 @@ interface FirewallResult {
     reason: string;
     riskScore: number;          // 0.0 - 1.0
     flags: FirewallFlag[];
-    receipt?: ToolExecutionReceipt;
+    receipt?: AegisComplianceReceipt;
     euAiActArticles: string[];
     mitreTechniques: string[];
     executedPrograms: string[];
@@ -301,23 +301,38 @@ export class SolanaTransactionFirewall {
         return riskScore;
     }
 
-    private generateReceiptData(instructions: TransactionInstruction[], walletPubkey: string, decision: FirewallDecision, riskScore: number, flags: FirewallFlag[]): ToolExecutionReceipt {
-        const receiptData = {
-            actionId: `solana-tx-${Date.now()}`,
+    private generateReceiptData(instructions: TransactionInstruction[], walletPubkey: string, decision: FirewallDecision, riskScore: number, flags: FirewallFlag[]): AegisComplianceReceipt {
+        const timestamp = new Date().toISOString();
+        const actionId = `solana-tx-${Date.now()}`;
+        const parameters = {
+            wallet: walletPubkey,
+            instructionCount: instructions.length,
+            programs: [...new Set(instructions.map(ix => ix.programId.toBase58()))],
+            decision,
+            riskScore,
+            flagCount: flags.length,
+        };
+
+        const resultHash = createHash('sha512')
+            .update(JSON.stringify({ decision, flags, riskScore }))
+            .digest('hex');
+
+        const receiptData: AegisComplianceReceipt = {
+            receiptId: `aegis-v1-fw-${Date.now()}`,
+            actionId,
             toolId: 'solana-transaction-firewall',
+            agentPubKey: walletPubkey,
+            article12LogHash: resultHash,
+            parametersHash: createHash('sha512').update(JSON.stringify(parameters)).digest('hex'),
+            resultHash,
+            article14OversightSignature: '', // No human signature for automated firewall
+            policyId: 'default-firewall-v1',
+            tenantId: 'system',
+            complianceStandard: 'ARS-01+',
+            limitations: ['Observation Gap: Static Analysis only'],
             authorizationNonce: `nonce-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
-            parameters: {
-                wallet: walletPubkey,
-                instructionCount: instructions.length,
-                programs: [...new Set(instructions.map(ix => ix.programId.toBase58()))],
-                decision,
-                riskScore,
-                flagCount: flags.length,
-            },
-            resultHash: createHash('sha256')
-                .update(JSON.stringify({ decision, flags, riskScore }))
-                .digest('hex'),
-            timestamp: new Date().toISOString(),
+            validatedParams: parameters,
+            timestamp,
             signature: '',
         };
 

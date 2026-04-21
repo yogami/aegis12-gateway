@@ -1,8 +1,8 @@
 {
-  "name": "aegis-core",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "aegis12-gateway",
+  "version": "2.0.0",
+  "description": "High-Veracity Sovereign Compliance Gateway for Autonomous AI Agents on Solana. Hardware-attested policy enforcement with Post-Quantum (ML-DSA) resilience.",
+  "main": "dist/index.js",
   "scripts": {
     "demo:agent": "tsx scripts/demo_agent.ts",
     "test": "vitest run",
@@ -12,9 +12,16 @@
     "start": "tsx src/server.ts",
     "start:cvm": "tsx src/phala_cvm_server.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "solana",
+    "ai-agents",
+    "compliance",
+    "tee",
+    "post-quantum",
+    "eu-ai-act"
+  ],
+  "author": "Berlin AI Labs",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "@emnapi/core": "^1.9.2",
@@ -39,12 +46,15 @@
     "@fastify/swagger-ui": "^5.2.5",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.1",
+    "@noble/post-quantum": "^0.6.1",
     "@solana/spl-memo": "^0.2.5",
     "@solana/web3.js": "^1.98.4",
     "@sqds/multisig": "^2.1.4",
     "dotenv": "^17.4.2",
     "ethers": "^5.8.0",
     "fastify": "^5.7.4",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.6.0",
     "tweetnacl": "^1.0.3",
     "undici": "^8.1.0",
     "x402-solana": "^2.0.4"

@@ -28,7 +28,7 @@ import {
 } from '@solana/web3.js';
 import * as multisig from '@sqds/multisig';
 import { createHash } from 'crypto';
-import { TrustTier, ToolExecutionReceipt } from '../types';
+import { TrustTier, AegisComplianceReceipt } from '../types';
 
 interface GovernanceConfig {
     /** Solana cluster */

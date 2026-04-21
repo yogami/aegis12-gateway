@@ -19,7 +19,7 @@ import {
 } from '@solana/web3.js';
 import { createMemoInstruction } from '@solana/spl-memo';
 import { createHash } from 'crypto';
-import { ToolExecutionReceipt } from '../types';
+import { AegisComplianceReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 
 interface AnchorResult {
@@ -105,10 +105,10 @@ export class SolanaAnchor {
      * Compute a deterministic hash of a ToolExecutionReceipt.
      * Uses SHA-256 over a JSON-canonicalized representation.
      */
-    public computeReceiptHash(receipt: ToolExecutionReceipt): string {
-        // Sort keys for deterministic hashing (simplified JCS)
+    public computeReceiptHash(receipt: AegisComplianceReceipt): string {
+        // [V4-PQ] SHA-512 for Post-Quantum Resilience
         const canonical = JSON.stringify(receipt, Object.keys(receipt).sort());
-        return createHash('sha256').update(canonical).digest('hex');
+        return createHash('sha512').update(canonical).digest('hex');
     }
 
     /**
@@ -246,7 +246,7 @@ export class SolanaAnchor {
      */
     public async verifyAnchoredReceipt(
         txSignature: string,
-        receipt?: ToolExecutionReceipt,
+        receipt?: AegisComplianceReceipt,
         signer?: AegisSigner
     ): Promise<VerificationResult> {
         try {

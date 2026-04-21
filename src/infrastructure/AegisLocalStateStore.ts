@@ -112,6 +112,26 @@ export class AegisLocalStateStore implements IAegisStateStore {
         }
     }
 
+    public async updateBatchProof(batchId: string, merkleRoot: string, pqSignature: string, proofs: Record<string, string[]>): Promise<void> {
+        let updated = false;
+        for (const [k, v] of this.evidence.entries()) {
+            const nonce = v.authorizationNonce;
+            if (proofs[nonce]) {
+                v.batchProof = {
+                    batchId,
+                    merkleRoot,
+                    pqSignature,
+                    proofPath: proofs[nonce]
+                };
+                this.evidence.set(k, v);
+                updated = true;
+            }
+        }
+        if (updated) {
+            await this.persist();
+        }
+    }
+
     public async checkpoint(): Promise<void> {
         await this.persist();
     }

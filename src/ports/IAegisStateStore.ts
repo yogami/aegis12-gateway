@@ -13,5 +13,6 @@ export interface IAegisStateStore {
     getEvidence(txSignature: string): Promise<any | null>;
     getEvidenceByReceiptId(receiptId: string): Promise<any | null>;
     updateZkSeal(receiptId: string, zkSealData: { seal?: string, vkey?: string }): Promise<void>;
+    updateBatchProof(batchId: string, merkleRoot: string, pqSignature: string, proofs: Record<string, string[]>): Promise<void>;
     checkpoint(): Promise<void>; // Anchoring hook for Solana
 }

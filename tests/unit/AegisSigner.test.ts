@@ -58,4 +58,28 @@ describe('AegisSigner', () => {
         const signature = signer.signEIP712(domain, types, value);
         expect(signature).toBeDefined();
     });
+
+    it('should sign and verify ML-DSA-65 (Post-Quantum) signatures', () => {
+        const signer = AegisSigner.createSync();
+        const message = 'pq_policy_enforcement_v1';
+
+        const signature = signer.signMLDSA(message);
+        const pubKey = signer.getPQPublicKeyHex();
+
+        expect(signature).toBeDefined();
+        // ML-DSA-65 signatures are large (~3.3KB = 6600+ hex chars)
+        expect(signature.length).toBeGreaterThan(6000);
+
+        const isValid = signer.verifyMLDSA(message, signature, pubKey);
+        expect(isValid).toBe(true);
+    });
+
+    it('should reject tampered ML-DSA-65 signatures', () => {
+        const signer = AegisSigner.createSync();
+        const message = 'original';
+        const signature = signer.signMLDSA(message);
+
+        const isValid = signer.verifyMLDSA('tampered', signature, signer.getPQPublicKeyHex());
+        expect(isValid).toBe(false);
+    });
 });

@@ -9,6 +9,8 @@ import { Eip712Verifier } from '../domain/Eip712Verifier';
 import { TierEvaluator } from '../domain/TierEvaluator';
 import { IAegisStateStore } from '../ports/IAegisStateStore';
 import { AegisLocalStateStore } from './AegisLocalStateStore';
+import { AegisJournal } from './AegisJournal';
+import { AegisCanonicalMessage } from '../types';
 
 const AEGIS_CHAIN_ID = 1399811149;
 const AEGIS_DOMAIN_NAME = "Aegis-12-Compliance-Matrix";
@@ -20,12 +22,14 @@ export class AegisPEP {
     private tenantTrustStore: Record<string, string[]>;
     private nonceRegistry: INonceRegistry;
     private stateStore: IAegisStateStore;
+    private journal: AegisJournal;
 
-    constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}, registry?: INonceRegistry, stateStore?: IAegisStateStore) {
+    constructor(signer: AegisSigner, tenantTrustStore: Record<string, string[]> = {}, registry?: INonceRegistry, stateStore?: IAegisStateStore, journal?: AegisJournal) {
         this.signer = signer;
         this.tenantTrustStore = tenantTrustStore;
         this.nonceRegistry = registry || new AegisLocalNonceRegistry();
         this.stateStore = stateStore || new AegisLocalStateStore();
+        this.journal = journal || new AegisJournal();
         this.breaker.reset();
     }
 
@@ -115,12 +119,26 @@ export class AegisPEP {
     }
 
     private async generateReceipt(request: PolicyEvaluationRequest, sanit: Record<string, unknown>, tenantId: string, nonce: string): Promise<AegisComplianceReceipt> {
+        const canonicalMessage: AegisCanonicalMessage = {
+            tenantId,
+            nonce,
+            article12LogHash: ethers.utils.id(JSON.stringify(sanit)),
+            timestamp: new Date().toISOString()
+        };
+
+        // [SYNCHRONOUS INTENT JOURNALING]
+        // This MUST succeed before we generate the hot-path signature or return an ALLOW.
+        const journaled = this.journal.appendSync(canonicalMessage);
+        if (!journaled) {
+             throw new Error('[TERMINAL REFUSAL] Failed to journal execution intent. Halting hot path.');
+        }
+
         const receipt: AegisComplianceReceipt = {
             receiptId: `aegis-v1-${Date.now()}`,
             actionId: `act-${nonce}`,
             toolId: request.action.toolId,
             agentPubKey: request.agent?.did || "unknown",
-            article12LogHash: ethers.utils.id(JSON.stringify(sanit)),
+            article12LogHash: canonicalMessage.article12LogHash,
             parametersHash: ethers.utils.id(JSON.stringify(sanit)),
             resultHash: ethers.utils.id("ALLOW"),
             article14OversightSignature: request.dynamicPolicy!.signature,
@@ -130,7 +148,7 @@ export class AegisPEP {
             limitations: [],
             authorizationNonce: nonce,
             validatedParams: sanit,
-            timestamp: new Date().toISOString() as any,
+            timestamp: canonicalMessage.timestamp as any,
             signature: ""
         };
 
@@ -141,6 +159,7 @@ export class AegisPEP {
             zkSeal: (receipt as any).zkSeal || "none"
         };
 
+        // [HOT PATH] Ed25519 / EIP-712 Signature
         receipt.signature = await this.signer.signEIP712({ name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID }, { AegisComplianceReceipt: [
             { name: 'receiptId', type: 'string' }, { name: 'actionId', type: 'string' }, { name: 'toolId', type: 'string' },
             { name: 'agentPubKey', type: 'string' }, { name: 'article12LogHash', type: 'string' }, { name: 'parametersHash', type: 'string' },
@@ -196,6 +215,11 @@ export class AegisPEP {
         await this.nonceRegistry.commit(scopedNonce);
         await this.stateStore.updateStats(tenantId, Number(spendAmountBig));
 
-        return this.generateReceipt(request, sanit, tenantId, nonce);
+        const receipt = await this.generateReceipt(request, sanit, tenantId, nonce);
+        
+        // Note: The PQ Batch Processor will periodically sweep the AegisJournal 
+        // to generate the FIPS 204 Merkle Proofs. We no longer trigger async crypto here.
+
+        return receipt;
     }
 }

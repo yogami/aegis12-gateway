@@ -47,6 +47,7 @@ export interface PolicyObligation {
  * This structure fulfills the transparency and traceability requirements of 
  * Article 12 (Traceable Logging) and Article 14 (Human Oversight).
  */
+
 export interface AegisComplianceReceipt {
     receiptId: string;              // Unique time-ordered identifier (UUID v7)
     actionId: string;               // Link to Proof of Execution actionId
@@ -75,6 +76,23 @@ export interface AegisComplianceReceipt {
     };
     timestamp: ISO8601;
     signature: string;              // TEE Hardware Signature (Ed25519)
+    batchProof?: {                  // [POST-QUANTUM] Merkle-Rooted Batch Finality
+        batchId: string;
+        merkleRoot: string;
+        pqSignature: string;        // ML-DSA-65 signature of the merkleRoot
+        proofPath: string[];        // Merkle proof for this specific receipt
+    };
+}
+
+/**
+ * The unified byte-array representation that strictly binds the Ed25519 
+ * execution signature with the ML-DSA-65 audit signature.
+ */
+export interface AegisCanonicalMessage {
+    tenantId: string;
+    nonce: string;
+    article12LogHash: string;
+    timestamp: ISO8601;
 }
 
 export interface ProofOfExecution {
@@ -142,14 +160,4 @@ export interface PolicyEvaluationRequest {
         ownerPublicKey: string; // The hex address that signed the policy
         signature: string; // EIP-712 Signature
     };
-}
-
-export interface ToolExecutionReceipt {
-    actionId: string;
-    toolId: string;
-    authorizationNonce: string;
-    parameters: Record<string, unknown>;
-    resultHash: string;
-    timestamp: string;
-    signature: string;
 }

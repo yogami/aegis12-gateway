@@ -114,6 +114,6 @@ describe('AegisZKClient (Unit)', () => {
             return { stdin: { write: vi.fn(), end: vi.fn() } } as any;
         });
 
-        await expect(client.generateProof({})).rejects.toThrow(/Invalid proof schema/);
+        await expect(client.generateProof({})).rejects.toThrow(/Prover output missing 'seal' or invalid format/);
     });
 });
