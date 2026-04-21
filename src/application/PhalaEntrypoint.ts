@@ -56,6 +56,7 @@ async function doInitialize() {
                     
                     const { AegisLocalNonceRegistry } = await import('../infrastructure/NonceRegistry');
                     const { AegisLocalStateStore } = await import('../infrastructure/AegisLocalStateStore');
+                    const { AegisJournal } = await import('../infrastructure/AegisJournal');
                     
                     const nonceReg = new AegisLocalNonceRegistry("/var/data/nonce_registry.json");
                     await nonceReg.initialize();
@@ -63,7 +64,9 @@ async function doInitialize() {
                     const stateStore = new AegisLocalStateStore("/var/data/state_store.json");
                     await stateStore.initialize();
 
-                    pep = new AegisPEP(signer, tenants, nonceReg, stateStore);
+                    const journal = new AegisJournal("/var/data/aegis_journal.log");
+
+                    pep = new AegisPEP(signer, tenants, nonceReg, stateStore, journal);
                     console.log(`[Aegis-12] Hardware Init: PEP initialized with ${Object.keys(tenants).length} tenants.`);
                 } catch (pe) {
                     console.error(`[Aegis-12] Hardware Init: JSON Parse Error or DB Init Error:`, pe);
