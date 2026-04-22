@@ -1,0 +1,187 @@
+**Aegis-12 临床解剖报告：量子安全剧场与异步竞态灾难**  
+**审计方：** Kimi K2.6 (Adversarial Chinese Security Auditor)  
+**评级：** 🔴 **P0 – 结构性坍塌 | 不可投产**  
+**结论前置：** 这不是“确定性底座（Deterministic Floor）”，而是“概率性沼泽”。你们用 ML-DSA-65 搭建了一座昂贵的舞台背景，却在热路径上留下了一道纸糊的后门。整个架构的核心矛盾在于：**执行与审计被刻意解耦，导致 PQ 证明既不绑定执行结果，也无法保证最终一致性。**
+
+---
+
+### 1. 热路径与审计路径的“量子断层”（The Quantum Gap）
+
+你们的营销话术将“Hot Path / Audit Path”包装为工程权衡，但代码揭露了残酷现实：**Ed25519 的 `ALLOW` 收据在 PQ 证明落地之前就已经返回给调用方。**
+
+```typescript
+// AegisPEP.ts enforce()
+const receipt = await this.generateReceipt(request, sanit, tenantId, nonce);
+
+// 触发后台 PQ 路径——实际上是一次“弃之不顾”(fire-and-forget)
+this.generateAuditProof(receipt).catch(e => console.error(`...`));
+
+return receipt; // <-- 此时 Solana 交易可能已经上链
+```
+
+**致命问题：**
+- **时空裂缝：** 调用方拿到 Ed25519 签名的 `AegisComplianceReceipt` 后，完全可以立即将交易提交至 Solana。ML-DSA-65 的“长期最终性”此时还在 TEE 的 event loop 里排队。如果攻击者只想 spoof kill switch，他只需要针对 Ed25519 路径，PQ 证明永远不会成为阻挡条件。
+- **Article 12 的谎言：** EU AI Act 要求的“automatic recording”在你们这里变成了“probabilistic recording”。`generateAuditProof` 的 catch 块里只有一行 `console.error`。PQ 签名失败？静默丢弃。审计员五年后翻案时，只会发现链上有一笔交易，但 TEE 证据库里没有对应的 PQ receipt。
+
+---
+
+### 2. 异步签名的 Race Condition：状态存储层的崩塌
+
+你们声称 `generateAuditProof` 是“后台异步”的，但看看它依赖的状态存储实现：
+
+```typescript
+// AegisLocalStateStore.ts
+public async updatePqSignature(receiptId: string, pqSignature: string): Promise<void> {
+    let foundKey: string | null = null;
+    for (const [k, v] of this.evidence.entries()) { // O(n) 线性扫描
+        if (v.receiptId === receiptId) { foundKey = k; break; }
+    }
+    if (foundKey) {
+        const receipt = this.evidence.get(foundKey);
+        receipt.pqSignature = pqSignature; // 直接修改引用
+        this.evidence.set(foundKey, receipt);
+        await this.persist(); // 全量序列化双文件
+    }
+}
+```
+
+**这是灾难性的：**
+
+| 缺陷 | 影响 |
+|------|------|
+| **O(n) 线性扫描** | 每一条 PQ 签名更新都要遍历整个证据 Map。在 burst load 下，CPU 和锁竞争会指数级放大。 |
+| **全量 JSON 重写** | `persist()` 将整个 `state` 和 `evidence` Map 序列化为 JSON 并执行双文件 atomic write。Node.js 单线程 event loop 会被同步磁盘 I/O 阻塞。你的“后台”PQ 路径实际上会拖死“热路径”。 |
+| **Evidence 不存在** | 注意：`enforce()` 里**从未调用** `saveEvidence()`。`generateAuditProof` 运行时，`evidence` Map 大概率是空的。除非外部调用者在 receipt 返回后、PQ 任务执行前——以纳秒级速度——调用了 `saveEvidence`，否则 `updatePqSignature` 找不到目标，PQ 签名直接丢失。 |
+| **竞态写入** | 即使外部调用了 `saveEvidence`，两个异步操作（`saveEvidence` 的 `persist()` 与 `updatePqSignature` 的 `persist()`）在 `Map` 和文件系统上无任何行级/键级锁，最终 JSON 文件内容取决于最后一次 `persist()` 的覆盖结果。 |
+
+**更可笑的是：** `signMLDSA` 在 `generateAuditProof` 中没有被 `await`：
+
+```typescript
+const pqSignature = this.signer.signMLDSA(auditPayload); // 如果返回 Promise，则传递的是 Promise 对象
+await this.stateStore.updatePqSignature(receipt.receiptId, pqSignature); // 存储的可能是 [object Promise]
+```
+
+如果 `signMLDSA` 是同步的，它在后台线程（如果有）或主线程上执行 ML-DSA-65（10-50x 慢于 Ed25519），直接阻塞 event loop；如果是异步的，你们漏了 `await`，存储的是未解析的 Promise。**无论哪种解释，都是低级错误。**
+
+---
+
+### 3. 收据标识符与绑定机制：纸糊的因果链
+
+```typescript
+const receipt: AegisComplianceReceipt = {
+    receiptId: `aegis-v1-${Date.now()}`, // 毫秒级时间戳作为 ID？
+    // ...
+};
+```
+
+- **碰撞风险：** `Date.now()` 在高并发下必然碰撞。两个不同 action 拿到相同 `receiptId` 后，`updatePqSignature` 的线性扫描会attach到错误的证据上。
+- **逻辑绑定缺失：** `generateAuditProof` 构造的 `auditPayload` 只包含：
+  ```typescript
+  { receiptId, actionId, article12LogHash, timestamp }
+  ```
+  它**完全不包含** Ed25519 签名、也不包含实际的执行决策（`ALLOW`）或政策参数。这意味着 PQ 签名只是在证明“某个时间点有一串哈希存在”，而不是在证明“这个特定的 Ed25519 授权是合法的”。**攻击者可以替换热路径收据，而 PQ 证明依然有效——因为它没绑定任何东西。**
+
+这正是审计报告所说的 **“Inconsistent Binding”**。你们的 PQ 升级是纯粹的 **Security Theater**：算法用的是 NIST 标准，但协议工程是初中生水平。
+
+---
+
+### 4. 性能自杀与资源枯竭
+
+你们声称平均延迟 **44.52ms**，但代码表明在 burst 场景下这是不可能的：
+
+1. ML-DSA-65 签名计算是 CPU 密集型。
+2. `AegisLocalStateStore` 在每次更新时做**全量 JSON 持久化**。
+3. `updatePqSignature` 的 O(n) 扫描 + 双文件 `atomicWriteSync` 会在负载上升时形成“Metastable Failure”（亚稳态故障）。
+
+**具体 Kill Chain：**
+1. 攻击者发送 1000 req/s 的合法请求（或更阴险的，大量不同 tenant 的无效请求触发 breaker）。
+2. 后台 PQ 队列堆积。每个任务触发一次全量磁盘写。
+3. Event loop 被 `fs.writeFileSync` 和 JSON 序列化占满。
+4. 热路径的 `enforce()` 开始超时。Circuit Breaker（阈值荒谬地设为 1000 次失败/60s）终于跳闸。
+5. **Kill Switch 变成 Self-DDoS 工具。** 攻击者甚至不需要 bypass，只需等待你们自己把自己堵死。
+
+关于 **Side-Channels**：ML-DSA-65 的 Fiat-Shamir 变换确实有概率性 abort。如果你们在 TEE 内把 metrics 暴露出去（比如 Prometheus scrape），攻击者可以通过 timing 差异推断签名过程中的内部状态。代码中没有看到常量时间实现的证据。
+
+---
+
+### 5. “FIPS 204 Ready”——销售话术 vs 工程现实
+
+你们的文档写道：
+> *"FIPS 204 Readiness"* ... *"Uses FIPS-204 ML-DSA-65 for quantum-safe audit signatures"*
+
+**这是 Consultant/Salesman 的经典误导：**
+- **实现算法 ≠ 运营 FIPS 模块。** FIPS 204 是算法标准，FIPS 140-3 才是模块认证。你们的 `AegisSigner` 没有展示任何 CMVP 证书编号，没有硬件安全边界细节，没有经过认证的密钥零化（key zeroization）。
+- 在 TEE（Phala CVM）里跑未经认证的 Dilithium 实现，然后声称“FIPS 204 Ready”，相当于在虚拟机里跑 OpenSSL 然后声称“我们拥有 FIPS 140-2 HSM”。**这是监管层面的虚假宣传。**
+
+正确表述应为：**“Experimental implementation of ML-DSA-65 (FIPS 204 algorithm) in a non-certified software module.”** 任何 less than this 都是在给合规团队埋雷。
+
+---
+
+### 6. 崩溃一致性：黑 Hole 生成器
+
+看看 `enforce()` 的提交顺序：
+
+```typescript
+await this.nonceRegistry.commit(scopedNonce);   // 1. Nonce 已消耗
+await this.stateStore.updateStats(tenantId, Number(spendAmountBig)); // 2. 统计已更新
+const receipt = await this.generateReceipt(...); // 3. Ed25519 收据已生成
+// 4. PQ 证明？后台随缘...
+```
+
+**如果 enclave 在步骤 3 之后、PQ 任务完成前崩溃：**
+- Nonce 已提交，不能重放。
+- 统计已更新，资金限额已消耗。
+- Solana 交易可能已经锚定（外部系统行为）。
+- **PQ 证据永久丢失。** 审计员看到的是一笔已经发生、但没有任何 post-quantum receipt 的链上交易。这就是审计报告定义的 **“Black Hole for Auditors”**。
+
+真正的确定性底座需要 **WAL-backed recovery**：在返回 `receipt` 之前，必须先将一个**幂等的、不可变的**事件日志写入 WAL，声明“此 action 需要 PQ 签名”。崩溃恢复时，重放 WAL 补齐缺失的 PQ 证据。你们的 `WALEngine` 只用于 stats/evidence 全量文件，没有 per-event journaling，因此不具备崩溃恢复能力。
+
+---
+
+### 7. 修复方案（若还想挽救声誉）
+
+若要将此系统从“剧场道具”还原为“工程设施”，必须执行以下手术：
+
+1. **同步绑定（Binding Commitment）**
+   - 在 `generateReceipt` 阶段，计算 `commitment = Hash(Ed25519_Sig || action_params || policy_id)`。
+   - 热路径返回的 receipt 必须包含此 commitment。
+   - PQ 路径签名的 payload **必须包含并绑定**此 commitment，而非孤零零的几个字段。
+
+2. **预写日志与两阶段提交（2PC/WAL）**
+   - 不要再用全量 JSON Map 做存储。使用**基于事件 ID 的追加型 WAL**（per-event journal）。
+   - `enforce()` 必须在返回前执行：
+     - Phase 1: Write `PENDING` event to WAL (fsync)。
+     - Phase 2: 启动 PQ 签名任务。
+     - Phase 3: 仅当 WAL 确认 durable 后，才返回 receipt。
+   - 崩溃恢复时扫描 WAL，对 `PENDING` 事件重试 PQ 签名（idempotent）。
+
+3. **状态存储重构**
+   - 用 LevelDB/RocksDB 或至少是一个按 key 隔离的 WAL，替代 `Map + JSON.stringify`。
+   - `updatePqSignature` 必须实现为 O(1) 的 key lookup，而非线性扫描。
+   - 磁盘写入必须批量（batch）且异步，避免阻塞主线程。
+
+4. **Receipt ID 的密码学生成**
+   - 废除 `Date.now()`。使用 `H(nonce || policy_hash || timestamp || counter)` 生成不可碰撞的 receipt ID。
+
+5. **ML-DSA-65 集成修正**
+   - 如果确实是后台异步，使用专门的 Worker Thread（Node.js worker_threads）执行 ML-DSA-65，避免 event loop 阻塞。
+   - 确保 `signMLDSA` 的 Promise 被正确 await。
+
+6. **移除虚假合规声明**
+   - 将“FIPS 204 Ready”改为“FIPS 204 Algorithm Implementation (Non-Certified)”。
+   - 明确披露 async PQ path 的“eventual consistency”特性及其风险。
+
+---
+
+### 最终裁决 (Clinical Verdict)
+
+> **“Aegis-12 当前的状态更接近于一个复杂性陷阱，而非确定性底座。”**  
+> —— 你们的 Perplexity Pro 审计已经说得够委婉了。
+
+我的裁决更直接：**这套系统的 PQ 升级是 Security Theater，异步架构是 Race Condition 的温床，状态存储层是业余级别的 JSON 玩具。** 在真实对抗环境中，攻击者不需要破解 ML-DSA-65 或 Ed25519——他们只需要利用你们的**竞态窗口、静默失败和磁盘 I/O 阻塞**，就能让合规证据凭空消失，或者让 Kill Switch 自我窒息。
+
+如果这是给 Colosseum Hackathon 的提交作品，它能得奖的唯一理由是“最佳 PPT 工程”。如果这是给金融机构的 Pilot Spec，**建议立即停止，回滚到单路径 Ed25519 并重新设计证据持久化层**，否则你们卖的不是安全，是责任诉讼的邀请函。
+
+**审计签署：**  
+**Kimi K2.6 | 对抗性安全审计**  
+*2026-04-21*

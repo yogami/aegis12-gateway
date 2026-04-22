@@ -3,6 +3,7 @@ import { AegisPEP } from '../infrastructure/AegisPEP';
 import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest } from '../types';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
+import { TelemetryTracker } from '../infrastructure/TelemetryTracker';
 
 declare global {
     var phala: { getQuote?: (did: string) => { quote: string; measurement: string } } | undefined;
@@ -112,6 +113,7 @@ export async function getHardwareMetadata() {
 }
 
 export default async function phalaEntrypoint(payloadStr: string): Promise<string> {
+    const telemetry = new TelemetryTracker();
     try {
         await initializeHardware();
         
@@ -120,14 +122,19 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         }
 
         const payload: PolicyEvaluationRequest = JSON.parse(payloadStr);
+        telemetry.mark('init');
+
         const receipt = await pep.enforce(payload);
+        telemetry.mark('pep');
         
         const { attestation, pcr0 } = await getHardwareMetadata();
         if (!pcr0 || pcr0 === "") {
             throw new Error(`[TERMINAL REFUSAL] Genuine Enclave measurement (PCR0) is strictly required for this High-Veracity session. Boot aborted.`);
         }
+        telemetry.mark('attest');
 
         const solanaReceipt = await anchorToLedger(receipt, 'approved');
+        telemetry.mark('anchor');
 
         // Asynchronous ZK Proving Pipeline
         // We offload the 3-minute ZK-STARK computation to the background so we can instantly 
@@ -144,6 +151,9 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             }
         });
 
+        const metrics = telemetry.getMetrics();
+        console.log(`[Aegis-12] Hot-Path Telemetry:`, metrics);
+
         return JSON.stringify({
             status: "approved",
             receipt,
@@ -153,10 +163,11 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             ars_anchor: "pending",
             zk_vkey: "pending",
             solana_tx: solanaReceipt?.txSignature,
-            explorer_url: solanaReceipt?.explorerUrl
+            explorer_url: solanaReceipt?.explorerUrl,
+            telemetry: metrics
         });
     } catch (e: any) {
-        return handleEntrypointError(e);
+        return handleEntrypointError(e, telemetry);
     }
 }
 
@@ -239,15 +250,18 @@ export async function getEvidenceStatus(receiptId: string): Promise<string> {
     });
 }
 
-async function handleEntrypointError(e: any): Promise<string> {
+async function handleEntrypointError(e: any, telemetry?: TelemetryTracker): Promise<string> {
     const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
     const solanaReceipt = await anchorToLedger(dummyReceipt, 'denied');
+
+    const metrics = telemetry ? { total_ms: telemetry.getMetrics().total_ms } : undefined;
 
     return JSON.stringify({
         status: "denied",
         error: e.message,
         enclaveDid: signer?.enclaveDid || "unknown",
         solana_tx: solanaReceipt?.txSignature,
-        explorer_url: solanaReceipt?.explorerUrl
+        explorer_url: solanaReceipt?.explorerUrl,
+        ...(metrics ? { telemetry: metrics } : {})
     });
 }

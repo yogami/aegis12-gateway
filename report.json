@@ -1,0 +1,718 @@
+{
+  "config": {
+    "configFile": "/Users/user1000/gitprojects/aegis12-gateway/playwright.config.ts",
+    "rootDir": "/Users/user1000/gitprojects/aegis12-gateway/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/user1000/gitprojects/aegis12-gateway/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/user1000/gitprojects/aegis12-gateway/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "council-security-verification.spec.ts",
+      "file": "council-security-verification.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Aegis-12: Independent Council Security Re-Audit E2E Base",
+          "file": "council-security-verification.spec.ts",
+          "line": 48,
+          "column": 6,
+          "specs": [
+            {
+              "title": "DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1686,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:00.368Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-7b3ed986822e5e6927df",
+              "file": "council-security-verification.spec.ts",
+              "line": 50,
+              "column": 9
+            },
+            {
+              "title": "Signature Malleability via Unbounded financialLimitsString (parser bomb defense)",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1091,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:82:28",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 28,
+                          "line": 82
+                        },
+                        "snippet": "  80 |         const body = await res.json();\n  81 |         expect(body.status).toBe('denied');\n> 82 |         expect(body.error).toContain('exceeds 1024 byte safety bound');\n     |                            ^\n  83 |     });\n  84 |\n  85 |     test('POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 28,
+                            "line": 82
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m\n\n  80 |         const body = await res.json();\n  81 |         expect(body.status).toBe('denied');\n> 82 |         expect(body.error).toContain('exceeds 1024 byte safety bound');\n     |                            ^\n  83 |     });\n  84 |\n  85 |     test('POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:82:28"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:02.065Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 28,
+                        "line": 82
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1829,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:82:28",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 28,
+                          "line": 82
+                        },
+                        "snippet": "  80 |         const body = await res.json();\n  81 |         expect(body.status).toBe('denied');\n> 82 |         expect(body.error).toContain('exceeds 1024 byte safety bound');\n     |                            ^\n  83 |     });\n  84 |\n  85 |     test('POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 28,
+                            "line": 82
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"exceeds 1024 byte safety bound\"\u001b[39m\nReceived string:    \u001b[31m\"Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\"\u001b[39m\n\n  80 |         const body = await res.json();\n  81 |         expect(body.status).toBe('denied');\n> 82 |         expect(body.error).toContain('exceeds 1024 byte safety bound');\n     |                            ^\n  83 |     });\n  84 |\n  85 |     test('POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:82:28"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-21T21:08:03.658Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 28,
+                        "line": 82
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-5f1dba575b767e5b2dee",
+              "file": "council-security-verification.spec.ts",
+              "line": 66,
+              "column": 9
+            },
+            {
+              "title": "POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1873,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:06.036Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-1341a01b7369b2044bde",
+              "file": "council-security-verification.spec.ts",
+              "line": 85,
+              "column": 9
+            },
+            {
+              "title": "POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1743,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:07.926Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-4e62d866591d7e106629",
+              "file": "council-security-verification.spec.ts",
+              "line": 101,
+              "column": 9
+            },
+            {
+              "title": "POST /enforce - Financial Limit Type Confusion Injection Post-Normalization",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1199,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:09.680Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-0051a96990f8d5bc9167",
+              "file": "council-security-verification.spec.ts",
+              "line": 130,
+              "column": 9
+            },
+            {
+              "title": "Healthtech Privilege Escalation / Data Exfiltration",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1107,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:160:65",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 65,
+                          "line": 160
+                        },
+                        "snippet": "  158 |         const body = await res.json();\n  159 |         expect(body.status).toBe('denied');\n> 160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');\n      |                                                                 ^\n  161 |     });\n  162 | });\n  163 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 65,
+                            "line": 160
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m\n\n  158 |         const body = await res.json();\n  159 |         expect(body.status).toBe('denied');\n> 160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');\n      |                                                                 ^\n  161 |     });\n  162 | });\n  163 |\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:160:65"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:10.888Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 65,
+                        "line": 160
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 1788,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:160:65",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 65,
+                          "line": 160
+                        },
+                        "snippet": "  158 |         const body = await res.json();\n  159 |         expect(body.status).toBe('denied');\n> 160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');\n      |                                                                 ^\n  161 |     });\n  162 | });\n  163 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 65,
+                            "line": 160
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected substring: \u001b[32m\"not authorized\"\u001b[39m\nReceived string:    \u001b[31m\"[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.\"\u001b[39m\n\n  158 |         const body = await res.json();\n  159 |         expect(body.status).toBe('denied');\n> 160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');\n      |                                                                 ^\n  161 |     });\n  162 | });\n  163 |\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:160:65"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-21T21:08:12.511Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 65,
+                        "line": 160
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-4d5a830c4a27a980c2e1",
+              "file": "council-security-verification.spec.ts",
+              "line": 145,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Aegis-12: Solana Transaction Firewall Hardening",
+          "file": "council-security-verification.spec.ts",
+          "line": 164,
+          "column": 6,
+          "specs": [
+            {
+              "title": "POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense)",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 13457,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:177:38",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 38,
+                          "line": 177
+                        },
+                        "snippet": "  175 |     \n  176 |         // Implementation may return 400 or 403; we only assert that it fails closed with BLOCK decision.\n> 177 |         expect([400, 403, 413, 500]).toContain(res.status());\n      |                                      ^\n  178 |         const body = await res.json();\n  179 |         expect(body.decision || body.status).not.toBe('ALLOW');\n  180 |     });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 38,
+                            "line": 177
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m\n\n  175 |     \n  176 |         // Implementation may return 400 or 403; we only assert that it fails closed with BLOCK decision.\n> 177 |         expect([400, 403, 413, 500]).toContain(res.status());\n      |                                      ^\n  178 |         const body = await res.json();\n  179 |         expect(body.decision || body.status).not.toBe('ALLOW');\n  180 |     });\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:177:38"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:14.795Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 38,
+                        "line": 177
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5567,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:177:38",
+                        "location": {
+                          "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                          "column": 38,
+                          "line": 177
+                        },
+                        "snippet": "  175 |     \n  176 |         // Implementation may return 400 or 403; we only assert that it fails closed with BLOCK decision.\n> 177 |         expect([400, 403, 413, 500]).toContain(res.status());\n      |                                      ^\n  178 |         const body = await res.json();\n  179 |         expect(body.decision || body.status).not.toBe('ALLOW');\n  180 |     });"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                            "column": 38,
+                            "line": 177
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoContain\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // indexOf\u001b[22m\n\nExpected value: \u001b[32m200\u001b[39m\nReceived array: \u001b[31m[400, 403, 413, 500]\u001b[39m\n\n  175 |     \n  176 |         // Implementation may return 400 or 403; we only assert that it fails closed with BLOCK decision.\n> 177 |         expect([400, 403, 413, 500]).toContain(res.status());\n      |                                      ^\n  178 |         const body = await res.json();\n  179 |         expect(body.decision || body.status).not.toBe('ALLOW');\n  180 |     });\n    at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:177:38"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-21T21:08:28.983Z",
+                      "annotations": [],
+                      "attachments": [],
+                      "errorLocation": {
+                        "file": "/Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts",
+                        "column": 38,
+                        "line": 177
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-c1523b37e2f66d723999",
+              "file": "council-security-verification.spec.ts",
+              "line": 165,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses",
+          "file": "council-security-verification.spec.ts",
+          "line": 183,
+          "column": 6,
+          "specs": [
+            {
+              "title": "VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1933,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:35.041Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-566eb6fc644834b1e542",
+              "file": "council-security-verification.spec.ts",
+              "line": 185,
+              "column": 9
+            },
+            {
+              "title": "VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1157,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:36.986Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-23fff5b40e9dd5cc843e",
+              "file": "council-security-verification.spec.ts",
+              "line": 207,
+              "column": 9
+            },
+            {
+              "title": "VULN-003: Assert JSON Type Confusion on maxAnomalyScore Cannot Bypass Defenses",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 988,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:38.154Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-7866f603dda5282944e4",
+              "file": "council-security-verification.spec.ts",
+              "line": 227,
+              "column": 9
+            },
+            {
+              "title": "VULN-004: Assert Empty Limits String \"{}\" Causes Fail-Closed Denial",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1241,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:39.155Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-3c7f0c4505658e347d67",
+              "file": "council-security-verification.spec.ts",
+              "line": 249,
+              "column": 9
+            },
+            {
+              "title": "VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30013,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-04-21T21:08:40.407Z",
+                      "annotations": [],
+                      "attachments": []
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30017,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-04-21T21:09:11.116Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "867a0af55d857084d2dc-d7098568b0e0553ddec2",
+              "file": "council-security-verification.spec.ts",
+              "line": 270,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-04-21T21:07:59.690Z",
+    "duration": 101507.66900000001,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

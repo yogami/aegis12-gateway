@@ -1,0 +1,238 @@
+# 🔥 BRUTAL SECURITY TEARDOWN: AEGIS-12 TIERED CRYPTO IMPLEMENTATION
+
+## 🚨 EXECUTIVE ASSASSINATION
+
+**This isn't a security architecture—it's a ticking time bomb wrapped in quantum-resistant hype.** The "tiered" approach you've implemented is the cryptographic equivalent of putting a bank vault door on a cardboard box while leaving the back wall open. Every single audit finding is a direct indictment of structural incompetence.
+
+---
+
+## 💀 ATOMIC FAILURE #1: THE "QUANTUM GAP" IS A **CATEGORICAL BREACH**
+
+### What You Built:
+```javascript
+// HOT PATH = Ed25519
+receipt.signature = await this.signer.signEIP712(...);
+
+// AUDIT PATH = ML-DSA-65 (background, fire-and-forget)
+this.generateAuditProof(receipt).catch(e => console.error(...));
+```
+
+### Why This Is Catastrophic:
+
+1. **You inverted the security hierarchy.** The **weakest** signature (Ed25519) controls live execution. An attacker only needs to:
+   - Break Ed25519 (conventional threat) → SPOOF KILL SWITCH
+   - PQ proof arrives LATE or NEVER → ZERO PROTECTION
+
+2. **You violated the "Deterministic Floor" mandate at the design level.** Article 12 requires **automatic recording**—not "probabilistic recording if the background worker doesn't crash."
+
+3. **The binding between signatures is pure fiction:**
+   ```javascript
+   const auditPayload = JSON.stringify({
+       receiptId: receipt.receiptId,  // NOT the same message as Ed25519!
+       actionId: receipt.actionId,
+       article12LogHash: receipt.article12LogHash,
+       timestamp: receipt.timestamp
+   });
+   ```
+   Where's the `parametersHash`? The `resultHash`? The `toolId`? **You're signing DIFFERENT DATA SETS**, creating a forensic nightmare.
+
+---
+
+## ⚡ ATOMIC FAILURE #2: ASYNCHRONOUS EVIDENCE = **EVIDENCE LOSS GUARANTEED**
+
+### The State Store Is A Write-Through Cache Disguised As Persistence:
+
+```javascript
+public async updatePqSignature(receiptId: string, pqSignature: string): Promise<void> {
+    let foundKey: string | null = null;
+    for (const [k, v] of this.evidence.entries()) {  // 🔥 O(n) SCAN UNDER LOCK
+        if (v.receiptId === receiptId) {
+            foundKey = k;
+            break;
+        }
+    }
+    if (foundKey) {
+        const receipt = this.evidence.get(foundKey);
+        receipt.pqSignature = pqSignature;  // 🔥 MUTABLE STATE, NO TRANSACTION
+        this.evidence.set(foundKey, receipt);
+        await this.persist();  // 🔥 SINGLE POINT OF FAILURE
+    }
+}
+```
+
+### **Race Conditions Galore:**
+
+1. **Enclave crashes between `enforce()` return and `updatePqSignature()`** → PQ evidence LOST FOREVER
+2. **Concurrent updates can overwrite each other** → Last-write-wins with ML-DSA-65 signatures??
+3. **No idempotency** → Background worker crashes and restarts? Duplicate signatures? Who knows!
+
+### **Data Loss Pattern GUARANTEED:**
+```
+1. Transaction arrives → Ed25519 signs → "ALLOW"
+2. Enclave returns approval to client
+3. [CRASH: TEE hardware fault, kernel panic, OOM killer]
+4. ML-DSA-65 signature NEVER generated
+5. RESULT: Solana transaction LIVE with NO PQ audit trail
+```
+
+**This isn't a vulnerability—it's a DESIGN GUARANTEE of audit failure.**
+
+---
+
+## 🧠 ATOMIC FAILURE #3: RESOURCE STARVATION = SELF-DDOS
+
+### The Performance Lie:
+
+You claim "hot path" vs "audit path" but:
+
+```javascript
+// ML-DSA-65 is 10-50x more expensive than Ed25519
+const pqSignature = this.signer.signMLDSA(auditPayload);
+```
+
+### **What Actually Happens Under Load:**
+1. Burst of 1000 transactions → 1000 ML-DSA-65 signing jobs queued
+2. CPU saturation inside TEE → Hot-path execution STARVES
+3. **The "Kill Switch" becomes a SELF-DDOS vector**
+4. Node.js event loop blocked → Timeouts cascade
+
+### **Side-Channel Feast:**
+ML-DSA-65 uses **Fiat-Shamir with aborts**—probabilistic rejection sampling. Under CPU pressure:
+- Timing variations become **detectable patterns**
+- If ANY metrics leak (cloud monitoring, logs), you've given attackers a side-channel
+- **You turned quantum resistance into a timing oracle**
+
+---
+
+## 🎭 ATOMIC FAILURE #4: REGULATORY FRAUD
+
+### The "FIPS 204 Readiness" Lie:
+
+**IMPLEMENTING ≠ OPERATING.** You're using NIST-approved primitives but:
+
+1. **No certified FIPS 204 module** → This is "consultant compliance theater"
+2. **No key management ceremony** → Where are your ML-DSA-65 key generation controls?
+3. **No entropy validation** → ML-DSA-65 requires high-quality randomness
+4. **No side-channel protection** → TEE doesn't magically fix algorithmic timing leaks
+
+**This is security theater masquerading as regulatory compliance.**
+
+---
+
+## 💣 CONCRETE ATTACK VECTORS (Exploitable TODAY)
+
+### **Vector 1: Hot-Path Spoofing**
+```
+1. Intercept PolicyEvaluationRequest
+2. Replace Ed25519 signature with compromised one
+3. Send to AegisPEP.enforce()
+4. Get "ALLOW" → Execute on Solana immediately
+5. ML-DSA-65 signature? Who cares—it's async!
+RESULT: Quantum-safe audit trail = BROKEN
+```
+
+### **Vector 2: Resource Exhaustion Attack**
+```
+1. Send 10,000 high-value transactions in burst
+2. ML-DSA-65 queue starves CPU
+3. Legitimate kill-switch triggers DELAYED or BLOCKED
+4. Enclave becomes unresponsive
+RESULT: Kill switch = DISABLED
+```
+
+### **Vector 3: Evidence Gap Exploitation**
+```
+1. Monitor for system restarts/deployments
+2. Flood transactions RIGHT AFTER restart
+3. Background worker not initialized yet
+4. All approvals get Ed25519 only
+5. Claim "legitimate evidence loss" during incident
+RESULT: Plausible deniability for missing PQ proofs
+```
+
+---
+
+## 🧨 STRUCTURAL INTEGRITY FAILURE
+
+### **The Tier Evaluator Is Blind to Crypto Tiers:**
+Where is the code that ensures:
+- Every Ed25519 signature MUST have corresponding ML-DSA-65?
+- Maximum time delta between signatures?
+- Recovery protocol for missing PQ proofs?
+
+### **The State Store Has No Recovery Protocol:**
+What happens when:
+- Disk corruption loses evidence map?
+- WAL engine fails to decrypt?
+- Replica desync creates conflicting PQ signatures?
+
+**SILENCE.** No retry logic, no reconciliation, no repair.
+
+---
+
+## 🏴‍☠️ VERDICT: ARCHITECTURAL MALPRACTICE
+
+### **This system fails at EVERY security principle:**
+
+1. **Fail-Safe Defaults:** ❌ Async = best-effort, not guaranteed
+2. **Complete Mediation:** ❌ Two signatures ≠ twice the mediation
+3. **Open Design:** ❌ Complexity obscures failure modes
+4. **Least Privilege:** ❌ Hot path has privilege WITHOUT accountability
+5. **Psychological Acceptability:** ❌ Engineers will "just disable PQ" when it breaks
+
+### **The "Deterministic Floor" Is Nowhere In Sight:**
+
+**You created a PROBABILISTIC audit trail** while claiming determinism. This is **regulatory fraud** under Article 12.
+
+---
+
+## 🛠️ REQUIRED IMMEDIATE CORRECTIONS (If This Is Salvageable):
+
+### **1. SYNCHRONOUS BIPARTITE SIGNING OR FAIL:**
+```javascript
+// Atomic: Both signatures or NO signatures
+const [ed25519Sig, pqSig] = await Promise.all([
+    this.signer.signEIP712(...),
+    this.signer.signMLDSA(auditPayload)  // SAME payload
+]);
+
+// If PQ fails, THROW and release nonce
+// NO HOT PATH WITHOUT PQ PROOF
+```
+
+### **2. IDEMPOTENT EVENT LOG WITH STRICT ORDERING:**
+```javascript
+// Pre-assign event IDs before ANY crypto
+const eventId = crypto.randomUUID();
+await this.stateStore.reserveEventId(eventId);  // WAL-backed
+
+// Signatures reference eventId
+// Recovery scans for missing PQ signatures
+```
+
+### **3. RATE LIMITING WITH PQ-AWARE BACKPRESSURE:**
+```javascript
+// If PQ queue depth > threshold, THROTTLE hot path
+// No "fire and forget" — synchronous backpressure
+```
+
+### **4. FORENSICALLY IDENTICAL MESSAGE BINDING:**
+```javascript
+// Sign EXACTLY the same canonical bytes
+const message = canonicalSerialize(receipt);
+const signatures = {
+    ed25519: await signer.signEd25519(message),
+    pq: await signer.signMLDSA(message)  // SAME BYTES
+};
+```
+
+---
+
+## 📜 FINAL JUDGMENT:
+
+**This implementation is not merely vulnerable—it's architecturally unsound at the cryptographic level.** The tiered approach fundamentally **cannot** satisfy Article 12's "Deterministic Floor" requirement. 
+
+**Recommendation:** Complete architectural redesign or regulatory non-compliance declaration. **Do not deploy in production. Do not claim regulatory compliance. Do not trust with customer funds.**
+
+---
+**Security Auditor's Note:** This isn't about finding bugs. This is about recognizing that the **entire cryptographic security model is backwards**. You built a fast car with no brakes and called it "tiered stopping."
