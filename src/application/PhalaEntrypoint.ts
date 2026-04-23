@@ -274,11 +274,12 @@ export async function getEvidenceStatus(receiptId: string): Promise<string> {
     });
 }
 
+import { TerminalRefusalError } from '../errors';
+
 async function handleEntrypointError(e: any, telemetry?: TelemetryTracker): Promise<string> {
     const isUnauthenticated = e instanceof SyntaxError || 
-                              e.message.includes('SyntaxError') || 
-                              e.message.includes('JSON') || 
-                              e.message.includes('[TERMINAL REFUSAL]');
+                              e instanceof TerminalRefusalError ||
+                              (e.name === 'TerminalRefusalError');
                               
     if (!isUnauthenticated) {
         const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };

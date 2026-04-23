@@ -1,6 +1,7 @@
 import { AegisJournal } from './infrastructure/AegisJournal';
 import { SolanaAnchor } from './infrastructure/SolanaAnchor';
-import { createHash } from 'crypto';
+import { MerkleTree } from 'merkletreejs';
+import keccak256 from 'keccak256';
 
 export class BatchAnchorWorker {
     private journal: AegisJournal;
@@ -46,17 +47,20 @@ export class BatchAnchorWorker {
         try {
             console.log(`[BatchAnchorWorker] Sweeping ${unbatched.length} unanchored receipts...`);
             
-            // Compute Merkle Root (simplified flat hash for hackathon)
-            const hashes = unbatched.map(entry => entry.article12LogHash).sort();
-            const merkleRoot = createHash('sha512').update(hashes.join(',')).digest('hex');
+            // Compute real Merkle Root (proper Buffer encoding for keccak256)
+            const leaves = unbatched.map(entry => {
+                const hexString = entry.article12LogHash.replace(/^0x/, '');
+                return keccak256(Buffer.from(hexString, 'hex'));
+            });
+            const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+            const merkleRoot = '0x' + tree.getRoot().toString('hex');
 
             const batchActionId = `batch-${Date.now()}-${unbatched.length}`;
             
-            // Create a synthetic receipt that represents the batch
             const batchReceipt = {
                 receiptId: batchActionId,
                 actionId: batchActionId,
-                payloadHash: merkleRoot, // The anchor will use this
+                payloadHash: merkleRoot,
                 timestamp: new Date().toISOString(),
                 isBatch: true,
                 count: unbatched.length

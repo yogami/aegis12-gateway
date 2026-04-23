@@ -11,6 +11,7 @@ import { IAegisStateStore } from '../ports/IAegisStateStore';
 import { AegisLocalStateStore } from './AegisLocalStateStore';
 import { AegisJournal } from './AegisJournal';
 import { AegisCanonicalMessage } from '../types';
+import { TerminalRefusalError } from '../errors';
 
 const AEGIS_CHAIN_ID = 1399811149;
 const AEGIS_DOMAIN_NAME = "Aegis-12-Compliance-Matrix";
@@ -94,7 +95,7 @@ export class AegisPEP {
         // This MUST succeed before we generate the hot-path signature or return an ALLOW.
         const journaled = this.journal.appendSync(canonicalMessage);
         if (!journaled) {
-             throw new Error('[TERMINAL REFUSAL] Failed to journal execution intent. Halting hot path.');
+             throw new TerminalRefusalError(' Failed to journal execution intent. Halting hot path.');
         }
 
         const receipt: AegisComplianceReceipt = {
@@ -149,14 +150,14 @@ export class AegisPEP {
     }
 
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
-        if (!request.dynamicPolicy) throw new Error('[TERMINAL REFUSAL] Missing Cryptographic Policy envelope.');
+        if (!request.dynamicPolicy) throw new TerminalRefusalError(' Missing Cryptographic Policy envelope.');
         
         const tenantId = request.dynamicPolicy.policyConfig.tenantId;
         const nonce = request.dynamicPolicy.policyConfig.nonce;
         const scopedNonce = `${tenantId}::${nonce}`;
 
         if (!(await this.nonceRegistry.reserve(scopedNonce))) {
-             throw new Error('[TERMINAL REFUSAL] Nonce already used or reservation failed. Replay detected.');
+             throw new TerminalRefusalError(' Nonce already used or reservation failed. Replay detected.');
         }
 
         let nonceCommitted = false;
@@ -164,10 +165,10 @@ export class AegisPEP {
         try {
             const score = request.context?.currentAnomalyScore;
             const isScoreInvalid = score === undefined || !Number.isFinite(score) || score < 0 || score > 1.0;
-            if (isScoreInvalid) throw new Error('[TERMINAL REFUSAL] Invalid or unscaled contextual anomaly score.');
+            if (isScoreInvalid) throw new TerminalRefusalError(' Invalid or unscaled contextual anomaly score.');
             
             if (request.dynamicPolicy.policyConfig.expiresAt < Math.floor(Date.now() / 1000)) {
-                throw new Error('[TERMINAL REFUSAL] Policy Expired.');
+                throw new TerminalRefusalError(' Policy Expired.');
             }
 
             let sanit;
@@ -188,20 +189,26 @@ export class AegisPEP {
             await this.verifyPolicy(evalRequest);
 
             let spendAmountBig = 0n;
-            try { spendAmountBig = BigInt(sanit.amount as any || 0); } catch(e) {}
+            try { 
+                spendAmountBig = BigInt(sanit.amount as any || 0); 
+            } catch(e: any) {
+                throw new Error(`[TERMINAL REFUSAL] Invalid spend amount format. Must be a valid BigInt string. Error: ${e.message}`);
+            }
             
             await this.enforceLimits(request, tenantId, spendAmountBig, scopedNonce);
 
-            await this.nonceRegistry.commit(scopedNonce);
-            nonceCommitted = true;
-
             const spendNumber = Number(spendAmountBig);
             if (!Number.isFinite(spendNumber) || spendNumber > Number.MAX_SAFE_INTEGER) {
-                 throw new Error("[TERMINAL REFUSAL] Infinity Defense Triggered: Mathematical integrity compromised.");
+                 throw new TerminalRefusalError(" Infinity Defense Triggered: Mathematical integrity compromised.");
             }
             await this.stateStore.updateStats(tenantId, spendNumber);
 
             const receipt = await this.generateReceipt(request, sanit, tenantId, nonce);
+
+            // Commit the nonce only after all state updates and journal appends have succeeded
+            await this.nonceRegistry.commit(scopedNonce);
+            nonceCommitted = true;
+
             return receipt;
         } finally {
             if (!nonceCommitted) {
