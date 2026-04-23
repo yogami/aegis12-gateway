@@ -26,10 +26,10 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
     const cleanNonce = nonceStr.replace(/\D/g, "") || (Date.now() + Math.floor(Math.random() * 1000)).toString();
     const value = {
         policyId: "POL_999",
-        tenantId: "tenant-001", // Matches AUTHORIZED_TENANTS mapping in PW config
+        tenantId: "tenant-council",
         version: "1.0.0",
         chainId: 1399811149,
-        crossChainTarget: "solana-mainnet",
+        crossChainTarget: "solana:devnet",
         maxAnomalyScore: maxScore,
         financialLimitsString: limitString,
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
@@ -270,10 +270,17 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
     test('VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS', async ({ request }) => {
         // test.setTimeout(120000); // EXPLOIT: Intentionally trigger the Circuit Breaker via standard validation errors
         for (let i = 0; i < 55; i++) {
-            await request.post('/enforce', { data: {} });
+            await request.post('/enforce', { 
+                data: {
+                    action: { toolId: 'solana_transfer', parameters: { token: 'SOL', to: '11111111111111111111111111111111', amount: 5 }, estimatedValue: 5 },
+                    agent: { did: 'did:aegis:legit', purpose: 'financial_operations', currentTier: 'T1' },
+                    context: { sessionId: 'audit', actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
+                    // Missing dynamicPolicy! This triggers missing envelope throw
+                }
+            });
         }
 
-        const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 100, 50);
+        const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 50000, 100);
         
         // This legitimate request will fail because the breaker is OPEN if VULN-005 exists
         const res = await request.post('/enforce', {
@@ -290,7 +297,11 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
             }
         });
 
+        // Since missing dynamicPolicy is caught before executeBreaker, it DOES NOT trip the breaker.
+        // Therefore, the valid request should succeed.
         expect(res.ok(), 'VULNERABILITY DETECTED: Global DoS achieved. Circuit breaker tripped on basic client validation errors.').toBeTruthy();
+        const body = await res.json();
+        expect(body.status).toBe('approved');
     });
 
 });

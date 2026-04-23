@@ -4,6 +4,8 @@ import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest } from '../types';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
 import { TelemetryTracker } from '../infrastructure/TelemetryTracker';
+import { AegisJournal } from '../infrastructure/AegisJournal';
+import { BatchAnchorWorker } from '../BatchAnchorWorker';
 
 declare global {
     var phala: { getQuote?: (did: string) => { quote: string; measurement: string } } | undefined;
@@ -12,28 +14,35 @@ declare global {
 export let signer: AegisSigner;
 export let pep: AegisPEP;
 export let anchor: SolanaAnchor;
+export let journal: AegisJournal;
+export let batchWorker: BatchAnchorWorker;
 
 /**
  * Initialization mutex: ensures only one init runs at a time.
  * All concurrent callers await the same Promise.
  */
+let isInitializing = false;
 let initPromise: Promise<void> | null = null;
 
 export async function initializeHardware() {
     // Fast path: already initialized
     if (signer && pep && anchor) return;
 
-    // Mutex: if init is in progress, await it instead of starting a new one
+    // ATOMIC MUTEX
+    while (isInitializing) await new Promise(r => setTimeout(r, 10));
     if (initPromise) {
         await initPromise;
         return;
     }
+    if (signer && pep && anchor) return;
 
-    initPromise = doInitialize();
+    isInitializing = true;
     try {
+        initPromise = doInitialize();
         await initPromise;
     } finally {
         initPromise = null;
+        isInitializing = false;
     }
 }
 
@@ -59,13 +68,15 @@ async function doInitialize() {
                     const { AegisLocalStateStore } = await import('../infrastructure/AegisLocalStateStore');
                     const { AegisJournal } = await import('../infrastructure/AegisJournal');
                     
-                    const nonceReg = new AegisLocalNonceRegistry("/var/data/nonce_registry.json");
+                    const dataDir = process.env.NODE_ENV === 'test' || !process.env.PHALA_CVM_ENVIRONMENT ? '/tmp' : '/var/data';
+                    
+                    const nonceReg = new AegisLocalNonceRegistry(`${dataDir}/nonce_registry.json`);
                     await nonceReg.initialize();
                     
-                    const stateStore = new AegisLocalStateStore("/var/data/state_store.json");
+                    const stateStore = new AegisLocalStateStore(`${dataDir}/state_store.json`);
                     await stateStore.initialize();
 
-                    const journal = new AegisJournal("/var/data/aegis_journal.log");
+                    journal = new AegisJournal(`${dataDir}/aegis_journal.log`);
 
                     pep = new AegisPEP(signer, tenants, nonceReg, stateStore, journal);
                     console.log(`[Aegis-12] Hardware Init: PEP initialized with ${Object.keys(tenants).length} tenants.`);
@@ -79,6 +90,11 @@ async function doInitialize() {
                 console.log(`[Aegis-12] Hardware Init: Initializing SolanaAnchor for cluster: ${process.env.SOLANA_CLUSTER || 'devnet'}`);
                 anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
                 console.log(`[Aegis-12] Hardware Init: SolanaAnchor established.`);
+            }
+
+            if (!batchWorker && journal && anchor && signer) {
+                batchWorker = new BatchAnchorWorker(journal, anchor, signer.enclaveDid);
+                batchWorker.start(30000); // Batch anchor every 30 seconds
             }
 
             return;
@@ -124,17 +140,23 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         const payload: PolicyEvaluationRequest = JSON.parse(payloadStr);
         telemetry.mark('init');
 
-        const receipt = await pep.enforce(payload);
-        telemetry.mark('pep');
-        
+        // FIXED: Attestation Check MUST occur before PEP enforcement
         const { attestation, pcr0 } = await getHardwareMetadata();
         if (!pcr0 || pcr0 === "") {
             throw new Error(`[TERMINAL REFUSAL] Genuine Enclave measurement (PCR0) is strictly required for this High-Veracity session. Boot aborted.`);
         }
         telemetry.mark('attest');
 
-        const solanaReceipt = await anchorToLedger(receipt, 'approved');
-        telemetry.mark('anchor');
+        const receipt = await pep.enforce(payload);
+        telemetry.mark('pep');
+
+        // Asynchronous Solana Anchoring Pipeline
+        // Offload the ~1300ms Solana anchor to the background to prevent DoS connection exhaustion
+        anchorToLedger(receipt, 'approved').then(solanaReceipt => {
+            console.log(`[Aegis-12] Async Anchor Complete. Tx: ${solanaReceipt?.txSignature}`);
+        }).catch(err => {
+            console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_BACKGROUND_FAILURE: ${err.message}`);
+        });
 
         // Asynchronous ZK Proving Pipeline
         // We offload the 3-minute ZK-STARK computation to the background so we can instantly 
@@ -162,8 +184,8 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
             pcr0: pcr0,
             ars_anchor: "pending",
             zk_vkey: "pending",
-            solana_tx: solanaReceipt?.txSignature,
-            explorer_url: solanaReceipt?.explorerUrl,
+            solana_tx: "batching", // Async Optimistic TEE-Rollup
+            explorer_url: "pending",
             telemetry: metrics
         });
     } catch (e: any) {
@@ -214,6 +236,8 @@ async function generateZkProof(receipt: any): Promise<{ seal?: string, vkey?: st
 }
 
 async function anchorToLedger(receipt: any, decision: 'approved' | 'denied'): Promise<{ txSignature?: string, explorerUrl?: string } | null> {
+    // Note: In Optimistic Rollup (Option 1) mode, successful receipts are batched via BatchAnchorWorker.
+    // This function remains to immediately anchor failure cases if desired, or can be skipped.
     if (!signer || !anchor) return null;
     try {
         const solanaReceipt = await anchor.anchorReceipt(receipt, decision, signer.enclaveDid);
@@ -251,17 +275,26 @@ export async function getEvidenceStatus(receiptId: string): Promise<string> {
 }
 
 async function handleEntrypointError(e: any, telemetry?: TelemetryTracker): Promise<string> {
-    const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
-    const solanaReceipt = await anchorToLedger(dummyReceipt, 'denied');
+    const isUnauthenticated = e instanceof SyntaxError || 
+                              e.message.includes('SyntaxError') || 
+                              e.message.includes('JSON') || 
+                              e.message.includes('[TERMINAL REFUSAL]');
+                              
+    if (!isUnauthenticated) {
+        const dummyReceipt = { actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() };
+        anchorToLedger(dummyReceipt, 'denied').catch(err => {
+            console.error(`[Aegis-12 Override]: SOLANA_ANCHOR_BACKGROUND_FAILURE: ${err.message}`);
+        });
+    }
 
-    const metrics = telemetry ? { total_ms: telemetry.getMetrics().total_ms } : undefined;
+    const metrics = telemetry ? telemetry.getMetrics() : undefined;
 
     return JSON.stringify({
         status: "denied",
         error: e.message,
         enclaveDid: signer?.enclaveDid || "unknown",
-        solana_tx: solanaReceipt?.txSignature,
-        explorer_url: solanaReceipt?.explorerUrl,
+        solana_tx: "pending",
+        explorer_url: "pending",
         ...(metrics ? { telemetry: metrics } : {})
     });
 }
