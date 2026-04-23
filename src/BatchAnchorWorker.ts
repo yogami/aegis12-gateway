@@ -66,7 +66,14 @@ export class BatchAnchorWorker {
                 count: unbatched.length
             };
 
-            const solanaReceipt = await this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
+            const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
+            
+            // Fix: Enforce a strict 15-second timeout on the Solana RPC call to prevent indefinite worker stall
+            const timeoutPromise = new Promise<any>((_, reject) => 
+                setTimeout(() => reject(new Error('RPC connection timed out after 15000ms')), 15000)
+            );
+            
+            const solanaReceipt = await Promise.race([anchorPromise, timeoutPromise]);
 
             if (solanaReceipt && solanaReceipt.txSignature) {
                 console.log(`[BatchAnchorWorker] Successfully anchored batch root ${merkleRoot} in tx ${solanaReceipt.txSignature}`);

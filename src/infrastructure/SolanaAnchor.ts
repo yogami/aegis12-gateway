@@ -22,6 +22,21 @@ import { createHash } from 'crypto';
 import { AegisComplianceReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 
+function safeStringify(obj: any, keys?: string[]): string {
+    const replacer = (key: string, value: any) => {
+        if (typeof value === 'bigint') return value.toString();
+        return value;
+    };
+    if (keys) {
+        const filtered: any = {};
+        for (const k of keys) {
+            if (obj[k] !== undefined) filtered[k] = obj[k];
+        }
+        return JSON.stringify(filtered, replacer);
+    }
+    return JSON.stringify(obj, replacer);
+}
+
 interface AnchorResult {
     txSignature: string;
     receiptHash: string;
@@ -107,7 +122,7 @@ export class SolanaAnchor {
      */
     public computeReceiptHash(receipt: AegisComplianceReceipt): string {
         // [V4-PQ] SHA-512 for Post-Quantum Resilience
-        const canonical = JSON.stringify(receipt, Object.keys(receipt).sort());
+        const canonical = safeStringify(receipt, Object.keys(receipt).sort());
         return createHash('sha512').update(canonical).digest('hex');
     }
 
@@ -165,16 +180,19 @@ export class SolanaAnchor {
         
         if (isZkSharded) {
             // Compress Async ZK proof into Post-Quantum SHA-512 hash
-            pQHashStr = createHash('sha512').update(JSON.stringify(receipt.zkSnarkProof)).digest('hex');
+            pQHashStr = createHash('sha512').update(safeStringify(receipt.zkSnarkProof)).digest('hex');
         } else {
             // Fallback to SHA-512 for raw payload
-            pQHashStr = createHash('sha512').update(JSON.stringify(receipt)).digest('hex');
+            pQHashStr = createHash('sha512').update(safeStringify(receipt)).digest('hex');
         }
+
+        // FIXED: Truncate strings mapped to SPL Memo execution
+        const safeActionId = String(receipt.actionId).substring(0, 256);
 
         // Construct structured memo
         const memo = [
             isZkSharded ? 'aegis:v2-zkp' : 'aegis:v4-pq',
-            receipt.actionId,
+            safeActionId,
             pQHashStr.substring(0, 16),
             decision,
             enclaveDid.substring(enclaveDid.lastIndexOf(':') + 1), // Short DID suffix
@@ -309,7 +327,7 @@ export class SolanaAnchor {
             }
 
             if (receipt && signer) {
-                const canonical = JSON.stringify(receipt, Object.keys(receipt).sort());
+                const canonical = safeStringify(receipt, Object.keys(receipt).sort());
                 try {
                     signatureValid = signer.verify(
                         canonical,

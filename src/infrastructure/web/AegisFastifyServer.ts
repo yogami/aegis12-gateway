@@ -15,7 +15,7 @@ fastify.register(swagger, {
 });
 fastify.register(swaggerUi, { routePrefix: '/api/docs/ui' });
 
-const payGate = new X402PayGate({ enabled: true, pricePerCall: 0.005 });
+const payGate = new X402PayGate({ enabled: false, pricePerCall: 0.005 });
 const governance = new SquadsGovernance();
 const controller = new AegisController(payGate, governance);
 

@@ -1,14 +1,14 @@
-export function assertSafeFinancialAmount(value: unknown, fieldName: string): number {
-    if (typeof value !== 'number') {
-        throw new Error(`Invalid type for ${fieldName}: expected number, got ${typeof value}`);
+export function assertSafeFinancialAmount(value: unknown, fieldName: string): bigint {
+    try {
+        const bigVal = BigInt(value as any);
+        if (bigVal < 0n) {
+            throw new Error(`Manipulation detected on ${fieldName}: Negative values are mathematically unsafe for this field.`);
+        }
+        return bigVal;
+    } catch (e: any) {
+        if (e.message.includes("Negative values")) throw e;
+        throw new Error(`Invalid type or precision loss for ${fieldName}: expected valid BigInt string/number, got ${typeof value}`);
     }
-    if (!Number.isFinite(value) || isNaN(value)) {
-        throw new Error(`Manipulation detected on ${fieldName}: Non-finite or NaN value injected.`);
-    }
-    if (value < 0) {
-        throw new Error(`Manipulation detected on ${fieldName}: Negative values are mathematically unsafe for this field.`);
-    }
-    return value;
 }
 
 function isValidSolanaAddress(addr: string): boolean {
@@ -61,7 +61,7 @@ export function normalizeParameters(toolId: string, parameters: Record<string, u
             throw new Error(`[TERMINAL REFUSAL] swap token mint is not approved by the secure TEE allowlist properties.`);
         }
         const slippage = assertSafeFinancialAmount(parameters.slippageBps, 'slippageBps');
-        if (slippage > MAX_SLIPPAGE_CACHE) {
+        if (slippage > BigInt(MAX_SLIPPAGE_CACHE)) {
             throw new Error(`[TERMINAL REFUSAL] slippageBps (${slippage}) exceeds mathematically safe MEV bounds of ${MAX_SLIPPAGE_CACHE}.`);
         }
         return Object.assign(Object.create(null), {

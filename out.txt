@@ -1,0 +1,407 @@
+
+Running 24 tests using 1 worker
+
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [SolanaAnchor] ⚠️ Using ephemeral keypair. Set SOLANA_PAYER_SECRET for persistence.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'Action denied by Aegis Enclave: Action value 9999 exceeds mathematically signed Tier limit 10'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m93.66[39m,
+    parse_and_init_ms: [33m58.36[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   1 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (139ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'Action denied by Aegis Enclave: Signer not found in provisioned TEE Root-of-Trust. Found: 0x1563915e194d8cfba1943570603f7606a3115508'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m20.72[39m,
+    parse_and_init_ms: [33m0.01[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   2 e2e/adversarial_pentest.spec.ts:118:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-2: Opus-4.6 "Rogue Signer" attack — policy signed by unauthorized key must fail (34ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓   3 e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied (99ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'Action denied by Aegis Enclave: [TERMINAL REFUSAL] slippageBps (9999) exceeds mathematically safe MEV bounds of 300.'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m7.75[39m,
+    parse_and_init_ms: [33m0.01[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   4 e2e/adversarial_pentest.spec.ts:165:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-4: Slippage Floor attack — exceeding slippageBps must be rejected (16ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'Action denied by Aegis Enclave: Anomaly score exceeds Dynamic TEE threshold (>50)'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m15.32[39m,
+    parse_and_init_ms: [33m0[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   5 e2e/adversarial_pentest.spec.ts:186:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-5: Anomaly Boundary Attack — 0.51 vs max 0.50 (21ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'Action denied by Aegis Enclave: Circular swap detected. fromMint and toMint are identical.'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m10.26[39m,
+    parse_and_init_ms: [33m0.01[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   6 e2e/adversarial_pentest.spec.ts:202:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-6: Circular Swap protection (16ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m"Action denied by Aegis Enclave: Invalid 'toMint' address. Must be Base58 public key."[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m8.81[39m,
+    parse_and_init_ms: [33m0.01[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   7 e2e/adversarial_pentest.spec.ts:223:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-7: Unapproved Mint substitution (14ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+STATUS: [33m403[39m {
+  status: [32m'denied'[39m,
+  error: [32m'[TERMINAL REFUSAL] Policy Expired.'[39m,
+  enclaveDid: [32m'did:aegis:enclave:c097ef19736e6ce2'[39m,
+  solana_tx: [32m'pending'[39m,
+  explorer_url: [32m'pending'[39m,
+  telemetry: {
+    total_ms: [33m7.22[39m,
+    parse_and_init_ms: [33m0.01[39m,
+    pep_enforce_ms: [33m0[39m,
+    hardware_attest_ms: [33m0[39m,
+    ledger_anchor_ms: [33m0[39m
+  }
+}
+  ✓   8 e2e/adversarial_pentest.spec.ts:245:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-8: Expired Policy Replay attempt (14ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+VULN-006 Error: [90mundefined[39m
+  ✓   9 e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash (54ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+VULN-007 Error: Action denied by Aegis Enclave: [TERMINAL REFUSAL] Multi-tier limit objects are structurally unsafe. Signature must mathematically lock exactly one Tier attribute.
+[WebServer] [SolanaAnchor] ⚠️ Airdrop failed: airdrop to ACnShRY2sKqbAMCwZR7B51wf9Hn5eBoKkLdWL2Z3JJZ9 failed: Internal error
+  ✓  10 e2e/apt-council-deepthink-bypasses.spec.ts:75:9 › APT-Council DeepThink Security Remediation Verification › VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits (17ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [SolanaAnchor] ⚠️ RPC failed (https://api.devnet.solana.com): Simulation failed. 
+[WebServer] Message: Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.. 
+[WebServer] Logs: 
+[WebServer] []. 
+[WebServer] Catch the `SendTransactionError` and call `getLogs()` on it for full details.
+VULN-008 Error: Action denied by Aegis Enclave: Invalid type for amount: expected number, got string
+  ✓  11 e2e/apt-council-deepthink-bypasses.spec.ts:94:9 › APT-Council DeepThink Security Remediation Verification › VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected (15ms)
+[WebServer] [SolanaAnchor] ⚠️ RPC failed (https://api.devnet.solana.com): Simulation failed. 
+[WebServer] Message: Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.. 
+[WebServer] Logs: 
+[WebServer] []. 
+[WebServer] Catch the `SendTransactionError` and call `getLogs()` on it for full details.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✘  12 e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests (202ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [SolanaAnchor] ⚠️ RPC failed (https://api.testnet.solana.com): Simulation failed. 
+[WebServer] Message: Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.. 
+[WebServer] Logs: 
+[WebServer] []. 
+[WebServer] Catch the `SendTransactionError` and call `getLogs()` on it for full details.
+[WebServer] [Aegis-12 Override]: SOLANA_ANCHOR_FAILURE. Failed to anchor denied. Error: [SolanaAnchor] ❌ All RPC fallbacks failed. Last error: Simulation failed. 
+[WebServer] Message: Transaction simulation failed: Attempt to debit an account but found no record of a prior credit.. 
+[WebServer] Logs: 
+[WebServer] []. 
+[WebServer] Catch the `SendTransactionError` and call `getLogs()` on it for full details.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✘  13 e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests (retry #1) (206ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓  14 e2e/council-security-verification.spec.ts:50:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload (23ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+  ✓  15 e2e/council-security-verification.spec.ts:66:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Signature Malleability via Unbounded financialLimitsString (parser bomb defense) (20ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+  ✓  16 e2e/council-security-verification.spec.ts:85:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant) (23ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓  17 e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) (42ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓  18 e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization (14ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [Aegis-12] RBAC_VIOLATION: med-bot-1 (intern) attempted write_ehr
+  ✓  19 e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration (3ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+  ✓  20 e2e/council-security-verification.spec.ts:165:9 › Aegis-12: Solana Transaction Firewall Hardening › POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense) (26ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+  ✓  21 e2e/council-security-verification.spec.ts:185:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits (15ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓  22 e2e/council-security-verification.spec.ts:207:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation (20ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✓  23 e2e/council-security-verification.spec.ts:227:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-003: Assert JSON Type Confusion on maxAnomalyScore Cannot Bypass Defenses (14ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+  ✓  24 e2e/council-security-verification.spec.ts:249:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-004: Assert Empty Limits String "{}" Causes Fail-Closed Denial (12ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+  ✓  25 e2e/council-security-verification.spec.ts:270:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS (77ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+
+
+  1) e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests 
+
+    Error: Circuit Breaker failed to trip after 10 invalid requests!
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      133 |         // Before patch: The breaker never tripped because the inner try/catch swallowed the failure.
+      134 |         // After patch: The breaker throws natively and trips, protecting the gateway.
+    > 135 |         expect(breakerTripped, "Circuit Breaker failed to trip after 10 invalid requests!").toBe(true);
+          |                                                                                             ^
+      136 |     });
+      137 |
+      138 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:135:93
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Circuit Breaker failed to trip after 10 invalid requests!
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      133 |         // Before patch: The breaker never tripped because the inner try/catch swallowed the failure.
+      134 |         // After patch: The breaker throws natively and trips, protecting the gateway.
+    > 135 |         expect(breakerTripped, "Circuit Breaker failed to trip after 10 invalid requests!").toBe(true);
+          |                                                                                             ^
+      136 |     });
+      137 |
+      138 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:135:93
+
+  1 failed
+    e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests 
+  23 passed (4.8s)

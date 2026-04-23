@@ -2,7 +2,7 @@ import { PolicyEvaluationRequest, AegisComplianceReceipt } from '../types';
 import { getCircuitBreaker } from './CircuitBreaker';
 import { normalizeParameters } from '../domain/PolicyValidator';
 import { AegisSigner } from './AegisSigner';
-import { ethers } from 'ethers';
+import keccak256 from 'keccak256';
 import { INonceRegistry } from '../ports/INonceRegistry';
 import { AegisLocalNonceRegistry } from './NonceRegistry';
 import { Eip712Verifier } from '../domain/Eip712Verifier';
@@ -87,7 +87,7 @@ export class AegisPEP {
         const canonicalMessage: AegisCanonicalMessage = {
             tenantId,
             nonce,
-            article12LogHash: ethers.utils.id(JSON.stringify(sanit)),
+            article12LogHash: '0x' + keccak256(Buffer.from(JSON.stringify(sanit, (_, v) => typeof v === 'bigint' ? v.toString() : v), 'utf8')).toString('hex'),
             timestamp: new Date().toISOString()
         };
 
@@ -104,8 +104,8 @@ export class AegisPEP {
             toolId: request.action.toolId,
             agentPubKey: request.agent?.did || "unknown",
             article12LogHash: canonicalMessage.article12LogHash,
-            parametersHash: ethers.utils.id(JSON.stringify(sanit)),
-            resultHash: ethers.utils.id("ALLOW"),
+            parametersHash: '0x' + keccak256(Buffer.from(JSON.stringify(sanit, (_, v) => typeof v === 'bigint' ? v.toString() : v), 'utf8')).toString('hex'),
+            resultHash: '0x' + keccak256(Buffer.from("ALLOW", 'utf8')).toString('hex'),
             article14OversightSignature: request.dynamicPolicy!.signature,
             policyId: request.dynamicPolicy!.policyConfig.policyId,
             tenantId: tenantId,
@@ -119,7 +119,7 @@ export class AegisPEP {
 
         const signableReceipt = {
             ...receipt,
-            validatedParamsJson: JSON.stringify(sanit),
+            validatedParamsJson: JSON.stringify(sanit, (_, v) => typeof v === 'bigint' ? v.toString() : v),
             limitationsJson: JSON.stringify(receipt.limitations),
             zkSeal: (receipt as any).zkSeal || "none"
         };
@@ -197,11 +197,8 @@ export class AegisPEP {
             
             await this.enforceLimits(request, tenantId, spendAmountBig, scopedNonce);
 
-            const spendNumber = Number(spendAmountBig);
-            if (!Number.isFinite(spendNumber) || spendNumber > Number.MAX_SAFE_INTEGER) {
-                 throw new TerminalRefusalError(" Infinity Defense Triggered: Mathematical integrity compromised.");
-            }
-            await this.stateStore.updateStats(tenantId, spendNumber);
+            const spendString = spendAmountBig.toString();
+            await this.stateStore.updateStats(tenantId, spendString);
 
             const receipt = await this.generateReceipt(request, sanit, tenantId, nonce);
 

@@ -12,7 +12,7 @@ export default defineConfig({
     },
     workers: 1,
     webServer: process.env.TEST_API_URL ? undefined : {
-        command: 'NODE_ENV=test ALLOW_E2E_MOCKING=false PHALA_SIMULATED_ROOT_SEED=0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abcd SOLANA_CLUSTER=devnet AUTHORIZED_TENANTS=\'{"tenant-council": ["0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"], "tenant-e2e": ["0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"]}\' npx tsx src/server.ts',
+        command: 'NODE_ENV=test ALLOW_E2E_MOCKING=false PHALA_SIMULATED_ROOT_SEED=0xabc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abcd SOLANA_CLUSTER=devnet AUTHORIZED_TENANTS=\'{"tenant-council": ["0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"], "tenant-e2e": ["0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"]}\' npx tsx src/server.ts',
         port: 8000,
         timeout: 30000,
         reuseExistingServer: true,

@@ -1,5 +1,5 @@
 export interface BehavioralStats {
-    totalSpend: number;
+    totalSpend: string; // Store as string to avoid BigInt precision loss
     actionCount: number;
     lastActionTimestamp: number;
     velocityScore: number; // Moving average or simple count in interval
@@ -8,7 +8,7 @@ export interface BehavioralStats {
 export interface IAegisStateStore {
     initialize?(): Promise<void>;
     getStats(agentId: string): Promise<BehavioralStats>;
-    updateStats(agentId: string, deltaSpend: number): Promise<BehavioralStats>;
+    updateStats(agentId: string, deltaSpend: string): Promise<BehavioralStats>;
     saveEvidence(receipt: any, solanaTx?: string): Promise<void>;
     getEvidence(txSignature: string): Promise<any | null>;
     getEvidenceByReceiptId(receiptId: string): Promise<any | null>;

@@ -67,7 +67,8 @@ export class WALEngine {
             let decrypted = decipher.update(parsed.encrypted, 'hex', 'utf8');
             decrypted += decipher.final('utf8');
             return decrypted;
-        } catch (e) {
+        } catch (e: any) {
+            console.error(`[WALEngine] decryptWal error:`, e.message);
             throw new Error("[TERMINAL REFUSAL] WAL Integrity Compromised: Failed to decrypt state file.");
         }
     }
@@ -106,7 +107,8 @@ export class WALEngine {
             try {
                 const raw = fs.readFileSync(targetPath, 'utf-8');
                 return this.decryptWal(raw);
-            } catch (e) {
+            } catch (e: any) {
+                console.error(`[WALEngine] Decryption/Read error on ${targetPath}:`, e.message);
                 throw new Error("[TERMINAL REFUSAL] WAL integrity compromised.");
             }
         }

@@ -56,17 +56,17 @@ export class AegisLocalStateStore implements IAegisStateStore {
 
     public async getStats(agentId: string): Promise<BehavioralStats> {
         return this.state.get(agentId) || {
-            totalSpend: 0,
+            totalSpend: "0",
             actionCount: 0,
             lastActionTimestamp: 0,
             velocityScore: 0
         };
     }
 
-    public async updateStats(agentId: string, deltaSpend: number): Promise<BehavioralStats> {
+    public async updateStats(agentId: string, deltaSpend: string): Promise<BehavioralStats> {
         const current = await this.getStats(agentId);
         const updated: BehavioralStats = {
-            totalSpend: current.totalSpend + deltaSpend,
+            totalSpend: (BigInt(current.totalSpend) + BigInt(deltaSpend)).toString(),
             actionCount: current.actionCount + 1,
             lastActionTimestamp: Date.now(),
             velocityScore: current.velocityScore + 1

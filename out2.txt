@@ -1,0 +1,89 @@
+
+Running 1 test using 1 worker
+
+  [38;5;45;1mpw:api [0m=> apiRequest.newContext started [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m<= apiRequest.newContext succeeded [38;5;45m+15ms[0m
+  [38;5;45;1mpw:api [0m=> apiRequestContext.post started [38;5;45m+7ms[0m
+  [38;5;45;1mpw:api [0m→ POST https://aegis12-gateway.up.railway.app/enforce [38;5;45m+4ms[0m
+  [38;5;45;1mpw:api [0m  user-agent: Playwright/1.58.2 (arm64; macOS 15.6) node/25.2 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  accept: */* [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  accept-encoding: gzip,deflate,br [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  Content-Type: application/json [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  content-length: 772 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m← 404  [38;5;45m+68ms[0m
+  [38;5;45;1mpw:api [0m  connection: keep-alive [38;5;45m+1ms[0m
+  [38;5;45;1mpw:api [0m  content-length: 101 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  cache-control: public, max-age=5 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-cdn-edge: fastly/cache-fra-eddf8230210-FRA [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  content-type: application/json [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  server: railway-edge [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-edge: railway/europe-west4-drams3a [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-fallback: true [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-request-id: eXLlr1BsQTupf3Xx55So4g [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  date: Wed, 22 Apr 2026 09:52:43 GMT [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-cache: MISS [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-cache-hits: 0 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-served-by: cache-fra-eddf8230210-FRA [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m<= apiRequestContext.post succeeded [38;5;45m+1ms[0m
+  ✘  1 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (124ms)
+  [38;5;45;1mpw:api [0m=> apiRequest.newContext started [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m<= apiRequest.newContext succeeded [38;5;45m+15ms[0m
+  [38;5;45;1mpw:api [0m=> apiRequestContext.post started [38;5;45m+6ms[0m
+  [38;5;45;1mpw:api [0m→ POST https://aegis12-gateway.up.railway.app/enforce [38;5;45m+5ms[0m
+  [38;5;45;1mpw:api [0m  user-agent: Playwright/1.58.2 (arm64; macOS 15.6) node/25.2 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  accept: */* [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  accept-encoding: gzip,deflate,br [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  Content-Type: application/json [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  content-length: 772 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m← 404  [38;5;45m+58ms[0m
+  [38;5;45;1mpw:api [0m  connection: keep-alive [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  content-length: 101 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  cache-control: public, max-age=5 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-cdn-edge: fastly/cache-fra-eddf8230153-FRA [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  content-type: application/json [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  server: railway-edge [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-edge: railway/europe-west4-drams3a [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-fallback: true [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-railway-request-id: S_YWnh12S7mbeX65EuroCg [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  date: Wed, 22 Apr 2026 09:52:43 GMT [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-cache: MISS [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-cache-hits: 0 [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m  x-served-by: cache-fra-eddf8230153-FRA [38;5;45m+0ms[0m
+  [38;5;45;1mpw:api [0m<= apiRequestContext.post succeeded [38;5;45m+1ms[0m
+  ✘  2 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (retry #1) (89ms)
+
+
+  1) e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m404[39m
+    Received array: [31m[403, 200][39m
+
+      111 |
+      112 |         const body = await res.json();
+    > 113 |         expect([403, 200]).toContain(res.status());
+          |                            ^
+      114 |         expect(body.status).toBe('denied');
+      115 |         expect(body.error).toContain('exceeds');
+      116 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/adversarial_pentest.spec.ts:113:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m404[39m
+    Received array: [31m[403, 200][39m
+
+      111 |
+      112 |         const body = await res.json();
+    > 113 |         expect([403, 200]).toContain(res.status());
+          |                            ^
+      114 |         expect(body.status).toBe('denied');
+      115 |         expect(body.error).toContain('exceeds');
+      116 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/adversarial_pentest.spec.ts:113:28
+
+  1 failed
+    e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored 

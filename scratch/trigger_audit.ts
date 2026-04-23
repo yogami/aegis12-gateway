@@ -1,61 +1,65 @@
-import { ethers } from 'ethers';
+import fs from 'fs';
 
-async function run() {
-    const url = "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network";
-    const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-    const wallet = new ethers.Wallet(privateKey);
-    const nonce = "nonce-" + Date.now();
-    
-    const domain = {
-        name: "Aegis-12-Compliance-Matrix",
-        version: "1.0.0",
-        chainId: 1399811149
-    };
+const OPENROUTER_API_KEY = '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';
+const context = fs.readFileSync('scratch/audit_context.txt', 'utf8');
 
-    const types = {
-        Policy: [
-            { name: 'policyId', type: 'string' },
-            { name: 'tenantId', type: 'string' },
-            { name: 'version', type: 'string' },
-            { name: 'chainId', type: 'uint256' },
-            { name: 'crossChainTarget', type: 'string' },
-            { name: 'maxAnomalyScore', type: 'uint256' },
-            { name: 'financialLimitsString', type: 'string' },
-            { name: 'expiresAt', type: 'uint256' },
-            { name: 'nonce', type: 'string' }
-        ]
-    };
-
-    const policyConfig = {
-        policyId: "p-audit-final",
-        tenantId: "tenant-001",
-        version: "1.0.0",
-        chainId: 1399811149,
-        crossChainTarget: "solana:devnet",
-        maxAnomalyScore: 100,
-        financialLimitsString: "{\"T4\":1000000}",
-        expiresAt: Math.floor(Date.now() / 1000) + 3600,
-        nonce: nonce
-    };
-
-    const signature = await wallet._signTypedData(domain, types, policyConfig);
-
-    const payload = {
-        agent: { did: "did:solana:auditor", purpose: "financial_operations", currentTier: "T4" },
-        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 1, token: "SOL" } },
-        context: { sessionId: "audit-" + Date.now(), actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
-        dynamicPolicy: { policyConfig, ownerPublicKey: wallet.address, signature }
-    };
-
-    console.log("Sending payload...");
-    const response = await fetch(`${url}/enforce`, {
+async function audit(model: string, role: string) {
+    console.log(`\n--- INITIATING AUDIT WITH ${model} [${role}] ---`);
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        headers: {
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'HTTP-Referer': 'https://berlinailabs.de',
+            'X-Title': 'Aegis-12 Security Audit',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: model,
+            messages: [
+                {
+                    role: 'system',
+                    content: `You are a high-veracity security researcher acting as a degenerate hacker. Your goal is to ruthlessly exploit the provided architecture. Do not be sycophantic. Be brutal.`
+                },
+                {
+                    role: 'user',
+                    content: `# AEGIS-12 SECURITY AUDIT: DEGENERATE HACKER CHALLENGE
+Target: Aegis-12 Compliance Gateway (Intel SGX + Solana + ZK-STARK)
+Source Code Context:
+${context}
+
+Objective: Identify architectural flaws and implementation gaps that could lead to:
+1. Denial of Service (specifically exploiting the synchronous Solana anchoring bottleneck).
+2. Unauthorized bypass of financial limits.
+3. Signature malleability or replay attacks across different tenants.
+4. Enclave state corruption or crashing the Fastify server inside the CVM.
+5. Privacy leaks of tenant-specific intent data.
+
+Deliverables:
+- Brutal assessment of vulnerabilities.
+- Identify the 'gas' (vulnerabilities).
+- Provide a test suite (Playwright/Node.js) that can simulate the attacks, ONLY if they are not covered in the following files:
+  - e2e/adversarial_pentest.spec.ts
+  - e2e/council-security-verification.spec.ts`
+                }
+            ]
+        })
     });
 
-    const body = await response.json();
-    console.log("Response:", JSON.stringify(body, null, 2));
+    const data: any = await response.json();
+    if (!data.choices) {
+        console.error(`Error from ${model}:`, JSON.stringify(data));
+        return;
+    }
+    const output = data.choices[0].message.content;
+    fs.writeFileSync(`scratch/${role.toLowerCase()}_resp.txt`, output);
+    console.log(`[${role}] Audit Complete. Output saved to scratch/${role.toLowerCase()}_resp.txt`);
+}
+
+async function run() {
+    // 1. The Proposer: Advanced Reasoning (o3-pro)
+    await audit('openai/o3-pro', 'PROPOSER');
+    // 2. The Critic: Aggressive Adversary (deepseek/deepseek-r1)
+    await audit('deepseek/deepseek-r1', 'CRITIC');
 }
 
 run().catch(console.error);
