@@ -176,7 +176,7 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         const metrics = telemetry.getMetrics();
         console.log(`[Aegis-12] Hot-Path Telemetry:`, metrics);
 
-        return JSON.stringify({
+        return safeStringify({
             status: "approved",
             receipt,
             enclaveDid: signer?.enclaveDid || "unknown",
@@ -261,11 +261,11 @@ export async function getEvidenceStatus(receiptId: string): Promise<string> {
     
     const evidence = await (pep as any).stateStore.getEvidenceByReceiptId(receiptId);
     if (!evidence) {
-        return JSON.stringify({ status: "NOT_FOUND", receiptId });
+        return safeStringify({ status: "NOT_FOUND", receiptId });
     }
 
     // Map the internal state to the Auditor's expected protocol
-    return JSON.stringify({
+    return safeStringify({
         status: evidence.ars_anchor && evidence.ars_anchor !== "pending" ? "COMPLETED" : "pending",
         receiptId: evidence.receiptId,
         ars_anchor: evidence.ars_anchor,
@@ -290,7 +290,7 @@ async function handleEntrypointError(e: any, telemetry?: TelemetryTracker): Prom
 
     const metrics = telemetry ? telemetry.getMetrics() : undefined;
 
-    return JSON.stringify({
+    return safeStringify({
         status: "denied",
         error: e.message,
         enclaveDid: signer?.enclaveDid || "unknown",
