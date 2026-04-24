@@ -60,7 +60,7 @@ export class AegisPEP {
 
     private async enforceLimits(request: PolicyEvaluationRequest, tenantId: string, spendAmountBig: bigint, scopedNonce: string): Promise<void> {
         const currentStats = await this.stateStore.getStats(tenantId);
-        const currentTotalBig = BigInt(Math.floor(currentStats.totalSpend));
+        const currentTotalBig = BigInt(currentStats.totalSpend);
         const projectedSpendBig = currentTotalBig + spendAmountBig;
         
         const rawLimitsStr = request.dynamicPolicy!.policyConfig.financialLimitsString || "{}";

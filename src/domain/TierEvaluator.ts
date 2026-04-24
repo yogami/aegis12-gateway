@@ -53,7 +53,7 @@ export class TierEvaluator {
         // --- COUNCIL FIX: INFINITY / 1e308 BYPASS PREVENTION ---
         assertSafeFinancialAmount(maxAllowedValue, "tier limits");
 
-        const estimatedValue = BigInt(action.estimatedValue);
+        const estimatedValue = BigInt(action.estimatedValue || 0);
         const maxAllowedBig = BigInt(maxAllowedValue);
 
         if (estimatedValue > maxAllowedBig) {
