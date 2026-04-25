@@ -76,10 +76,35 @@ async function verify() {
     const body = await response.json();
     console.log(`[Auditor] ✅ Enforcement Approved. Status: ${body.status}`, body);
 
-    // SUBSTANCE AUDIT 1: SOLANA ANCHOR
-    const solanaTx = body.solana_tx;
-    if (!solanaTx || solanaTx.startsWith("mock_tx_")) {
-        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Solana transaction is missing or mocked: ${solanaTx}`);
+        // SUBSTANCE AUDIT 1: SOLANA ANCHOR
+    let solanaTx = body.solana_tx;
+    const receiptId = body.receipt.receiptId;
+    
+    if (solanaTx === "batching" || solanaTx === "pending") {
+        console.log(`[Auditor] ⏳ Solana Anchor is batching asynchronously...`);
+        let attempts = 0;
+        const maxAttempts = 30; // 5 minutes
+        while ((solanaTx === "batching" || solanaTx === "pending") && attempts < maxAttempts) {
+            await new Promise(r => setTimeout(r, 10000));
+            attempts++;
+            console.log(`[Auditor] ⏳ Polling enclave for Solana Anchor status... (${attempts}/${maxAttempts})`);
+            try {
+                const evidenceRes = await fetch(`${baseUrl}/evidence/${receiptId}`);
+                if (evidenceRes.ok) {
+                    const evidenceBody = await evidenceRes.json();
+                    if (evidenceBody.solana_tx && evidenceBody.solana_tx !== "batching" && evidenceBody.solana_tx !== "pending") {
+                        solanaTx = evidenceBody.solana_tx;
+                        console.log(`[Auditor] ✨ Solana Anchor Discovered: ${solanaTx}`);
+                    }
+                }
+            } catch (e) {
+                // Ignore transient network errors during polling
+            }
+        }
+    }
+
+    if (!solanaTx || solanaTx.startsWith("mock_tx_") || solanaTx === "batching" || solanaTx === "pending") {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Solana transaction is missing, mocked, or stuck: ${solanaTx}`);
         process.exit(1);
     }
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
@@ -87,8 +112,12 @@ async function verify() {
     
     let tx = null;
     for (let i = 0; i < 12; i++) {
-        tx = await connection.getParsedTransaction(solanaTx, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
-        if (tx) break;
+        try {
+            tx = await connection.getParsedTransaction(solanaTx, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
+            if (tx) break;
+        } catch (e) {
+            // Ignore signature length errors if it was a weird hash, just keep waiting
+        }
         console.log(`[Auditor] ⏳ Waiting for transaction confirmation... (${i+1}/12)`);
         await new Promise(r => setTimeout(r, 5000));
     }
