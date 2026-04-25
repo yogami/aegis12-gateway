@@ -77,12 +77,16 @@ export class AegisLocalStateStore implements IAegisStateStore {
     }
 
     public async saveEvidence(receipt: any, solanaTx?: string): Promise<void> {
-        const key = solanaTx || receipt.actionId || receipt.receiptId;
+        const key = receipt.receiptId || receipt.actionId;
+        if (solanaTx) receipt.solana_tx = solanaTx;
         this.evidence.set(key, receipt);
         await this.persist();
     }
 
     public async getEvidence(txSignature: string): Promise<any | null> {
+        for (const v of this.evidence.values()) {
+            if (v.solana_tx === txSignature) return v;
+        }
         return this.evidence.get(txSignature) || null;
     }
 

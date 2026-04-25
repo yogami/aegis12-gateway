@@ -154,6 +154,9 @@ export default async function phalaEntrypoint(payloadStr: string): Promise<strin
         const receipt = await pep.enforce(payload);
         telemetry.mark('pep');
 
+        // Optimistic TEE Rollup: Persist the receipt immediately before async anchoring
+        await pep.saveEvidence(receipt, "batching");
+
         // Asynchronous Solana Anchoring Pipeline
         // Offload the ~1300ms Solana anchor to the background to prevent DoS connection exhaustion
         anchorToLedger(receipt, 'approved').then(solanaReceipt => {
