@@ -70,6 +70,9 @@ export function normalizeParameters(toolId: string, parameters: Record<string, u
             amount: assertSafeFinancialAmount(parameters.amount, 'amount'),
             slippageBps: slippage
         });
+    } else if (toolId === 'insurance_claim') {
+        const { IncaInsurancePolicy } = require('./IncaInsurancePolicy');
+        return IncaInsurancePolicy.validateClaim(parameters);
     }
 
     throw new Error(`[TERMINAL REFUSAL] Unrecognized tool execution request.`);

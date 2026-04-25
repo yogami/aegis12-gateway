@@ -7,6 +7,10 @@ import { TelemetryTracker } from '../infrastructure/TelemetryTracker';
 import { AegisJournal } from '../infrastructure/AegisJournal';
 import { BatchAnchorWorker } from '../BatchAnchorWorker';
 
+function safeStringify(obj: any): string {
+    return JSON.stringify(obj, (_, v) => typeof v === 'bigint' ? v.toString() : v);
+}
+
 declare global {
     var phala: { getQuote?: (did: string) => { quote: string; measurement: string } } | undefined;
 }
