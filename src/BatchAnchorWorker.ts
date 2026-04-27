@@ -71,9 +71,10 @@ export class BatchAnchorWorker {
 
             const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
             
-            // Fix: Enforce a strict 15-second timeout on the Solana RPC call to prevent indefinite worker stall
+            // Fix: Enforce a generous 120-second timeout on the Solana RPC call.
+            // Devnet confirmations frequently exceed 15s, which previously caused infinite batching loops.
             const timeoutPromise = new Promise<any>((_, reject) => 
-                setTimeout(() => reject(new Error('RPC connection timed out after 15000ms')), 15000)
+                setTimeout(() => reject(new Error('RPC connection timed out after 120000ms')), 120000)
             );
             
             const solanaReceipt = await Promise.race([anchorPromise, timeoutPromise]);

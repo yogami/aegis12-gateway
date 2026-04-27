@@ -49,11 +49,32 @@ export class SolanaAnchor {
         return JsonUtils.computeReceiptHash(receipt);
     }
 
+    private hasFundedPayer = false;
+
+    private async fundPayerIfEmpty(): Promise<void> {
+        if (this.cluster !== 'devnet' || this.hasFundedPayer || process.env.SOLANA_PAYER_SECRET) return;
+        try {
+            const balance = await this.connection.getBalance(this.payer.publicKey);
+            if (balance < 10000000) { // Less than 0.01 SOL
+                console.log(`[SolanaAnchor] 💧 Empty Devnet Wallet detected. Requesting Airdrop to ${this.payer.publicKey.toBase58()}...`);
+                const sig = await this.connection.requestAirdrop(this.payer.publicKey, 1000000000); // 1 SOL
+                await this.connection.confirmTransaction(sig, 'confirmed');
+                console.log(`[SolanaAnchor] ✅ Devnet Airdrop successful.`);
+            }
+        } catch (e: any) {
+            console.warn(`[SolanaAnchor] ⚠️ Devnet Airdrop failed: ${e.message}. (Will attempt transaction anyway in case of RPC caching)`);
+        } finally {
+            this.hasFundedPayer = true;
+        }
+    }
+
     public async anchorReceipt(
         receipt: any, 
         decision: 'approved' | 'denied',
         enclaveDid: string
     ): Promise<AnchorResult> {
+        await this.fundPayerIfEmpty();
+        
         const isZkSharded = !!receipt.zkSnarkProof;
         const receiptHash = this.computeReceiptHash(receipt);
         
