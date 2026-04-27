@@ -57,8 +57,11 @@ export class AegisEnclave {
 
     private async startInitialization(): Promise<void> {
         try {
+            console.log("[Aegis-12] 🚀 Starting Hardware Enclave Initialization...");
             await this.doInitializeWithRetry(0);
-        } catch (err) {
+            console.log("[Aegis-12] ✅ Enclave Fully Initialized.");
+        } catch (err: any) {
+            console.error(`[Aegis-12] ❌ Hardware Initialization Failed: ${err.message}`);
             this._initPromise = null;
             throw err;
         }
@@ -68,7 +71,7 @@ export class AegisEnclave {
         try {
             await this.performInitializationSteps();
         } catch (err) {
-            if (attempt >= 2) throw err;
+            if (attempt >= 4) throw err; // Increased retries for slow sidecars
             await this.waitWithJitter(attempt + 1);
             return this.doInitializeWithRetry(attempt + 1);
         }
@@ -85,11 +88,18 @@ export class AegisEnclave {
         const rawTenants = process.env.AUTHORIZED_TENANTS || '{}';
         const tenants = JsonUtils.safeParse(rawTenants, 'AUTHORIZED_TENANTS');
         const dataDir = process.env.NODE_ENV === 'test' || !process.env.PHALA_CVM_ENVIRONMENT ? '/tmp' : '/var/data';
+        
+        let walSecret = process.env.WAL_SECRET;
+        if (!walSecret && process.env.TEE_ENV === 'phala') {
+            console.log("[Aegis-12] WAL_SECRET missing. Deriving from hardware Root of Trust...");
+            walSecret = await new TappdClient().deriveKey("aegis-12/wal-secret", 'secp256k1');
+        }
+
         const { AegisLocalNonceRegistry } = await import('../infrastructure/NonceRegistry');
         const { AegisLocalStateStore } = await import('../infrastructure/AegisLocalStateStore');
         const nonceReg = new AegisLocalNonceRegistry(`${dataDir}/nonce_registry.json`);
         await nonceReg.initialize();
-        const stateStore = new AegisLocalStateStore(dataDir);
+        const stateStore = new AegisLocalStateStore(dataDir, walSecret);
         await stateStore.initialize();
         this._journal = new AegisJournal(`${dataDir}/aegis_journal.log`);
         this._pep = new AegisPEP(this._signer!, tenants, nonceReg, stateStore, this._journal);

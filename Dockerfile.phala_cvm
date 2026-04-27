@@ -69,16 +69,30 @@ RUN mkdir -p /var/data
 
 # Environment Configuration
 ENV PORT=8000
-# Transition to production mode now that the binary is included
 ENV NODE_ENV=production
 ENV TEE_ENV=phala
+ENV PHALA_CVM_ENVIRONMENT=1
 EXPOSE 8000
 
 # Entrypoint script to calculate hash and start the enclave
 RUN echo '#!/bin/sh\n\
 export AEGIS_ZK_PROVER_HASH=$(sha256sum /app/bin/aegis-zk-prover | cut -d" " -f1)\n\
 echo "[Aegis-12] Calculated Prover Hash: $AEGIS_ZK_PROVER_HASH"\n\
-exec node dist/phala_cvm_server.js' > /app/entrypoint.sh && \
+\n\
+# Wait for dStack sidecar socket if in TEE mode\n\
+if [ "$TEE_ENV" = "phala" ]; then\n\
+    echo "[Aegis-12] Waiting for /var/run/dstack.sock..." \n\
+    for i in $(seq 1 30); do\n\
+        if [ -S /var/run/dstack.sock ]; then\n\
+            echo "[Aegis-12] Hardware socket found."\n\
+            break\n\
+        fi\n\
+        sleep 2\n\
+    done\n\
+fi\n\
+\n\
+# Start the Node.js application with explicit memory limits for 2GB CVM\n\
+exec node --max-old-space-size=1536 dist/phala_cvm_server.js' > /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

@@ -33,10 +33,23 @@ export class TappdClient {
      */
     public async deriveKey(path: string, algorithm: 'secp256k1' | 'ed25519' = 'secp256k1'): Promise<string> {
         if (!this.isTee) {
-            // Fallback to Mock implementation
             return new PhalaTappdMock().deriveKey(path);
         }
 
+        // Proactive retry loop for hardware sidecar availability
+        for (let i = 0; i < 5; i++) {
+            try {
+                return await this.executeDerive(path, algorithm);
+            } catch (err: any) {
+                if (i === 4) throw err;
+                console.warn(`[TappdClient] Hardware not ready (Attempt ${i+1}/5). Retrying in 2s...`);
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+        throw new Error("Hardware sidecar unreachable.");
+    }
+
+    private executeDerive(path: string, algorithm: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const body = JSON.stringify({
                 path,
