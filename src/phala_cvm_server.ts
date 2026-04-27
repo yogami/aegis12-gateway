@@ -1,5 +1,5 @@
 import * as http from "http";
-import phalaEntrypoint, { initializeHardware, anchor, signer, getEvidenceStatus } from "./application/PhalaEntrypoint";
+import phalaEntrypoint, { AegisEnclave } from "./application/PhalaEntrypoint";
 
 const PORT = process.env.PORT || 8000;
 
@@ -19,11 +19,12 @@ const server = http.createServer(async (req, res) => {
     
     if (req.method === "GET" && req.url === "/health") {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const health = {
                 status: "alive",
-                solanaPayer: anchor?.getPayerPublicKey(),
-                enclaveDid: signer?.enclaveDid,
+                solanaPayer: enclave.anchor?.getPayerPublicKey(),
+                enclaveDid: enclave.signer?.enclaveDid,
                 version: "v1.0.1-unmocked",
                 hardware: "phala-dstack-cvm",
                 timestamp: new Date().toISOString()
@@ -46,7 +47,8 @@ const server = http.createServer(async (req, res) => {
             if (!receiptId) throw new Error("Missing Receipt ID in evidence lookup.");
             
             console.log(`[dStack CVM] Evidence Lookup: ${receiptId}`);
-            const status = await getEvidenceStatus(receiptId);
+            const enclave = AegisEnclave.getInstance();
+            const status = await enclave.getEvidenceStatus(receiptId);
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(status);
         } catch (err: any) {

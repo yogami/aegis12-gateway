@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import phalaEntrypoint, { pep, signer as aegisSigner, anchor, initializeHardware, getHardwareMetadata } from '../../application/PhalaEntrypoint';
+import phalaEntrypoint, { AegisEnclave } from '../../application/PhalaEntrypoint';
 import { X402PayGate } from '../X402PayGate';
 import { SquadsGovernance } from '../SquadsGovernance';
 import { Transaction } from '@solana/web3.js';
@@ -11,22 +11,24 @@ export class AegisController {
     ) {}
 
     public async health(request: FastifyRequest, reply: FastifyReply) {
-        await initializeHardware();
+        const enclave = AegisEnclave.getInstance();
+        await enclave.initialize();
         return {
             status: 'alive',
-            enclaveDid: aegisSigner?.enclaveDid || "initializing",
+            enclaveDid: enclave.signer?.enclaveDid || "initializing",
             solanaCluster: process.env.SOLANA_CLUSTER || 'devnet',
-            solanaPayer: anchor?.getPayerPublicKey(),
+            solanaPayer: enclave.anchor?.getPayerPublicKey(),
             features: ['solana-anchoring', 'solana-tx-firewall', 'squads-governance']
         };
     }
 
     public async getDocs(request: FastifyRequest, reply: FastifyReply) {
+        const enclave = AegisEnclave.getInstance();
         return {
             name: 'Aegis-12 Compliance Gateway',
             version: '2.0.0',
             status: 'ONLINE',
-            enclaveDid: aegisSigner?.enclaveDid || "initializing",
+            enclaveDid: enclave.signer?.enclaveDid || "initializing",
             endpoints: {
                 'POST /enforce': 'Policy Enforcement',
                 'POST /anchor-receipt': 'Solana SPL Memo Anchoring',
@@ -73,11 +75,12 @@ export class AegisController {
 
     public async anchorReceipt(request: FastifyRequest, reply: FastifyReply) {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const { receipt, decision } = request.body as any;
             if (!receipt || !decision) return reply.status(400).send({ error: 'Missing required fields: receipt, decision' });
 
-            const solanaReceipt = await anchor.anchorReceipt(receipt, decision, aegisSigner?.enclaveDid || "unknown");
+            const solanaReceipt = await enclave.anchor!.anchorReceipt(receipt, decision, enclave.signer?.enclaveDid || "unknown");
             return reply.status(200).send({
                 status: 'anchored',
                 txSignature: solanaReceipt.txSignature,
@@ -90,12 +93,13 @@ export class AegisController {
 
     public async verifySignature(request: FastifyRequest<{ Params: { txSignature: string } }>, reply: FastifyReply) {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const { txSignature } = request.params;
             console.log(`[Auditor] Public substance verification request for tx: ${txSignature}`);
             
-            const localEvidence = await pep.getEvidence(txSignature);
-            const solanaResult = await anchor.verifyAnchoredReceipt(txSignature, localEvidence || undefined, aegisSigner);
+            const localEvidence = await enclave.pep!.getEvidence(txSignature);
+            const solanaResult = await enclave.anchor!.verifyAnchoredReceipt(txSignature, localEvidence || undefined, enclave.signer!);
             
             if (solanaResult.error && !localEvidence) {
                 return reply.status(404).send({ status: 'error', error: solanaResult.error });
@@ -125,11 +129,12 @@ export class AegisController {
 
     public async getEvidenceStatus(request: FastifyRequest<{ Params: { receiptId: string } }>, reply: FastifyReply) {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const { receiptId } = request.params;
             console.log(`[Aegis-12] Retrieving evidence for receipt: ${receiptId}`);
             
-            const evidence = await pep.getEvidenceByReceiptId(receiptId);
+            const evidence = await enclave.pep!.getEvidenceByReceiptId(receiptId);
             
             if (!evidence) {
                 return reply.status(404).send({ error: `Receipt ${receiptId} not found in state store.` });
@@ -150,13 +155,14 @@ export class AegisController {
 
     public async enforceSolanaTx(request: FastifyRequest, reply: FastifyReply) {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const { serializedTx } = request.body as any;
             if (!serializedTx) return reply.status(400).send({ error: 'Missing required fields: serializedTx' });
 
             try {
                 const tx = Transaction.from(Buffer.from(serializedTx, 'base64'));
-                const result = await pep.enforce({
+                const result = await enclave.pep!.enforce({
                     agent: { did: 'did:aegis:tx-firewall', purpose: 'transaction_protection', currentTier: 'T4' },
                     action: { toolId: 'solana_tx', actionType: 'execute', parameters: { instructions: tx.instructions.length } },
                     context: { currentAnomalyScore: 0.1 },
@@ -193,15 +199,16 @@ export class AegisController {
     }
 
     public async getAttestationStatus(request: FastifyRequest, reply: FastifyReply) {
-        const { attestation, pcr0 } = await getHardwareMetadata();
+        const enclave = AegisEnclave.getInstance();
+        const { attestation, pcr0 } = await enclave.getHardwareMetadata();
 
         return {
             teeProvider: 'Phala dStack CVM (Intel SGX)',
-            enclaveDid: aegisSigner?.enclaveDid || "unknown",
-            enclavePublicKey: aegisSigner?.getPublicKeyHex(),
+            enclaveDid: enclave.signer?.enclaveDid || "unknown",
+            enclavePublicKey: enclave.signer?.getPublicKeyHex(),
             signatureAlgorithm: 'Ed25519 (TweetNaCl)',
             pqAlgorithm: 'ML-DSA-65 (NIST FIPS 204)',
-            pqPublicKey: aegisSigner?.getPQPublicKeyHex(),
+            pqPublicKey: enclave.signer?.getPQPublicKeyHex(),
             attestationStatus: attestation === "unknown" ? "SIMULATED" : "HARDWARE_ATTESTED",
             quote: attestation,
             pcr0,
@@ -231,7 +238,8 @@ export class AegisController {
 
     public async healthtechEnforce(request: FastifyRequest, reply: FastifyReply) {
         try {
-            await initializeHardware();
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const payload = request.body as any;
             console.log(`[Aegis-12] /healthtech/enforce payload: ${JSON.stringify(payload)}`);
             const { agentId, agentRole, targetAction, payloadData } = payload;
@@ -267,9 +275,9 @@ export class AegisController {
             }
 
             const receiptId = `aegis-v1-ht-${Date.now()}`;
-            const signature = aegisSigner.sign(JSON.stringify({ agentId, targetAction, receiptId }));
+            const signature = enclave.signer!.sign(JSON.stringify({ agentId, targetAction, receiptId }));
 
-            const { attestation, pcr0 } = await getHardwareMetadata();
+            const { attestation, pcr0 } = await enclave.getHardwareMetadata();
 
             const result = {
                 status: 'approved',
@@ -286,7 +294,7 @@ export class AegisController {
                 },
                 hardwareAttestation: {
                     teeProvider: 'Phala dStack',
-                    enclaveDid: aegisSigner.enclaveDid,
+                    enclaveDid: enclave.signer!.enclaveDid,
                     pcr0: pcr0,
                     quote: attestation
                 }
@@ -304,7 +312,8 @@ export class AegisController {
         if (process.env.NODE_ENV !== 'test') return reply.status(403).send({ error: 'Only allowed in test mode' });
         const { tenantId, address } = request.body as any;
         
-        pep.provisionTenant(tenantId, address);
+        const enclave = AegisEnclave.getInstance();
+        enclave.pep!.provisionTenant(tenantId, address);
         
         console.log(`[E2E] Provisioning test tenant: ${tenantId} -> ${address}`);
         return reply.send({ status: 'provisioned' });

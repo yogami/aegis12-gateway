@@ -179,6 +179,10 @@ export class AegisPEP {
         await this.stateStore.saveEvidence(receipt, solanaTx);
     }
 
+    public async getEvidence(txSignature: string): Promise<any | null> {
+        return await this.stateStore.getEvidence(txSignature);
+    }
+
     public async getEvidenceByReceiptId(receiptId: string): Promise<any | null> {
         return await this.stateStore.getEvidenceByReceiptId(receiptId);
     }

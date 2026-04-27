@@ -31,6 +31,10 @@ export class AegisEnclave {
         return AegisEnclave.instance;
     }
 
+    public get signer() { return this._signer; }
+    public get anchor() { return this._anchor; }
+    public get pep() { return this._pep; }
+
     public static reset(): void {
         AegisEnclave.instance?.stopWorker();
         AegisEnclave.instance = new AegisEnclave();
@@ -159,7 +163,8 @@ export class AegisEnclave {
 
     private async generateZkProof(receipt: AegisComplianceReceipt, nonce: string): Promise<void> {
         try {
-            const amount = this.validateZkAmount(BigInt(receipt.validatedParams.amount || 0));
+            const amountVal = receipt.validatedParams?.amount as string | number | bigint | undefined;
+            const amount = this.validateZkAmount(BigInt(amountVal || 0));
             const input = this.createZkInput(receipt, amount, nonce);
             const proof = await new AegisZKClient().generateProof(input);
             await this._pep!.updateZkSeal(receipt.receiptId, proof);
@@ -204,4 +209,5 @@ export class AegisEnclave {
 }
 
 const enclave = AegisEnclave.getInstance();
-export default (payload: string) => enclave.processRequest(payload);
+export const phalaEntrypoint = (payload: string) => enclave.processRequest(payload);
+export default phalaEntrypoint;

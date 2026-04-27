@@ -130,4 +130,8 @@ export class SolanaAnchor {
                (memoObj.d === expectedDecision) &&
                (memoObj.did === expectedDid);
     }
+
+    public getPayerPublicKey(): string {
+        return this.payer.publicKey.toBase58();
+    }
 }

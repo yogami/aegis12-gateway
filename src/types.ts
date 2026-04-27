@@ -70,6 +70,8 @@ export interface AegisComplianceReceipt {
     
     authorizationNonce: string;     // Irrevocable nonce (burned at execution)
     validatedParams?: Record<string, unknown>; // [AUDIT-GRADE] Sanitized whitelisted parameters
+    decision: string;               // [AUDIT-GRADE] The final gateway decision (e.g., approved, denied)
+    enclaveDid: string;             // [AUDIT-GRADE] Hardware identity of the signing enclave
     zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
         journal: any;
         seal: string;               // Base64 encoded ZK-Proof bytes
@@ -133,6 +135,7 @@ export interface PolicyEvaluationRequest {
         currentTier: TrustTier;
     };
     action: {
+        actionId?: string;
         toolId: string;
         actionType: string;
         parameters: Record<string, unknown>;

@@ -15,13 +15,18 @@ vi.mock('fastify', () => ({ default: mockFastify }));
 
 // Mock PhalaEntrypoint
 const mockPhala = vi.fn().mockResolvedValue(JSON.stringify({ status: 'approved' }));
+const mockEnclave = {
+    getInstance: () => mockEnclave,
+    initialize: vi.fn().mockResolvedValue(undefined),
+    getHardwareMetadata: vi.fn().mockResolvedValue({ attestation: 'mock-attestation', pcr0: 'mock-pcr0' }),
+    pep: { provisionTenant: vi.fn(), getEvidence: vi.fn(), getEvidenceByReceiptId: vi.fn() },
+    signer: { enclaveDid: 'did:mock', sign: vi.fn().mockReturnValue('mock-sig'), getPublicKeyHex: vi.fn().mockReturnValue('deadbeef'), getPQPublicKeyHex: vi.fn().mockReturnValue('pq-deadbeef') },
+    anchor: { getPayerPublicKey: vi.fn().mockReturnValue('MockPayer'), anchorReceipt: vi.fn(), verifyAnchoredReceipt: vi.fn() }
+};
+
 vi.mock('../../src/application/PhalaEntrypoint', () => ({
     default: mockPhala,
-    pep: { provisionTenant: vi.fn(), getEvidence: vi.fn() },
-    signer: { enclaveDid: 'did:mock', sign: vi.fn().mockReturnValue('mock-sig'), getPublicKeyHex: vi.fn().mockReturnValue('deadbeef') },
-    anchor: { getPayerPublicKey: vi.fn().mockReturnValue('MockPayer'), anchorReceipt: vi.fn(), verifyAnchoredReceipt: vi.fn() },
-    initializeHardware: vi.fn().mockResolvedValue(undefined),
-    getHardwareMetadata: vi.fn().mockResolvedValue({ attestation: 'mock-attestation', pcr0: 'mock-pcr0' })
+    AegisEnclave: mockEnclave
 }));
 
 // Mock X402PayGate

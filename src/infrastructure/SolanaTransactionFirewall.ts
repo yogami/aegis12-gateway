@@ -332,6 +332,8 @@ export class SolanaTransactionFirewall {
             limitations: ['Observation Gap: Static Analysis only'],
             authorizationNonce: `nonce-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
             validatedParams: parameters,
+            decision,
+            enclaveDid: this.signer.enclaveDid,
             timestamp,
             signature: '',
         };
