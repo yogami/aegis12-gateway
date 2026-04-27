@@ -10,10 +10,13 @@ export class BatchAnchorWorker {
     private intervalId: NodeJS.Timeout | null = null;
     private isAnchoring: boolean = false;
 
-    constructor(journal: AegisJournal, anchor: SolanaAnchor, enclaveDid: string) {
+    private pep: any; // Injected to update evidence store
+
+    constructor(journal: AegisJournal, anchor: SolanaAnchor, enclaveDid: string, pep: any) {
         this.journal = journal;
         this.anchor = anchor;
         this.enclaveDid = enclaveDid;
+        this.pep = pep;
     }
 
     public start(intervalMs: number = 30000) {
@@ -78,6 +81,18 @@ export class BatchAnchorWorker {
             if (solanaReceipt && solanaReceipt.txSignature) {
                 console.log(`[BatchAnchorWorker] Successfully anchored batch root ${merkleRoot} in tx ${solanaReceipt.txSignature}`);
                 
+                // Update evidence store for each individual receipt in the batch
+                for (const entry of unbatched) {
+                    try {
+                        const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
+                        if (original) {
+                            await this.pep.saveEvidence(original, solanaReceipt.txSignature);
+                        }
+                    } catch (err: any) {
+                        console.error(`[BatchAnchorWorker] Failed to update evidence for ${entry.receiptId}: ${err.message}`);
+                    }
+                }
+
                 const nonces = unbatched.map(entry => entry.nonce);
                 this.journal.markAsBatched(nonces);
             }

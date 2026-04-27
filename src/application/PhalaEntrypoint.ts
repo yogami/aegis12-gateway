@@ -107,7 +107,7 @@ export class AegisEnclave {
 
     private async ensureWorker(): Promise<void> {
         if (this._batchWorker) return;
-        const worker = new BatchAnchorWorker(this._journal!, this._anchor!, this._signer!.enclaveDid);
+        const worker = new BatchAnchorWorker(this._journal!, this._anchor!, this._signer!.enclaveDid, this._pep!);
         worker.start(30000);
         this._batchWorker = worker;
     }
@@ -166,7 +166,8 @@ export class AegisEnclave {
     }
 
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
-        this.anchorToLedger(receipt, 'approved').catch(() => {});
+        // Individual Solana anchoring is replaced by the high-throughput BatchAnchorWorker.
+        // We only dispatch the ZK-Proof generation here.
         this.generateZkProof(receipt, receipt.authorizationNonce).catch(() => {});
     }
 

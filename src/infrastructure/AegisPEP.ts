@@ -137,15 +137,28 @@ export class AegisPEP {
     }
 
     private async generateReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: string): Promise<AegisComplianceReceipt> {
-        const msg = this.createCanonicalMessage(tenantId, nonce, sanit);
+        const receiptId = `aegis-v1-${tenantId}-${keccak256(tenantId + "::" + nonce + "::" + ('0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'))).toString('hex').substring(0, 16)}`;
+        const msg = this.createCanonicalMessage(tenantId, nonce, receiptId, sanit);
         this.journalIntent(msg);
-        const receipt = this.assembleReceipt(req, sanit, tenantId, nonce, decision, msg.article12LogHash, msg.timestamp);
+        const receipt = this.assembleReceiptWithId(receiptId, req, sanit, tenantId, nonce, decision, msg.article12LogHash, msg.timestamp);
         receipt.signature = await this.signer.sign(JsonUtils.computeReceiptHash(receipt));
         return receipt;
     }
 
-    private createCanonicalMessage(tenantId: string, nonce: string, sanit: any): AegisCanonicalMessage {
-        return { tenantId, nonce, article12LogHash: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'), timestamp: new Date().toISOString() };
+    private assembleReceiptWithId(receiptId: string, req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: string, logHash: string, ts: string): AegisComplianceReceipt {
+        const receipt = this.assembleReceipt(req, sanit, tenantId, nonce, decision, logHash, ts);
+        receipt.receiptId = receiptId;
+        return receipt;
+    }
+
+    private createCanonicalMessage(tenantId: string, nonce: string, receiptId: string, sanit: any): AegisCanonicalMessage {
+        return { 
+            tenantId, 
+            nonce, 
+            receiptId,
+            article12LogHash: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'), 
+            timestamp: new Date().toISOString() 
+        };
     }
 
     private journalIntent(msg: AegisCanonicalMessage): void {

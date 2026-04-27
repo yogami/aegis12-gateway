@@ -93,6 +93,7 @@ export interface AegisComplianceReceipt {
 export interface AegisCanonicalMessage {
     tenantId: string;
     nonce: string;
+    receiptId: string;
     article12LogHash: string;
     timestamp: ISO8601;
 }
