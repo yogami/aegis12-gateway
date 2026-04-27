@@ -49,9 +49,10 @@ const MAX_SLIPPAGE_CACHE = ((): number => {
 })();
 
 export function normalizeParameters(toolId: string, parameters: any): Record<string, unknown> {
-    if (toolId === 'transfer' || toolId === 'solana_transfer') return normalizeTransfer(parameters);
-    if (toolId === 'swap') return normalizeSwap(parameters);
-    throw new Error(`[TERMINAL REFUSAL] Unrecognized tool ID: ${toolId}.`);
+    const normalizedId = (toolId || "").toString().trim().toLowerCase();
+    if (normalizedId === 'transfer' || normalizedId === 'solana_transfer') return normalizeTransfer(parameters);
+    if (normalizedId === 'swap') return normalizeSwap(parameters);
+    throw new Error(`[TERMINAL REFUSAL] Unrecognized tool ID: "${toolId}".`);
 }
 
 function normalizeTransfer(params: any): Record<string, unknown> {
