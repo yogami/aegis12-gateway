@@ -13,19 +13,21 @@ export function assertSafeFinancialAmount(value: any, fieldName: string): bigint
 }
 
 function validateAmountType(value: any, fieldName: string): void {
-    if (typeof value !== 'string') throw new Error(`Invalid type for ${fieldName}: expected string.`);
+    const isString = typeof value === 'string';
+    const isSafeNumber = typeof value === 'number' && Number.isSafeInteger(value);
+    if (!isString && !isSafeNumber) throw new Error(`Invalid type for ${fieldName}: expected string or safe integer.`);
 }
 
 function validateAmountPrecision(value: string, fieldName: string): void {
-    if (value.length > 78) throw new Error(`[TERMINAL REFUSAL] ${fieldName} exceeds max precision (78 digits).`);
+    if (value.toString().length > 78) throw new Error(`[TERMINAL REFUSAL] ${fieldName} exceeds max precision (78 digits).`);
 }
 
 function validateAmountFormat(value: string, fieldName: string): void {
-    if (!/^(0|[1-9][0-9]*)$/.test(value)) throw new Error(`Invalid format for ${fieldName}: expected canonical decimal string.`);
+    if (!/^(0|[1-9][0-9]*)$/.test(value.toString())) throw new Error(`Invalid format for ${fieldName}: expected canonical decimal string.`);
 }
 
-function convertToBigInt(value: string, fieldName: string): bigint {
-    try { return BigInt(value); } catch (e) { throw new Error(`Invalid precision for ${fieldName}.`); }
+function convertToBigInt(value: any, fieldName: string): bigint {
+    try { return BigInt(value.toString()); } catch (e) { throw new Error(`Invalid precision for ${fieldName}.`); }
 }
 
 export function assertSafeIdentifier(id: any, fieldName: string): string {
@@ -47,15 +49,18 @@ const MAX_SLIPPAGE_CACHE = ((): number => {
 })();
 
 export function normalizeParameters(toolId: string, parameters: any): Record<string, unknown> {
-    if (toolId === 'transfer') return normalizeTransfer(parameters);
+    if (toolId === 'transfer' || toolId === 'solana_transfer') return normalizeTransfer(parameters);
     if (toolId === 'swap') return normalizeSwap(parameters);
     throw new Error(`[TERMINAL REFUSAL] Unrecognized tool ID: ${toolId}.`);
 }
 
 function normalizeTransfer(params: any): Record<string, unknown> {
+    const recipient = params.recipient || params.to;
+    if (!recipient) throw new Error('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
     return {
-        recipient: assertSafeIdentifier(params.recipient, 'recipient'),
-        amount: assertSafeFinancialAmount(params.amount, 'amount')
+        recipient: assertSafeIdentifier(recipient, 'recipient'),
+        amount: assertSafeFinancialAmount(params.amount, 'amount'),
+        token: params.token ? assertSafeIdentifier(params.token, 'token') : undefined
     };
 }
 
