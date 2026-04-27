@@ -136,7 +136,7 @@ export interface PolicyEvaluationRequest {
         toolId: string;
         actionType: string;
         parameters: Record<string, unknown>;
-        estimatedValue?: number;
+        estimatedValue?: bigint | number;
     };
     context: {
         sessionId: string;

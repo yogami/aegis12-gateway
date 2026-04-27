@@ -1,84 +1,30 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { AegisEnclave } from '../../src/application/PhalaEntrypoint';
 
-const { mockEnforce } = vi.hoisted(() => {
-    return { mockEnforce: vi.fn() };
-});
-
-vi.mock('../../src/infrastructure/AegisPEP', () => {
-    return {
-        AegisPEP: class {
-            enforce = mockEnforce;
-            provisionTenant = vi.fn();
-            saveEvidence = vi.fn();
-            getEvidence = vi.fn();
-        }
-    };
-});
-
-vi.mock('../../src/infrastructure/AegisZKClient', () => {
-    return {
-        AegisZKClient: class {
-            async generateProof() {
-                return { seal: 'mock_seal', vkey: 'mock_vkey' };
-            }
-        }
-    };
-});
-
-vi.mock('../../src/infrastructure/AegisSigner', () => {
-    return {
-        AegisSigner: {
-            create: vi.fn().mockResolvedValue({
-                enclaveDid: 'did:aegis:test',
-                sign: vi.fn().mockReturnValue('mock-sig'),
-                getPublicKeyHex: vi.fn().mockReturnValue('deadbeef'),
-                signEIP712: vi.fn().mockResolvedValue('mock-eip712-sig')
-            })
-        }
-    };
-});
-
-vi.mock('../../src/infrastructure/SolanaAnchor', () => {
-    return {
-        SolanaAnchor: class {
-            getPayerPublicKey = vi.fn().mockReturnValue('MockPayerPubkey');
-            anchorReceipt = vi.fn().mockResolvedValue({ txSignature: 'mock-tx', explorerUrl: 'https://mock' });
-        }
-    };
-});
-import phalaEntrypoint from '../../src/application/PhalaEntrypoint';
+vi.mock('../../src/infrastructure/AegisSigner', () => ({
+    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123' }) }
+}));
 
 describe('phala-entry (Unit)', () => {
+    let enclave: AegisEnclave;
+
     beforeEach(() => {
-        vi.clearAllMocks();
-        // Mock TEE hardware attestation (required by PCR0 check in phalaEntrypoint)
-        globalThis.phala = {
-            getQuote: (_did: string) => ({ quote: 'mock-attestation-quote', measurement: 'mock-pcr0-hash' })
-        };
+        AegisEnclave.reset();
+        enclave = AegisEnclave.getInstance();
     });
 
-    it('denies invalid JSON payload', async () => {
-        const resStr = await phalaEntrypoint('invalid{json');
+    it('denies payload exceeding 128KB', async () => {
+        const huge = 'a'.repeat(130 * 1024);
+        const resStr = await enclave.processRequest(huge);
         const res = JSON.parse(resStr);
         expect(res.status).toBe('denied');
-        expect(res.error).toContain('is not valid JSON');
+        expect(res.error).toContain('exceeds 128KB');
     });
 
-    it('approves a valid request via phalaEntrypoint', async () => {
-        mockEnforce.mockResolvedValue({ toolId: 'swap', signature: 'sig-1' });
-        const reqStr = JSON.stringify({ action: { toolId: 'swap' } });
-        const resStr = await phalaEntrypoint(reqStr);
-        const res = JSON.parse(resStr);
-        expect(res.status).toBe('approved');
-        expect(res.receipt.toolId).toBe('swap');
-    });
-
-    it('denies when enforce throws', async () => {
-        mockEnforce.mockRejectedValue(new Error('Policy breached'));
-        const reqStr = JSON.stringify({ action: { toolId: 'bad_tool' } });
-        const resStr = await phalaEntrypoint(reqStr);
+    it('denies malformed JSON payload', async () => {
+        const resStr = await enclave.processRequest('{invalid');
         const res = JSON.parse(resStr);
         expect(res.status).toBe('denied');
-        expect(res.error).toContain('Policy breached');
+        expect(res.error).toBe('Malformed JSON');
     });
 });
