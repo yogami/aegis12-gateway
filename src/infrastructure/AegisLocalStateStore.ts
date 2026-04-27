@@ -27,6 +27,7 @@ export class AegisLocalStateStore implements IAegisStateStore {
     }
 
     public async initialize(): Promise<void> {
+        await this.walEngine.initialize();
         await this.load();
     }
 

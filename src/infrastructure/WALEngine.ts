@@ -14,8 +14,13 @@ export class WALEngine {
     private derivationPath: string;
     private cachedKey: Buffer | null = null;
 
-    constructor(derivationPath: string) {
-        this.derivationPath = derivationPath;
+    constructor(derivationPathOrKey: string | Buffer) {
+        if (Buffer.isBuffer(derivationPathOrKey)) {
+            this.cachedKey = derivationPathOrKey;
+            this.derivationPath = "DIRECT_KEY_INJECTED";
+        } else {
+            this.derivationPath = derivationPathOrKey;
+        }
     }
 
     /**
@@ -37,6 +42,9 @@ export class WALEngine {
      */
     public initializeSync(): void {
         if (this.cachedKey) return;
+        if (process.env.TEE_ENV === 'phala') {
+            throw new Error("[TERMINAL REFUSAL] Async initialization mandatory in TEE mode. Hardware Root of Trust required.");
+        }
         const tappd = new PhalaTappdMock();
         const keyHex = tappd.deriveKey(this.derivationPath);
         this.cachedKey = Buffer.from(keyHex.replace('0x', '').slice(0, 64), 'hex');
