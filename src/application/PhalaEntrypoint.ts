@@ -154,7 +154,15 @@ export class AegisEnclave {
     }
 
     private formatSuccess(receipt: any, meta: any, tel: TelemetryTracker): string {
-        return JsonUtils.stableStringify({ status: "approved", receipt, enclaveDid: this._signer!.enclaveDid, attestation: meta.attestation, pcr0: meta.pcr0, telemetry: tel.getMetrics() });
+        return JsonUtils.stableStringify({ 
+            status: "approved", 
+            receipt, 
+            solana_tx: "batching", // Anchoring is dispatched to background worker
+            enclaveDid: this._signer!.enclaveDid, 
+            attestation: meta.attestation, 
+            pcr0: meta.pcr0, 
+            telemetry: tel.getMetrics() 
+        });
     }
 
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
