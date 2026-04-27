@@ -74,12 +74,22 @@ async function verify() {
     }
 
     const body = await response.json();
-    console.log(`[Auditor] ✅ Enforcement Approved. Status: ${body.status}`, body);
+    console.log(`[Auditor] ✅ Enforcement Received. Status: ${body.status}`, body);
 
-        // SUBSTANCE AUDIT 1: SOLANA ANCHOR
+    if (body.status === 'denied') {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Enclave denied the action. Reason: ${body.error}`);
+        process.exit(1);
+    }
+
+    // SUBSTANCE AUDIT 1: SOLANA ANCHOR
     let solanaTx = body.solana_tx;
-    const receiptId = body.receipt.receiptId;
+    const receiptId = body.receipt?.receiptId;
     
+    if (!receiptId) {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Enclave approved action but failed to provide a receiptId.`);
+        process.exit(1);
+    }
+
     if (solanaTx === "batching" || solanaTx === "pending") {
         console.log(`[Auditor] ⏳ Solana Anchor is batching asynchronously...`);
         let attempts = 0;
