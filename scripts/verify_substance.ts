@@ -138,8 +138,20 @@ async function verify() {
     }
 
     const memoLog = tx.meta?.logMessages?.find(log => log.includes('Program log: Memo'));
-    if (!memoLog || (!memoLog.includes(nonce) && !memoLog.includes('batch-'))) {
-        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: On-chain memo does not match actionId/nonce and is not a valid batch anchor. Log: ${memoLog}`);
+    if (!memoLog || !memoLog.includes('a12:')) {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: On-chain memo is missing the Aegis-12 prefix (a12:). Log: ${memoLog}`);
+        process.exit(1);
+    }
+    
+    try {
+        const base64Payload = memoLog.split('a12:')[1].split('"')[0];
+        const decoded = Buffer.from(base64Payload, 'base64url').toString('utf8');
+        if (!decoded.includes(nonce) && !decoded.includes('batch-')) {
+             console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Decoded memo does not match actionId/nonce or batch ID. Decoded: ${decoded}`);
+             process.exit(1);
+        }
+    } catch(e) {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Failed to decode memo payload. Log: ${memoLog}`);
         process.exit(1);
     }
     console.log(`[Auditor] ✅ Solana Anchor Verified: Immutable ledger record exists.`);
