@@ -48,6 +48,7 @@ const server = http.createServer(async (req, res) => {
                 solanaPayer: enclave.anchor?.getPayerPublicKey(),
                 enclaveDid: enclave.signer?.enclaveDid,
                 version: "v1.0.1-unmocked",
+                commit_hash: process.env.GIT_COMMIT_SHA || "unknown",
                 hardware: "phala-dstack-cvm",
                 timestamp: new Date().toISOString()
             };
