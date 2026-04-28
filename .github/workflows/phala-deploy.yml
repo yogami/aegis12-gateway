@@ -124,8 +124,20 @@ jobs:
 
       - name: Verify Live Deployment (Substance Audit)
         run: |
-          echo "Waiting for hardware enclave to boot (Polling)..."
           ENCLAVE_URL="https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network"
+          
+          echo "Waiting for old container to terminate (expecting non-200)..."
+          for i in {1..30}; do
+            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
+            if [ "$RESPONSE_CODE" != "200" ]; then
+              echo "Old container is down (HTTP $RESPONSE_CODE)."
+              break
+            fi
+            echo "Old container still responding (HTTP $RESPONSE_CODE). Sleeping 5s..."
+            sleep 5
+          done
+          
+          echo "Waiting for new hardware enclave to boot (Polling)..."
           MAX_RETRIES=90
           RETRY_COUNT=0
           
@@ -137,6 +149,7 @@ jobs:
               echo "✅ Enclave Gateway is LIVE (HTTP $RESPONSE_CODE). Initiating Cryptographic Substance Audit..."
               break
             fi
+
             
             RETRY_COUNT=$((RETRY_COUNT+1))
             echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Enclave not ready (HTTP $RESPONSE_CODE). Sleeping 10s..."
