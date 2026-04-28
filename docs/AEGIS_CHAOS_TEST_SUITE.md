@@ -1,43 +1,61 @@
 # Aegis-12 Master Chaos & Resilience Suite
-_Unified CI/CD Blueprint for High-Performance Architecture (16GB TEE)_
+_Unified CI/CD Blueprint for High-Veracity TEE Deployments_
 
 ## Overview
-This master suite consolidates the adversarial vectors designed by the OpenRouter Frontier Council (GPT-5.5, Opus 4.7, DeepSeek-V4, o3-Pro), Grok, Perplexity, and Google DeepThink. 
-With the strict 2GB memory limitation lifted for the 16GB demo environment, these tests focus entirely on unbounded concurrency scaling, asynchronous state collapse, and cryptographic determinism.
+This master suite consolidates the adversarial vectors designed by the OpenRouter Frontier Council, Grok, Perplexity Pro, and Google DeepThink. 
+It is structurally divided into two distinct execution tiers based on the active memory configuration of the Phala CVM. The CI pipeline must dynamically select the appropriate tier depending on the deployment hardware.
 
 ---
 
-## 1. CI/CD Deployment Integrity (Automated in Actions)
-*   **[ACTIVE] C-001 (Deployment Proxy Phantom):** Cryptographic `$GITHUB_SHA` verification required on the `/health` endpoint before CI proceeds, preventing rolling-update proxy cache races.
-*   **[ACTIVE] M-001 (ZK-Prover Bomb):** Baseline 150-concurrent request DDoS injected directly into the CI pipeline during deployment to ensure basic event-loop survival.
+# TIER 1: The Starvation Crucible (2GB RAM Limit)
+**Focus:** Out-of-Memory (OOM) survival, Truncated File Recovery, and Graceful Failure.
 
----
+## 1. CI/CD Deployment Integrity
+*   **[ACTIVE] C-001 (Deployment Proxy Phantom):** Cryptographic `$GITHUB_SHA` verification required on the `/health` endpoint before CI proceeds.
+*   **[ACTIVE] M-001 (ZK-Prover Bomb):** Baseline 150-concurrent request DDoS injected directly into the CI pipeline to ensure basic event-loop survival.
 
 ## 2. Cryptographic File Integrity
 *   **D-003 / X-004 (The AEAD Poison Pill / Nonce Reuse):** 
     *   *Test:* Send a SIGKILL to the Node process exactly as `cipher.final()` writes to the `.rzreceipt` file.
-    *   *Requirement:* The worker must write to a `.tmp` file and use an atomic `rename()` syscall. Any corrupted AEAD envelope must be deterministically quarantined, and AEAD nonces must strictly strictly increment.
+    *   *Requirement:* The worker must write to a `.tmp` file and use an atomic `rename()` syscall. Corrupted AEAD envelopes must be deterministically quarantined.
 
 ## 3. Asynchronous Worker State Collapse
 *   **D-002 (The Zombie Prover Leak):** 
-    *   *Test:* Trigger an OS-level kill on the parent Node.js process while 50 ZK-Provers are running in child processes.
-    *   *Requirement:* The system must use strict Linux PID namespace management or `prctl(PR_SET_PDEATHSIG, SIGKILL)` to ensure orphaned provers instantly die, preventing hypervisor lockup on a 16GB machine.
-*   **X-005 (Misordered ZK Updates):**
-    *   *Test:* Delay ZK-Prover completions for 90s, bypassing the 30s Batch Anchor tick.
-    *   *Requirement:* Ensure no "ghost proofs" (PROVED but unanchored forever) occur when an asynchronous promise returns out-of-order.
+    *   *Test:* Trigger an OS-level kill on the parent Node.js process while 50 ZK-Provers are running.
+    *   *Requirement:* Enforce strict child process death (via detached IPC watcher or `prctl`) to ensure orphaned provers instantly die, preventing hypervisor lockup. *(Status: Mitigated)*
 
-## 4. Solana RPC & Lock Synchronization
-*   **D-001 / X-002 (Redis Lock TTL Starvation):** 
-    *   *Test:* Pin the Node event loop for 40 seconds via massive JSON canonicalization, forcing the 30s `batch-anchor-lock` TTL to silently expire in the background.
-    *   *Requirement:* The BatchAnchorWorker must use a strictly monotonic fencing token or atomic renewal to verify lock ownership immediately before broadcasting to Solana to prevent duplicate anchor collisions.
-*   **D-004 / X-003 (Phantom Anchor Divergence):**
-    *   *Test:* Drop the TCP ACK from Solana Devnet. The transaction lands on-chain, but Node.js hits a 15s local timeout.
-    *   *Requirement:* The system must never rollback the WAL to `RETRY` purely based on a local network timeout. It must query the chain via the transaction signature to confirm actual L1 status.
+---
 
-## 5. Temporal Cryptography
-*   **D-005 (TEE Quote Epoch Staleness):** 
-    *   *Test:* Throttle the CVM CPU so the ZK-Proof takes 10 minutes, causing the initial TEE Hardware Quote to expire before anchoring.
-    *   *Requirement:* The worker must catch the on-chain `StaleQuote` error and trigger a full local quote regeneration rather than infinitely retrying the dead payload.
+# TIER 2: The Unbounded Scale Crucible (128GB RAM Limit)
+**Focus:** Event-Loop Livelocks, File Descriptor (ulimit) Exhaustion, and TCP Port Saturation.
+**Prerequisite:** Node.js must be executed with `--max-old-space-size=120000`.
+
+## 4. File Descriptor & Connection Pool Saturation
+*   **D-101 (The EMFILE Shatter / DeepThink):** 
+    *   *Test:* Sustain 150,000 concurrent payloads using HTTP Keep-Alives. V8 absorbs them effortlessly, but the OS rejects the `spawn` and file `open` syscalls.
+    *   *Requirement:* Implement a strict Application-Layer Concurrency Semaphore (e.g., max 2,000 active FDs).
+*   **X-101 (Sticky Socket Storm / Perplexity):**
+    *   *Test:* Send slow-loris POSTs maintaining 50k connections, pushing the OS to the `ulimit -n` brink.
+    *   *Requirement:* Node must health-check `< 500ms` and fail closed (`503/429`) cleanly without dropping in-flight connections.
+*   **X-102 (Redis Socket Leak / Grok):**
+    *   *Test:* Send 12,000 concurrent requests without closing client sockets.
+    *   *Requirement:* The system never exceeds the OS `ulimit -n` while maintaining consistent 202 responses.
+
+## 5. Event Loop & Temporal Desynchronization
+*   **D-102 (The Phantom Lock / DeepThink):** 
+    *   *Test:* Saturate the 4-thread `libuv` pool and Redis connection pool, causing Event-Loop Tick Latency to balloon to >35 seconds. The Redis 15s lock expires in real-time, but the worker doesn't realize it due to lag.
+    *   *Requirement:* Aegis-12 must monitor Event Loop Utilization (ELU) via `perf_hooks` and trip a Circuit Breaker if lag exceeds 500ms.
+*   **C-101 (Anchor-Storm Lock-Convoy / Council):**
+    *   *Test:* Phase-align 5000 requests perfectly with the `BatchAnchorWorker` 30s tick, alongside a forced Major GC Pause (`global.gc()`).
+    *   *Requirement:* No duplicate Solana batches ever land on-chain due to GC-induced lock expiration.
+
+## 6. Network Blackholing & Thundering Herds
+*   **D-103 (The TIME_WAIT Avalanche / DeepThink):** 
+    *   *Test:* Solana responds with HTTP 429 to 250,000 anchored batches. The 120GB memory effortlessly queues 250,000 `setTimeout` retries. They resolve simultaneously, creating a Thundering Herd that exhausts all ephemeral TCP ports (`EADDRNOTAVAIL`).
+    *   *Requirement:* Rely on a globally bounded `http.Agent` (`maxSockets: 50`, `keepAlive: true`) to multiplex L1 egress gracefully.
+*   **X-103 (Event-Loop Collapse via RPC Blackhole / Grok & Perplexity):**
+    *   *Test:* Proxy returns HTTP 200 for `getLatestBlockhash` but hangs indefinitely on `sendAndConfirmTransaction`.
+    *   *Requirement:* Strict RPC backoff logic that does not saturate the `libuv` pool with endless retries. No blind retries based on local network timeouts.
 
 ---
 

@@ -108,6 +108,18 @@ export class AegisZKClient {
                 }
             });
 
+            // [D-002 ZOMBIE PROVER MITIGATION]
+            // We spawn a detached watcher. If the parent Node.js process is OOM-killed (SIGKILL),
+            // the IPC pipe to the watcher breaks. `cat` exits, and the watcher atomically SIGKILLs the prover.
+            if (child.pid) {
+                const { spawn } = require('child_process');
+                const watcher = spawn('sh', ['-c', `cat > /dev/null; kill -9 ${child.pid} 2>/dev/null`], {
+                    stdio: ['pipe', 'ignore', 'ignore'],
+                    detached: true
+                });
+                watcher.unref();
+            }
+
             if (child.stdin) {
                 child.stdin.write(inputStr);
                 child.stdin.end();
