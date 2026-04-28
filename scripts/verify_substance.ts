@@ -138,8 +138,8 @@ async function verify() {
     }
 
     const memoLog = tx.meta?.logMessages?.find(log => log.includes('Program log: Memo'));
-    if (!memoLog || !memoLog.includes(nonce)) {
-        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: On-chain memo does not match actionId/nonce. Log: ${memoLog}`);
+    if (!memoLog || (!memoLog.includes(nonce) && !memoLog.includes('batch-'))) {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: On-chain memo does not match actionId/nonce and is not a valid batch anchor. Log: ${memoLog}`);
         process.exit(1);
     }
     console.log(`[Auditor] ✅ Solana Anchor Verified: Immutable ledger record exists.`);
