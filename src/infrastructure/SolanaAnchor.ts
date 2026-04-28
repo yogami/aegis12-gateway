@@ -117,7 +117,7 @@ export class SolanaAnchor implements ILedgerAnchor {
             const signatureValid = signer.verify(recomputedHash, receipt.signature, signer.getPublicKeyHex());
             if (!signatureValid) throw new Error('Enclave signature invalid.');
 
-            return { verified: hashMatch && signatureValid, txSignature, onChainMemo, recomputedHash, enclaveSignatureValid: signatureValid, slot: tx.slot, blockTime: tx.blockTime ?? null };
+            return { verified: hashMatch && signatureValid, txSignature, onChainMemo, recomputedHash, enclaveSignatureValid: signatureValid, slot: tx.slot, blockTime: tx.blockTime ?? undefined };
         } catch (e: any) {
             return { verified: false, error: e.message };
         }

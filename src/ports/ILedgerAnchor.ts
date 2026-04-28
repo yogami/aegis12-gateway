@@ -1,8 +1,13 @@
-import { AegisComplianceReceipt } from '../domain/types';
+import { AegisComplianceReceipt } from '../types';
 
 export interface AnchorResult {
     txSignature: string;
     explorerUrl: string;
+    receiptHash?: string;
+    slot?: number;
+    cluster?: string;
+    anchoredAt?: string;
+    isZkSharded?: boolean;
 }
 
 export interface VerificationResult {
@@ -11,6 +16,11 @@ export interface VerificationResult {
     onChainMemo?: string;
     memoObj?: any;
     timestamp?: number;
+    txSignature?: string;
+    recomputedHash?: string;
+    enclaveSignatureValid?: boolean;
+    slot?: number;
+    blockTime?: number;
 }
 
 export interface ILedgerAnchor {

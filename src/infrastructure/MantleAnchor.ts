@@ -5,12 +5,12 @@ import { AegisSigner } from './AegisSigner';
 import { JsonUtils } from './JsonUtils';
 
 export class MantleAnchor implements ILedgerAnchor {
-    private provider: ethers.Provider;
+    private provider: ethers.providers.Provider;
     private wallet: Wallet;
     private networkName: string;
 
     constructor(rpcUrl: string, wallet: Wallet, networkName: string = 'Mantle (EVM)') {
-        this.provider = new ethers.JsonRpcProvider(rpcUrl);
+        this.provider = new ethers.providers.JsonRpcProvider(rpcUrl);
         this.wallet = wallet.connect(this.provider);
         this.networkName = networkName;
     }
@@ -33,7 +33,7 @@ export class MantleAnchor implements ILedgerAnchor {
         const memo = `a12:${Buffer.from(JSON.stringify(memoObj)).toString('base64url')}`;
 
         // On EVM, we write data to the blockchain by sending a transaction to ourselves with hex calldata.
-        const hexData = ethers.hexlify(ethers.toUtf8Bytes(memo));
+        const hexData = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(memo));
         
         const tx = await this.wallet.sendTransaction({
             to: this.wallet.address,
@@ -60,7 +60,7 @@ export class MantleAnchor implements ILedgerAnchor {
             const hexData = tx.data;
             if (hexData === '0x') throw new Error('No calldata found in transaction');
 
-            const onChainMemo = ethers.toUtf8String(hexData);
+            const onChainMemo = ethers.utils.toUtf8String(hexData);
             if (!onChainMemo.startsWith('a12:')) throw new Error('Invalid memo prefix');
             
             const memoObj = JsonUtils.safeParse(Buffer.from(onChainMemo.substring(4), 'base64url').toString('utf-8'), 'MantleMemo');

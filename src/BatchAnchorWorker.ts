@@ -2,6 +2,7 @@ import { AegisJournal } from './infrastructure/AegisJournal';
 import { ILedgerAnchor } from './ports/ILedgerAnchor';
 import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
+import { AegisComplianceReceipt } from './types';
 
 export class BatchAnchorWorker {
     private journal: AegisJournal;
@@ -67,7 +68,7 @@ export class BatchAnchorWorker {
                 timestamp: new Date().toISOString(),
                 isBatch: true,
                 count: unbatched.length
-            };
+            } as unknown as AegisComplianceReceipt;
 
             const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
             
@@ -86,7 +87,7 @@ export class BatchAnchorWorker {
                     try {
                         const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
                         if (original) {
-                            await this.pep.saveEvidence(original, ledgerReceipt.txSignature);
+                            await this.pep.saveEvidence(original, ledgerReceipt.txSignature, ledgerReceipt.blockTime ?? undefined);
                         }
                     } catch (err: any) {
                         console.error(`[BatchAnchorWorker] Failed to update evidence for ${entry.receiptId}: ${err.message}`);
