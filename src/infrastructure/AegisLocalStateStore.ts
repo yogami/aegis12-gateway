@@ -12,7 +12,7 @@ export class AegisLocalStateStore implements IAegisStateStore {
     private walEngine: WALEngine;
     private state: Map<string, BehavioralStats> = new Map();
     private evidence: Map<string, any> = new Map();
-    private evidenceByReceipt: Map<string, string> = new Map(); // receiptId -> solana_tx
+    private evidenceByReceipt: Map<string, string> = new Map(); // receiptId -> ledger_tx
     private walPath: string;
     private evidencePath: string;
 
@@ -116,9 +116,9 @@ export class AegisLocalStateStore implements IAegisStateStore {
         await this.persist();
     }
 
-    public async saveEvidence(receipt: AegisComplianceReceipt, solanaTx?: string): Promise<void> {
-        const txKey = solanaTx || `pending-${receipt.receiptId}`;
-        const enrichedReceipt = { ...receipt, solana_tx: solanaTx };
+    public async saveEvidence(receipt: AegisComplianceReceipt, ledgerTxHash?: string): Promise<void> {
+        const txKey = ledgerTxHash || `pending-${receipt.receiptId}`;
+        const enrichedReceipt = { ...receipt, ledger_tx: ledgerTxHash };
         this.evidence.set(txKey, enrichedReceipt);
         this.evidenceByReceipt.set(receipt.receiptId, txKey);
         await this.persist();

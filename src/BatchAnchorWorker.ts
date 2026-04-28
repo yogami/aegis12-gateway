@@ -1,18 +1,18 @@
 import { AegisJournal } from './infrastructure/AegisJournal';
-import { SolanaAnchor } from './infrastructure/SolanaAnchor';
+import { ILedgerAnchor } from './ports/ILedgerAnchor';
 import { MerkleTree } from 'merkletreejs';
 import keccak256 from 'keccak256';
 
 export class BatchAnchorWorker {
     private journal: AegisJournal;
-    private anchor: SolanaAnchor;
+    private anchor: ILedgerAnchor;
     private enclaveDid: string;
     private intervalId: NodeJS.Timeout | null = null;
     private isAnchoring: boolean = false;
 
     private pep: any; // Injected to update evidence store
 
-    constructor(journal: AegisJournal, anchor: SolanaAnchor, enclaveDid: string, pep: any) {
+    constructor(journal: AegisJournal, anchor: ILedgerAnchor, enclaveDid: string, pep: any) {
         this.journal = journal;
         this.anchor = anchor;
         this.enclaveDid = enclaveDid;
@@ -71,23 +71,22 @@ export class BatchAnchorWorker {
 
             const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
             
-            // Fix: Enforce a generous 120-second timeout on the Solana RPC call.
-            // Devnet confirmations frequently exceed 15s, which previously caused infinite batching loops.
+            // Fix: Enforce a generous 120-second timeout on the RPC call.
             const timeoutPromise = new Promise<any>((_, reject) => 
                 setTimeout(() => reject(new Error('RPC connection timed out after 120000ms')), 120000)
             );
             
-            const solanaReceipt = await Promise.race([anchorPromise, timeoutPromise]);
+            const ledgerReceipt = await Promise.race([anchorPromise, timeoutPromise]);
 
-            if (solanaReceipt && solanaReceipt.txSignature) {
-                console.log(`[BatchAnchorWorker] Successfully anchored batch root ${merkleRoot} in tx ${solanaReceipt.txSignature}`);
+            if (ledgerReceipt && ledgerReceipt.txSignature) {
+                console.log(`[BatchAnchorWorker] Successfully anchored batch root ${merkleRoot} in tx ${ledgerReceipt.txSignature}`);
                 
                 // Update evidence store for each individual receipt in the batch
                 for (const entry of unbatched) {
                     try {
                         const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
                         if (original) {
-                            await this.pep.saveEvidence(original, solanaReceipt.txSignature);
+                            await this.pep.saveEvidence(original, ledgerReceipt.txSignature);
                         }
                     } catch (err: any) {
                         console.error(`[BatchAnchorWorker] Failed to update evidence for ${entry.receiptId}: ${err.message}`);

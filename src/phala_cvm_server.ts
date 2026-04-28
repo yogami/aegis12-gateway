@@ -45,7 +45,7 @@ const server = http.createServer(async (req, res) => {
             await enclave.initialize();
             const health = {
                 status: "alive",
-                solanaPayer: enclave.anchor?.getPayerPublicKey(),
+                ledgerPayer: enclave.anchor?.getPayerPublicKey(),
                 enclaveDid: enclave.signer?.enclaveDid,
                 version: "v1.0.1-unmocked",
                 commit_hash: process.env.GIT_COMMIT_SHA || "unknown",

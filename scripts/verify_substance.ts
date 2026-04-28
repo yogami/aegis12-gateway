@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
  * 
  * Production-grade cryptographic auditor for the Aegis-12 Evidence Pack.
  * Validates:
- * 1. Solana On-Chain Memo (Immutable Anchor)
+ * 1. Ledger On-Chain Memo (Immutable Anchor)
  * 2. RISC Zero ZK-Seal (Computational Proof)
  * 3. Phala Hardware Quote (TEE Attestation)
  */
@@ -81,8 +81,8 @@ async function verify() {
         process.exit(1);
     }
 
-    // SUBSTANCE AUDIT 1: SOLANA ANCHOR
-    let solanaTx = body.solana_tx;
+    // SUBSTANCE AUDIT 1: LEDGER ANCHOR
+    let ledgerTx = body.ledger_tx;
     const receiptId = body.receipt?.receiptId;
     
     if (!receiptId) {
@@ -90,21 +90,21 @@ async function verify() {
         process.exit(1);
     }
 
-    if (solanaTx === "batching" || solanaTx === "pending") {
-        console.log(`[Auditor] ⏳ Solana Anchor is batching asynchronously...`);
+    if (ledgerTx === "batching" || ledgerTx === "pending") {
+        console.log(`[Auditor] ⏳ Ledger Anchor is batching asynchronously...`);
         let attempts = 0;
         const maxAttempts = 30; // 5 minutes
-        while ((solanaTx === "batching" || solanaTx === "pending") && attempts < maxAttempts) {
+        while ((ledgerTx === "batching" || ledgerTx === "pending") && attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 10000));
             attempts++;
-            console.log(`[Auditor] ⏳ Polling enclave for Solana Anchor status... (${attempts}/${maxAttempts})`);
+            console.log(`[Auditor] ⏳ Polling enclave for Ledger Anchor status... (${attempts}/${maxAttempts})`);
             try {
                 const evidenceRes = await fetch(`${baseUrl}/evidence/${receiptId}`);
                 if (evidenceRes.ok) {
                     const evidenceBody = await evidenceRes.json();
-                    if (evidenceBody.solana_tx && evidenceBody.solana_tx !== "batching" && evidenceBody.solana_tx !== "pending") {
-                        solanaTx = evidenceBody.solana_tx;
-                        console.log(`[Auditor] ✨ Solana Anchor Discovered: ${solanaTx}`);
+                    if (evidenceBody.ledger_tx && evidenceBody.ledger_tx !== "batching" && evidenceBody.ledger_tx !== "pending") {
+                        ledgerTx = evidenceBody.ledger_tx;
+                        console.log(`[Auditor] ✨ Ledger Anchor Discovered: ${ledgerTx}`);
                     }
                 }
             } catch (e) {
@@ -113,17 +113,17 @@ async function verify() {
         }
     }
 
-    if (!solanaTx || solanaTx.startsWith("mock_tx_") || solanaTx === "batching" || solanaTx === "pending") {
-        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Solana transaction is missing, mocked, or stuck: ${solanaTx}`);
+    if (!ledgerTx || ledgerTx.startsWith("mock_tx_") || ledgerTx === "batching" || ledgerTx === "pending") {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Ledger transaction is missing, mocked, or stuck: ${ledgerTx}`);
         process.exit(1);
     }
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-    console.log(`[Auditor] 🔗 Fetching on-chain anchor: ${solanaTx}...`);
+    console.log(`[Auditor] 🔗 Fetching on-chain anchor: ${ledgerTx}...`);
     
     let tx = null;
     for (let i = 0; i < 12; i++) {
         try {
-            tx = await connection.getParsedTransaction(solanaTx, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
+            tx = await connection.getParsedTransaction(ledgerTx, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
             if (tx) break;
         } catch (e) {
             // Ignore signature length errors if it was a weird hash, just keep waiting
@@ -154,7 +154,7 @@ async function verify() {
         console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Failed to decode memo payload. Log: ${memoLog}`);
         process.exit(1);
     }
-    console.log(`[Auditor] ✅ Solana Anchor Verified: Immutable ledger record exists.`);
+    console.log(`[Auditor] ✅ Ledger Anchor Verified: Immutable ledger record exists.`);
 
     // SUBSTANCE AUDIT 2: ZK SEAL
     let zkSeal = body.ars_anchor || "pending";

@@ -21,7 +21,7 @@ const mockEnclave = {
     getHardwareMetadata: vi.fn().mockResolvedValue({ attestation: 'mock-attestation', pcr0: 'mock-pcr0' }),
     pep: { provisionTenant: vi.fn(), getEvidence: vi.fn(), getEvidenceByReceiptId: vi.fn() },
     signer: { enclaveDid: 'did:mock', sign: vi.fn().mockReturnValue('mock-sig'), getPublicKeyHex: vi.fn().mockReturnValue('deadbeef'), getPQPublicKeyHex: vi.fn().mockReturnValue('pq-deadbeef') },
-    anchor: { getPayerPublicKey: vi.fn().mockReturnValue('MockPayer'), anchorReceipt: vi.fn(), verifyAnchoredReceipt: vi.fn() }
+    anchor: { getPayerPublicKey: vi.fn().mockReturnValue('MockPayer'), anchorReceipt: vi.fn(), verifyAnchoredReceipt: vi.fn(), getNetworkName: vi.fn().mockReturnValue('mock-network') }
 };
 
 vi.mock('../../src/application/PhalaEntrypoint', () => ({

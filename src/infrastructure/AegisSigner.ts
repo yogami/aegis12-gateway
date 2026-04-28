@@ -97,6 +97,10 @@ export class AegisSigner {
         return this.ethWallet.address;
     }
 
+    public getEvmWallet(): Wallet {
+        return this.ethWallet;
+    }
+
     public getPublicKeyHex(): string {
         return bytesToHex(this.publicKey);
     }

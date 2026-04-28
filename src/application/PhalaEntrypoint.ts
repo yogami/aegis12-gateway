@@ -2,6 +2,7 @@ import { AegisSigner } from '../infrastructure/AegisSigner';
 import { AegisPEP } from '../infrastructure/AegisPEP';
 import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest, AegisComplianceReceipt } from '../types';
+import { ILedgerAnchor } from '../ports/ILedgerAnchor';
 import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
 import { TelemetryTracker } from '../infrastructure/TelemetryTracker';
 import { AegisJournal } from '../infrastructure/AegisJournal';
@@ -19,7 +20,7 @@ export class AegisEnclave {
     private static instance: AegisEnclave;
     private _signer?: AegisSigner;
     private _pep?: AegisPEP;
-    private _anchor?: SolanaAnchor;
+    private _anchor?: ILedgerAnchor;
     private _journal?: AegisJournal;
     private _batchWorker?: BatchAnchorWorker;
     private _initPromise: Promise<void> | null = null;
@@ -80,7 +81,17 @@ export class AegisEnclave {
     private async performInitializationSteps(): Promise<void> {
         this._signer = this._signer || await AegisSigner.create();
         await this.ensurePep();
-        this._anchor = this._anchor || new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+        
+        if (!this._anchor) {
+            const ledgerType = process.env.LEDGER_TYPE || 'solana';
+            if (ledgerType === 'mantle') {
+                const { MantleAnchor } = await import('../infrastructure/MantleAnchor');
+                const rpc = process.env.MANTLE_RPC_URL || 'https://rpc.sepolia.mantle.xyz';
+                this._anchor = new MantleAnchor(rpc, this._signer.getEvmWallet());
+            } else {
+                this._anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
+            }
+        }
     }
 
     private async ensurePep(): Promise<void> {
@@ -157,7 +168,7 @@ export class AegisEnclave {
         return JsonUtils.stableStringify({ 
             status: "approved", 
             receipt, 
-            solana_tx: "batching", // Anchoring is dispatched to background worker
+            ledger_tx: "batching", // Anchoring is dispatched to background worker
             enclaveDid: this._signer!.enclaveDid, 
             attestation: meta.attestation, 
             pcr0: meta.pcr0, 
@@ -179,8 +190,8 @@ export class AegisEnclave {
     }
 
     private async anchorToLedger(receipt: any, decision: 'approved' | 'denied'): Promise<void> {
-        const solanaReceipt = await this._anchor!.anchorReceipt(receipt, decision, this._signer!.enclaveDid);
-        if (decision === 'approved') await this._pep!.saveEvidence(receipt, solanaReceipt.txSignature);
+        const ledgerReceipt = await this._anchor!.anchorReceipt(receipt, decision, this._signer!.enclaveDid);
+        if (decision === 'approved') await this._pep!.saveEvidence(receipt, ledgerReceipt.txSignature);
     }
 
     private async generateZkProof(receipt: AegisComplianceReceipt, nonce: string): Promise<void> {
@@ -232,7 +243,7 @@ export class AegisEnclave {
             status: evidence.ars_anchor ? "COMPLETED" : "pending", 
             receiptId, 
             ars_anchor: evidence.ars_anchor, 
-            solana_tx: evidence.solana_tx 
+            ledger_tx: evidence.ledger_tx 
         });
     }
 }

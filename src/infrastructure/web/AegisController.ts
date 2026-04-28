@@ -16,9 +16,9 @@ export class AegisController {
         return {
             status: 'alive',
             enclaveDid: enclave.signer?.enclaveDid || "initializing",
-            solanaCluster: process.env.SOLANA_CLUSTER || 'devnet',
-            solanaPayer: enclave.anchor?.getPayerPublicKey(),
-            features: ['solana-anchoring', 'solana-tx-firewall', 'squads-governance']
+            ledgerNetwork: enclave.anchor?.getNetworkName() || 'unknown',
+            ledgerPayer: enclave.anchor?.getPayerPublicKey(),
+            features: ['ledger-anchoring', 'transaction-firewall', 'squads-governance']
         };
     }
 
@@ -31,13 +31,13 @@ export class AegisController {
             enclaveDid: enclave.signer?.enclaveDid || "initializing",
             endpoints: {
                 'POST /enforce': 'Policy Enforcement',
-                'POST /anchor-receipt': 'Solana SPL Memo Anchoring',
+                'POST /anchor-receipt': 'Universal Ledger Anchoring',
                 'POST /solana/enforce-tx': 'Transaction Firewall',
                 'POST /governance/evaluate': 'Squads V4 Risk Evaluation',
                 'GET /attestation/status': 'Hardware PCR0 Status'
             },
-            solanaIntegration: {
-                programs: ['SPL Memo (receipt anchoring)', 'Squads V4 (human-in-the-loop governance)', 'x402 USDC (pay-per-inference)']
+            ledgerIntegration: {
+                programs: ['Anchoring (SPL Memo/Mantle)', 'Squads V4 (human-in-the-loop governance)', 'x402 USDC (pay-per-inference)']
             },
             compliance: {
                 euAiAct: ['Article 12 (Record Keeping)', 'Article 14 (Human Oversight)', 'Article 15 (Cybersecurity)'],
@@ -80,11 +80,11 @@ export class AegisController {
             const { receipt, decision } = request.body as any;
             if (!receipt || !decision) return reply.status(400).send({ error: 'Missing required fields: receipt, decision' });
 
-            const solanaReceipt = await enclave.anchor!.anchorReceipt(receipt, decision, enclave.signer?.enclaveDid || "unknown");
+            const ledgerReceipt = await enclave.anchor!.anchorReceipt(receipt, decision, enclave.signer?.enclaveDid || "unknown");
             return reply.status(200).send({
                 status: 'anchored',
-                txSignature: solanaReceipt.txSignature,
-                explorerUrl: solanaReceipt.explorerUrl
+                txSignature: ledgerReceipt.txSignature,
+                explorerUrl: ledgerReceipt.explorerUrl
             });
         } catch (err: any) {
             return reply.status(500).send({ status: 'error', error: err.message });
@@ -99,28 +99,28 @@ export class AegisController {
             console.log(`[Auditor] Public substance verification request for tx: ${txSignature}`);
             
             const localEvidence = await enclave.pep!.getEvidence(txSignature);
-            const solanaResult = await enclave.anchor!.verifyAnchoredReceipt(txSignature, localEvidence || undefined, enclave.signer!);
+            const ledgerResult = await enclave.anchor!.verifyAnchoredReceipt(txSignature, localEvidence || undefined, enclave.signer!);
             
-            if (solanaResult.error && !localEvidence) {
-                return reply.status(404).send({ status: 'error', error: solanaResult.error });
+            if (ledgerResult.error && !localEvidence) {
+                return reply.status(404).send({ status: 'error', error: ledgerResult.error });
             }
             
             return reply.status(200).send({
                 txSignature,
-                status: (solanaResult.verified && localEvidence) ? "VERIFIED" : "PARTIAL_PROOF",
+                status: (ledgerResult.verified && localEvidence) ? "VERIFIED" : "PARTIAL_PROOF",
                 onChain: {
-                    verified: solanaResult.verified,
-                    memo: solanaResult.onChainMemo,
-                    slot: solanaResult.slot,
-                    blockTime: solanaResult.blockTime
+                    verified: ledgerResult.verified,
+                    memo: ledgerResult.onChainMemo,
+                    slot: ledgerResult.timestamp || null,
+                    blockTime: ledgerResult.timestamp || null
                 },
                 enclaveEvidence: {
                     found: !!localEvidence,
-                    signatureValid: solanaResult.enclaveSignatureValid,
+                    signatureValid: ledgerResult.verified,
                     receiptId: localEvidence?.receiptId,
                     complianceStandard: localEvidence?.complianceStandard || "ARS-01+"
                 },
-                note: (solanaResult.verified && localEvidence) ? "Full cryptographic substance confirmed across Ledger and Enclave." : "Partial evidence found. Chain of trust may be incomplete."
+                note: (ledgerResult.verified && localEvidence) ? "Full cryptographic substance confirmed across Ledger and Enclave." : "Partial evidence found. Chain of trust may be incomplete."
             });
         } catch (err: any) {
             return reply.status(500).send({ status: 'error', error: err.message });
@@ -145,7 +145,7 @@ export class AegisController {
                 status: evidence.ars_anchor && evidence.ars_anchor !== "pending" ? "COMPLETED" : "PENDING_ASYNC_COMPUTATION",
                 ars_anchor: evidence.ars_anchor || "pending",
                 zk_vkey: evidence.zk_vkey || "pending",
-                solana_tx: evidence.solana_tx || "pending",
+                ledger_tx: evidence.ledger_tx || "pending",
                 timestamp: evidence.timestamp
             });
         } catch (err: any) {

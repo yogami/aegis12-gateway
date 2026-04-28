@@ -9,7 +9,7 @@ export interface IAegisStateStore {
     initialize?(): Promise<void>;
     tryIncrementSpend(agentId: string, deltaSpend: bigint, limit: bigint): Promise<void>;
     rollbackSpend(agentId: string, deltaSpend: bigint): Promise<void>;
-    saveEvidence(receipt: any, solanaTx?: string): Promise<void>;
+    saveEvidence(receipt: any, ledgerTxHash?: string): Promise<void>;
     getEvidence(txSignature: string): Promise<any | null>;
     getEvidenceByReceiptId(receiptId: string): Promise<any | null>;
     updateZkSeal(receiptId: string, zkSealData: { seal?: string, vkey?: string }): Promise<void>;

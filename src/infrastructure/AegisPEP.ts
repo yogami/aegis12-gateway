@@ -188,8 +188,8 @@ export class AegisPEP {
         };
     }
 
-    public async saveEvidence(receipt: AegisComplianceReceipt, solanaTx?: string): Promise<void> {
-        await this.stateStore.saveEvidence(receipt, solanaTx);
+    public async saveEvidence(receipt: AegisComplianceReceipt, ledgerTxHash?: string): Promise<void> {
+        await this.stateStore.saveEvidence(receipt, ledgerTxHash);
     }
 
     public async getEvidence(txSignature: string): Promise<any | null> {

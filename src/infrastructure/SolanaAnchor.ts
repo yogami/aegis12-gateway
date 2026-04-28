@@ -13,18 +13,9 @@ import { createMemoInstruction } from '@solana/spl-memo';
 import { AegisComplianceReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 import { JsonUtils } from './JsonUtils';
+import { ILedgerAnchor, AnchorResult, VerificationResult } from '../ports/ILedgerAnchor';
 
-interface AnchorResult {
-    txSignature: string;
-    receiptHash: string;
-    slot: number;
-    cluster: string;
-    explorerUrl: string;
-    anchoredAt: string;
-    isZkSharded?: boolean;
-}
-
-export class SolanaAnchor {
+export class SolanaAnchor implements ILedgerAnchor {
     private connection: Connection;
     private payer: Keypair;
     private cluster: string;
@@ -111,7 +102,7 @@ export class SolanaAnchor {
         txSignature: string,
         receipt: AegisComplianceReceipt,
         signer: AegisSigner
-    ): Promise<any> {
+    ): Promise<VerificationResult> {
         try {
             const tx = await this.connection.getParsedTransaction(txSignature, { commitment: 'confirmed' });
             if (!tx) throw new Error('Transaction not found');
@@ -154,5 +145,9 @@ export class SolanaAnchor {
 
     public getPayerPublicKey(): string {
         return this.payer.publicKey.toBase58();
+    }
+
+    public getNetworkName(): string {
+        return `Solana (${this.cluster})`;
     }
 }
