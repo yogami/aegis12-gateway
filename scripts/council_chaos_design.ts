@@ -22,62 +22,83 @@ Architecture Context:
    - CI/CD rolling deployments take 5-10 minutes (Rust compilation), leading to race conditions if the CI tests hit the proxy while the old container is draining.
 `;
 
-async function askOpenRouter(model: string, systemPrompt: string, userPrompt: string): Promise<string> {
-    const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://berlinailabs.com",
-            "X-Title": "Aegis-12 Chaos Council"
-        },
-        body: JSON.stringify({
-            model: model,
-            messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: userPrompt }
-            ]
-        })
-    });
+async function askOpenRouter(model: string, systemPrompt: string, userPrompt: string, retries = 3): Promise<string> {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://berlinailabs.com",
+                    "X-Title": "Aegis-12 Chaos Council"
+                },
+                body: JSON.stringify({
+                    model: model,
+                    max_tokens: 8000,
+                    messages: [
+                        { role: "system", content: systemPrompt },
+                        { role: "user", content: userPrompt }
+                    ]
+                })
+            });
 
-    if (!response.ok) {
-        throw new Error(`OpenRouter API Error: ${response.status} - ${await response.text()}`);
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`HTTP ${response.status} - ${errText}`);
+            }
+
+            const data = await response.json();
+            if (!data.choices || !data.choices[0]) {
+                throw new Error(`Invalid data: ${JSON.stringify(data)}`);
+            }
+            return data.choices[0].message.content;
+        } catch (err: any) {
+            console.warn(`[Attempt ${i+1}/${retries}] Failed to query ${model}: ${err.message}`);
+            if (i === retries - 1) throw err;
+            await new Promise(r => setTimeout(r, 5000)); // wait 5s before retry
+        }
     }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
+    return "";
 }
 
 async function runCouncil() {
-    console.log("==========================================");
-    console.log("🔥 AEGIS-12 CHAOS COUNCIL INITIATED 🔥");
-    console.log("==========================================\n");
+    console.log("==================================================");
+    console.log("🔥 ADVANCED REASONING CHAOS COUNCIL INITIATED 🔥");
+    console.log("==================================================\n");
 
-    // Phase 1: Proposer (GPT-4o)
-    console.log("Phase 1: Generating Initial Proposal (Proposer: openai/gpt-4o)...");
+    // Phase 1: Proposer
+    console.log("Phase 1: Generating Initial Proposal (Proposer: openai/gpt-5.5)...");
     const proposerSystem = `You are the Proposer (The Architectural Mastermind). ${CONTEXT}
-Your task is to design a comprehensive Chaos & Adversarial Test Suite for Aegis-12. Be bold, target deep infrastructure flaws, and write it professionally.`;
+Your task is to design a comprehensive Chaos & Adversarial Test Suite for Aegis-12. Target deep infrastructure flaws.`;
     const proposerPrompt = "Draft the initial Aegis-12 Chaos Test Suite focusing on Memory (OOM), Network (HTTP 429), and CI/CD race conditions.";
     
-    const proposal = await askOpenRouter("openai/gpt-4o", proposerSystem, proposerPrompt);
+    const proposal = await askOpenRouter("openai/gpt-5.5", proposerSystem, proposerPrompt);
     console.log("✅ Proposal received.\n");
 
-    // Phase 2: Critic (Claude 3.5 Sonnet)
-    console.log("Phase 2: Vicious Debate (Critic: anthropic/claude-3.5-sonnet)...");
-    const criticSystem = `You are the Critic (The Brutal Assessor). ${CONTEXT}
-Your mandate is to ruthlessly tear apart the Proposer's idea. Hunt for hallucinations, point out tests that are physically impossible or naive, identify over-hyped assumptions, and brutally counter any sycophantic praise. You must attack the weak points of the Proposer's arguments. Do not be polite.`;
-    const criticPrompt = `Here is the Proposer's Chaos Test Suite:\n\n${proposal}\n\nDestroy this proposal. Find its logical flaws, point out what tests are naive, and identify what critical edge cases they completely missed regarding the TEE limitations or Solana devnet behaviors.`;
+    // Phase 2: Dual Critique
+    console.log("Phase 2a: Structural Critique (Critic 1: anthropic/claude-opus-4.7)...");
+    const critic1System = `You are Critic 1 (The Structural Assassin). ${CONTEXT}
+Your mandate is to ruthlessly tear apart the Proposer's idea focusing on structural edge-cases like proxy caching, race conditions, and Node.js event loop blocking. Hunt for hallucinations and physically impossible tests.`;
+    const critic1Prompt = `Proposer's Draft:\n${proposal}\n\nDestroy this proposal structurally. Find the logical flaws regarding the TEE limitations.`;
+    const critique1Promise = askOpenRouter("anthropic/claude-opus-4.7", critic1System, critic1Prompt);
 
-    const critique = await askOpenRouter("anthropic/claude-3.5-sonnet", criticSystem, criticPrompt);
-    console.log("✅ Critique received.\n");
+    console.log("Phase 2b: Cryptographic Critique (Critic 2: deepseek/deepseek-v4-pro)...");
+    const critic2System = `You are Critic 2 (The Cryptographic Assessor). ${CONTEXT}
+Your mandate is to ruthlessly tear apart the Proposer's idea focusing on mathematical constraints, ZK-Prover memory spikes, WAL (Write-Ahead Log) corruption during OS-level OOM kills, and JSON parser recursive depth limits.`;
+    const critic2Prompt = `Proposer's Draft:\n${proposal}\n\nDestroy this proposal cryptographically. Find the naive assumptions regarding ZK generation and WAL integrity during memory failure.`;
+    const critique2Promise = askOpenRouter("deepseek/deepseek-v4-pro", critic2System, critic2Prompt);
 
-    // Phase 3: Resolver (o3-mini)
-    console.log("Phase 3: Synthesis (Resolver: openai/o3-mini)...");
+    const [critique1, critique2] = await Promise.all([critique1Promise, critique2Promise]);
+    console.log("✅ Dual Critiques received.\n");
+
+    // Phase 3: Synthesis
+    console.log("Phase 3: Synthesis (Resolver: openai/o3-pro)...");
     const resolverSystem = `You are the Resolver (The Final Judge). ${CONTEXT}
-Your mandate is to synthesize the Proposer's initial idea and the Critic's brutal feedback. Filter out any hallucinated or impossible tests. Deliver the final, hyper-realistic, code-ready "Aegis-12 Chaos & Adversarial Test Suite" blueprint. Format it as a professional Markdown document.`;
-    const resolverPrompt = `Proposer's Draft:\n${proposal}\n\nCritic's Attack:\n${critique}\n\nSynthesize this into the final, unassailable Aegis-12 Chaos Test Suite. Provide ONLY the final Markdown document.`;
+Your mandate is to synthesize the Proposer's idea and both Critics' feedback into a hyper-realistic, code-ready "Aegis-12 Chaos Test Suite" blueprint. Filter out impossible tests. Deliver the final Markdown document.`;
+    const resolverPrompt = `Proposer's Draft:\n${proposal}\n\nCritic 1 (Structural):\n${critique1}\n\nCritic 2 (Cryptographic):\n${critique2}\n\nSynthesize this into the final, unassailable Aegis-12 Chaos Test Suite. Provide ONLY the final Markdown document.`;
 
-    const finalSuite = await askOpenRouter("openai/o3-mini", resolverSystem, resolverPrompt);
+    const finalSuite = await askOpenRouter("openai/o3-pro", resolverSystem, resolverPrompt);
     console.log("✅ Synthesis complete.\n");
 
     const outDir = path.join(__dirname, '../docs');
@@ -87,7 +108,7 @@ Your mandate is to synthesize the Proposer's initial idea and the Critic's bruta
     const outFile = path.join(outDir, 'AEGIS_CHAOS_TEST_SUITE.md');
     fs.writeFileSync(outFile, finalSuite);
 
-    console.log(`🚀 Final Suite saved to ${outFile}`);
+    console.log(`🚀 Final Authentic Suite saved to ${outFile}`);
 }
 
 runCouncil().catch(err => {
