@@ -14,6 +14,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -34,6 +45,13 @@ jobs:
           key: ${{ runner.os }}-zk-artifacts-${{ hashFiles('aegis-zk-prover/**') }}
           restore-keys: |
             ${{ runner.os }}-zk-artifacts-
+
+      - name: Cache Cargo and Target (for ZK Prover)
+        if: steps.zk-cache.outputs.cache-hit != 'true'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "aegis-zk-prover -> target"
+          cache-on-failure: "true"
 
       - name: Build ZK Prover (If Not Cached)
         if: steps.zk-cache.outputs.cache-hit != 'true'
