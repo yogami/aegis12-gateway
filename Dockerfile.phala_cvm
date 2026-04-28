@@ -1,33 +1,7 @@
-# STAGE 1: Build the RISC Zero ZK Prover (Rust)
-FROM rust:bookworm AS prover-builder
-WORKDIR /build
+# Note: Rust compilation (formerly Stage 1) has been extracted to GitHub Actions
+# via Artifact Injection caching to prevent 15-minute Docker builds.
 
-# Install dependencies for RISC Zero
-RUN apt-get update && apt-get install -y \
-    libssl-dev \
-    pkg-config \
-    build-essential \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Use rzup to install the RISC Zero toolchain (official method)
-RUN curl -L https://risczero.com/install | bash
-ENV PATH="/root/.risc0/bin:/root/.cargo/bin:${PATH}"
-RUN rzup install rust
-RUN rzup install cargo-risczero
-
-# Note: We don't run `cargo risczero install` here as it might be too heavy for some CI environments
-# but the host build will trigger guest compilation if needed.
-
-COPY aegis-zk-prover/ /build/aegis-zk-prover/
-WORKDIR /build/aegis-zk-prover
-
-# Build the host binary in release mode
-# This will also compile the guest methods.
-RUN cargo build --release
-
-# STAGE 2: Build the Node.js Application
+# STAGE 1: Build the Node.js Application
 FROM node:20-bookworm AS app-builder
 WORKDIR /app
 
@@ -57,15 +31,14 @@ COPY --from=app-builder /app/dist ./dist
 COPY --from=app-builder /app/node_modules ./node_modules
 COPY --from=app-builder /app/package.json ./
 
-# Copy the ZK Prover binary to the standardized production path
+# Copy the pre-compiled ZK Prover binary (injected by GitHub Actions)
 RUN mkdir -p /app/bin
-COPY --from=prover-builder /build/aegis-zk-prover/target/release/host /app/bin/aegis-zk-prover
+COPY zk-artifacts/aegis-zk-prover /app/bin/aegis-zk-prover
 RUN chmod +x /app/bin/aegis-zk-prover
 
-# Copy RISC Zero IPC prover dependencies (r0vm)
-COPY --from=prover-builder /root/.risc0 /root/.risc0
-COPY --from=prover-builder /root/.cargo /root/.cargo
-ENV PATH="/root/.cargo/bin:/root/.risc0/bin:${PATH}"
+# Copy RISC Zero IPC prover dependencies (injected by GitHub Actions)
+COPY zk-artifacts/.risc0 /root/.risc0
+ENV PATH="/root/.risc0/bin:${PATH}"
 
 # Create data directory for WAL Engine state persistence and lock files
 RUN mkdir -p /var/data
