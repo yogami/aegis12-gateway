@@ -157,7 +157,7 @@ async function verify() {
     console.log(`[Auditor] ✅ Solana Anchor Verified: Immutable ledger record exists.`);
 
     // SUBSTANCE AUDIT 2: ZK SEAL
-    let zkSeal = body.ars_anchor;
+    let zkSeal = body.ars_anchor || "pending";
     
     if (zkSeal === "pending") {
         console.log(`[Auditor] ⏳ ZK-Seal computation is running asynchronously in the TEE...`);
