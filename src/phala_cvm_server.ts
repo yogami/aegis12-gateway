@@ -3,6 +3,21 @@ import phalaEntrypoint, { AegisEnclave } from "./application/PhalaEntrypoint";
 
 const PORT = process.env.PORT || 8000;
 
+const logBuffer: string[] = [];
+const originalLog = console.log;
+const originalError = console.error;
+const originalWarn = console.warn;
+
+function interceptLog(level: string, args: any[]) {
+    const msg = `[${new Date().toISOString()}] [${level}] ` + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+    logBuffer.push(msg);
+    if (logBuffer.length > 200) logBuffer.shift();
+}
+
+console.log = function(...args) { interceptLog('INFO', args); originalLog.apply(console, args); };
+console.error = function(...args) { interceptLog('ERROR', args); originalError.apply(console, args); };
+console.warn = function(...args) { interceptLog('WARN', args); originalWarn.apply(console, args); };
+
 // Production Micro-Server mapped explicitly for the Phala Network dStack CVM
 const server = http.createServer(async (req, res) => {
     // Cross-Origin configuration required for some TEE RPC interfaces
@@ -17,7 +32,14 @@ const server = http.createServer(async (req, res) => {
 
     console.log(`[dStack CVM] Incoming Request: ${req.method} ${req.url}`);
     
+    if (req.method === "GET" && req.url === "/logs") {
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ logs: logBuffer }));
+        return;
+    }
+    
     if (req.method === "GET" && req.url === "/health") {
+
         try {
             const enclave = AegisEnclave.getInstance();
             await enclave.initialize();
