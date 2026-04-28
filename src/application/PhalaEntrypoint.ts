@@ -225,8 +225,15 @@ export class AegisEnclave {
     public async getEvidenceStatus(receiptId: string): Promise<string> {
         await this.initialize();
         const evidence = await this._pep?.getEvidenceByReceiptId(receiptId);
-        if (!evidence) return JsonUtils.stableStringify({ status: "NOT_FOUND" });
-        return JsonUtils.stableStringify({ status: evidence.ars_anchor ? "COMPLETED" : "pending", receiptId, ars_anchor: evidence.ars_anchor, solana_tx: evidence.solana_tx });
+        if (!evidence) return JSON.stringify({ status: "NOT_FOUND" });
+        
+        // Use standard JSON.stringify to properly omit undefined values and produce valid JSON
+        return JSON.stringify({ 
+            status: evidence.ars_anchor ? "COMPLETED" : "pending", 
+            receiptId, 
+            ars_anchor: evidence.ars_anchor, 
+            solana_tx: evidence.solana_tx 
+        });
     }
 }
 

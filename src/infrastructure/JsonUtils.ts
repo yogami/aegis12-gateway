@@ -16,7 +16,7 @@ export class JsonUtils {
         if (Array.isArray(obj)) {
             return `[${obj.map(o => JsonUtils.stableStringify(o, depth + 1)).join(',')}]`;
         }
-        const keys = Object.keys(obj).sort();
+        const keys = Object.keys(obj).sort().filter(k => obj[k] !== undefined);
         return `{${keys.map(k => `${JSON.stringify(k)}:${JsonUtils.stableStringify(obj[k], depth + 1)}`).join(',')}}`;
     }
 
