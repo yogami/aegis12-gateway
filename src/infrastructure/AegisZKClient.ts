@@ -14,6 +14,30 @@ export class AegisZKClient {
 
     private static isVerified = false;
 
+    // Concurrency control to prevent OOM Kills on 2GB Phala CVMs
+    private static activeProvers = 0;
+    private static readonly MAX_CONCURRENT_PROVERS = 2;
+    private static queue: (() => void)[] = [];
+
+    private static async acquireSlot(): Promise<void> {
+        if (AegisZKClient.activeProvers < AegisZKClient.MAX_CONCURRENT_PROVERS) {
+            AegisZKClient.activeProvers++;
+            return;
+        }
+        return new Promise<void>(resolve => {
+            AegisZKClient.queue.push(resolve);
+        });
+    }
+
+    private static releaseSlot(): void {
+        const next = AegisZKClient.queue.shift();
+        if (next) {
+            next();
+        } else {
+            AegisZKClient.activeProvers--;
+        }
+    }
+
     constructor() {
 
         // Default to the built host binary in the target directory (check release then debug for development)
@@ -54,6 +78,15 @@ export class AegisZKClient {
      * In a production CVM, this may be delegated to a ZK-Coprocessor or Local RISC Zero instance.
      */
     public async generateProof(input: any): Promise<any> {
+        await AegisZKClient.acquireSlot();
+        try {
+            return await this.executeProverProcess(input);
+        } finally {
+            AegisZKClient.releaseSlot();
+        }
+    }
+
+    private async executeProverProcess(input: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
             // Increased timeout to 15 minutes (900,000ms) because ZK proofs take a long time on CPU
