@@ -61,15 +61,27 @@ jobs:
             -v "${{ github.workspace }}/aegis-zk-prover:/build" \
             -v "${{ github.workspace }}/zk-artifacts:/output" \
             debian:bookworm bash -c '
+              set -e
               apt-get update && apt-get install -y curl build-essential pkg-config libssl-dev git
+              
+              # Install Rust first (required by rzup)
+              curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+              export PATH="/root/.cargo/bin:$PATH"
+              
+              # Install RISC Zero toolchain
               curl -L https://risczero.com/install | bash
-              export PATH="/root/.risc0/bin:/root/.cargo/bin:$PATH"
-              /root/.risc0/bin/rzup install rust
-              /root/.risc0/bin/rzup install cargo-risczero
+              export PATH="/root/.risc0/bin:$PATH"
+              rzup install rust
+              rzup install cargo-risczero
+              
+              # Build the prover
               cd /build
               cargo build --release
+              
+              # Copy artifacts
               cp /build/target/release/host /output/aegis-zk-prover
               cp -r /root/.risc0 /output/.risc0
+              echo "✅ ZK Prover built successfully inside debian:bookworm (glibc matched)"
             '
 
       - name: Build and Push Phala CVM Image
