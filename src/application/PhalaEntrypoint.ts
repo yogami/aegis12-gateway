@@ -3,7 +3,7 @@ import { AegisPEP } from '../infrastructure/AegisPEP';
 import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest, AegisComplianceReceipt } from '../types';
 import { ILedgerAnchor } from '../ports/ILedgerAnchor';
-import { SolanaAnchor } from '../infrastructure/SolanaAnchor';
+import { LedgerAnchorFactory } from '../infrastructure/LedgerAnchorFactory';
 import { TelemetryTracker } from '../infrastructure/TelemetryTracker';
 import { AegisJournal } from '../infrastructure/AegisJournal';
 import { BatchAnchorWorker } from '../BatchAnchorWorker';
@@ -83,14 +83,7 @@ export class AegisEnclave {
         await this.ensurePep();
         
         if (!this._anchor) {
-            const ledgerType = process.env.LEDGER_TYPE || 'solana';
-            if (ledgerType === 'mantle') {
-                const { MantleAnchor } = await import('../infrastructure/MantleAnchor');
-                const rpc = process.env.MANTLE_RPC_URL || 'https://rpc.sepolia.mantle.xyz';
-                this._anchor = new MantleAnchor(rpc, this._signer.getEvmWallet());
-            } else {
-                this._anchor = new SolanaAnchor(process.env.SOLANA_CLUSTER || 'devnet');
-            }
+            this._anchor = await LedgerAnchorFactory.create(this._signer!);
         }
     }
 
