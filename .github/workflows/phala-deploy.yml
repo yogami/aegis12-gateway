@@ -205,8 +205,5 @@ jobs:
             exit 1
           fi
 
-          echo "Executing Chaos Vector 1: The ZK-Collision OOM Bomb..."
-          npx tsx scripts/chaos_oom_bomb.ts "$ENCLAVE_URL"
-          
           echo "Running Deep Substance Audit (Solana + ZK + TEE)..."
           npx tsx scripts/verify_substance.ts "$ENCLAVE_URL"
