@@ -179,7 +179,9 @@ export class AegisEnclave {
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
         // Individual Solana anchoring is replaced by the high-throughput BatchAnchorWorker.
         // We only dispatch the ZK-Proof generation here.
-        this.generateZkProof(receipt, receipt.authorizationNonce).catch(() => {});
+        this.generateZkProof(receipt, receipt.authorizationNonce).catch((err) => {
+            console.error(`[Aegis-12] ⚠️ Background ZK proof generation FAILED for ${receipt.receiptId}: ${err.message}`);
+        });
     }
 
     public async getHardwareMetadata() {
