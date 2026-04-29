@@ -42,9 +42,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: zk-artifacts/
-          key: ${{ runner.os }}-zk-artifacts-${{ hashFiles('aegis-zk-prover/**') }}
+          key: ${{ runner.os }}-zk-artifacts-v2-bookworm-${{ hashFiles('aegis-zk-prover/**') }}
           restore-keys: |
-            ${{ runner.os }}-zk-artifacts-
+            ${{ runner.os }}-zk-artifacts-v2-bookworm-
 
       - name: Cache Cargo and Target (for ZK Prover)
         if: steps.zk-cache.outputs.cache-hit != 'true'
@@ -56,16 +56,21 @@ jobs:
       - name: Build ZK Prover (If Not Cached)
         if: steps.zk-cache.outputs.cache-hit != 'true'
         run: |
-          curl -L https://risczero.com/install | bash
-          ~/.risc0/bin/rzup install rust
-          ~/.risc0/bin/rzup install cargo-risczero
-          export PATH="/home/runner/.risc0/bin:/home/runner/.cargo/bin:${PATH}"
-          cd aegis-zk-prover
-          cargo build --release
-          cd ..
           mkdir -p zk-artifacts
-          cp aegis-zk-prover/target/release/host zk-artifacts/aegis-zk-prover
-          cp -r ~/.risc0 zk-artifacts/.risc0
+          docker run --rm \
+            -v "${{ github.workspace }}/aegis-zk-prover:/build" \
+            -v "${{ github.workspace }}/zk-artifacts:/output" \
+            debian:bookworm bash -c '
+              apt-get update && apt-get install -y curl build-essential pkg-config libssl-dev git
+              curl -L https://risczero.com/install | bash
+              export PATH="/root/.risc0/bin:/root/.cargo/bin:$PATH"
+              /root/.risc0/bin/rzup install rust
+              /root/.risc0/bin/rzup install cargo-risczero
+              cd /build
+              cargo build --release
+              cp /build/target/release/host /output/aegis-zk-prover
+              cp -r /root/.risc0 /output/.risc0
+            '
 
       - name: Build and Push Phala CVM Image
         id: docker_build
