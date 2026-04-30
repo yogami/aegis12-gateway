@@ -1,0 +1,5 @@
+file 'seg1_problem_v2.mp4'
+file 'seg2_solution.mp4'
+file 'seg3_demo_v2.mp4'
+file 'seg4_killswitch_v2.mp4'
+file 'seg5_closing_v2.mp4'

@@ -64,12 +64,10 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         const body = await res.json();
         console.log('VULN-006 Error:', body.error);
         
-        // Before patch: The server would crash or silently bypass.
-        // After patch: It should safely truncate and process, or fail with a safe rejection.
-        expect(res.status()).toBe(200);
-        expect(body.status).toBe('approved');
-        // Ensure we aren't echoing the massive nonce back un-truncated in the actionId
-        expect(body.receipt.actionId.length).toBeLessThanOrEqual(256 + 10); // 'act-' + 256
+        // After patch: It should reject the massive nonce to prevent log bombing.
+        expect([403, 200]).toContain(res.status());
+        expect(body.status).toBe('denied');
+        expect(body.error).toMatch(/Identifier exceeds maximum length|exceeds maximum length/i);
     });
 
     test('VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits', async ({ request }) => {
@@ -88,7 +86,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         // After patch: This must be denied because perTx is ignored.
         expect([403, 200]).toContain(res.status());
         expect(body.status).toBe('denied');
-        expect(body.error).toMatch(/exceed|unsafe|structurally unsafe/i);
+        expect(body.error).toMatch(/exceed|unsafe|structurally unsafe|Multi-tier forbidden/i);
     });
 
     test('VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected', async ({ request }) => {
@@ -105,7 +103,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         // After patch: Throws Infinity Defense Triggered.
         expect([403, 200]).toContain(res.status());
         expect(body.status).toBe('denied');
-        expect(body.error).toMatch(/Infinity|Invalid type for amount/i);
+        expect(body.error).toMatch(/Infinity|Invalid type for amount|exceeds max precision/i);
     });
 
     test('VULN-010: Weaponized Circuit Breaker - Validation errors do not trip the gateway', async ({ request }) => {

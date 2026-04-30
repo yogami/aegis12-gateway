@@ -34,6 +34,9 @@ export function assertSafeIdentifier(id: any, fieldName: string): string {
     if (typeof id !== 'string' || !/^[a-zA-Z0-9_\-.:]+$/.test(id)) {
         throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid ${fieldName} format. Identifier must be alphanumeric + [_-.:]`);
     }
+    if (id.length > 256) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Identifier exceeds maximum length of 256 characters.`);
+    }
     const reserved = ['__proto__', 'prototype', 'constructor'];
     if (reserved.includes(id.toLowerCase())) {
         throw new TerminalRefusalError(`[TERMINAL REFUSAL] Reserved identifier used for ${fieldName}.`);
