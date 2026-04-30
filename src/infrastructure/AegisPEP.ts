@@ -74,10 +74,31 @@ export class AegisPEP {
 
             await this.verifyPolicy({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } }, limits);
 
-            await this.stateStore.tryIncrementSpend(ctx.tenantId, amountBig, limits.limit);
-            ctx.spendIncremented = true;
+            let decision: 'approved' | 'escalated' = 'approved';
+            let envelope;
 
-            const receipt = await this.generateReceipt(request, sanit, ctx.tenantId, ctx.nonce, 'approved');
+            // [ARTICLE 14] HOTL Escalate Condition
+            const ESCALATE_THRESHOLD = 10_000_000_000n; // e.g., 10k USDC with 6 decimals
+            if (amountBig >= ESCALATE_THRESHOLD) {
+                decision = 'escalated';
+                envelope = {
+                    domain_separator: "AEGIS12_ESCALATE_V1",
+                    vault_pda: request.dynamicPolicy?.policyConfig?.vaultPda || "VaultPDA_Fallback",
+                    squads_multisig: request.dynamicPolicy?.policyConfig?.squadsMultisig || "SquadsMultisig_Fallback",
+                    instruction_digest: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'),
+                    state_predicates: {
+                        max_input_amount: Number(amountBig),
+                        allowed_program_ids: request.dynamicPolicy?.policyConfig?.allowedProgramIds || ["TargetProgramID_Fallback"],
+                        valid_until_slot: request.context?.currentSlot ? request.context.currentSlot + 1000 : 1000000
+                    },
+                    policy_hash: request.dynamicPolicy!.policyConfig.policyId
+                };
+            } else {
+                await this.stateStore.tryIncrementSpend(ctx.tenantId, amountBig, limits.limit);
+                ctx.spendIncremented = true;
+            }
+
+            const receipt = await this.generateReceipt(request, sanit, ctx.tenantId, ctx.nonce, decision, envelope);
             await this.commitTransaction(receipt, ctx.scopedNonce);
             return receipt;
         } catch (e: any) {
@@ -136,16 +157,19 @@ export class AegisPEP {
         return { tier, limit: assertSafeFinancialAmount(parsed[tier], 'tier limit') };
     }
 
-    private async generateReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: string): Promise<AegisComplianceReceipt> {
+    private async generateReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: 'approved' | 'denied' | 'escalated', envelope?: any): Promise<AegisComplianceReceipt> {
         const receiptId = `aegis-v1-${tenantId}-${keccak256(tenantId + "::" + nonce + "::" + ('0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'))).toString('hex').substring(0, 16)}`;
         const msg = this.createCanonicalMessage(tenantId, nonce, receiptId, sanit);
         this.journalIntent(msg);
         const receipt = this.assembleReceiptWithId(receiptId, req, sanit, tenantId, nonce, decision, msg.article12LogHash, msg.timestamp);
+        if (envelope) {
+            receipt.envelope = envelope;
+        }
         receipt.signature = await this.signer.sign(JsonUtils.computeReceiptHash(receipt));
         return receipt;
     }
 
-    private assembleReceiptWithId(receiptId: string, req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: string, logHash: string, ts: string): AegisComplianceReceipt {
+    private assembleReceiptWithId(receiptId: string, req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: 'approved' | 'denied' | 'escalated', logHash: string, ts: string): AegisComplianceReceipt {
         const receipt = this.assembleReceipt(req, sanit, tenantId, nonce, decision, logHash, ts);
         receipt.receiptId = receiptId;
         return receipt;
@@ -165,7 +189,7 @@ export class AegisPEP {
         if (!this.journal.appendSync(msg)) throw new TerminalRefusalError('Journaling failed.');
     }
 
-    private assembleReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: string, logHash: string, ts: string): AegisComplianceReceipt {
+    private assembleReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: 'approved' | 'denied' | 'escalated', logHash: string, ts: string): AegisComplianceReceipt {
         return {
             receiptId: `aegis-v1-${tenantId}-${keccak256(tenantId + "::" + nonce + "::" + logHash).toString('hex').substring(0, 16)}`,
             actionId: req.action.actionId || `act-${nonce}`,

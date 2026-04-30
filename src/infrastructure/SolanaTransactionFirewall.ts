@@ -53,7 +53,7 @@ const TOKEN_IX = {
     APPROVE_CHECKED: 13,
 };
 
-type FirewallDecision = 'ALLOW' | 'BLOCK' | 'REQUIRE_HUMAN';
+type FirewallDecision = 'approved' | 'denied' | 'escalated';
 
 interface FirewallResult {
     decision: FirewallDecision;
@@ -372,15 +372,15 @@ export class SolanaTransactionFirewall {
             riskScore = Math.min(riskScore, 1.0);
 
             let decision: FirewallDecision;
-            if (flags.some(f => f.severity === 'CRITICAL')) decision = 'BLOCK';
-            else if (riskScore >= this.config.requireHumanAboveRisk) decision = 'REQUIRE_HUMAN';
-            else decision = 'ALLOW';
+            if (flags.some(f => f.severity === 'CRITICAL')) decision = 'denied';
+            else if (riskScore >= this.config.requireHumanAboveRisk) decision = 'escalated';
+            else decision = 'approved';
 
             const receiptData = this.generateReceiptData(instructions, walletPubkey, decision, riskScore, flags);
 
             return {
                 decision,
-                reason: decision === 'ALLOW' ? 'Transaction passed all firewall rules.' : (decision === 'REQUIRE_HUMAN' ? `Risk score ${riskScore.toFixed(2)} exceeds threshold. Human approval required.` : `Transaction blocked: ${flags.filter(f => f.severity === 'CRITICAL').map(f => f.rule).join(', ')}`),
+                reason: decision === 'approved' ? 'Transaction passed all firewall rules.' : (decision === 'escalated' ? `Risk score ${riskScore.toFixed(2)} exceeds threshold. Human approval required.` : `Transaction blocked: ${flags.filter(f => f.severity === 'CRITICAL').map(f => f.rule).join(', ')}`),
                 riskScore,
                 flags,
                 receipt: receiptData,
@@ -390,7 +390,7 @@ export class SolanaTransactionFirewall {
             };
         } catch (e: any) {
             return {
-                decision: 'BLOCK',
+                decision: 'denied',
                 reason: `Transaction parsing failed: ${e.message}`,
                 riskScore: 1.0,
                 flags: [{

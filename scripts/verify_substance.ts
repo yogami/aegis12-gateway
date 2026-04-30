@@ -36,7 +36,10 @@ async function verify() {
             { name: 'maxAnomalyScore', type: 'uint256' },
             { name: 'financialLimitsString', type: 'string' },
             { name: 'expiresAt', type: 'uint256' },
-            { name: 'nonce', type: 'string' }
+            { name: 'nonce', type: 'string' },
+            { name: 'vaultPda', type: 'string' },
+            { name: 'squadsMultisig', type: 'string' },
+            { name: 'allowedProgramIds', type: 'string[]' }
         ]
     };
 
@@ -49,7 +52,10 @@ async function verify() {
         maxAnomalyScore: 100,
         financialLimitsString: "{\"T4\":1000000}",
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
-        nonce: nonce
+        nonce: nonce,
+        vaultPda: "AuditorVault_Default",
+        squadsMultisig: "AuditorSquads_Default",
+        allowedProgramIds: ["11111111111111111111111111111111"]
     };
 
     const signature = await wallet._signTypedData(domain, types, policyConfig);
@@ -214,6 +220,57 @@ async function verify() {
         process.exit(1);
     }
     console.log(`[Auditor] ✅ TEE Hardware Quote Verified: Genuine enclave execution confirmed.`);
+
+    // SUBSTANCE AUDIT 4: HOTL ESCALATION
+    console.log(`[Auditor] 🔍 Auditing Article 14 (HOTL) Cryptographic Envelope...`);
+    
+    const hotlPolicyConfig = {
+        ...policyConfig,
+        policyId: "p-audit-hotl",
+        nonce: "audit-hotl-" + Date.now(),
+        vaultPda: "AuditorVault_Prod",
+        squadsMultisig: "AuditorSquads_Prod",
+        allowedProgramIds: ["11111111111111111111111111111111"]
+    };
+    
+    const hotlSignature = await wallet._signTypedData(domain, types, hotlPolicyConfig);
+    
+    const hotlPayload = {
+        agent: { did: "did:solana:auditor", purpose: "financial_operations", currentTier: "T4" },
+        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 50000000000, token: "USDC" } },
+        context: { sessionId: "audit-" + Date.now(), actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0, currentSlot: 2000000 },
+        dynamicPolicy: { policyConfig: hotlPolicyConfig, ownerPublicKey: wallet.address, signature: hotlSignature }
+    };
+
+    const hotlResponse = await fetch(`${baseUrl}/enforce`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hotlPayload)
+    });
+
+    if (!hotlResponse.ok) {
+        console.error(`[Auditor] ❌ HOTL Enforcement failed HTTP: ${await hotlResponse.text()}`);
+        process.exit(1);
+    }
+
+    const hotlBody = await hotlResponse.json();
+    if (hotlBody.status !== 'escalated') {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: HOTL scenario returned status ${hotlBody.status} instead of escalated.`);
+        process.exit(1);
+    }
+    
+    if (!hotlBody.receipt?.envelope) {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: HOTL escalated receipt missing Intent Envelope.`);
+        process.exit(1);
+    }
+    
+    const env = hotlBody.receipt.envelope;
+    if (env.domain_separator !== 'AEGIS12_ESCALATE_V1' || env.vault_pda !== 'AuditorVault_Prod' || !env.tee_signature) {
+         console.error(`[Auditor] ❌ SUBSTANCE FAILURE: HOTL Intent Envelope is malformed or missing TEE signature. Envelope: ${JSON.stringify(env)}`);
+         process.exit(1);
+    }
+    
+    console.log(`[Auditor] ✅ Article 14 HOTL Enforcement Verified. Envelope correctly generated and signed by TEE.`);
 
     console.log(`[Auditor] 🏆 100% SUBSTANCE VERIFIED. EVIDENCE PACK IS AUTHENTIC.`);
 }

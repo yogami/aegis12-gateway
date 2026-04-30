@@ -58,4 +58,22 @@ describe('AegisPEP (Unit)', () => {
         const req = createValidReq('600', 'nonce-pep-2');
         await expect(pep.enforce(req)).rejects.toThrow('exceeds signed Tier limit 500');
     });
+
+    it('escalates and generates Intent Envelope for amounts >= 10,000 USDC (HOTL)', async () => {
+        const req = createValidReq('15000000000', 'nonce-pep-3'); // 15k USDC
+        req.dynamicPolicy.policyConfig.financialLimitsString = '{"T1":"20000000000"}'; // Raise limit to 20k to avoid early denial
+        req.dynamicPolicy.policyConfig.vaultPda = "MockVault";
+        req.dynamicPolicy.policyConfig.squadsMultisig = "MockMultisig";
+        req.dynamicPolicy.policyConfig.allowedProgramIds = ["MockProgram"];
+
+        const receipt = await pep.enforce(req);
+        
+        expect(receipt.decision).toBe('escalated');
+        expect(receipt.envelope).toBeDefined();
+        expect(receipt.envelope!.domain_separator).toBe("AEGIS12_ESCALATE_V1");
+        expect(receipt.envelope!.vault_pda).toBe("MockVault");
+        expect(receipt.envelope!.squads_multisig).toBe("MockMultisig");
+        expect(receipt.envelope!.state_predicates.max_input_amount).toBe(15000000000);
+        expect(receipt.envelope!.state_predicates.allowed_program_ids).toContain("MockProgram");
+    });
 });

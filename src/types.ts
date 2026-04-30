@@ -41,6 +41,25 @@ export interface PolicyObligation {
 }
 
 /**
+ * The canonical payload generated when the TEE decides to ESCALATE.
+ * This binds the exact execution environment (state predicates) to the
+ * TEE's attestation, preventing State Drift and UI Spoofing.
+ */
+export interface AegisIntentEnvelope {
+    domain_separator: string; // e.g. "AEGIS12_ESCALATE_V1"
+    vault_pda: string;
+    squads_multisig: string;
+    instruction_digest: string; // The canonical hash of the intended Solana instruction
+    state_predicates: {
+        max_input_amount: number;
+        allowed_program_ids: string[];
+        valid_until_slot: number; // The Expiration Epoch
+    };
+    policy_hash: string;
+    tee_signature?: string; // The Ed25519 signature from the Phala TEE
+}
+
+/**
  * AegisComplianceReceipt (v1.0.0)
  * 
  * [EU AI ACT COMPLIANCE]
@@ -70,7 +89,8 @@ export interface AegisComplianceReceipt {
     
     authorizationNonce: string;     // Irrevocable nonce (burned at execution)
     validatedParams?: Record<string, unknown>; // [AUDIT-GRADE] Sanitized whitelisted parameters
-    decision: string;               // [AUDIT-GRADE] The final gateway decision (e.g., approved, denied)
+    decision: 'approved' | 'denied' | 'escalated'; // [AUDIT-GRADE] The final gateway decision
+    envelope?: AegisIntentEnvelope; // [ARTICLE 14] The cryptographically bound envelope if escalated
     enclaveDid: string;             // [AUDIT-GRADE] Hardware identity of the signing enclave
     zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
         journal: any;
@@ -148,6 +168,7 @@ export interface PolicyEvaluationRequest {
         actionsThisHour: number;
         currentAnomalyScore: number;
         recentIncidents: number;
+        currentSlot?: number; // Added for Solana HOTL slot bounds
     };
     dynamicPolicy?: {
         policyConfig: {
@@ -160,6 +181,9 @@ export interface PolicyEvaluationRequest {
             financialLimitsString: string; // VULNERABILITY FIXED: Hardened cryptographic string binding for mutable parameters
             expiresAt: number; // Unix timestamp for Replay Attack Prevention
             nonce: string; // Cryptographic nonce
+            vaultPda?: string; // Target PDA for HOTL Vault
+            squadsMultisig?: string; // Target Multisig Address
+            allowedProgramIds?: string[]; // Allowed CPI programs
         };
         ownerPublicKey: string; // The hex address that signed the policy
         signature: string; // EIP-712 Signature

@@ -71,7 +71,8 @@ export class AegisEnclave {
     private async doInitializeWithRetry(attempt: number): Promise<void> {
         try {
             await this.performInitializationSteps();
-        } catch (err) {
+        } catch (err: any) {
+            console.error(`[Aegis-12] Init attempt ${attempt} failed: ${err.message}`);
             if (attempt >= 4) throw err; // Increased retries for slow sidecars
             await this.waitWithJitter(attempt + 1);
             return this.doInitializeWithRetry(attempt + 1);
@@ -137,6 +138,13 @@ export class AegisEnclave {
             telemetry.mark('attest');
             const receipt = await this._pep!.enforce(payload);
             telemetry.mark('pep');
+            
+            if (receipt.decision === 'escalated' && receipt.envelope) {
+                const envelopeHash = keccak256(Buffer.from(JsonUtils.stableStringify(receipt.envelope), 'utf8')).toString('hex');
+                receipt.envelope.tee_signature = await this._signer!.sign(envelopeHash);
+                receipt.signature = await this._signer!.sign(JsonUtils.computeReceiptHash(receipt));
+            }
+
             this.dispatchBackground(receipt);
             return this.formatSuccess(receipt, metadata, telemetry);
         } catch (e: any) {
@@ -160,12 +168,13 @@ export class AegisEnclave {
         }
     }
 
-    private formatSuccess(receipt: any, meta: any, tel: TelemetryTracker): string {
+    private formatSuccess(receipt: AegisComplianceReceipt, meta: any, tel: TelemetryTracker): string {
         return JsonUtils.stableStringify({ 
-            status: "approved", 
+            status: receipt.decision, 
             receipt, 
             ledger_tx: "batching", // Anchoring is dispatched to background worker
             enclaveDid: this._signer!.enclaveDid, 
+            publicKeyHex: this._signer!.getPublicKeyHex(),
             attestation: meta.attestation, 
             pcr0: meta.pcr0, 
             telemetry: tel.getMetrics() 
