@@ -117,7 +117,7 @@ jobs:
                 - NODE_ENV=production
                 - LEDGER_TYPE=${{ vars.LEDGER_TYPE || 'solana' }}
                 - MANTLE_RPC_URL=${{ vars.MANTLE_RPC_URL || '' }}
-                - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
+                - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-council":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-e2e":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
                 - SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
               volumes:
                 - /var/run/dstack.sock:/var/run/dstack.sock
