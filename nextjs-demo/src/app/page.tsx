@@ -177,7 +177,7 @@ export default function Home() {
                                     {log.msg}
                                     {log.link && (
                                         <a href={log.link} target="_blank" rel="noopener noreferrer" className={styles.explorerLink}>
-                                            <br />[View Execution Anchor on Solana Explorer]
+                                            <br />[View Execution Anchor on Blockchain Explorer]
                                         </a>
                                     )}
                                 </div>
@@ -189,7 +189,7 @@ export default function Home() {
                 {receiptData && (
                     <div className={`glass-panel ${styles.explorerPanel}`}>
                         <div className={styles.explorerHeader}>
-                            <h3>🌐 Solana Explorer Mock</h3>
+                            <h3>🌐 On-Chain Evidence Explorer</h3>
                             <span className={styles.badgeSuccess}>Confirmed On-Chain</span>
                         </div>
                         <div className={styles.explorerData}>
