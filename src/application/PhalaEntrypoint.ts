@@ -89,7 +89,10 @@ export class AegisEnclave {
 
     private async ensurePep(): Promise<void> {
         if (this._pep) return;
-        const rawTenants = process.env.AUTHORIZED_TENANTS || '{}';
+        let rawTenants = process.env.AUTHORIZED_TENANTS || '{}';
+        if (rawTenants.startsWith("'") && rawTenants.endsWith("'")) {
+            rawTenants = rawTenants.slice(1, -1);
+        }
         const tenants = JsonUtils.safeParse(rawTenants, 'AUTHORIZED_TENANTS');
         const dataDir = process.env.NODE_ENV === 'test' || !process.env.PHALA_CVM_ENVIRONMENT ? '/tmp' : '/var/data';
         
