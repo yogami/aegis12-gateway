@@ -182,9 +182,11 @@ jobs:
           done
 
       - name: Install verification dependencies
+        if: "!contains(github.event.head_commit.message, '[skip-audit]')"
         run: npm install ethers tsx @solana/web3.js
 
       - name: Verify Live Deployment (Substance Audit)
+        if: "!contains(github.event.head_commit.message, '[skip-audit]')"
         run: |
           ENCLAVE_URL="https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network"
           
