@@ -76,10 +76,25 @@ function normalizeSwap(params: any): Record<string, unknown> {
     // SEC-07: Accept fromMint/toMint as aliases for token_in/token_out
     const tokenIn = params.token_in || params.fromMint;
     const tokenOut = params.token_out || params.toMint;
+    
+    const validIn = assertBase58Address(tokenIn, 'token_in');
+    const validOut = assertBase58Address(tokenOut, 'token_out');
+    
+    if (validIn === validOut) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Circular swap detected.`);
+    }
+
     return {
-        token_in: assertSafeIdentifier(tokenIn, 'token_in'),
-        token_out: assertSafeIdentifier(tokenOut, 'token_out'),
+        token_in: validIn,
+        token_out: validOut,
         amount: assertSafeFinancialAmount(params.amount, 'amount'),
         slippageBps: slippage
     };
+}
+
+export function assertBase58Address(id: any, fieldName: string): string {
+    if (typeof id !== 'string' || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(id)) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid "${fieldName}" address. Must be Base58.`);
+    }
+    return id;
 }
