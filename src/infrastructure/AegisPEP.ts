@@ -72,7 +72,9 @@ export class AegisPEP {
             await this.reserveNonce(ctx.scopedNonce);
             ctx.nonceReserved = true;
 
-            await this.verifyPolicy({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } }, limits);
+            // [PHASE 1] Verify cryptographic signature + anomaly score BEFORE escalation decision.
+            // Tier limit check is deferred — high-value txns must escalate, not be flat-denied.
+            await this.verifySignatureAndAnomaly({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } });
 
             let decision: 'approved' | 'escalated' = 'approved';
             let envelope;
@@ -94,6 +96,8 @@ export class AegisPEP {
                     policy_hash: request.dynamicPolicy!.policyConfig.policyId
                 };
             } else {
+                // [PHASE 2] Only check tier limit for non-escalated (autonomous) transactions.
+                await this.verifyTierLimit({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } }, limits);
                 await this.stateStore.tryIncrementSpend(ctx.tenantId, amountBig, limits.limit);
                 ctx.spendIncremented = true;
             }
@@ -122,10 +126,23 @@ export class AegisPEP {
         if (ctx.nonceReserved) await this.nonceRegistry.release(ctx.scopedNonce).catch(() => {});
     }
 
-    private async verifyPolicy(req: PolicyEvaluationRequest, limits: { tier: string, limit: bigint }): Promise<void> {
+    /**
+     * [PHASE 1] Verify EIP-712 signature integrity + anomaly score.
+     * MUST run before the Article 14 escalation decision.
+     */
+    private async verifySignatureAndAnomaly(req: PolicyEvaluationRequest): Promise<void> {
         Eip712Verifier.verifySignature(req.dynamicPolicy!, this.tenantTrustStore, AEGIS_DOMAIN_NAME, AEGIS_DOMAIN_VERSION, AEGIS_CHAIN_ID);
         const { TierEvaluator } = await import('../domain/TierEvaluator');
-        TierEvaluator.verifyBoundsWithLimits(req, limits);
+        TierEvaluator.verifyAnomalyOnly(req);
+    }
+
+    /**
+     * [PHASE 2] Verify tier spending limit.
+     * Only called for non-escalated (autonomous) transactions.
+     */
+    private async verifyTierLimit(req: PolicyEvaluationRequest, limits: { tier: string, limit: bigint }): Promise<void> {
+        const { TierEvaluator } = await import('../domain/TierEvaluator');
+        TierEvaluator.verifyValueLimit(req, limits);
     }
 
     private getValidatedLimits(request: PolicyEvaluationRequest): { tier: string, limit: bigint } {

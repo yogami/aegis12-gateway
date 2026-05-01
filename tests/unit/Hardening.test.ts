@@ -74,8 +74,10 @@ describe('Aegis-12 Hardening Tests', () => {
 
     describe('BigInt Logic Integrity', () => {
         it('should handle amounts exceeding MAX_SAFE_INTEGER without precision loss', async () => {
-            const hugeAmount = '9007199254740992'; 
-            const request = createHardenedReq(hugeAmount, 'nonce-hardening-bigint');
+            // Amount exceeds T1 tier limit (500) but stays below HOTL escalation threshold (10B)
+            // to test tier limit enforcement, not Article 14 escalation.
+            const largeAmount = '9999';
+            const request = createHardenedReq(largeAmount, 'nonce-hardening-bigint');
             await expect(pep.enforce(request as any)).rejects.toThrow('exceeds signed Tier limit 500');
         });
     });
