@@ -30,6 +30,9 @@ const eip712Types = {
     { name: "financialLimitsString", type: "string" },
     { name: "expiresAt", type: "uint256" },
     { name: "nonce", type: "string" },
+    { name: "vaultPda", type: "string" },
+    { name: "squadsMultisig", type: "string" },
+    { name: "allowedProgramIds", type: "string[]" },
   ],
 };
 
@@ -72,6 +75,9 @@ async function buildSignedPolicy(opts: {
     financialLimitsString,
     expiresAt,
     nonce: cleanNonce,
+    vaultPda: "ReauditVault_Default",
+    squadsMultisig: "ReauditSquads_Default",
+    allowedProgramIds: ["11111111111111111111111111111111"],
   };
 
   const signature = await e2eWallet._signTypedData(

@@ -15,7 +15,10 @@ const eip712Types = {
         { name: "maxAnomalyScore", type: "uint256" },
         { name: "financialLimitsString", type: "string" },
         { name: "expiresAt", type: "uint256" },
-        { name: "nonce", type: "string" }
+        { name: "nonce", type: "string" },
+        { name: "vaultPda", type: "string" },
+        { name: "squadsMultisig", type: "string" },
+        { name: "allowedProgramIds", type: "string[]" }
     ]
 };
 
@@ -34,6 +37,9 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
         financialLimitsString: limitString,
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
         nonce: cleanNonce,
+        vaultPda: "CouncilVault_Default",
+        squadsMultisig: "CouncilSquads_Default",
+        allowedProgramIds: ["11111111111111111111111111111111"],
         ...customFields
     };
 

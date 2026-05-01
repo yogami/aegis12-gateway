@@ -46,7 +46,10 @@ const eip712Types = {
         { name: "maxAnomalyScore", type: "uint256" },
         { name: "financialLimitsString", type: "string" },
         { name: "expiresAt", type: "uint256" },
-        { name: "nonce", type: "string" }
+        { name: "nonce", type: "string" },
+        { name: "vaultPda", type: "string" },
+        { name: "squadsMultisig", type: "string" },
+        { name: "allowedProgramIds", type: "string[]" }
     ]
 };
 
@@ -60,7 +63,10 @@ async function createSignedDynamicPolicy(tier: string, limit: number, maxScore: 
         maxAnomalyScore: maxScore,
         financialLimitsString: JSON.stringify({ [tier]: limit }),
         expiresAt: Math.floor(Date.now() / 1000) + 3600,
-        nonce: nonceStr
+        nonce: nonceStr,
+        vaultPda: "E2EVault_Default",
+        squadsMultisig: "E2ESquads_Default",
+        allowedProgramIds: ["11111111111111111111111111111111"]
     };
 
     const signature = await e2eWallet._signTypedData(eip712Domain, eip712Types, config);

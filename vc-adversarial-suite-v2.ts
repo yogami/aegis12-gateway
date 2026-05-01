@@ -37,6 +37,9 @@ async function buildSignedPolicy(
     financialLimitsString: JSON.stringify({ [TrustTier.T4]: 100000 }),
     expiresAt: Math.floor(Date.now() / 1000) + 3600,
     nonce: "nonce-" + Math.random().toString(36).slice(2),
+    vaultPda: "TestVault_Default",
+    squadsMultisig: "TestSquads_Default",
+    allowedProgramIds: ["11111111111111111111111111111111"],
     ...overrides,
   };
 
@@ -51,6 +54,9 @@ async function buildSignedPolicy(
       { name: "financialLimitsString", type: "string" },
       { name: "expiresAt", type: "uint256" },
       { name: "nonce", type: "string" },
+      { name: "vaultPda", type: "string" },
+      { name: "squadsMultisig", type: "string" },
+      { name: "allowedProgramIds", type: "string[]" },
     ],
   };
 
@@ -185,5 +191,45 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     };
 
     await expect(pep.enforce(req)).rejects.toThrow(/crossChainTarget mismatch/i);
+  });
+
+  it("denies circular swap (token_in == token_out)", async () => {
+    const signed = await buildSignedPolicy(tenantWallet);
+    const circularAction = {
+      ...baseAction,
+      parameters: {
+        fromMint: "11111111111111111111111111111111",
+        toMint: "11111111111111111111111111111111",
+        amount: 50,
+      }
+    };
+    const req: PolicyEvaluationRequest = {
+      agent: baseAgent,
+      action: circularAction,
+      context: baseContext,
+      dynamicPolicy: signed,
+    };
+
+    await expect(pep.enforce(req)).rejects.toThrow(/Circular swap detected/);
+  });
+
+  it("denies unapproved Base58 mint substitution", async () => {
+    const signed = await buildSignedPolicy(tenantWallet);
+    const badMintAction = {
+      ...baseAction,
+      parameters: {
+        fromMint: "11111111111111111111111111111111",
+        toMint: "0xBadMintThatIsNotBase58000000000",
+        amount: 50,
+      }
+    };
+    const req: PolicyEvaluationRequest = {
+      agent: baseAgent,
+      action: badMintAction,
+      context: baseContext,
+      dynamicPolicy: signed,
+    };
+
+    await expect(pep.enforce(req)).rejects.toThrow(/Must be Base58/);
   });
 });

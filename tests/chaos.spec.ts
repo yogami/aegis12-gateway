@@ -25,8 +25,18 @@ describe("AegisPEP Chaos Testing Suite", () => {
             { name: "maxAnomalyScore", type: "uint256" },
             { name: "financialLimitsString", type: "string" },
             { name: "expiresAt", type: "uint256" },
-            { name: "nonce", type: "string" }
+            { name: "nonce", type: "string" },
+            { name: "vaultPda", type: "string" },
+            { name: "squadsMultisig", type: "string" },
+            { name: "allowedProgramIds", type: "string[]" }
         ]
+    };
+
+    // Default Squads governance fields for test policy configs
+    const SQUADS_DEFAULTS = {
+        vaultPda: "TestVault_Default",
+        squadsMultisig: "TestSquads_Default",
+        allowedProgramIds: ["11111111111111111111111111111111"]
     };
 
     beforeEach(async () => {
@@ -65,7 +75,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
                 financialLimits: { 'T4': 50000 },
                 financialLimitsString: JSON.stringify({ 'T4': 50000 }),
                 expiresAt: Math.floor(Date.now() / 1000) + 60,
-                nonce: "1234-5678"
+                nonce: "1234-5678",
+                ...SQUADS_DEFAULTS
             },
             signature: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12', 
             ownerPublicKey: ceoWallet.address
@@ -97,7 +108,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 100,
             financialLimits: { 'T4': 5000000 }, // Huge limits!
             expiresAt: Math.floor(Date.now() / 1000) + 60,
-            nonce: "attack-nonce"
+            nonce: "attack-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
         
@@ -111,7 +123,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const selfSignedPolicy = {
@@ -143,7 +158,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 80,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) - 10,
-            nonce: "replay-attack-test"
+            nonce: "replay-attack-test",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
         
@@ -156,7 +172,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const request: any = {
@@ -182,7 +201,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "sanitizer-nonce"
+            nonce: "sanitizer-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -195,7 +215,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const dirtyLLMParameters = {
@@ -242,7 +265,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "unique-nonce-1"
+            nonce: "unique-nonce-1",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -255,7 +279,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const request: any = {
@@ -301,7 +328,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             // Attacker wants to secretly pass this unsigned JSON
             financialLimits: { 'T4': 5000000 }, 
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "bisection-attack-nonce"
+            nonce: "bisection-attack-nonce",
+            ...SQUADS_DEFAULTS
         };
         // But the CEO actually only ever signed a $50 strict limit mathematically
         config.financialLimitsString = JSON.stringify({ 'T4': 50 });
@@ -315,7 +343,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const request: any = {
@@ -342,7 +373,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "cross-chain-nonce"
+            nonce: "cross-chain-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -355,7 +387,10 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: config.maxAnomalyScore,
             financialLimitsString: config.financialLimitsString,
             expiresAt: config.expiresAt,
-            nonce: config.nonce
+            nonce: config.nonce,
+            vaultPda: config.vaultPda,
+            squadsMultisig: config.squadsMultisig,
+            allowedProgramIds: config.allowedProgramIds
         });
 
         const request: any = {
@@ -381,7 +416,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "type-coercion-nonce"
+            nonce: "type-coercion-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -410,7 +446,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "asset-substitution-nonce"
+            nonce: "asset-substitution-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -442,7 +479,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "atomic-burn-nonce"
+            nonce: "atomic-burn-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -485,7 +523,8 @@ describe("AegisPEP Chaos Testing Suite", () => {
             maxAnomalyScore: 90,
             financialLimits: { 'T4': 50000 },
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "vera-timeout-nonce"
+            nonce: "vera-timeout-nonce",
+            ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
 
@@ -510,5 +549,62 @@ describe("AegisPEP Chaos Testing Suite", () => {
         } finally {
             global.fetch = originalFetch;
         }
+    });
+    /**
+     * Case 13: Circular Swap Simulation (Chaos)
+     */
+    it("denies circular swap where token_in equals token_out", async () => {
+        const config: any = {
+            policyId: "circularSwapPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana:devnet",
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "circular-swap-nonce",
+            ...SQUADS_DEFAULTS
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        const request: any = {
+            action: { toolId: "swap", parameters: { token_in: "11111111111111111111111111111111", token_out: "11111111111111111111111111111111", amount: 100 }, estimatedValue: 100 },
+            agent: { did: "did:example:999", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 0.1 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Circular swap detected/);
+    });
+
+    /**
+     * Case 14: Base58 Mint Substitution (Chaos)
+     */
+    it("denies action with non-Base58 mint addresses", async () => {
+        const config: any = {
+            policyId: "base58SwapPolicy",
+            tenantId: "legitTenant",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana:devnet",
+            maxAnomalyScore: 90,
+            financialLimits: { 'T4': 50000 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "base58-swap-nonce",
+            ...SQUADS_DEFAULTS
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        const request: any = {
+            action: { toolId: "swap", parameters: { token_in: "11111111111111111111111111111111", token_out: "0xMaliciousEVMMintAddressThatIsNotBase5800", amount: 100 }, estimatedValue: 100 },
+            agent: { did: "did:example:1000", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 0.1 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Must be Base58/);
     });
 });

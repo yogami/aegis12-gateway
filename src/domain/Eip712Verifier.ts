@@ -14,7 +14,10 @@ export class Eip712Verifier {
                 { name: "maxAnomalyScore", type: "uint256" },
                 { name: "financialLimitsString", type: "string" },
                 { name: "expiresAt", type: "uint256" },
-                { name: "nonce", type: "string" }
+                { name: "nonce", type: "string" },
+                { name: "vaultPda", type: "string" },
+                { name: "squadsMultisig", type: "string" },
+                { name: "allowedProgramIds", type: "string[]" }
             ]
         };
 

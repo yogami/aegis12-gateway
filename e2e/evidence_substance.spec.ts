@@ -23,7 +23,10 @@ const eip712Types = {
         { name: "maxAnomalyScore", type: "uint256" },
         { name: "financialLimitsString", type: "string" },
         { name: "expiresAt", type: "uint256" },
-        { name: "nonce", type: "string" }
+        { name: "nonce", type: "string" },
+        { name: "vaultPda", type: "string" },
+        { name: "squadsMultisig", type: "string" },
+        { name: "allowedProgramIds", type: "string[]" }
     ]
 };
 
@@ -44,6 +47,9 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
             financialLimitsString: JSON.stringify({ T1: 1000 }),
             expiresAt: Math.floor(Date.now() / 1000) + 3600,
             nonce: nonce,
+            vaultPda: "SubstanceVault_Default",
+            squadsMultisig: "SubstanceSquads_Default",
+            allowedProgramIds: ["11111111111111111111111111111111"],
         };
 
         const signature = await e2eWallet._signTypedData(eip712Domain, eip712Types, policyConfig);

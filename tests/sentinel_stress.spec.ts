@@ -44,7 +44,10 @@ describe('Aegis Sentinel: Stateful Behavioral Enforcement', () => {
                 maxAnomalyScore: 100, // 1.0 scaled to int
                 financialLimitsString: JSON.stringify({ perTx: 50000 }),
                 expiresAt: Math.floor(Date.now() / 1000) + 3600,
-                nonce
+                nonce,
+                vaultPda: "SentinelVault_Default",
+                squadsMultisig: "SentinelSquads_Default",
+                allowedProgramIds: ["11111111111111111111111111111111"]
             };
             const domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1399811149 };
             const types = { 
@@ -57,7 +60,10 @@ describe('Aegis Sentinel: Stateful Behavioral Enforcement', () => {
                     { name: "maxAnomalyScore", type: "uint256" },
                     { name: "financialLimitsString", type: "string" },
                     { name: "expiresAt", type: "uint256" },
-                    { name: "nonce", type: "string" }
+                    { name: "nonce", type: "string" },
+                    { name: "vaultPda", type: "string" },
+                    { name: "squadsMultisig", type: "string" },
+                    { name: "allowedProgramIds", type: "string[]" }
                 ] 
             };
             const signature = await signer.signEIP712(domain, types, policyConfig);
