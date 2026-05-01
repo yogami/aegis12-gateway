@@ -48,7 +48,7 @@ export class Eip712Verifier {
 
         const signable = {
             ...receipt,
-            validatedParamsJson: JSON.stringify(receipt.validatedParams),
+            validatedParamsJson: JSON.stringify(receipt.validatedParams, (key, value) => typeof value === 'bigint' ? value.toString() : value),
             limitationsJson: JSON.stringify(receipt.limitations),
             zkSeal: (receipt as any).zkSeal || "none"
         };

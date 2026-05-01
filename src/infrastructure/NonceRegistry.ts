@@ -10,13 +10,15 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
     private readonly pendingWalPath: string;
     private readonly lockPath: string;
     private walEngine: WALEngine;
+    public readonly maxCapacity: number;
 
-    constructor(customWalPath?: string) {
+    constructor(customWalPath?: string, maxCapacity: number = 100_000) {
         const basePath = customWalPath ? customWalPath.replace('.json', '') : path.resolve('/tmp', '.aegis_wal');
         this.committedWalPath = `${basePath}_committed.json`;
         this.pendingWalPath = `${basePath}_pending.json`;
         this.lockPath = `${basePath}.lock`;
         this.walEngine = new WALEngine("aegis-12/wal-encryption-key");
+        this.maxCapacity = maxCapacity;
     }
 
     public async initialize(): Promise<void> {
@@ -43,6 +45,8 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
         await this.walEngine.acquireLock(this.lockPath);
         try {
             if (this.committedNonces.has(nonce) || this.pendingNonces.has(nonce)) return false;
+            // SEC-04: Evict oldest entries if capacity exceeded
+            this.evictIfNeeded();
             const nextPending = new Set(this.pendingNonces);
             nextPending.add(nonce);
             const tempPath = `${this.pendingWalPath}.tmp`;
@@ -108,5 +112,22 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
         } finally {
             this.walEngine.releaseLock(this.lockPath);
         }
+    }
+
+    /**
+     * SEC-04: Evict oldest committed nonces when capacity is exceeded.
+     * Sets are insertion-ordered in JS, so iterator yields oldest first.
+     */
+    private evictIfNeeded(): void {
+        const totalSize = this.committedNonces.size + this.pendingNonces.size;
+        if (totalSize < this.maxCapacity) return;
+        const evictCount = Math.ceil(this.maxCapacity * 0.1); // Evict oldest 10%
+        let evicted = 0;
+        for (const nonce of this.committedNonces) {
+            if (evicted >= evictCount) break;
+            this.committedNonces.delete(nonce);
+            evicted++;
+        }
+        console.warn(`[Aegis-12 NonceRegistry] Evicted ${evicted} oldest nonces to maintain capacity.`);
     }
 }

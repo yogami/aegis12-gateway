@@ -91,6 +91,7 @@ export class X402PayGate {
     
     // Replay Protection
     private usedSignatures: Set<string> = new Set();
+    public readonly maxReplayEntries: number = 50_000;
 
     constructor(config?: Partial<X402Config>) {
         this.config = { ...DEFAULT_CONFIG, ...config };
@@ -227,6 +228,11 @@ export class X402PayGate {
     private checkReplay(paymentHeader: string): string | null {
         if (this.usedSignatures.has(paymentHeader)) {
             return 'Payment signature replay detected';
+        }
+        // SEC-05: Evict oldest entries if capacity exceeded
+        if (this.usedSignatures.size >= this.maxReplayEntries) {
+            const oldest = this.usedSignatures.values().next().value;
+            if (oldest) this.usedSignatures.delete(oldest);
         }
         this.usedSignatures.add(paymentHeader);
         return null;

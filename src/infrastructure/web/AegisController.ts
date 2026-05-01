@@ -60,9 +60,9 @@ export class AegisController {
             }
 
             const payloadStr = typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
-            console.log(`[Aegis-12] /enforce payload: ${payloadStr.substring(0, 500)}...`);
+            console.log(`[Aegis-12] /enforce payload (${Buffer.byteLength(payloadStr)}B)`);
             const resultJson = await phalaEntrypoint(payloadStr);
-            console.log(`[Aegis-12] /enforce result: ${resultJson}`);
+            console.log(`[Aegis-12] /enforce completed.`);
             const result = JSON.parse(resultJson);
             
             return result.status === 'denied' ? reply.status(403).send(result) : reply.status(200).send(result);
@@ -75,10 +75,14 @@ export class AegisController {
 
     public async anchorReceipt(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const enclave = AegisEnclave.getInstance();
-            await enclave.initialize();
+            // Validate inputs BEFORE expensive enclave init (fail-fast)
             const { receipt, decision } = request.body as any;
             if (!receipt || !decision) return reply.status(400).send({ error: 'Missing required fields: receipt, decision' });
+            const VALID_DECISIONS = ['approved', 'denied', 'escalated'];
+            if (!VALID_DECISIONS.includes(decision)) return reply.status(400).send({ error: `Invalid decision: must be one of ${VALID_DECISIONS.join(', ')}` });
+
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
 
             const ledgerReceipt = await enclave.anchor!.anchorReceipt(receipt, decision, enclave.signer?.enclaveDid || "unknown");
             return reply.status(200).send({
@@ -238,14 +242,14 @@ export class AegisController {
 
     public async healthtechEnforce(request: FastifyRequest, reply: FastifyReply) {
         try {
-            const enclave = AegisEnclave.getInstance();
-            await enclave.initialize();
+            // Validate inputs BEFORE expensive enclave init (fail-fast)
             const payload = request.body as any;
-            console.log(`[Aegis-12] /healthtech/enforce payload: ${JSON.stringify(payload)}`);
+            console.log(`[Aegis-12] /healthtech/enforce request from ${payload?.agentId || 'unknown'}`);
             const { agentId, agentRole, targetAction, payloadData } = payload;
             
+            const CLINICIAN_ALLOWED_ACTIONS = ['READ_RECORD', 'WRITE_RECORD', 'READ_SCHEDULE'];
             const isAuthorized = (agentRole === "SCHEDULER" && (targetAction === "READ_SCHEDULE" || targetAction === "WRITE_SCHEDULE")) ||
-                                 (agentRole === "CLINICIAN");
+                                 (agentRole === "CLINICIAN" && CLINICIAN_ALLOWED_ACTIONS.includes(targetAction));
 
             if (!isAuthorized) {
                 console.warn(`[Aegis-12] RBAC_VIOLATION: ${agentId} (${agentRole}) attempted ${targetAction}`);
@@ -274,6 +278,8 @@ export class AegisController {
                 });
             }
 
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
             const receiptId = `aegis-v1-ht-${Date.now()}`;
             const signature = enclave.signer!.sign(JSON.stringify({ agentId, targetAction, receiptId }));
 

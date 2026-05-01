@@ -165,8 +165,30 @@ export class AegisPEP {
         if (envelope) {
             receipt.envelope = envelope;
         }
-        receipt.signature = await this.signer.sign(JsonUtils.computeReceiptHash(receipt));
+        await this.signReceipt(receipt);
         return receipt;
+    }
+
+    public async signReceipt(receipt: AegisComplianceReceipt): Promise<void> {
+        receipt.signature = await this.signer.signEIP712(
+            { name: AEGIS_DOMAIN_NAME, version: AEGIS_DOMAIN_VERSION, chainId: AEGIS_CHAIN_ID },
+            {
+                AegisComplianceReceipt: [
+                    { name: 'receiptId', type: 'string' }, { name: 'actionId', type: 'string' }, { name: 'toolId', type: 'string' },
+                    { name: 'agentPubKey', type: 'string' }, { name: 'article12LogHash', type: 'string' }, { name: 'parametersHash', type: 'string' },
+                    { name: 'resultHash', type: 'string' }, { name: 'article14OversightSignature', type: 'string' }, { name: 'policyId', type: 'string' },
+                    { name: 'tenantId', type: 'string' }, { name: 'complianceStandard', type: 'string' }, { name: 'authorizationNonce', type: 'string' },
+                    { name: 'timestamp', type: 'string' }, { name: 'validatedParamsJson', type: 'string' }, { name: 'limitationsJson', type: 'string' },
+                    { name: 'zkSeal', type: 'string' }
+                ]
+            },
+            {
+                ...receipt,
+                validatedParamsJson: JSON.stringify(receipt.validatedParams, (key, value) => typeof value === 'bigint' ? value.toString() : value),
+                limitationsJson: JSON.stringify(receipt.limitations),
+                zkSeal: (receipt as any).zkSeal || "none"
+            }
+        );
     }
 
     private assembleReceiptWithId(receiptId: string, req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: 'approved' | 'denied' | 'escalated', logHash: string, ts: string): AegisComplianceReceipt {

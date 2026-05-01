@@ -77,7 +77,7 @@ describe('VC Assurance & Architectural Integrity', () => {
             const hasCriticalEclipseFlag = result.flags.some(f => (f.rule === 'SIMULATION_UNAVAILABLE' || f.rule === 'RPC_QUORUM_FAILURE') && f.severity === 'CRITICAL');
             expect(hasCriticalEclipseFlag).toBe(true);
             expect(result.riskScore).toBe(1.0);
-            expect(result.decision).toBe('BLOCK');
+            expect(result.decision).toBe('denied');
         });
     });
 

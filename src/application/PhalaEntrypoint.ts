@@ -1,6 +1,5 @@
 import { AegisSigner } from '../infrastructure/AegisSigner';
 import { AegisPEP } from '../infrastructure/AegisPEP';
-import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { PolicyEvaluationRequest, AegisComplianceReceipt } from '../types';
 import { ILedgerAnchor } from '../ports/ILedgerAnchor';
 import { LedgerAnchorFactory } from '../infrastructure/LedgerAnchorFactory';
@@ -11,6 +10,9 @@ import { TappdClient } from '../infrastructure/TappdClient';
 import { TerminalRefusalError } from '../errors';
 import keccak256 from 'keccak256';
 import { JsonUtils } from '../infrastructure/JsonUtils';
+import { PepFactory } from './PepFactory';
+import { Pcr0Verifier } from './Pcr0Verifier';
+import { ZkProofGenerator } from './ZkProofGenerator';
 
 /**
  * [EXTREME QUALITY] PhalaEntrypoint
@@ -53,7 +55,7 @@ export class AegisEnclave {
     }
 
     private isReady(): boolean {
-        return !!(this._signer && this._pep && this._anchor && this._batchWorker);
+        return [this._signer, this._pep, this._anchor, this._batchWorker].every(Boolean);
     }
 
     private async startInitialization(): Promise<void> {
@@ -72,11 +74,15 @@ export class AegisEnclave {
         try {
             await this.performInitializationSteps();
         } catch (err: any) {
-            console.error(`[Aegis-12] Init attempt ${attempt} failed: ${err.message}`);
-            if (attempt >= 4) throw err; // Increased retries for slow sidecars
+            this.handleInitError(err, attempt);
             await this.waitWithJitter(attempt + 1);
             return this.doInitializeWithRetry(attempt + 1);
         }
+    }
+
+    private handleInitError(err: any, attempt: number): void {
+        console.error(`[Aegis-12] Init attempt ${attempt} failed: ${err.message}`);
+        if (attempt >= 4) throw err;
     }
 
     private async performInitializationSteps(): Promise<void> {
@@ -90,27 +96,9 @@ export class AegisEnclave {
 
     private async ensurePep(): Promise<void> {
         if (this._pep) return;
-        let rawTenants = process.env.AUTHORIZED_TENANTS || '{}';
-        if (rawTenants.startsWith("'") && rawTenants.endsWith("'")) {
-            rawTenants = rawTenants.slice(1, -1);
-        }
-        const tenants = JsonUtils.safeParse(rawTenants, 'AUTHORIZED_TENANTS');
-        const dataDir = process.env.NODE_ENV === 'test' || !process.env.PHALA_CVM_ENVIRONMENT ? '/tmp' : '/var/data';
-        
-        let walSecret = process.env.WAL_SECRET;
-        if (!walSecret && process.env.TEE_ENV === 'phala') {
-            console.log("[Aegis-12] WAL_SECRET missing. Deriving from hardware Root of Trust...");
-            walSecret = await new TappdClient().deriveKey("aegis-12/wal-secret", 'secp256k1');
-        }
-
-        const { AegisLocalNonceRegistry } = await import('../infrastructure/NonceRegistry');
-        const { AegisLocalStateStore } = await import('../infrastructure/AegisLocalStateStore');
-        const nonceReg = new AegisLocalNonceRegistry(`${dataDir}/nonce_registry.json`);
-        await nonceReg.initialize();
-        const stateStore = new AegisLocalStateStore(dataDir, walSecret);
-        await stateStore.initialize();
-        this._journal = new AegisJournal(`${dataDir}/aegis_journal.log`);
-        this._pep = new AegisPEP(this._signer!, tenants, nonceReg, stateStore, this._journal);
+        const result = await PepFactory.createPep(this._signer!);
+        this._pep = result.pep;
+        this._journal = result.journal;
     }
 
     private async ensureWorker(): Promise<void> {
@@ -128,51 +116,54 @@ export class AegisEnclave {
     public async processRequest(payloadStr: string): Promise<string> {
         const telemetry = new TelemetryTracker();
         try {
-            this.validatePayloadSize(payloadStr);
-            await this.initialize();
-            const payload = this.parsePayload(payloadStr);
-            telemetry.mark('init');
-            const metadata = await this.getHardwareMetadata();
-            this.verifyPcr0(metadata.pcr0);
-            await this.ensureWorker();
-            telemetry.mark('attest');
-            const receipt = await this._pep!.enforce(payload);
-            telemetry.mark('pep');
-            
-            if (receipt.decision === 'escalated' && receipt.envelope) {
-                const envelopeHash = keccak256(Buffer.from(JsonUtils.stableStringify(receipt.envelope), 'utf8')).toString('hex');
-                receipt.envelope.tee_signature = await this._signer!.sign(envelopeHash);
-                receipt.signature = await this._signer!.sign(JsonUtils.computeReceiptHash(receipt));
-            }
-
-            this.dispatchBackground(receipt);
-            return this.formatSuccess(receipt, metadata, telemetry);
+            return await this.executeProcess(payloadStr, telemetry);
         } catch (e: any) {
             return this.handleError(e, telemetry);
         }
     }
 
+    private async executeProcess(payloadStr: string, telemetry: TelemetryTracker): Promise<string> {
+        this.validatePayloadSize(payloadStr);
+        await this.initialize();
+        const payload = this.parsePayload(payloadStr);
+        telemetry.mark('init');
+        
+        const metadata = await this.getHardwareMetadata();
+        Pcr0Verifier.verify(metadata.pcr0);
+        await this.ensureWorker();
+        telemetry.mark('attest');
+        
+        const receipt = await this._pep!.enforce(payload);
+        telemetry.mark('pep');
+        
+        await this.signEscalatedReceipt(receipt);
+        this.dispatchBackground(receipt);
+        
+        return this.formatSuccess(receipt, metadata, telemetry);
+    }
+
+    private async signEscalatedReceipt(receipt: AegisComplianceReceipt): Promise<void> {
+        if (receipt.decision !== 'escalated' || !receipt.envelope) return;
+        const envelopeHash = keccak256(Buffer.from(JsonUtils.stableStringify(receipt.envelope), 'utf8')).toString('hex');
+        receipt.envelope.tee_signature = await this._signer!.sign(envelopeHash);
+        await this._pep!.signReceipt(receipt);
+    }
+
     private validatePayloadSize(payload: string): void {
-        if (!payload || Buffer.byteLength(payload, 'utf8') > 128 * 1024) throw new TerminalRefusalError('Payload exceeds 128KB.');
+        if (!payload || Buffer.byteLength(payload, 'utf8') > 128 * 1024) {
+            throw new TerminalRefusalError('Payload exceeds 128KB.');
+        }
     }
 
     private parsePayload(payload: string): PolicyEvaluationRequest {
-        try { return JSON.parse(payload); } catch (e) { throw new Error('Malformed JSON'); }
-    }
-
-    private verifyPcr0(pcr0: string): void {
-        const approved = process.env.APPROVED_PCR0 || "verified_via_quote";
-        if (approved === "SKIP_PCR0_CHECK") return;
-        if (!pcr0 || (process.env.NODE_ENV !== 'test' && pcr0 !== approved)) {
-            throw new TerminalRefusalError(`Invalid PCR0: ${pcr0}. Expected: ${approved}`);
-        }
+        try { return JSON.parse(payload); } catch (e) { throw new Error('Malformed JSON', { cause: e }); }
     }
 
     private formatSuccess(receipt: AegisComplianceReceipt, meta: any, tel: TelemetryTracker): string {
         return JsonUtils.stableStringify({ 
             status: receipt.decision, 
             receipt, 
-            ledger_tx: "batching", // Anchoring is dispatched to background worker
+            ledger_tx: "batching",
             enclaveDid: this._signer!.enclaveDid, 
             publicKeyHex: this._signer!.getPublicKeyHex(),
             attestation: meta.attestation, 
@@ -182,10 +173,8 @@ export class AegisEnclave {
     }
 
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
-        // Individual Solana anchoring is replaced by the high-throughput BatchAnchorWorker.
-        // We only dispatch the ZK-Proof generation here.
-        this.generateZkProof(receipt, receipt.authorizationNonce).catch((err) => {
-            console.error(`[Aegis-12] ⚠️ Background ZK proof generation FAILED for ${receipt.receiptId}: ${err.message}`);
+        ZkProofGenerator.generate(receipt, receipt.authorizationNonce, this._pep).catch((err) => {
+            console.error(`[Aegis-12] ⚠️ Background ZK FAILED for ${receipt.receiptId}: ${err.message}`);
         });
     }
 
@@ -201,35 +190,6 @@ export class AegisEnclave {
         if (decision === 'approved') await this._pep!.saveEvidence(receipt, ledgerReceipt.txSignature);
     }
 
-    private async generateZkProof(receipt: AegisComplianceReceipt, nonce: string): Promise<void> {
-        try {
-            const amountVal = receipt.validatedParams?.amount as string | number | bigint | undefined;
-            const amount = this.validateZkAmount(BigInt(amountVal || 0));
-            const input = this.createZkInput(receipt, amount, nonce);
-            const proof = await new AegisZKClient().generateProof(input);
-            await this._pep!.updateZkSeal(receipt.receiptId, proof);
-        } catch (e: any) {
-            console.error(`ZK Error: ${e.message}`);
-        }
-    }
-
-    private validateZkAmount(amount: bigint): number {
-        const MAX = 9007199254740991n - 1000n;
-        if (amount > MAX) throw new Error("Amount exceeds ZK capacity.");
-        return Number(amount);
-    }
-
-    private createZkInput(receipt: any, amount: number, nonce: string): any {
-        const nonceHash = keccak256(Buffer.from(nonce, 'utf8'));
-        const nonceNumeric = parseInt(nonceHash.toString('hex').substring(0, 12), 16);
-        return {
-            action: { tool_id: receipt.toolId, amount, nonce: nonceNumeric },
-            constraints: { max_per_tx: amount + 1000, cumulative_limit: amount + 1000, last_checkpointed_nonce: 0 },
-            stats_before: { total_spend: 0, tx_count: 0, last_activity: Math.floor(Date.now() / 1000) },
-            state_proof: { slot: 1, state_root: Array(32).fill(1), account_hash: Array(32).fill(1), proof: [] }
-        };
-    }
-
     private async handleError(e: any, tel: TelemetryTracker): Promise<string> {
         this.anchorDeniedIfSafe(e);
         return JsonUtils.stableStringify({ status: "denied", error: e.message, enclaveDid: this._signer?.enclaveDid || "unknown", telemetry: tel.getMetrics() });
@@ -237,15 +197,19 @@ export class AegisEnclave {
 
     private anchorDeniedIfSafe(e: any): void {
         const isTerminal = e instanceof TerminalRefusalError || e.name === 'TerminalRefusalError';
-        if (!isTerminal) this.anchorToLedger({ actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() }, 'denied').catch(() => {});
+        if (!isTerminal) {
+            this.anchorToLedger({ actionId: `denied-${Date.now()}`, timestamp: new Date().toISOString() }, 'denied').catch(() => {});
+        }
     }
 
     public async getEvidenceStatus(receiptId: string): Promise<string> {
         await this.initialize();
         const evidence = await this._pep?.getEvidenceByReceiptId(receiptId);
+        return this.formatEvidence(evidence, receiptId);
+    }
+
+    private formatEvidence(evidence: any, receiptId: string): string {
         if (!evidence) return JSON.stringify({ status: "NOT_FOUND" });
-        
-        // Use standard JSON.stringify to properly omit undefined values and produce valid JSON
         return JSON.stringify({ 
             status: evidence.ars_anchor ? "COMPLETED" : "pending", 
             receiptId, 

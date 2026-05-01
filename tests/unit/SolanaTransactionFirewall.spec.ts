@@ -50,13 +50,13 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         const serialized = tx.serialize({ requireAllSignatures: false }).toString('base64');
         
         const res = await firewall.inspectTransaction(serialized, kp.publicKey.toBase58());
-        expect(res.decision).toBe('ALLOW');
+        expect(res.decision).toBe('approved');
         expect(res.flags).toHaveLength(0);
     });
 
     it('should block if parsing fails', async () => {
         const res = await firewall.inspectTransaction('invalid-base64', 'wallet');
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags[0].rule).toBe('PARSE_FAILURE');
     });
 
@@ -73,7 +73,7 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         tx.feePayer = kp.publicKey;
         
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags.some(f => f.rule === 'HIGH_VALUE_TRANSFER')).toBe(true);
     });
 
@@ -88,7 +88,7 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         tx.feePayer = kp.publicKey;
         
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags.some(f => f.rule === 'UNKNOWN_PROGRAM')).toBe(true);
     });
 
@@ -115,7 +115,7 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         tx.feePayer = kp.publicKey;
         
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags.some(f => f.rule === 'RPC_QUORUM_FAILURE')).toBe(true);
     });
 
@@ -159,7 +159,7 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         tx.feePayer = kp.publicKey;
         
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags.some(f => f.rule === 'HIDDEN_CPI_UNKNOWN_PROGRAM')).toBe(true);
     });
 
@@ -187,7 +187,7 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         tx.feePayer = kp.publicKey;
         
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
-        expect(res.decision).toBe('BLOCK');
+        expect(res.decision).toBe('denied');
         expect(res.flags.some(f => f.rule === 'TOKEN_SET_AUTHORITY')).toBe(true);
     });
 

@@ -135,4 +135,39 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         expect(validBody.status).toBe('approved');
     });
 
+    test('VULN-011: Article 14 Bypass - Gateway must issue signed HOTL envelope instead of blind blocking on high-value transfers', async ({ request }) => {
+        // Attack/Scenario: A deepthink agent attempts to execute a massive $50M transfer.
+        // Instead of simply returning 'BLOCK' (which causes the agent to crash or loop),
+        // the gateway must intercept, escalate to a human Multisig (HOTL), and return a signed cryptographic envelope.
+        
+        const policy = await createSignedPolicy(`nonce-hotl-${crypto.randomUUID()}`, {
+            vaultPda: "AuditorVault_Prod",
+            squadsMultisig: "AuditorSquads_Prod",
+            allowedProgramIds: ["11111111111111111111111111111111"],
+            financialLimitsString: JSON.stringify({ "T1": 100000000000 })
+        });
+
+        const res = await request.post('/enforce', {
+            data: buildPayload(50000000000, policy, 'T1') // Massive transfer amount
+        });
+
+        const body = await res.json();
+        console.log('VULN-011 Error:', body.error);
+        console.log('VULN-011 Escrow Receipt:', body.receipt?.envelope);
+        
+        // Assert the gateway gracefully escalated rather than crashing or denying
+        expect(res.status()).toBe(200);
+        expect(body.status).toBe('escalated');
+        
+        // Assert the cryptographic envelope is perfectly formed
+        expect(body.receipt.envelope).toBeDefined();
+        expect(body.receipt.envelope.domain_separator).toBe('AEGIS12_ESCALATE_V1');
+        expect(body.receipt.envelope.vault_pda).toBe('AuditorVault_Prod');
+        expect(body.receipt.envelope.squads_multisig).toBe('AuditorSquads_Prod');
+        
+        // Assert the TEE actually signed the payload using its Hardware Root-of-Trust
+        expect(body.receipt.envelope.tee_signature).toBeDefined();
+        expect(body.receipt.envelope.tee_signature.length).toBeGreaterThan(64);
+    });
+
 });

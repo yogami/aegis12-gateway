@@ -6,7 +6,16 @@ import { AegisLocalStateStore } from '../../src/infrastructure/AegisLocalStateSt
 import * as fs from 'fs';
 
 vi.mock('../../src/infrastructure/AegisSigner', () => ({
-    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', sign: vi.fn().mockResolvedValue('sig') }) }
+    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', getPublicKeyHex: vi.fn().mockReturnValue('pubkey123') }) }
+}));
+
+vi.mock('../../src/application/PepFactory', () => ({
+    PepFactory: { 
+        createPep: vi.fn().mockResolvedValue({ 
+            pep: { getEvidenceByReceiptId: vi.fn(), enforce: vi.fn(), updateZkSeal: vi.fn() }, 
+            journal: {} 
+        }) 
+    }
 }));
 
 describe('Aegis-12 Hardening Tests', () => {

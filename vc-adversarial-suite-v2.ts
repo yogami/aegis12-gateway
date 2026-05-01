@@ -1,15 +1,19 @@
 // vc-adversarial-suite-v2.ts
 // Black-box adversarial tests for Aegis-12 TEE Compliance Gateway
 // To execute:  `npx jest vc-adversarial-suite-v2.ts`  (or vitest)
+import { describe, it, expect, beforeAll } from 'vitest';
 
 import { AegisPEP } from "./src/infrastructure/AegisPEP";
 import { AegisSigner } from "./src/infrastructure/AegisSigner";
+import { AegisLocalStateStore } from "./src/infrastructure/AegisLocalStateStore";
+import { Eip712Verifier } from "./src/domain/Eip712Verifier";
 import { PolicyEvaluationRequest, TrustTier, AgentPurpose } from "./src/types";
 import { ethers, Wallet } from "ethers";
 import { randomBytes } from "crypto";
 import { AegisLocalNonceRegistry } from "./src/infrastructure/NonceRegistry";
 
 process.env.PHALA_SIMULATED_ROOT_SEED = "0x" + randomBytes(32).toString("hex"); // satisfy entropy check
+process.env.DATA_DIR = '/tmp'; // Avoid permission errors with default /var/data
 
 // ----- helpers -------------------------------------------------------------
 
@@ -17,10 +21,9 @@ const DOMAIN = {
   name: "Aegis-12-Compliance-Matrix",
   version: "1.0.0",
   chainId: 1399811149,
-  verifyingContract: "0xAegisComplianceRegistry11111111111111111",
 };
 
-function buildSignedPolicy(
+async function buildSignedPolicy(
   wallet: Wallet,
   overrides: Partial<PolicyEvaluationRequest["dynamicPolicy"]["policyConfig"]> = {}
 ) {
@@ -51,7 +54,7 @@ function buildSignedPolicy(
     ],
   };
 
-  const signature = wallet._signTypedData(DOMAIN, types, policyConfig);
+  const signature = await wallet._signTypedData(DOMAIN, types, policyConfig);
 
   return {
     policyConfig,
@@ -63,18 +66,25 @@ function buildSignedPolicy(
 // --------------------------------------------------------------------------
 
 describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
-  const enclaveSigner = new AegisSigner();
-  // Register wallet address as authorised tenant root
-  const tenantWallet = Wallet.createRandom();
-  const tenantTrustStore: Record<string, string[]> = {
-    "tenant-unit-test": [tenantWallet.address],
-  };
+  let enclaveSigner: AegisSigner;
+  let tenantWallet: Wallet;
+  let tenantTrustStore: Record<string, string[]>;
+  let pep: AegisPEP;
 
-  const pep = new AegisPEP(
-    enclaveSigner,
-    tenantTrustStore,
-    new AegisLocalNonceRegistry() // dedicated WAL per test run
-  );
+  beforeAll(async () => {
+    enclaveSigner = await AegisSigner.create();
+    tenantWallet = Wallet.createRandom();
+    tenantTrustStore = {
+      "tenant-unit-test": [tenantWallet.address],
+    };
+
+    pep = new AegisPEP(
+      enclaveSigner,
+      tenantTrustStore,
+      new AegisLocalNonceRegistry(),
+      new AegisLocalStateStore('/tmp')
+    );
+  });
 
   const baseAgent = {
     did: "did:web:agent.test",
@@ -107,14 +117,13 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
       agent: baseAgent,
       action: baseAction,
       context: baseContext,
-      dynamicPolicy: buildSignedPolicy(tenantWallet),
+      dynamicPolicy: await buildSignedPolicy(tenantWallet),
     };
 
     const receipt = await pep.enforce(req);
     expect(receipt.signature.length).toBeGreaterThan(0);
 
     // SUBSTANCE AUDIT: Verify Enclave Signature on Receipt
-    const { Eip712Verifier } = require("./src/domain/Eip712Verifier");
     const isValid = Eip712Verifier.verifyReceipt(
         receipt, 
         enclaveSigner.getAddress(), 
@@ -123,10 +132,21 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
         1399811149
     );
     expect(isValid).toBe(true);
+
+    // Validate squadmanifest payload structure
+    const squadmanifest = {
+        status: receipt.decision === 'approved' ? 'APPROVED' : 'BLOCKED',
+        policyViolations: [],
+        timestamp: new Date().toISOString(),
+        teeAttestationHash: receipt.parametersHash,
+        intentHash: receipt.receiptId
+    };
+    expect(squadmanifest.status).toBe('APPROVED');
+    expect(squadmanifest.teeAttestationHash).toBeDefined();
   });
 
   it("blocks the exact same nonce (replay attack)", async () => {
-    const signed = buildSignedPolicy(tenantWallet);
+    const signed = await buildSignedPolicy(tenantWallet);
     const req: PolicyEvaluationRequest = {
       agent: baseAgent,
       action: baseAction,
@@ -142,7 +162,7 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
 
   it("rejects an invalid EIP-712 signature", async () => {
     const evilWallet = Wallet.createRandom();
-    const badPolicy = buildSignedPolicy(evilWallet); // wallet not in tenantTrustStore
+    const badPolicy = await buildSignedPolicy(evilWallet); // wallet not in tenantTrustStore
     const req: PolicyEvaluationRequest = {
       agent: baseAgent,
       action: baseAction,
@@ -154,7 +174,7 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
   });
 
   it("rejects mismatched crossChainTarget", async () => {
-    const wrongTargetPolicy = buildSignedPolicy(tenantWallet, {
+    const wrongTargetPolicy = await buildSignedPolicy(tenantWallet, {
       crossChainTarget: "solana:mainnet-beta",
     });
     const req: PolicyEvaluationRequest = {

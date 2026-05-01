@@ -73,9 +73,12 @@ function normalizeSwap(params: any): Record<string, unknown> {
     if (typeof slippage !== 'number' || !Number.isSafeInteger(slippage) || slippage < 0 || slippage > MAX_SLIPPAGE_CACHE) {
         throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-${MAX_SLIPPAGE_CACHE}.`);
     }
+    // SEC-07: Accept fromMint/toMint as aliases for token_in/token_out
+    const tokenIn = params.token_in || params.fromMint;
+    const tokenOut = params.token_out || params.toMint;
     return {
-        token_in: assertSafeIdentifier(params.token_in, 'token_in'),
-        token_out: assertSafeIdentifier(params.token_out, 'token_out'),
+        token_in: assertSafeIdentifier(tokenIn, 'token_in'),
+        token_out: assertSafeIdentifier(tokenOut, 'token_out'),
         amount: assertSafeFinancialAmount(params.amount, 'amount'),
         slippageBps: slippage
     };

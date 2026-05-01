@@ -1,5 +1,8 @@
 import * as http from "http";
 import phalaEntrypoint, { AegisEnclave } from "./application/PhalaEntrypoint";
+import { assertSafeIdentifier } from "./domain/PolicyValidator";
+
+const MAX_BODY_SIZE = 128 * 1024; // 128KB — matches PhalaEntrypoint.validatePayloadSize
 
 const PORT = process.env.PORT || 8000;
 
@@ -66,8 +69,9 @@ const server = http.createServer(async (req, res) => {
     // Resilient to double-slashes or proxy prefixes
     if (req.method === "GET" && req.url?.includes("/evidence/")) {
         try {
-            const receiptId = req.url.split("/evidence/")[1];
-            if (!receiptId) throw new Error("Missing Receipt ID in evidence lookup.");
+            const rawReceiptId = req.url.split("/evidence/")[1];
+            if (!rawReceiptId) throw new Error("Missing Receipt ID in evidence lookup.");
+            const receiptId = assertSafeIdentifier(decodeURIComponent(rawReceiptId), 'receiptId');
             
             console.log(`[dStack CVM] Evidence Lookup: ${receiptId}`);
             const enclave = AegisEnclave.getInstance();
@@ -86,7 +90,17 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && isAegisRoute) {
         let body = "";
-        req.on("data", chunk => { body += chunk.toString(); });
+        let bodySize = 0;
+        req.on("data", chunk => {
+            bodySize += chunk.length;
+            if (bodySize > MAX_BODY_SIZE) {
+                req.destroy();
+                res.writeHead(413, { "Content-Type": "application/json" });
+                res.end(JSON.stringify({ status: "error", error: `Payload exceeds ${MAX_BODY_SIZE} byte limit.` }));
+                return;
+            }
+            body += chunk.toString();
+        });
         req.on("error", (err: Error) => {
             console.error(`[dStack CVM] Stream Error: ${err.message}`);
             res.writeHead(500, { "Content-Type": "application/json" });
@@ -128,7 +142,6 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ 
             status: "error", 
             error: "Enclave Invalid Route",
-            received_url: req.url,
             suggestion: "Try /enforce or /evidence"
         }));
     }

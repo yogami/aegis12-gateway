@@ -5,7 +5,7 @@ import { AegisLocalStateStore } from '../../src/infrastructure/AegisLocalStateSt
 import * as fs from 'fs';
 
 vi.mock('../../src/infrastructure/AegisSigner', () => ({
-    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', sign: vi.fn().mockResolvedValue('sig') }) }
+    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', sign: vi.fn(), signEIP712: vi.fn().mockResolvedValue("mock-signature").mockResolvedValue('sig') }) }
 }));
 
 describe('AegisPEP (Unit)', () => {

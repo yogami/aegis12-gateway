@@ -3,7 +3,7 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 
-type Scenario = "HAPPY_PATH" | "IDENTITY_SPOOF" | "HIGH_ANOMALY" | "SPEND_VELOCITY" | "BAD_SIGNATURE";
+type Scenario = "HAPPY_PATH" | "IDENTITY_SPOOF" | "HIGH_ANOMALY" | "SPEND_VELOCITY" | "BAD_SIGNATURE" | "ARTICLE_12_TELEMETRY" | "ARTICLE_14_HOTL";
 
 export default function Home() {
   const [logs, setLogs] = useState<{msg: string, id: string, type: 'neutral' | 'success' | 'warning' | 'error', link?: string}[]>([]);
@@ -39,7 +39,7 @@ export default function Home() {
               parameters: {
                   fromMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
                   toMint: "So11111111111111111111111111111111111111112",
-                  amount: scenario === "SPEND_VELOCITY" ? 99999999 : 50000,
+                  amount: scenario === "SPEND_VELOCITY" ? 99999999 : (scenario === "ARTICLE_14_HOTL" ? 50000000000 : 50000),
                   slippageBps: 100
               }
           },
@@ -64,7 +64,12 @@ export default function Home() {
                   }),
                   limits: {
                       spendVelocityLimits: { dailyLimit: 1000000, perTxLimit: 50000 }
-                  }
+                  },
+                  ...(scenario === "ARTICLE_14_HOTL" ? {
+                      vaultPda: "AuditorVault_Prod",
+                      squadsMultisig: "AuditorSquads_Prod",
+                      allowedProgramIds: ["11111111111111111111111111111111"]
+                  } : {})
               }
           }
       };
@@ -98,9 +103,16 @@ export default function Home() {
               addLog(`⛓️ ZK Seal / ARS Anchor: ${result.ars_anchor.substring(0, 32)}...`, 'success');
           }
           setReceiptData(result);
+      } else if (result.status === "escalated") {
+          addLog(`⚠️ Firewall Decision: ESCALATED (Article 14 Human-In-The-Loop)`, 'warning');
+          addLog(`🛑 Agent Halted. Awaiting Multisig Threshold.`, 'warning');
+          setReceiptData(result);
       } else {
           addLog(`❌ Firewall Decision: BLOCK`, 'error');
           addLog(`⚠️ Reason: ${result.error || result.reason || 'Policy Violation'}`, 'error');
+          if (scenario === "ARTICLE_12_TELEMETRY") {
+              addLog(`📝 Article 12: Write-Ahead Log successfully stored trace of failed transaction.`, 'neutral');
+          }
       }
 
     } catch (e: any) {
@@ -142,6 +154,9 @@ export default function Home() {
                     <label>Simulation Mode:</label>
                     <select value={scenario} onChange={(e) => setScenario(e.target.value as Scenario)} disabled={isProcessing}>
                         <option value="HAPPY_PATH">Valid Execution (Happy Path)</option>
+                        <option value="ARTICLE_12_TELEMETRY">Article 12: Transparent Telemetry & WAL Audit</option>
+                        <option value="ARTICLE_14_HOTL">Article 14: HOTL Escalation (High-Value Transfer)</option>
+                        <option disabled>──────────</option>
                         <option value="IDENTITY_SPOOF">Attack Vector: Spoof Agent Tier (CRIT-01)</option>
                         <option value="HIGH_ANOMALY">Attack Vector: High Anomaly Score (VULN-001)</option>
                         <option value="SPEND_VELOCITY">Attack Vector: Exceed Spend Velocity (VULN-002)</option>
@@ -214,6 +229,19 @@ export default function Home() {
                                 <span className={styles.monospaceBlue}>{receiptData.zk_vkey}</span>
                             </div>
                         </div>
+                        {receiptData.status === 'escalated' && receiptData.receipt?.envelope && (
+                            <div className={styles.escrowPanel}>
+                                <h4>⚠️ Article 14: Escrow / Human Oversight Required</h4>
+                                <div className={styles.envelopeData}>
+                                    <div><strong>Vault PDA:</strong> {receiptData.receipt.envelope.vault_pda}</div>
+                                    <div><strong>Domain:</strong> {receiptData.receipt.envelope.domain_separator}</div>
+                                    <div><strong>TEE Signature:</strong> <span className={styles.monospaceAmber}>{receiptData.receipt.envelope.tee_signature.substring(0, 32)}...</span></div>
+                                </div>
+                                <button className={styles.approveBtn} onClick={() => alert("Human threshold met. Signing via Squads Multisig...")}>
+                                    Approve via Multisig
+                                </button>
+                            </div>
+                        )}
                         <button className={styles.verifyBtn} onClick={() => alert("Cryptographic ZK Seal verified successfully against the Aegis-12 on-chain verifier contract!")}>
                             Verify Cryptographic Proof Locally
                         </button>
