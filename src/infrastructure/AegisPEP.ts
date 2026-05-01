@@ -12,6 +12,8 @@ import { AegisCanonicalMessage } from '../types';
 import { TerminalRefusalError } from '../errors';
 import { assertSafeIdentifier } from '../domain/PolicyValidator';
 import { JsonUtils } from './JsonUtils';
+import { OfacValidator } from '../domain/OfacValidator';
+import { SimulationEngine } from './SimulationEngine';
 
 const AEGIS_CHAIN_ID = 1399811149;
 const AEGIS_DOMAIN_NAME = "Aegis-12-Compliance-Matrix";
@@ -75,6 +77,9 @@ export class AegisPEP {
             // [PHASE 1] Verify cryptographic signature + anomaly score BEFORE escalation decision.
             // Tier limit check is deferred — high-value txns must escalate, not be flat-denied.
             await this.verifySignatureAndAnomaly({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } });
+
+            // [ANTI-EVASION] TEE-Sandboxed Transaction Simulation
+            await SimulationEngine.simulateAndParse(sanit);
 
             let decision: 'approved' | 'escalated' = 'approved';
             let envelope;
@@ -287,6 +292,7 @@ export class AegisPEP {
 
     private normalizeAction(req: PolicyEvaluationRequest): { sanit: Record<string, unknown>, amountBig: bigint } {
         const sanit = normalizeParameters(req.action.toolId, req.action.parameters);
+        OfacValidator.inspectParameters(sanit); // Deterministic OFAC/Sanctions Kill Switch
         const amountBig = sanit.amount as bigint;
         if (typeof amountBig !== 'bigint') throw new TerminalRefusalError('Invalid BigInt amount.');
         return { sanit, amountBig };

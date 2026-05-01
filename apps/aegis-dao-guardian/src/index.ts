@@ -60,6 +60,20 @@ class PhalaTEEGateway {
             violations.push(`Target Address ${intent.targetAddress} is not in the DAO Whitelist.`);
         }
 
+        // 4. Check Circular Swap and Base58 validation (Aegis-12 V2 Features)
+        if (intent.action === 'SWAP') {
+            const tokenIn = (intent as any).tokenIn;
+            const tokenOut = (intent as any).tokenOut;
+            if (tokenIn && tokenOut && tokenIn === tokenOut) {
+                status = 'BLOCKED';
+                violations.push(`Circular swap detected.`);
+            }
+            if (tokenIn && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(tokenIn)) {
+                status = 'BLOCKED';
+                violations.push(`Invalid "token_in" address. Must be Base58.`);
+            }
+        }
+
         if (status === 'BLOCKED') {
             reason = 'Transaction mathematically blocked due to policy violations.';
         }

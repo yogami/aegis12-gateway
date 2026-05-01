@@ -13,6 +13,7 @@ import { JsonUtils } from '../infrastructure/JsonUtils';
 import { PepFactory } from './PepFactory';
 import { Pcr0Verifier } from './Pcr0Verifier';
 import { ZkProofGenerator } from './ZkProofGenerator';
+import { SquadsRouter } from '../infrastructure/SquadsRouter';
 
 /**
  * [EXTREME QUALITY] PhalaEntrypoint
@@ -137,6 +138,7 @@ export class AegisEnclave {
         telemetry.mark('pep');
         
         await this.signEscalatedReceipt(receipt);
+        await SquadsRouter.routeIfEscalated(receipt);
         this.dispatchBackground(receipt);
         
         return this.formatSuccess(receipt, metadata, telemetry);
@@ -219,6 +221,6 @@ export class AegisEnclave {
     }
 }
 
-const enclave = AegisEnclave.getInstance();
+export const enclave = AegisEnclave.getInstance();
 export const phalaEntrypoint = (payload: string) => enclave.processRequest(payload);
 export default phalaEntrypoint;
