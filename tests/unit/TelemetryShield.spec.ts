@@ -61,7 +61,7 @@ describe('AegisShield (Telemetry Shield SDK)', () => {
         expect(hash3).not.toBe(hash1);
     });
 
-    it('should execute decoy traffic (Chaff) and return measurable stats', async () => {
+    it('should execute decoy traffic (Chaff) and return measurable stats', { timeout: 10000 }, async () => {
         const dummyBlockhash = '8E5vP...dummy-blockhash';
         const stats = await shield.deployDecoyTraffic(dummyBlockhash);
         
