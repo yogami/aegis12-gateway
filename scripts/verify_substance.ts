@@ -237,7 +237,7 @@ async function verify() {
     
     const hotlPayload = {
         agent: { did: "did:solana:auditor", purpose: "financial_operations", currentTier: "T4" },
-        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 50000000000, token: "USDC" } },
+        action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 50000000000, token: "SOL" } },
         context: { sessionId: "audit-" + Date.now(), actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0, currentSlot: 2000000 },
         dynamicPolicy: { policyConfig: hotlPolicyConfig, ownerPublicKey: wallet.address, signature: hotlSignature }
     };
