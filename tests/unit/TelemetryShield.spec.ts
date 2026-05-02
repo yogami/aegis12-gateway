@@ -1,7 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AegisShield } from '../../packages/telemetry-shield/src';
 import { ITeeAnchor, AgentEvidenceRecord } from '../../packages/telemetry-shield/src/types';
 import { EvidenceWAL } from '../../packages/telemetry-shield/src/wal';
+
+// Mock @solana/web3.js Connection to prevent live RPC calls (429 rate limits from public Solana endpoints)
+vi.mock('@solana/web3.js', async (importOriginal) => {
+    const actual = await importOriginal() as any;
+    return {
+        ...actual,
+        Connection: vi.fn().mockImplementation(() => ({
+            getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: 'MockBlockhash', lastValidBlockHeight: 100000 }),
+            getSlot: vi.fn().mockResolvedValue(200000),
+            getAccountInfo: vi.fn().mockResolvedValue(null)
+        }))
+    };
+});
+
+// Import AFTER mock is hoisted
+import { AegisShield } from '../../packages/telemetry-shield/src';
 
 /**
  * TelemetryShield.spec.ts
@@ -47,7 +62,6 @@ describe('AegisShield (Telemetry Shield SDK)', () => {
     });
 
     it('should execute decoy traffic (Chaff) and return measurable stats', async () => {
-        // Use a fixed blockhash for reproducible seed logic
         const dummyBlockhash = '8E5vP...dummy-blockhash';
         const stats = await shield.deployDecoyTraffic(dummyBlockhash);
         
