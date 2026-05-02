@@ -178,7 +178,7 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
         expect(res.receipt.envelope.tee_signature).toBeTruthy();
 
         // State predicates: Squads on-chain guard
-        expect(res.receipt.envelope.state_predicates.max_input_amount).toBe(50000000000);
+        expect(res.receipt.envelope.state_predicates.max_input_amount).toBe("50000000000");
         expect(res.receipt.envelope.state_predicates.allowed_program_ids).toContain('11111111111111111111111111111111');
         expect(res.receipt.envelope.state_predicates.valid_until_slot).toBeGreaterThan(2000000);
 

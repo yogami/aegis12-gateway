@@ -41,8 +41,8 @@ describe('phala_cvm_server (Unit)', () => {
         };
 
         requestHandler(req, res);
-
-        expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', '*');
+        expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Origin', 'https://studio.berlinailabs.com');
+        expect(res.setHeader).toHaveBeenCalledWith('Access-Control-Allow-Headers', 'Content-Type, X-Aegis-Trace, Authorization');
         expect(res.writeHead).toHaveBeenCalledWith(204);
         expect(res.end).toHaveBeenCalled();
     });

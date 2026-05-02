@@ -68,7 +68,7 @@ export class AegisSigner {
      */
     public static createSync(enclaveDid?: string): AegisSigner {
         if (process.env.NODE_ENV === 'production') {
-            console.error('[AegisSigner] ⛔ CRITICAL: createSync() called in production. This uses simulated keys. Use AegisSigner.create() instead.');
+            throw new Error('[AegisSigner] ⛔ CRITICAL: createSync() called in production. This uses simulated keys. Use AegisSigner.create() instead.');
         }
         const instance = new AegisSigner();
         const tappd = new PhalaTappdMock();

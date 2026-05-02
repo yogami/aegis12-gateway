@@ -24,8 +24,8 @@ console.warn = function(...args) { interceptLog('WARN', args); originalWarn.appl
 // Production Micro-Server mapped explicitly for the Phala Network dStack CVM
 const server = http.createServer(async (req, res) => {
     // Cross-Origin configuration required for some TEE RPC interfaces
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Aegis-Trace");
+    res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "https://studio.berlinailabs.com");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Aegis-Trace, Authorization");
 
     if (req.method === "OPTIONS") {
         res.writeHead(204);
@@ -36,6 +36,11 @@ const server = http.createServer(async (req, res) => {
     console.log(`[dStack CVM] Incoming Request: ${req.method} ${req.url}`);
     
     if (req.method === "GET" && req.url === "/logs") {
+        if (req.headers.authorization !== `Bearer ${process.env.ADMIN_LOG_TOKEN || 'aegis-dev-token'}`) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Unauthorized" }));
+            return;
+        }
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ logs: logBuffer }));
         return;

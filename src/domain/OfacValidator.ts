@@ -10,11 +10,11 @@ export class OfacValidator {
     // A mock list of sanctioned OFAC addresses for the Colosseum Hackathon demo.
     // In production, this would be updated via an oracle or synced from Chainalysis/US Treasury.
     private static readonly SANCTIONED_ADDRESSES = new Set([
-        "8vX4rYwq...TornadoCash",
-        "LazarusGroup...HackerWallet",
-        "Sanctioned...Wallet123",
+        "8vx4rywq...tornadocash",
+        "lazarusgroup...hackerwallet",
+        "sanctioned...wallet123",
         // Adding a specific test address to trigger the OFAC block in E2E tests
-        "OFAC_BLOCKED_ADDRESS_001"
+        "ofac_blocked_address_001"
     ]);
 
     /**
@@ -25,8 +25,8 @@ export class OfacValidator {
     public static verifyAddress(address: string): void {
         if (!address) return;
 
-        // Perform strict exact match against the set
-        if (this.SANCTIONED_ADDRESSES.has(address)) {
+        // Perform strict exact match against the set, converting to lower case to prevent case-sensitivity bypass
+        if (this.SANCTIONED_ADDRESSES.has(address.toLowerCase())) {
             throw new TerminalRefusalError(`OFAC_VIOLATION_DETECTED: Address ${address} is on the federal sanctions blocklist.`);
         }
     }

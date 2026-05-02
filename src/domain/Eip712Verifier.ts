@@ -26,8 +26,10 @@ export class Eip712Verifier {
         const signerAddress = ethers.utils.verifyTypedData(domain, types, policy.policyConfig, policy.signature).toLowerCase();
         const authorized = (tenantTrustStore[policy.policyConfig.tenantId] || []).map(a => a.toLowerCase());
         if (!authorized.includes(signerAddress)) {
-            console.error(`[Aegis-12 DEBUG] tenantTrustStore: ${JSON.stringify(tenantTrustStore)}`);
-            console.error(`[Aegis-12 DEBUG] policy tenantId: ${policy.policyConfig.tenantId}`);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error(`[Aegis-12 DEBUG] tenantTrustStore: ${JSON.stringify(tenantTrustStore)}`);
+                console.error(`[Aegis-12 DEBUG] policy tenantId: ${policy.policyConfig.tenantId}`);
+            }
             throw new Error(`Signer not found in provisioned TEE Root-of-Trust. Found: ${signerAddress}`);
         }
 

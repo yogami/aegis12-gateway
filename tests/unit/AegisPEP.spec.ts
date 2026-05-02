@@ -73,7 +73,7 @@ describe('AegisPEP (Unit)', () => {
         expect(receipt.envelope!.domain_separator).toBe("AEGIS12_ESCALATE_V1");
         expect(receipt.envelope!.vault_pda).toBe("MockVault");
         expect(receipt.envelope!.squads_multisig).toBe("MockMultisig");
-        expect(receipt.envelope!.state_predicates.max_input_amount).toBe(15000000000);
+        expect(receipt.envelope!.state_predicates.max_input_amount).toBe("15000000000");
         expect(receipt.envelope!.state_predicates.allowed_program_ids).toContain("MockProgram");
     });
 });

@@ -14,6 +14,8 @@ import { assertSafeIdentifier } from '../domain/PolicyValidator';
 import { JsonUtils } from './JsonUtils';
 import { OfacValidator } from '../domain/OfacValidator';
 import { SimulationEngine } from './SimulationEngine';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const AEGIS_CHAIN_ID = 1399811149;
 const AEGIS_DOMAIN_NAME = "Aegis-12-Compliance-Matrix";
@@ -94,7 +96,7 @@ export class AegisPEP {
                     squads_multisig: request.dynamicPolicy?.policyConfig?.squadsMultisig || "SquadsMultisig_Fallback",
                     instruction_digest: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'),
                     state_predicates: {
-                        max_input_amount: Number(amountBig),
+                        max_input_amount: amountBig.toString(),
                         allowed_program_ids: request.dynamicPolicy?.policyConfig?.allowedProgramIds || ["TargetProgramID_Fallback"],
                         valid_until_slot: request.context?.currentSlot ? request.context.currentSlot + 1000 : 1000000
                     },
@@ -288,6 +290,25 @@ export class AegisPEP {
     private validateExpiry(expiry: any): void {
         if (typeof expiry !== 'number' || !Number.isSafeInteger(expiry) || expiry <= 0) throw new TerminalRefusalError('Invalid expiry.');
         if (expiry < Math.floor(Date.now() / 1000)) throw new TerminalRefusalError('Policy Expired.');
+        
+        // CRIT-01: Eviction Replay Defense. If this policy was signed before the oldest nonces were evicted,
+        // we must reject it to prevent an attacker from replaying an old, valid-but-evicted policy.
+        try {
+            // Find the active watermark file in either the cwd or the data dir
+            const basePath = (this.stateStore as any)['dataDir'] ? path.resolve((this.stateStore as any)['dataDir'], '.aegis_wal') : path.resolve('/tmp', '.aegis_wal');
+            const watermarkPath = `${basePath}_watermark.json`;
+            if (fs.existsSync(watermarkPath)) {
+                const data = JSON.parse(fs.readFileSync(watermarkPath, 'utf8'));
+                if (data && typeof data.evictionWatermark === 'number') {
+                    if (expiry < data.evictionWatermark) {
+                        throw new TerminalRefusalError('Policy rejected by Eviction Watermark (Anti-Replay).');
+                    }
+                }
+            }
+        } catch (e: any) {
+            if (e instanceof TerminalRefusalError) throw e;
+            console.warn(`[AegisPEP] Failed to read watermark: ${e.message}`);
+        }
     }
 
     private normalizeAction(req: PolicyEvaluationRequest): { sanit: Record<string, unknown>, amountBig: bigint } {

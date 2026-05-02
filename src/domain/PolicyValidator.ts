@@ -61,12 +61,15 @@ export function normalizeParameters(toolId: string, parameters: any): Record<str
 function normalizeTransfer(params: any): Record<string, unknown> {
     const recipient = params.recipient || params.to;
     if (!recipient) throw new Error('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
-    return {
+    const normalized: any = {
         recipient: assertSafeIdentifier(recipient, 'recipient'),
         amount: assertSafeFinancialAmount(params.amount, 'amount'),
-        token: params.token ? assertSafeIdentifier(params.token, 'token') : undefined,
-        test_evasion_flag: params.test_evasion_flag
+        token: params.token ? assertSafeIdentifier(params.token, 'token') : undefined
     };
+    if (process.env.NODE_ENV !== 'production' && params.test_evasion_flag) {
+        normalized.test_evasion_flag = params.test_evasion_flag;
+    }
+    return normalized;
 }
 
 function normalizeSwap(params: any): Record<string, unknown> {

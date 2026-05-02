@@ -183,7 +183,7 @@ export class AegisEnclave {
     public async getHardwareMetadata() {
         await this.initialize();
         const attestation = await new TappdClient().getQuote(this._signer!.enclaveDid);
-        const pcr0 = attestation ? (process.env.MOCK_PCR0 || "verified_via_quote") : "";
+        const pcr0 = attestation ? (process.env.NODE_ENV !== 'production' && process.env.MOCK_PCR0 ? process.env.MOCK_PCR0 : "verified_via_quote") : "";
         return { attestation, pcr0 };
     }
 

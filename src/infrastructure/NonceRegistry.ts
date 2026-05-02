@@ -70,11 +70,28 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
                 const nextCommitted = new Set(this.committedNonces);
                 nextCommitted.add(nonce);
                 
+                // Write both to temporary files first
                 const tempCommittedPath = `${this.committedWalPath}.tmp`;
-                this.walEngine.atomicWriteSync(tempCommittedPath, this.committedWalPath, JSON.stringify(Array.from(nextCommitted)));
-                
                 const tempPendingPath = `${this.pendingWalPath}.tmp`;
-                this.walEngine.atomicWriteSync(tempPendingPath, this.pendingWalPath, JSON.stringify(Array.from(nextPending)));
+                
+                const encryptedCommitted = this.walEngine.encryptWal(JSON.stringify(Array.from(nextCommitted)));
+                const encryptedPending = this.walEngine.encryptWal(JSON.stringify(Array.from(nextPending)));
+
+                const fdCommitted = fs.openSync(tempCommittedPath, 'w');
+                const fdPending = fs.openSync(tempPendingPath, 'w');
+                try {
+                    fs.writeSync(fdCommitted, encryptedCommitted);
+                    fs.fdatasyncSync(fdCommitted);
+                    fs.writeSync(fdPending, encryptedPending);
+                    fs.fdatasyncSync(fdPending);
+                } finally {
+                    fs.closeSync(fdCommitted);
+                    fs.closeSync(fdPending);
+                }
+                
+                // Atomic renames
+                fs.renameSync(tempCommittedPath, this.committedWalPath);
+                fs.renameSync(tempPendingPath, this.pendingWalPath);
                 
                 this.pendingNonces.delete(nonce);
                 this.committedNonces.add(nonce);
@@ -128,6 +145,12 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
             this.committedNonces.delete(nonce);
             evicted++;
         }
-        console.warn(`[Aegis-12 NonceRegistry] Evicted ${evicted} oldest nonces to maintain capacity.`);
+        
+        // Save an eviction watermark so AegisPEP can reject stale nonces that were evicted
+        const watermarkPath = `${this.committedWalPath.replace('_committed.json', '')}_watermark.json`;
+        const currentWatermark = Math.floor(Date.now() / 1000);
+        fs.writeFileSync(watermarkPath, JSON.stringify({ evictionWatermark: currentWatermark }));
+
+        console.warn(`[Aegis-12 NonceRegistry] Evicted ${evicted} oldest nonces to maintain capacity. Watermark set to ${currentWatermark}.`);
     }
 }
