@@ -60,14 +60,7 @@ export function normalizeParameters(toolId: string, parameters: any): Record<str
 
 function normalizeTransfer(params: any): Record<string, unknown> {
     const recipient = params.recipient || params.to;
-<<<<<<< HEAD
-    if (!recipient) throw new Error('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
-=======
     if (!recipient) throw new TerminalRefusalError('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
-    
-    console.log("DEBUG: normalizeTransfer called with params.token=", params.token);
-
->>>>>>> badb7f4 (Hardening Aegis Gateway: Resolve security audit vulnerabilities (VULN-001 to VULN-011))
     // SEC-03: Prevent Asset Substitution (VULN-001/002)
     if (params.token && typeof params.token === 'string' && params.token.toUpperCase() !== 'SOL') {
         throw new TerminalRefusalError('[TERMINAL REFUSAL] Token allowlist violation: asset substitution detected.');
