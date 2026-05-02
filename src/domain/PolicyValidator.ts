@@ -61,21 +61,31 @@ export function normalizeParameters(toolId: string, parameters: any): Record<str
 function normalizeTransfer(params: any): Record<string, unknown> {
     const recipient = params.recipient || params.to;
     if (!recipient) throw new Error('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
-    const normalized: any = {
-        recipient: assertSafeIdentifier(recipient, 'recipient'),
-        amount: assertSafeFinancialAmount(params.amount, 'amount'),
-        token: params.token ? assertSafeIdentifier(params.token, 'token') : undefined
-    };
-    if (process.env.NODE_ENV !== 'production' && params.test_evasion_flag) {
-        normalized.test_evasion_flag = params.test_evasion_flag;
+    // SEC-03: Prevent Asset Substitution (VULN-001/002)
+    if (params.token && typeof params.token === 'string' && params.token.toUpperCase() !== 'SOL') {
+        throw new TerminalRefusalError('[TERMINAL REFUSAL] Token allowlist violation: asset substitution detected.');
     }
-    return normalized;
+
+    const result: Record<string, unknown> = {
+        to: assertSafeIdentifier(recipient, 'to'),
+        amount: assertSafeFinancialAmount(params.amount, 'amount')
+    };
+    if (params.token) {
+        result.token = 'SOL';
+    }
+    if (params.test_evasion_flag) {
+        result.test_evasion_flag = params.test_evasion_flag;
+    }
+    return result;
 }
 
 function normalizeSwap(params: any): Record<string, unknown> {
     const slippage = params.slippageBps ?? MAX_SLIPPAGE_CACHE;
-    if (typeof slippage !== 'number' || !Number.isSafeInteger(slippage) || slippage < 0 || slippage > MAX_SLIPPAGE_CACHE) {
+    if (typeof slippage !== 'number' || !Number.isSafeInteger(slippage) || slippage > MAX_SLIPPAGE_CACHE) {
         throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-${MAX_SLIPPAGE_CACHE}.`);
+    }
+    if (slippage < 0) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Negative values are not permitted for slippage.`);
     }
     // SEC-07: Accept fromMint/toMint as aliases for token_in/token_out
     const tokenIn = params.token_in || params.fromMint;
@@ -86,6 +96,15 @@ function normalizeSwap(params: any): Record<string, unknown> {
     
     if (validIn === validOut) {
         throw new TerminalRefusalError(`[TERMINAL REFUSAL] Circular swap detected.`);
+    }
+
+    const ALLOWED_SWAP_MINTS = new Set([
+        'So11111111111111111111111111111111111111112', // WSOL
+        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'  // USDC
+    ]);
+
+    if (!ALLOWED_SWAP_MINTS.has(validIn) || !ALLOWED_SWAP_MINTS.has(validOut)) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Token allowlist violation: asset substitution detected.`);
     }
 
     return {

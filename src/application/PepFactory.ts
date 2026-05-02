@@ -35,8 +35,16 @@ export class PepFactory {
 
     private static getDataDir(): string {
         const isTest = process.env.NODE_ENV === 'test';
+        if (isTest) {
+            const workerId = process.env.VITEST_WORKER_ID || process.env.VITEST_POOL_ID || '0';
+            const dir = `/tmp/aegis_test_${workerId}`;
+            if (!require('fs').existsSync(dir)) {
+                require('fs').mkdirSync(dir, { recursive: true });
+            }
+            return dir;
+        }
         const isCvm = process.env.PHALA_CVM_ENVIRONMENT;
-        return isTest || !isCvm ? '/tmp' : '/var/data';
+        return !isCvm ? '/tmp' : '/var/data';
     }
 
     private static async getWalSecret(): Promise<string | undefined> {

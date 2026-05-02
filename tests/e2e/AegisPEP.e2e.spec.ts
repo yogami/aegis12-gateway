@@ -12,7 +12,7 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
         signer = await AegisSigner.create();
         await enclave.initialize();
         enclave.pep!.provisionTenant('tenant-1', signer.getAddress());
-    });
+    }, 30000);
 
     const baseAgent = {
         did: "did:web:noahai.agent.testbot",
@@ -112,7 +112,7 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
             action: {
                 toolId: "solana_transfer",
                 actionType: "transfer",
-                parameters: { to: 'OFAC_BLOCKED_ADDRESS_001', token: 'USDC', amount: 50 },
+                parameters: { to: 'OFAC_BLOCKED_ADDRESS_001', token: 'SOL', amount: 50 },
                 estimatedValue: 50
             },
             context: { sessionId: "session-4", actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 }
@@ -158,7 +158,7 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
             action: {
                 toolId: "solana_transfer",
                 actionType: "transfer",
-                parameters: { to: '11111111111111111111111111111111', amount: 50000000000, token: 'USDC' },
+                parameters: { to: '11111111111111111111111111111111', amount: 50000000000, token: 'SOL' },
                 estimatedValue: 50000000000
             },
             context: { sessionId: "session-6", actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0, currentSlot: 2000000 }

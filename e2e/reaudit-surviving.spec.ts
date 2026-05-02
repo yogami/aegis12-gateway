@@ -58,7 +58,7 @@ async function buildSignedPolicy(opts: {
     tenantId = "tenant-001",
     financialLimitsStringOverride,
     expiresAt = Math.floor(Date.now() / 1000) + 3600,
-    crossChainTarget = "solana-mainnet",
+    crossChainTarget = "solana:localnet",
   } = opts;
 
   const financialLimitsString =

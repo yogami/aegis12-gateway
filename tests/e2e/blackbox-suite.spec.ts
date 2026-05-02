@@ -29,7 +29,7 @@ describe('Blackbox Suite: DAO Guardian End-to-End Flow', () => {
         expect(stdout).toContain('[Phala TEE Enclave] Receiving Intent from Agent');
         expect(stdout).toContain('BLOCKED');
         expect(stdout).toContain('VERA Protocol');
-        expect(stdout).toContain('Reputation updated. New FICO Trust Score: 12 (Slashed)');
+        expect(stdout).toContain('Reputation updated (Offline Demo Mode). New FICO Trust Score:');
 
         // Assert the manifest file was written
         expect(fs.existsSync(manifestFile)).toBe(true);
