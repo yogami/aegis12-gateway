@@ -4,6 +4,8 @@ import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 import { AegisEnclave } from '../../src/application/PhalaEntrypoint';
 import { AegisLocalStateStore } from '../../src/infrastructure/AegisLocalStateStore';
 import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 vi.mock('../../src/infrastructure/AegisSigner', () => ({
     AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', getPublicKeyHex: vi.fn().mockReturnValue('pubkey123') }) }
@@ -22,14 +24,13 @@ describe('Aegis-12 Hardening Tests', () => {
     let pep: AegisPEP;
     let signer: any;
 
+    let testDir: string;
+
     beforeEach(async () => {
-        // Cleanup WAL files before each test
-        if (fs.existsSync('/tmp/tenant_stats.wal')) fs.unlinkSync('/tmp/tenant_stats.wal');
-        if (fs.existsSync('/tmp/evidence_store.wal')) fs.unlinkSync('/tmp/evidence_store.wal');
-        if (fs.existsSync('/tmp/nonce_registry.json')) fs.unlinkSync('/tmp/nonce_registry.json');
+        testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aegis-harden-'));
 
         signer = await AegisSigner.create();
-        const stateStore = new AegisLocalStateStore('/tmp');
+        const stateStore = new AegisLocalStateStore(testDir);
         await stateStore.initialize();
         pep = new AegisPEP(signer, { 'tenant-1': ['0x123'] }, undefined, stateStore);
         

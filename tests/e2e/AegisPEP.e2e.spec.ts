@@ -148,4 +148,67 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
         expect(res.error).toContain('ANTI_EVASION_TRIGGERED');
     });
 
+    it('[ARTICLE 14] should ESCALATE high-value intent to Squads V4 Multisig and produce SquadsRouter proposal', async () => {
+        const policyConfig = { policyId: "pol-6", tenantId: 'tenant-1', version: "1.0", chainId: 1399811149, crossChainTarget: "solana:devnet", nonce: `nonce-${Date.now()}-6`, expiresAt: Math.floor(Date.now() / 1000) + 1000, maxAnomalyScore: 100, financialLimitsString: '{"T4": 100000000000}', vaultPda: "HotlVaultPda_001", squadsMultisig: "HotlSquads_001", allowedProgramIds: ["11111111111111111111111111111111"] };
+        const signature = await signer.signEIP712(domain, types, policyConfig);
+
+        const payload: PolicyEvaluationRequest = {
+            agent: baseAgent,
+            dynamicPolicy: { policyConfig, ownerPublicKey: signer.getAddress(), signature } as any,
+            action: {
+                toolId: "solana_transfer",
+                actionType: "transfer",
+                parameters: { to: '11111111111111111111111111111111', amount: 50000000000, token: 'USDC' },
+                estimatedValue: 50000000000
+            },
+            context: { sessionId: "session-6", actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0, currentSlot: 2000000 }
+        };
+
+        const responseString = await phalaEntrypoint(JSON.stringify(payload));
+        const res = JSON.parse(responseString);
+
+        // Core decision: must be escalated, not denied or approved
+        expect(res.status).toBe('escalated');
+
+        // Envelope integrity: Article 14 HOTL envelope must be present
+        expect(res.receipt.envelope).toBeDefined();
+        expect(res.receipt.envelope.domain_separator).toBe('AEGIS12_ESCALATE_V1');
+        expect(res.receipt.envelope.vault_pda).toBe('HotlVaultPda_001');
+        expect(res.receipt.envelope.squads_multisig).toBe('HotlSquads_001');
+        expect(res.receipt.envelope.tee_signature).toBeTruthy();
+
+        // State predicates: Squads on-chain guard
+        expect(res.receipt.envelope.state_predicates.max_input_amount).toBe(50000000000);
+        expect(res.receipt.envelope.state_predicates.allowed_program_ids).toContain('11111111111111111111111111111111');
+        expect(res.receipt.envelope.state_predicates.valid_until_slot).toBeGreaterThan(2000000);
+
+        // SquadsRouter integration: proposal must be created
+        expect(res.receipt.squadsProposalId).toBeDefined();
+        expect(res.receipt.squadsProposalId).toMatch(/^sqds-prop-/);
+    });
+
+    it('should DENY when OFAC sanctioned address appears as transfer recipient via normalized parameters', async () => {
+        const policyConfig = { policyId: "pol-7", tenantId: 'tenant-1', version: "1.0", chainId: 1399811149, crossChainTarget: "solana:devnet", nonce: `nonce-${Date.now()}-7`, expiresAt: Math.floor(Date.now() / 1000) + 1000, maxAnomalyScore: 100, financialLimitsString: '{"T4": 100000}', vaultPda: "vault1", squadsMultisig: "sqds1", allowedProgramIds: ["11111111111111111111111111111111"] };
+        const signature = await signer.signEIP712(domain, types, policyConfig);
+
+        // Uses 'recipient' field instead of 'to' to test OfacValidator deep inspection
+        const payload: PolicyEvaluationRequest = {
+            agent: baseAgent,
+            dynamicPolicy: { policyConfig, ownerPublicKey: signer.getAddress(), signature } as any,
+            action: {
+                toolId: "transfer",
+                actionType: "transfer",
+                parameters: { recipient: 'OFAC_BLOCKED_ADDRESS_001', amount: 10 },
+                estimatedValue: 10
+            },
+            context: { sessionId: "session-7", actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 }
+        };
+
+        const responseString = await phalaEntrypoint(JSON.stringify(payload));
+        const res = JSON.parse(responseString);
+
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('OFAC_VIOLATION_DETECTED');
+    });
+
 });

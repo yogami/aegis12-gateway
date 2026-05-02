@@ -6,6 +6,7 @@ import { AegisLocalNonceRegistry } from '../src/infrastructure/NonceRegistry';
 import { AegisLocalStateStore } from '../src/infrastructure/AegisLocalStateStore';
 import { ethers } from 'ethers';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 
 describe("AegisPEP Chaos Testing Suite", () => {
@@ -56,8 +57,9 @@ describe("AegisPEP Chaos Testing Suite", () => {
             "legitTenant": [ceoWallet.address]
         };
 
-        process.env.DATA_DIR = '/tmp';
-        aegisPEP = new AegisPEP(enclaveSigner, hardcodedTrustStore, new AegisLocalNonceRegistry(), new AegisLocalStateStore('/tmp'));
+        const chaosDir = fs.mkdtempSync(path.join(os.tmpdir(), 'aegis-chaos-'));
+        process.env.DATA_DIR = chaosDir;
+        aegisPEP = new AegisPEP(enclaveSigner, hardcodedTrustStore, new AegisLocalNonceRegistry(), new AegisLocalStateStore(chaosDir));
     });
 
     /**
