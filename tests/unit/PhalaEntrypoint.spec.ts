@@ -34,7 +34,7 @@ describe('phala-entry (Unit)', () => {
         const resStr = await enclave.processRequest('{invalid');
         const res = JSON.parse(resStr);
         expect(res.status).toBe('denied');
-        expect(res.error).toBe('Malformed JSON');
+        expect(res.error).toContain('Malformed JSON');
     });
 
     it('processes valid request successfully', async () => {

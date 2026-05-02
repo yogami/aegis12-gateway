@@ -99,15 +99,16 @@ export class WALEngine {
     }
 
     public atomicWriteSync(tempPath: string, targetPath: string, data: string): void {
+        const uniqueTempPath = `${tempPath}.${crypto.randomUUID()}`;
         const encryptedData = this.encryptWal(data);
-        const fd = fs.openSync(tempPath, 'w');
+        const fd = fs.openSync(uniqueTempPath, 'w');
         try {
             fs.writeSync(fd, encryptedData);
             fs.fdatasyncSync(fd);
         } finally {
             fs.closeSync(fd);
         }
-        fs.renameSync(tempPath, targetPath);
+        fs.renameSync(uniqueTempPath, targetPath);
     }
     
     public loadWalSync(targetPath: string): string | null {

@@ -15,19 +15,19 @@ export function assertSafeFinancialAmount(value: any, fieldName: string): bigint
 function validateAmountType(value: any, fieldName: string): void {
     const isString = typeof value === 'string';
     const isSafeNumber = typeof value === 'number' && Number.isSafeInteger(value);
-    if (!isString && !isSafeNumber) throw new Error(`Invalid type for ${fieldName}: expected string or safe integer.`);
+    if (!isString && !isSafeNumber) throw new TerminalRefusalError(`Invalid type for ${fieldName}: expected string or safe integer.`);
 }
 
 function validateAmountPrecision(value: string, fieldName: string): void {
-    if (value.toString().length > 78) throw new Error(`[TERMINAL REFUSAL] ${fieldName} exceeds max precision (78 digits).`);
+    if (value.toString().length > 78) throw new TerminalRefusalError(`[TERMINAL REFUSAL] ${fieldName} exceeds max precision (78 digits).`);
 }
 
 function validateAmountFormat(value: string, fieldName: string): void {
-    if (!/^(0|[1-9][0-9]*)$/.test(value.toString())) throw new Error(`Invalid format for ${fieldName}: expected canonical decimal string.`);
+    if (!/^(0|[1-9][0-9]*)$/.test(value.toString())) throw new TerminalRefusalError(`Invalid format for ${fieldName}: expected canonical decimal string.`);
 }
 
 function convertToBigInt(value: any, fieldName: string): bigint {
-    try { return BigInt(value.toString()); } catch (e) { throw new Error(`Invalid precision for ${fieldName}.`); }
+    try { return BigInt(value.toString()); } catch (e) { throw new TerminalRefusalError(`Invalid precision for ${fieldName}.`); }
 }
 
 export function assertSafeIdentifier(id: any, fieldName: string): string {
@@ -55,12 +55,19 @@ export function normalizeParameters(toolId: string, parameters: any): Record<str
     const normalizedId = (toolId || "").toString().trim().toLowerCase();
     if (normalizedId === 'transfer' || normalizedId === 'solana_transfer') return normalizeTransfer(parameters);
     if (normalizedId === 'swap') return normalizeSwap(parameters);
-    throw new Error(`[TERMINAL REFUSAL] Unrecognized tool ID: "${toolId}".`);
+    throw new TerminalRefusalError(`[TERMINAL REFUSAL] Unrecognized tool ID.`);
 }
 
 function normalizeTransfer(params: any): Record<string, unknown> {
     const recipient = params.recipient || params.to;
+<<<<<<< HEAD
     if (!recipient) throw new Error('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
+=======
+    if (!recipient) throw new TerminalRefusalError('[TERMINAL REFUSAL] Missing recipient/to in transfer parameters.');
+    
+    console.log("DEBUG: normalizeTransfer called with params.token=", params.token);
+
+>>>>>>> badb7f4 (Hardening Aegis Gateway: Resolve security audit vulnerabilities (VULN-001 to VULN-011))
     // SEC-03: Prevent Asset Substitution (VULN-001/002)
     if (params.token && typeof params.token === 'string' && params.token.toUpperCase() !== 'SOL') {
         throw new TerminalRefusalError('[TERMINAL REFUSAL] Token allowlist violation: asset substitution detected.');

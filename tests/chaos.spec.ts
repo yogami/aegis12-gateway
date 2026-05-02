@@ -242,7 +242,7 @@ describe("AegisPEP Chaos Testing Suite", () => {
         const receipt = await aegisPEP.enforce(request);
 
         // The returned validParams should strictly be stripped down
-        expect((receipt.validatedParams as any).recipient).toEqual("11111111111111111111111111111111");
+        expect((receipt.validatedParams as any).to).toEqual("11111111111111111111111111111111");
         expect((receipt.validatedParams as any).amount).toEqual(50n);
         expect((receipt.validatedParams as any).hallucinated_note).toBeUndefined();
         expect((receipt.validatedParams as any).reasoning).toBeUndefined();

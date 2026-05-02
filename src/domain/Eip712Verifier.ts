@@ -1,5 +1,6 @@
 import { ethers } from 'ethers';
 import { PolicyEvaluationRequest } from '../types';
+import { TerminalRefusalError } from '../errors';
 
 export class Eip712Verifier {
     public static verifySignature(policy: NonNullable<PolicyEvaluationRequest['dynamicPolicy']>, tenantTrustStore: Record<string, string[]>, domainName: string, domainVersion: string, chainId: number): void {
@@ -23,20 +24,25 @@ export class Eip712Verifier {
 
 
 
-        const signerAddress = ethers.utils.verifyTypedData(domain, types, policy.policyConfig, policy.signature).toLowerCase();
+        let signerAddress: string;
+        try {
+            signerAddress = ethers.utils.verifyTypedData(domain, types, policy.policyConfig, policy.signature).toLowerCase();
+        } catch (e: any) {
+            throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid cryptographic signature format or structure: ${e.message}`);
+        }
         const authorized = (tenantTrustStore[policy.policyConfig.tenantId] || []).map(a => a.toLowerCase());
         if (!authorized.includes(signerAddress)) {
             if (process.env.NODE_ENV !== 'production') {
                 console.error(`[Aegis-12 DEBUG] tenantTrustStore: ${JSON.stringify(tenantTrustStore)}`);
                 console.error(`[Aegis-12 DEBUG] policy tenantId: ${policy.policyConfig.tenantId}`);
             }
-            throw new Error(`Signer not found in provisioned TEE Root-of-Trust. Found: ${signerAddress}`);
+            throw new TerminalRefusalError(`Signer not found in provisioned TEE Root-of-Trust. Found: ${signerAddress}`);
         }
 
         const cluster = process.env.SOLANA_CLUSTER || 'devnet';
         const expectedCrossChainTarget = cluster === 'mainnet-beta' ? 'solana-mainnet' : `solana:${cluster}`;
         if (policy.policyConfig.crossChainTarget !== expectedCrossChainTarget) {
-            throw new Error(`[TERMINAL REFUSAL] crossChainTarget mismatch. Expected ${expectedCrossChainTarget}, got ${policy.policyConfig.crossChainTarget}.`);
+            throw new TerminalRefusalError(`[TERMINAL REFUSAL] crossChainTarget mismatch. Expected ${expectedCrossChainTarget}, got ${policy.policyConfig.crossChainTarget}.`);
         }
     }
 

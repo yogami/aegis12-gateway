@@ -64,7 +64,7 @@ describe('Aegis-12 Hardening Tests', () => {
             const responseJson = await enclave.processRequest('{invalid-json');
             const response = JSON.parse(responseJson);
             expect(response.status).toBe('denied');
-            expect(response.error).toBe('Malformed JSON');
+            expect(response.error).toContain('Malformed JSON');
         });
 
         it('should handle malformed financialLimitsString in AegisPEP', async () => {

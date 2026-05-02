@@ -42,7 +42,7 @@ export class AegisPEP {
     }
 
     private validateTrustedAddress(address: string): void {
-        if (!/^0x[a-fA-F0-9]+$/.test(address)) throw new Error(`[TERMINAL REFUSAL] Invalid address: ${address}`);
+        if (!/^0x[a-fA-F0-9]+$/.test(address)) throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid address: ${address}`);
     }
 
     private ensureTenantArray(tenantId: string): void {
@@ -166,7 +166,7 @@ export class AegisPEP {
     private parseLimits(raw: string): any {
         try {
             const parsed = JSON.parse(raw);
-            if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid structure');
+            if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) throw new TerminalRefusalError('Invalid structure');
             return parsed;
         } catch (e: any) {
             throw new TerminalRefusalError(`Malformed limits: ${e.message}`);
@@ -175,7 +175,7 @@ export class AegisPEP {
 
     private extractTierLimit(request: PolicyEvaluationRequest, parsed: any) {
         const keys = Object.keys(parsed);
-        if (keys.length !== 1) throw new TerminalRefusalError('Multi-tier forbidden.');
+        if (keys.length !== 1) throw new TerminalRefusalError('Multi-tier limit objects are structurally unsafe.');
         const tier = request.agent?.currentTier || 'unknown';
         if (keys[0] !== tier) throw new TerminalRefusalError(`Tier mismatch: ${tier} vs ${keys[0]}`);
         return { tier, limit: assertSafeFinancialAmount(parsed[tier], 'tier limit') };
@@ -284,7 +284,7 @@ export class AegisPEP {
     private validateAnomalyScore(score: any, isMax: boolean = false): void {
         const scoreVal = isMax ? score : (score ?? -1);
         const invalid = typeof scoreVal !== 'number' || !Number.isFinite(scoreVal) || scoreVal < 0 || (isMax ? scoreVal > 100 : scoreVal > 1.0);
-        if (invalid) throw new TerminalRefusalError(`Invalid ${isMax ? 'max' : 'current'} anomaly score.`);
+        if (invalid) throw new TerminalRefusalError(`Invalid or unscaled contextual anomaly score.`);
     }
 
     private validateExpiry(expiry: any): void {

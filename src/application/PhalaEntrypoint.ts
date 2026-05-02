@@ -158,7 +158,7 @@ export class AegisEnclave {
     }
 
     private parsePayload(payload: string): PolicyEvaluationRequest {
-        try { return JSON.parse(payload); } catch (e) { throw new Error('Malformed JSON', { cause: e }); }
+        try { return JSON.parse(payload); } catch (e) { throw new TerminalRefusalError('Malformed JSON'); }
     }
 
     private formatSuccess(receipt: AegisComplianceReceipt, meta: any, tel: TelemetryTracker): string {
@@ -194,7 +194,18 @@ export class AegisEnclave {
 
     private async handleError(e: any, tel: TelemetryTracker): Promise<string> {
         this.anchorDeniedIfSafe(e);
-        return JsonUtils.stableStringify({ status: "denied", error: e.message, enclaveDid: this._signer?.enclaveDid || "unknown", telemetry: tel.getMetrics() });
+        let errorMsg = e.message || 'Unknown error';
+        const isTerminal = e instanceof TerminalRefusalError || e.name === 'TerminalRefusalError';
+        
+        console.error(`[Aegis-12] Internal Error:`, e);
+
+        // SEC-05: Global Error Sanitization (VULN-002 / VULN-003)
+        // Ensure we don't leak stack traces or raw unvalidated payload data
+        if (!errorMsg.startsWith('Action denied by Aegis Enclave')) {
+            errorMsg = `Action denied by Aegis Enclave: ${isTerminal ? errorMsg : 'Internal validation failure.'}`;
+        }
+        
+        return JsonUtils.stableStringify({ status: "denied", error: errorMsg, enclaveDid: this._signer?.enclaveDid || "unknown", telemetry: tel.getMetrics() });
     }
 
     private anchorDeniedIfSafe(e: any): void {
