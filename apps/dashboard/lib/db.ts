@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, QueryResultRow } from 'pg';
 
 // Create a single connection pool for the entire Next.js application
 const pool = new Pool({
@@ -11,7 +11,7 @@ export const db = {
     /**
      * Executes a raw SQL query using the connection pool.
      */
-    query: async <T = any>(text: string, params?: any[]) => {
+    query: async <T extends QueryResultRow = any>(text: string, params?: any[]) => {
         if (!process.env.DATABASE_URL && process.env.USE_MOCK_REPO !== 'true') {
             throw new Error("DATABASE_URL is not defined in the environment variables.");
         }
