@@ -16,7 +16,7 @@ export default defineConfig({
         timeout: 15000,
     },
     use: {
-        baseURL: 'https://agent-trust-protocol-production.up.railway.app',
+        baseURL: process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app',
         trace: 'on-first-retry',
         screenshot: 'only-on-failure',
         video: 'retain-on-failure',
