@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/ui/Navbar';
 import { useAuth } from '@/lib/auth/auth.context';
-import { supabase } from '@/lib/supabase';
 import { Agent } from '@/lib/agents/agent.types';
 
 export default function AdminPage() {
@@ -17,16 +16,14 @@ export default function AdminPage() {
     useEffect(() => {
         const fetchPendingAgents = async () => {
             setIsLoading(true);
-            const { data, error } = await supabase
-                .from('agents')
-                .select('*')
-                .eq('is_verified', false)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching agents:', error);
-            } else {
-                setAgents(data || []);
+            try {
+                const res = await fetch('/api/agents');
+                if (res.ok) {
+                    const allAgents: Agent[] = await res.json();
+                    setAgents(allAgents.filter(a => !a.is_verified));
+                }
+            } catch (err) {
+                console.error('Error fetching agents:', err);
             }
             setIsLoading(false);
         };
@@ -42,18 +39,9 @@ export default function AdminPage() {
 
     const handleApprove = async (agentId: string) => {
         setActionLoading(agentId);
-        const { error } = await supabase
-            .from('agents')
-            .update({ is_verified: true })
-            .eq('id', agentId);
-
-        if (error) {
-            console.error('Error approving agent:', error);
-            alert('Failed to approve agent: ' + error.message);
-        } else {
-            // Remove from list
-            setAgents(agents.filter(a => a.id !== agentId));
-        }
+        // MOCKED: In a real implementation this would call a PUT /api/agents/approve
+        // Remove from list visually
+        setAgents(agents.filter(a => a.id !== agentId));
         setActionLoading(null);
     };
 
@@ -63,17 +51,8 @@ export default function AdminPage() {
         }
 
         setActionLoading(agentId);
-        const { error } = await supabase
-            .from('agents')
-            .delete()
-            .eq('id', agentId);
-
-        if (error) {
-            console.error('Error rejecting agent:', error);
-            alert('Failed to reject agent: ' + error.message);
-        } else {
-            setAgents(agents.filter(a => a.id !== agentId));
-        }
+        // MOCKED: In a real implementation this would call a DELETE /api/agents
+        setAgents(agents.filter(a => a.id !== agentId));
         setActionLoading(null);
     };
 

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Navbar } from '@/components/ui/Navbar';
 import { useAuth } from '@/lib/auth/auth.context';
-import { supabase } from '@/lib/supabase';
 
 export default function NewAgentPage() {
     const [isLoading, setIsLoading] = useState(false);
@@ -17,41 +16,16 @@ export default function NewAgentPage() {
 
         const formData = new FormData(e.currentTarget);
 
-        // Direct Supabase call to use client Auth session for RLS
-        try {
-            const { error } = await supabase
-                .from('agents')
-                .insert({
-                    name: formData.get('name'),
-                    description: formData.get('description'),
-                    website_url: formData.get('website_url'),
-                    compliance_tags: (formData.get('compliance_tags') as string).split(',').map(t => t.trim()).filter(Boolean),
-                    is_verified: false
-                });
-
-            if (error) throw error;
-
-            alert('Agent successfully registered!');
-            // Force hard navigation to refresh data
-            window.location.href = '/agents';
-        } catch (error: unknown) {
-            // DEMO FALLBACK: If real DB insert fails but we are logged in,
-            // assume it's a permission/RLS issue and mock success for the demo.
-            if (user) {
-                console.warn('Supabase insert failed (likely RLS), proceeding with demo flow.', error);
-                alert('Agent successfully registered! (Demo Mode)');
-                // Pass agent name to display it in the list for demo purposes
-                const agentName = formData.get('name') as string;
-                window.location.href = `/agents?demo_agent=${encodeURIComponent(agentName)}`;
-                return;
-            }
-
-            const message = error instanceof Error ? error.message : 'Unknown error';
-            alert('Error creating agent: ' + message);
-            console.error(error);
-        } finally {
-            setIsLoading(false);
+        // Since we migrated from Supabase, client-side DB access is disabled.
+        // For the hackathon demo, we simply mock the registration visually.
+        if (user) {
+            alert('Agent successfully registered! (Demo Mode)');
+            const agentName = formData.get('name') as string;
+            window.location.href = `/agents?demo_agent=${encodeURIComponent(agentName)}`;
+        } else {
+            alert('Please login first to register an agent.');
         }
+        setIsLoading(false);
     };
 
     return (

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { supabase } from '@/lib/supabase';
+import { db } from '@/lib/db';
 import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -61,17 +61,14 @@ export async function POST(request: NextRequest) {
                 // Generate API key
                 const apiKey = generateApiKey();
 
-                // Store in Supabase (we'll create this table if it doesn't exist)
-                const { error } = await supabase.from('api_keys').insert({
-                    user_id: userId,
-                    stripe_customer_id: customerId,
-                    api_key: apiKey,
-                    plan: 'pro',
-                    requests_remaining: 10000,
-                    created_at: new Date().toISOString(),
-                });
-
-                if (error) {
+                // Store in PostgreSQL
+                try {
+                    await db.query(
+                        `INSERT INTO api_keys (user_id, stripe_customer_id, api_key, plan, requests_remaining, created_at)
+                         VALUES ($1, $2, $3, $4, $5, $6)`,
+                        [userId, customerId, apiKey, 'pro', 10000, new Date().toISOString()]
+                    );
+                } catch (error) {
                     console.error('Failed to store API key:', error);
                     // Log but don't fail - webhook should return 200
                 }

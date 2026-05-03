@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/ui/Navbar';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth/auth.context';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const router = useRouter();
+    const { login, loginWithEmail, loginWithGoogle } = useAuth();
 
     const handleEmailLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -17,14 +18,8 @@ export default function LoginPage() {
         setMessage(null);
 
         try {
-            const { error } = await supabase.auth.signInWithOtp({
-                email,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/dashboard`,
-                },
-            });
-
-            if (error) throw error;
+            const result = await loginWithEmail(email);
+            if (!result.success) throw new Error(result.message);
 
             setMessage({
                 type: 'success',
@@ -46,14 +41,8 @@ export default function LoginPage() {
         setMessage(null);
 
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
-                },
-            });
-
-            if (error) throw error;
+            await loginWithGoogle();
+            router.push('/dashboard');
         } catch (error) {
             console.error('Google login error:', error);
             setMessage({
@@ -65,21 +54,8 @@ export default function LoginPage() {
     };
 
     const handleDemoLogin = async () => {
-        setIsLoading(true);
-        // Demo login just redirects - the auth context handles the demo fallback
-        const demoEmail = `demo-${Math.random().toString(36).slice(2)}@example.com`;
-        const demoPassword = 'demo-password-123';
-
-        try {
-            const { error } = await supabase.auth.signUp({ email: demoEmail, password: demoPassword });
-            if (error) {
-                // Fallback: set demo user in local state and redirect
-                console.warn('Demo signup failed, using fallback');
-            }
-            router.push('/dashboard');
-        } catch {
-            router.push('/dashboard');
-        }
+        await login();
+        router.push('/dashboard');
     };
 
     return (
