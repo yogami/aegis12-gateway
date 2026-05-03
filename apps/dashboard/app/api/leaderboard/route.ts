@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { Agent } from '@/lib/agents/agent.types';
 
 export const dynamic = 'force-dynamic';
 

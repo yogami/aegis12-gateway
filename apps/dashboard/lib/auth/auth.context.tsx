@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = localStorage.getItem('aegis_mock_user');
         if (storedUser) {
             try {
+                // eslint-disable-next-line
                 setUser(JSON.parse(storedUser));
             } catch (e) {
                 console.error("Failed to parse mock user", e);

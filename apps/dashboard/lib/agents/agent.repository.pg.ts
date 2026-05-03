@@ -20,9 +20,9 @@ export class PgAgentRepository implements AgentRepository {
         try {
             const result = await db.query<Agent>(query, values);
             return result.rows[0];
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error creating agent:', error);
-            throw new Error(error.message);
+            throw new Error(error instanceof Error ? error.message : 'Unknown error');
         }
     }
 
@@ -32,9 +32,9 @@ export class PgAgentRepository implements AgentRepository {
         try {
             const result = await db.query<Agent>(query);
             return result.rows;
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error fetching agents:', error);
-            throw new Error(error.message);
+            throw new Error(error instanceof Error ? error.message : 'Unknown error');
         }
     }
 
@@ -45,7 +45,7 @@ export class PgAgentRepository implements AgentRepository {
             const result = await db.query<Agent>(query, [id]);
             if (result.rows.length === 0) return null;
             return result.rows[0];
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error fetching agent:', error);
             return null;
         }

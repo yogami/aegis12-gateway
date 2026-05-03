@@ -8,7 +8,7 @@ export default function FirewallSimulatorPage() {
     const [txType, setTxType] = useState('transfer');
     const [amount, setAmount] = useState(100);
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<Record<string, unknown> | null>(null);
 
     const handleSimulate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,7 +39,7 @@ export default function FirewallSimulatorPage() {
                         Wallet Firewall Simulator
                     </h1>
                     <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        Test how the Aegis-12 deterministic firewall enforces on-chain security policies based on an agent's TrustScore tier.
+                        Test how the Aegis-12 deterministic firewall enforces on-chain security policies based on an agent&apos;s TrustScore tier.
                     </p>
                 </div>
 
@@ -136,7 +136,7 @@ export default function FirewallSimulatorPage() {
                                 {result.flags && result.flags.length > 0 && (
                                     <div className="space-y-3">
                                         <p className="text-slate-400 text-sm uppercase">Security Flags Triggered</p>
-                                        {result.flags.map((flag: any, i: number) => (
+                                        {result.flags.map((flag: { severity: string; rule: string; detail: string }, i: number) => (
                                             <div key={i} className="bg-slate-800 p-3 rounded border border-slate-700">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="px-2 py-0.5 bg-red-900/50 text-red-400 text-xs font-bold rounded">

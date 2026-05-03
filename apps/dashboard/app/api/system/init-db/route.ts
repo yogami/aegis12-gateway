@@ -61,11 +61,11 @@ export async function GET() {
             success: true, 
             message: "Database initialized successfully! Tables created and seed data inserted." 
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error("Database initialization failed:", error);
         return NextResponse.json({ 
             success: false, 
-            error: error.message 
+            error: error instanceof Error ? error.message : 'Unknown error'
         }, { status: 500 });
     }
 }

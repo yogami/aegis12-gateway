@@ -19,7 +19,7 @@ export default function Dashboard() {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Active Policies</h2>
           <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-            You haven't configured any hardware constraints for your autonomous agents yet. Use the Aegis-12 SDK to deploy rules.
+            You haven&apos;t configured any hardware constraints for your autonomous agents yet. Use the Aegis-12 SDK to deploy rules.
           </p>
           <a href="#" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">
             Read the SDK Documentation &rarr;

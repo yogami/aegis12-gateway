@@ -7,7 +7,7 @@ import { AgentMaturity } from "../maturity.types";
 
 describe('MaturityService', () => {
     let service: MaturityService;
-    const now = new Date().toISOString();
+
 
     beforeEach(() => {
         service = new MaturityService();

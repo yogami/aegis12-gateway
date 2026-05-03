@@ -125,14 +125,14 @@ export default function VaultBotSimulator() {
               <div className="bg-black border border-gray-800 p-4 rounded-lg font-mono text-sm text-gray-300">
                 {scenario === 'safe' ? (
                   <div>
-                    <p className="text-blue-400">// Intent: Pay Contractor</p>
+                    <p className="text-blue-400">{&apos;// Intent: Pay Contractor&apos;}</p>
                     <p>Amount: 500 USDC</p>
                     <p>Destination: 8xRy...q9a</p>
                     <p>Program: TokenProgram.transfer</p>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-red-400">// Intent: Stealth Takeover</p>
+                    <p className="text-red-400">{&apos;// Intent: Stealth Takeover&apos;}</p>
                     <p>Amount: 1,500,000 USDC</p>
                     <p>Destination: North Korea Associated (OFAC)</p>
                     <p>Program: SystemProgram.assign</p>
