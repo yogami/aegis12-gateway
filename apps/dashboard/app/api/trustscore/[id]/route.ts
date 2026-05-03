@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { TrustScoreService } from '@/lib/trustscore/trustscore.service';
-import { SupabaseAgentRepository } from '@/lib/agents/agent.repository.supabase';
+import { PgAgentRepository } from '@/lib/agents/agent.repository.pg';
 
 import { MockAgentRepository } from '@/lib/agents/agent.repository.mock';
 
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 const trustScoreService = new TrustScoreService();
 const agentRepository = process.env.USE_MOCK_REPO === 'true'
     ? new MockAgentRepository()
-    : new SupabaseAgentRepository();
+    : new PgAgentRepository();
 
 export async function GET(
     request: Request,

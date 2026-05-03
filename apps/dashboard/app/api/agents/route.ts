@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { SupabaseAgentRepository } from '@/lib/agents/agent.repository.supabase';
+import { PgAgentRepository } from '@/lib/agents/agent.repository.pg';
 import { CreateAgentDTO } from '@/lib/agents/agent.types';
 
 import { MockAgentRepository } from '@/lib/agents/agent.repository.mock';
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 const agentRepository = process.env.USE_MOCK_REPO === 'true'
     ? new MockAgentRepository()
-    : new SupabaseAgentRepository();
+    : new PgAgentRepository();
 
 export async function GET() {
     const agents = await agentRepository.getAgents();

@@ -1,5 +1,5 @@
 import { AgentService } from '@/lib/agents/agent.service';
-import { SupabaseAgentRepository } from '@/lib/agents/agent.repository.supabase';
+import { PgAgentRepository } from '@/lib/agents/agent.repository.pg';
 import { AgentDirectory } from '@/components/ui/AgentDirectory';
 import { Navbar } from '@/components/ui/Navbar';
 
@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 // Initialize service with Repo (Mock or Real)
 const agentRepository = process.env.USE_MOCK_REPO === 'true'
     ? new MockAgentRepository()
-    : new SupabaseAgentRepository();
+    : new PgAgentRepository();
 
 const agentService = new AgentService(agentRepository);
 

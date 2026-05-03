@@ -1,10 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { User as SupabaseUser } from '@supabase/supabase-js';
 
-// Define the shape of our user object (simplified)
 interface User {
     id: string;
     email?: string;
@@ -28,105 +25,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
-                setUser(mapSupabaseUser(session.user));
+        // Load mock session from local storage on mount
+        const storedUser = localStorage.getItem('aegis_mock_user');
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Failed to parse mock user", e);
             }
-            setIsLoading(false);
-        });
-
-        // Listen for changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (session?.user) {
-                setUser(mapSupabaseUser(session.user));
-            } else {
-                setUser(null);
-            }
-            setIsLoading(false);
-        });
-
-        return () => subscription.unsubscribe();
+        }
+        setIsLoading(false);
     }, []);
+
+    const setAndStoreUser = (newUser: User | null) => {
+        setUser(newUser);
+        if (newUser) {
+            localStorage.setItem('aegis_mock_user', JSON.stringify(newUser));
+        } else {
+            localStorage.removeItem('aegis_mock_user');
+        }
+    };
 
     const login = async () => {
         setIsLoading(true);
-        // Login Demo: Create a random user to allow RLS to work without full email flow
-        const email = `demo-${Math.random().toString(36).slice(2)}@example.com`;
-        const password = 'demo-password-123';
-
-        try {
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-            });
-            if (error) {
-                // If signup fails (e.g. rate limit), try sign in with strict creds (fallback)
-                const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-                if (signInError) throw signInError;
-            }
-        } catch (e) {
-            console.error("Auth failed, falling back to mock user for demo:", e);
-            // FALLBACK FOR DEMO/TESTING: If real auth fails, just simulate a logged-in user
-            // This ensures the demo always "works" for the end user even if Supabase has limits
-            setUser({
-                id: 'demo-user-id',
-                email: email,
-                name: 'Demo User (Fallback)',
-                organization: 'Demo Org'
-            });
-        } finally {
-            setIsLoading(false);
-        }
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        const mockEmail = `demo-${Math.random().toString(36).slice(2)}@example.com`;
+        
+        setAndStoreUser({
+            id: 'mock-user-id',
+            email: mockEmail,
+            name: 'Demo Admin',
+            organization: 'Aegis-12 Security'
+        });
+        
+        setIsLoading(false);
     };
 
     const loginWithEmail = async (email: string): Promise<{ success: boolean; message: string }> => {
         setIsLoading(true);
-        try {
-            const { error } = await supabase.auth.signInWithOtp({
-                email,
-                options: {
-                    emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
-                },
-            });
-            if (error) throw error;
-            return { success: true, message: 'Check your email for a magic link!' };
-        } catch (e) {
-            console.error('Email login error:', e);
-            return { success: false, message: e instanceof Error ? e.message : 'Failed to send magic link' };
-        } finally {
-            setIsLoading(false);
-        }
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        setAndStoreUser({
+            id: 'mock-user-id',
+            email: email,
+            name: email.split('@')[0],
+            organization: 'Aegis-12 Security'
+        });
+        
+        setIsLoading(false);
+        return { success: true, message: 'Logged in securely.' };
     };
 
     const loginWithGoogle = async (): Promise<void> => {
-        setIsLoading(true);
-        try {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'google',
-                options: {
-                    redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
-                },
-            });
-            if (error) throw error;
-        } catch (e) {
-            console.error('Google login error:', e);
-        } finally {
-            setIsLoading(false);
-        }
+        await login(); // Just use the same mock flow
     };
 
     const logout = async () => {
-        await supabase.auth.signOut();
-        setUser(null);
+        setAndStoreUser(null);
     };
-
-    const mapSupabaseUser = (u: SupabaseUser): User => ({
-        id: u.id,
-        email: u.email,
-        name: u.email?.split('@')[0] || 'Demo User',
-        organization: 'Demo Org'
-    });
 
     return (
         <AuthContext.Provider value={{ user, login, loginWithEmail, loginWithGoogle, logout, isLoading }}>
