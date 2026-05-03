@@ -4,6 +4,14 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
+      - 'aegis-zk-prover/**'
+      - 'scripts/**'
+      - 'Dockerfile*'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
   workflow_dispatch: # Allows manual trigger from the GitHub UI
 
 jobs:
