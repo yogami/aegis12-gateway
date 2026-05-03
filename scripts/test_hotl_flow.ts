@@ -16,7 +16,7 @@ async function runHotlAudit() {
         action: {
             toolId: "solana_transfer",
             actionType: "EXECUTE",
-            parameters: { to: "AttackerWallet", amount: 50_000_000_000 } // 50k USDC
+            parameters: { to: "AttackerWallet", amount: 50_000_000_000, token: "SOL" } // 50k SOL
         },
         context: { sessionId: "session_1", actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.0, recentIncidents: 0 },
         dynamicPolicy: {
