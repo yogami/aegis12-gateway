@@ -8,7 +8,7 @@ export default function FirewallSimulatorPage() {
     const [txType, setTxType] = useState('transfer');
     const [amount, setAmount] = useState(100);
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<Record<string, unknown> | null>(null);
+    const [result, setResult] = useState<any>(null);
 
     const handleSimulate = async (e: React.FormEvent) => {
         e.preventDefault();
