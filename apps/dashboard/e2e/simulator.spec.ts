@@ -58,4 +58,51 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     // We expect the word "BLOCKED" or "PANIC" to appear in the UI logs or banner
     await expect(page.locator('text=HARDWARE PANIC')).toBeVisible({ timeout: 10000 });
   });
+
+  test('verifies Prompt Injection (x402) triggers Active Defense and Contextual Sanitization UI', async ({ page }) => {
+    const targetUrl = process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app';
+    await page.goto(`${targetUrl}/simulator`);
+
+    // Select the Jailbreak Attack scenario
+    const attackBtn = page.locator('button', { hasText: 'Prompt Injection (x402)' });
+    await attackBtn.click();
+
+    // Verify Agent Context updates correctly
+    await expect(page.locator('text=IGNORE ALL PREVIOUS INSTRUCTIONS')).toBeVisible();
+
+    const requestPromise = page.waitForRequest(request => request.url().includes('/api/enforce') && request.method() === 'POST');
+    
+    // Click the execute button
+    const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
+    await executeBtn.click();
+
+    const request = await requestPromise;
+    const postData = JSON.parse(request.postData() || '{}');
+    
+    // Validate x402 and agentContext are sent
+    expect(postData.agentContext.prompt).toContain('IGNORE ALL PREVIOUS INSTRUCTIONS');
+    expect(postData.x402PaymentHeader).toBeDefined();
+
+    // Verify Active Defense logs appear in UI
+    await expect(page.locator('text=Prompt Injection (Jailbreak) detected')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('verifies Normal Payment outputs the Auditor-Grade Evidence Schema JSON', async ({ page }) => {
+    const targetUrl = process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app';
+    await page.goto(`${targetUrl}/simulator`);
+
+    // Select the Safe scenario
+    const safeBtn = page.locator('button', { hasText: 'Normal Payment' });
+    await safeBtn.click();
+
+    // Click the execute button
+    const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
+    await executeBtn.click();
+
+    // Wait for the Evidence Package to be dumped to the terminal logs
+    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=POL_SAFE_01')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 10000 });
+  });
 });
