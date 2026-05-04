@@ -158,23 +158,28 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
         const memoLog = tx!.meta?.logMessages?.find(log => log.includes('Program log: Memo'));
         expect(memoLog, "Transaction must contain an SPL Memo").toBeDefined();
         
-        // Format: aegis:v4-pq:<actionId>:<hashPrefix>:<decision>:<didSuffix>:<timestamp>
         const memoMatch = memoLog!.match(/Memo \(len \d+\): "(.*?)"/);
         expect(memoMatch, "Memo must match structured format").not.toBeNull();
         const memoStr = memoMatch![1];
-        const memoParts = memoStr.split(':');
         
         console.log(`[Substance] On-Chain Memo: ${memoStr}`);
+        
+        expect(memoStr.startsWith('a12:'), "Memo must have a12 prefix").toBeTruthy();
+        const base64Payload = memoStr.substring(4);
+        const decodedStr = Buffer.from(base64Payload, 'base64url').toString('utf8');
+        const memoObj = JSON.parse(decodedStr);
 
-        expect(memoParts[0], "Version must match").toBe('aegis');
-        expect(memoParts[1], "Sub-version must be V4 Post-Quantum").toBe('v4-pq');
-        expect(memoParts[2], "Action ID must match receipt").toBe(receipt.actionId);
+        expect(memoObj.v, "Version must match").toBe('aegis:v8');
         
-        expect(memoParts[4], "Decision must be recorded on-chain").toBe('approved');
+        // Due to async batching, the on-chain action ID might be a batch ID
+        if (memoObj.act.startsWith('batch-')) {
+            expect(memoObj.act, "Action ID is batched").toMatch(/^batch-\d+-\d+$/);
+        } else {
+            expect(memoObj.act, "Action ID must match receipt").toBe(receipt.actionId);
+        }
         
-        const enclaveDid = body.enclaveDid;
-        const didSuffix = enclaveDid.substring(enclaveDid.lastIndexOf(':') + 1);
-        expect(memoParts[5], "Enclave DID Suffix must match").toBe(didSuffix);
+        expect(memoObj.d, "Decision must be recorded on-chain").toBe('approved');
+        expect(memoObj.did, "Enclave DID must match").toBe(body.enclaveDid);
         
         console.log(`[Substance] ✅ SUBSTANCE VERIFIED: Receipt is anchored to Solana with matching cryptographic metadata.`);
     });
