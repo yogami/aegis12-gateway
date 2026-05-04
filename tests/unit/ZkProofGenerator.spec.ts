@@ -38,7 +38,7 @@ describe('ZkProofGenerator', () => {
         await ZkProofGenerator.generate(mockReceipt as any, 'test_nonce', mockPep);
         
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Amount exceeds ZK capacity'));
-        expect(mockPep.updateZkSeal).not.toHaveBeenCalled();
+        expect(mockPep.updateZkSeal).toHaveBeenCalledWith('receipt-123', { seal: 'FAILED', vkey: 'Amount exceeds ZK capacity.' });
         consoleSpy.mockRestore();
     });
 });

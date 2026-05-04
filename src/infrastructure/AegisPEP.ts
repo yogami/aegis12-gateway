@@ -73,6 +73,14 @@ export class AegisPEP {
             const { sanit } = normalized;
             const limits = this.getValidatedLimits(request);
 
+            // [ACTIVE DEFENSE] Pre-Hashing Contextual Sanitization
+            if (request.agentContext?.prompt) {
+                const promptUpper = request.agentContext.prompt.toUpperCase();
+                if (promptUpper.includes('IGNORE ALL PREVIOUS INSTRUCTIONS') || promptUpper.includes('MALICIOUS_INTENT')) {
+                    throw new TerminalRefusalError('Malicious intent detected in context prompt.');
+                }
+            }
+
             await this.reserveNonce(ctx.scopedNonce);
             ctx.nonceReserved = true;
 
@@ -236,7 +244,7 @@ export class AegisPEP {
     }
 
     private assembleReceipt(req: PolicyEvaluationRequest, sanit: any, tenantId: string, nonce: string, decision: 'approved' | 'denied' | 'escalated', logHash: string, ts: string): AegisComplianceReceipt {
-        return {
+        const receipt: AegisComplianceReceipt = {
             receiptId: `aegis-v1-${tenantId}-${keccak256(tenantId + "::" + nonce + "::" + logHash).toString('hex').substring(0, 16)}`,
             actionId: req.action.actionId || `act-${nonce}`,
             toolId: req.action.toolId,
@@ -256,6 +264,24 @@ export class AegisPEP {
             signature: "",
             enclaveDid: this.signer.enclaveDid
         };
+
+        if (req.agentContext) {
+            receipt.evidencePackage = {
+                policyId: req.dynamicPolicy!.policyConfig.policyId,
+                riskTier: req.agent?.currentTier || 'unknown',
+                modelVersion: req.agentContext.modelVersion || 'unknown',
+                jurisdiction: req.agentContext.jurisdiction || 'unknown',
+                actionTaxonomy: req.action.toolId,
+                intentHash: '0x' + keccak256(Buffer.from(req.agentContext.prompt || '', 'utf8')).toString('hex'),
+                timestamp: Math.floor(new Date(ts).getTime() / 1000)
+            };
+        }
+
+        if ((req as any).x402PaymentHeader) {
+            receipt.x402PaymentHeader = (req as any).x402PaymentHeader;
+        }
+
+        return receipt;
     }
 
     public async saveEvidence(receipt: AegisComplianceReceipt, ledgerTxHash?: string): Promise<void> {

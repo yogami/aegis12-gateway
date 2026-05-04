@@ -62,8 +62,10 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
             },
             agent: { did: 'did:aegis:substance-test', purpose: 'financial_operations', currentTier: 'T1' },
             context: { sessionId: 'substance', actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
+            agentContext: { prompt: "Substance test prompt validation", modelVersion: "GPT-Substance", jurisdiction: "GLOBAL" },
+            x402PaymentHeader: "mock_solana_tx_signature_x402",
             dynamicPolicy: { policyConfig, ownerPublicKey: e2eWallet.address, signature },
-        };
+        } as any;
 
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
         const res = await request.post('/enforce', { data: payload });
@@ -85,6 +87,16 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
         expect(attestation, "TEE Attestation must not be mocked").not.toBe("not_available_in_mock");
         expect(pcr0, "PCR0 Measurement must be present").toBeDefined();
         expect(pcr0.length, "PCR0 must be a valid SHA-256 hash").toBe(64);
+
+        // 2.5 EVIDENCE PACKAGE SUBSTANCE VALIDATION
+        const ep = receipt.evidencePackage;
+        expect(ep, "Auditor-grade evidence package must exist in receipt").toBeDefined();
+        expect(ep.riskTier, "Risk Tier must match").toBe("T1");
+        expect(ep.modelVersion, "Model version must be attached").toBe("GPT-Substance");
+        expect(ep.jurisdiction, "Jurisdiction must be attached").toBe("GLOBAL");
+        expect(ep.intentHash, "Intent hash must exist").toBeDefined();
+        expect(ep.actionTaxonomy, "Taxonomy must be recorded").toBe("solana_transfer");
+        expect(receipt.x402PaymentHeader, "x402 payment header must be cryptographically bound").toBe("mock_solana_tx_signature_x402");
 
         // 3. ZK SUBSTANCE VALIDATION
         expect(zkSeal, "ZK Seal must not be mocked").not.toBe("mock-seal-for-demo");

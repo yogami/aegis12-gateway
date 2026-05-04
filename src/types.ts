@@ -59,6 +59,16 @@ export interface AegisIntentEnvelope {
     tee_signature?: string; // The Ed25519 signature from the Phala TEE
 }
 
+export interface EvidencePackage {
+    policyId: string;
+    riskTier: string;
+    modelVersion: string;
+    jurisdiction: string;
+    actionTaxonomy: string;
+    intentHash: string;
+    timestamp: number;
+}
+
 /**
  * AegisComplianceReceipt (v1.0.0)
  * 
@@ -91,6 +101,8 @@ export interface AegisComplianceReceipt {
     validatedParams?: Record<string, unknown>; // [AUDIT-GRADE] Sanitized whitelisted parameters
     decision: 'approved' | 'denied' | 'escalated'; // [AUDIT-GRADE] The final gateway decision
     envelope?: AegisIntentEnvelope; // [ARTICLE 14] The cryptographically bound envelope if escalated
+    evidencePackage?: EvidencePackage; // [AUDITOR-GRADE] JSON schema mapping for MiCA/NIST
+    x402PaymentHeader?: string;     // [PAYMENT] Bound payment header for the execution
     enclaveDid: string;             // [AUDIT-GRADE] Hardware identity of the signing enclave
     zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
         journal: any;
@@ -169,6 +181,11 @@ export interface PolicyEvaluationRequest {
         currentAnomalyScore: number;
         recentIncidents: number;
         currentSlot?: number; // Added for Solana HOTL slot bounds
+    };
+    agentContext?: {
+        prompt: string;
+        modelVersion: string;
+        jurisdiction: string;
     };
     dynamicPolicy?: {
         policyConfig: {

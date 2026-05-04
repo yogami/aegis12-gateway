@@ -38,8 +38,14 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
                 },
                 estimatedValue: 1000
             },
-            context: { sessionId: "session-1", actionsThisSession: 2, actionsThisHour: 5, currentAnomalyScore: 0.1, recentIncidents: 0 }
-        };
+            context: { sessionId: "session-1", actionsThisSession: 2, actionsThisHour: 5, currentAnomalyScore: 0.1, recentIncidents: 0 },
+            agentContext: {
+                prompt: "Execute standard daily treasury swap as planned.",
+                modelVersion: "Llama-3.1-70B-Instruct",
+                jurisdiction: "EU_MiCA"
+            },
+            x402PaymentHeader: "mock_solana_tx_signature_x402"
+        } as any;
 
         const responseString = await phalaEntrypoint(JSON.stringify(authorizedPayload));
         const res = JSON.parse(responseString);
@@ -49,6 +55,12 @@ describe('AegisPEP & Phala Entrypoint (E2E)', () => {
         // Check TEE cryptographic signature is present
         expect(res.receipt.signature).toBeDefined();
         expect(res.enclaveDid).toMatch(/^did:aegis:enclave/i);
+
+        // x402-PoI Fusion Assertions
+        expect(res.receipt.evidencePackage).toBeDefined();
+        expect(res.receipt.evidencePackage.riskTier).toBe(TrustTier.T4);
+        expect(res.receipt.evidencePackage.jurisdiction).toBe("EU_MiCA");
+        expect(res.receipt.x402PaymentHeader).toBe("mock_solana_tx_signature_x402");
     });
 
     it('should enact a TERMINAL REFUSAL when T4 maximum value limit is exceeded', async () => {
