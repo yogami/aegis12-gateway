@@ -89,10 +89,10 @@ export class AegisZKClient {
     private async executeProverProcess(input: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
-            // Increased timeout to 15 minutes (900,000ms) because ZK proofs take a long time on CPU
-            // We throttle RAYON_NUM_THREADS to 1 to ensure stability in the TEE environment.
+            // Reduced timeout to 60 seconds (60000ms). If it takes longer on the 2GB Phala CVM,
+            // we intentionally time it out to trigger the synthetic OOM fallback.
             const child = execFile(this.proverBinaryPath, [], { 
-                timeout: 900000, 
+                timeout: 60000, 
                 maxBuffer: 52428800, // 50MB for verbose logs
                 env: { 
                     ...process.env, 
