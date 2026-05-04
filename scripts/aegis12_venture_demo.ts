@@ -218,7 +218,7 @@ async function runDemo() {
         console.log(`🔍 [AUDITOR]: Polling /evidence endpoint for Receipt ID: ${receiptId}`);
 
         let zkVerified = false;
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 40; i++) {
             try {
                 const evidenceRes = await fetch(`${EVIDENCE_URL}/${receiptId}`);
                 if (evidenceRes.ok) {
