@@ -20,7 +20,8 @@ interface AgentsPageProps {
 }
 
 export default async function AgentsPage({ searchParams }: AgentsPageProps) {
-    const agents = await agentService.getAgents();
+    const allAgents = await agentService.getAgents();
+    const agents = allAgents.filter(a => a.is_verified);
     const resolvedSearchParams = await searchParams;
     const demoAgentName = resolvedSearchParams.demo_agent as string | undefined;
 
@@ -51,9 +52,12 @@ export default async function AgentsPage({ searchParams }: AgentsPageProps) {
                     <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 dark:from-blue-400 dark:via-indigo-300 dark:to-violet-400">
                         Agent Directory
                     </h1>
-                    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto mb-6">
                         Discover verified and compliant AI agents for the Berlin digital health ecosystem.
                     </p>
+                    <a href="/admin/agents/new" className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        Register New Agent
+                    </a>
                 </header>
 
                 <AgentDirectory agents={agents} />

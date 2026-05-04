@@ -14,9 +14,11 @@ test.describe('Authentication Flow', () => {
     // Expect redirect to dashboard
     await expect(page).toHaveURL(/.*\/dashboard/);
 
-    // Verify the mock auth state in the Navbar
-    // The navbar should display the demo admin's name
-    const navbarText = await page.getByText('Demo Admin').isVisible();
-    expect(navbarText).toBeTruthy();
+    // Verify the mock auth state persists across hard navigations
+    await page.reload();
+    await expect(page).toHaveURL(/.*\/dashboard/);
+    
+    // The navbar should display the Firewall Panel button for authenticated users
+    await expect(page.getByRole('link', { name: 'Firewall Panel' })).toBeVisible({ timeout: 10000 });
   });
 });
