@@ -52,6 +52,7 @@ jobs:
           PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
         run: |
           echo "Running full automated compliance testing matrix against Phala..."
+          export TEST_API_URL="$PHALA_CLOUD_URL"
           npx vitest run tests/e2e/AegisPEP.e2e.spec.ts
           npx vitest run tests/chaos.spec.ts
           npx playwright test e2e/evidence_substance.spec.ts
