@@ -24,7 +24,7 @@ jobs:
 
       - name: Wait for Phala Deployment
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc.app.phala.network'
+          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
         run: |
           echo "Waiting for Phala CVM Deployment to propagate..."
           MAX_RETRIES=60
@@ -32,7 +32,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             # The health endpoint or evidence endpoint
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PHALA_CLOUD_URL/evidence")
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$PHALA_CLOUD_URL/health" || echo "000")
             if [ "$HTTP_STATUS" == "200" ] || [ "$HTTP_STATUS" == "404" ] || [ "$HTTP_STATUS" == "402" ]; then
               echo "Phala CVM is online (Status: $HTTP_STATUS)!"
               break
@@ -49,7 +49,7 @@ jobs:
 
       - name: Execute Test Suites against Live Phala Environment
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc.app.phala.network'
+          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
         run: |
           echo "Running full automated compliance testing matrix against Phala..."
           npx vitest run tests/e2e/AegisPEP.e2e.spec.ts
