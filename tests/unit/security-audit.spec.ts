@@ -44,8 +44,9 @@ describe('SEC-01: CLINICIAN Role Must Have Action Restrictions', () => {
         // the controller proceeds to enclave.initialize(), not reply.status(403).
         // We verify by reading the source to confirm the allowlist is properly defined.
         const fs = await import('fs');
+        const path = await import('path');
         const controllerCode = fs.readFileSync(
-            '/Users/user1000/gitprojects/aegis12-gateway/src/infrastructure/web/AegisController.ts',
+            path.resolve(process.cwd(), 'src/infrastructure/web/AegisController.ts'),
             'utf-8'
         );
         
@@ -154,8 +155,9 @@ describe('SEC-08: CVM 404 Must Not Reflect Raw URL', () => {
         // Since we can't easily spin up the raw HTTP server in a unit test,
         // we verify the fix by checking the source code pattern.
         const fs = await import('fs');
+        const path = await import('path');
         const serverCode = fs.readFileSync(
-            '/Users/user1000/gitprojects/aegis12-gateway/src/phala_cvm_server.ts',
+            path.resolve(process.cwd(), 'src/phala_cvm_server.ts'),
             'utf-8'
         );
 
@@ -170,8 +172,9 @@ describe('SEC-08: CVM 404 Must Not Reflect Raw URL', () => {
 describe('SEC-09: Controller Must Not Log Full Payloads', () => {
     it('should not log the full enforce result JSON', async () => {
         const fs = await import('fs');
+        const path = await import('path');
         const controllerCode = fs.readFileSync(
-            '/Users/user1000/gitprojects/aegis12-gateway/src/infrastructure/web/AegisController.ts',
+            path.resolve(process.cwd(), 'src/infrastructure/web/AegisController.ts'),
             'utf-8'
         );
 
@@ -186,8 +189,9 @@ describe('SEC-09: Controller Must Not Log Full Payloads', () => {
 describe('SEC-02: CVM Server Must Enforce Body Size Limits', () => {
     it('should have a MAX_BODY_SIZE constant in the CVM server', async () => {
         const fs = await import('fs');
+        const path = await import('path');
         const serverCode = fs.readFileSync(
-            '/Users/user1000/gitprojects/aegis12-gateway/src/phala_cvm_server.ts',
+            path.resolve(process.cwd(), 'src/phala_cvm_server.ts'),
             'utf-8'
         );
 
@@ -202,8 +206,9 @@ describe('SEC-02: CVM Server Must Enforce Body Size Limits', () => {
 describe('SEC-03: CVM Evidence Lookup Must Sanitize Receipt ID', () => {
     it('should validate receiptId with assertSafeIdentifier', async () => {
         const fs = await import('fs');
+        const path = await import('path');
         const serverCode = fs.readFileSync(
-            '/Users/user1000/gitprojects/aegis12-gateway/src/phala_cvm_server.ts',
+            path.resolve(process.cwd(), 'src/phala_cvm_server.ts'),
             'utf-8'
         );
 
