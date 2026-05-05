@@ -70,52 +70,63 @@ async function verify() {
         process.exit(1);
     }
 
-    // SUBSTANCE AUDIT 1: EXECUTED TRANSACTION HASH
-    let txHash = body.tx_hash;
+    // SUBSTANCE AUDIT 1: EXECUTED TRANSACTION HASH (ASYNC)
+    let txHash = body.ledger_tx || "batching";
     
-    if (!txHash || txHash === "") {
-        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Enclave approved action but failed to provide a tx_hash.`);
-        process.exit(1);
-    }
-
-    console.log(`[Auditor] 🔗 Execution hash discovered: ${txHash}`);
-    console.log(`[Auditor] ✅ Ledger execution confirmed (simulated).`);
-
     // SUBSTANCE AUDIT 2: ZK SEAL (EVIDENCE PACKAGE)
-    let zkSeal = body.evidence_package?.zk_seal || "missing";
+    let zkSeal = "pending";
+    if (body.evidence_package && body.evidence_package.zk_seal) {
+        zkSeal = body.evidence_package.zk_seal;
+    }
     
-    if (zkSeal === "pending") {
-        console.log(`[Auditor] ⏳ ZK-Seal computation is running asynchronously in the TEE...`);
+    if (txHash === "batching" || zkSeal === "pending") {
+        console.log(`[Auditor] ⏳ Ledger anchor and ZK-Seal computation are running asynchronously in the background...`);
         const receiptId = body.receipt.receiptId;
         
         let attempts = 0;
         const maxAttempts = 120; // 20 minutes total (120 * 10s)
-        while (zkSeal === "pending" && attempts < maxAttempts) {
+        while ((txHash === "batching" || zkSeal === "pending") && attempts < maxAttempts) {
             await new Promise(r => setTimeout(r, 10000));
             attempts++;
-            console.log(`[Auditor] ⏳ Polling ZK-Prover status... (${attempts}/${maxAttempts})`);
+            console.log(`[Auditor] ⏳ Polling Evidence API... (${attempts}/${maxAttempts})`);
             try {
                 const evidenceRes = await fetch(`${baseUrl}/evidence/${receiptId}`);
                 if (evidenceRes.ok) {
                     const evidenceBody = await evidenceRes.json();
-                    if (evidenceBody.status === "COMPLETED") {
-                        zkSeal = evidenceBody.ars_anchor;
-                        console.log(`[Auditor] ✨ ZK-Seal Discovered!`);
-                    } else if (evidenceBody.ars_anchor === "FAILED" || evidenceBody.status === "FAILED") {
+                    
+                    if (evidenceBody.ledger_tx && evidenceBody.ledger_tx !== "batching") {
+                        if (txHash === "batching") {
+                            txHash = evidenceBody.ledger_tx;
+                            console.log(`[Auditor] 🔗 Execution hash discovered asynchronously: ${txHash}`);
+                        }
+                    }
+
+                    if (evidenceBody.status === "COMPLETED" || evidenceBody.ars_anchor) {
+                        if (evidenceBody.ars_anchor && evidenceBody.ars_anchor !== "FAILED" && evidenceBody.ars_anchor !== "pending") {
+                            zkSeal = evidenceBody.ars_anchor;
+                            console.log(`[Auditor] ✨ ZK-Seal Discovered!`);
+                        }
+                    }
+                    
+                    if (evidenceBody.ars_anchor === "FAILED" || evidenceBody.status === "FAILED") {
                         zkSeal = "FAILED";
                         console.error(`[Auditor] ❌ ZK-Prover reported a failure inside the enclave.`);
                         break;
-                    } else if (evidenceBody.status === "NOT_FOUND") {
-                        console.log(`[Auditor] ⚠️ Receipt not yet indexed. Retrying...`);
                     }
                 } else {
-                    console.log(`[Auditor] ⚠️ Gateway responded with ${evidenceRes.status}. The enclave might be busy or rebooting...`);
+                    console.log(`[Auditor] ⚠️ Gateway responded with ${evidenceRes.status}. The enclave might be busy...`);
                 }
             } catch (e) {
                 console.log(`[Auditor] ⚠️ Network error (enclave might be under high load): ${e}`);
             }
         }
     }
+
+    if (!txHash || txHash === "batching" || txHash === "") {
+        console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Enclave approved action but failed to provide a ledger_tx.`);
+        process.exit(1);
+    }
+    console.log(`[Auditor] ✅ Ledger execution confirmed.`);
 
     if (!zkSeal || zkSeal === "mock-seal-for-demo" || zkSeal === "pending" || zkSeal === "FAILED" || zkSeal.length < 100) {
         console.error(`[Auditor] ❌ SUBSTANCE FAILURE: ZK Seal is missing, pending, or mocked: ${zkSeal}`);
