@@ -45,12 +45,6 @@ jobs:
       - name: Vitest Quality Gate
         run: npx vitest run
 
-      - name: Playwright E2E Quality Gate
-        env:
-          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
-        run: |
-          npx playwright install --with-deps chromium
-          npx playwright test
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
@@ -122,6 +116,16 @@ jobs:
               echo "✅ ZK Prover built successfully inside debian:bookworm (glibc matched)"
             '
 
+      - name: Playwright E2E Quality Gate
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+        run: |
+          mkdir -p aegis-zk-prover/target/release/
+          cp zk-artifacts/aegis-zk-prover aegis-zk-prover/target/release/host
+          export AEGIS_ZK_PROVER_HASH=$(sha256sum aegis-zk-prover/target/release/host | awk '{print $1}')
+          echo "Dynamic Prover Hash for CI: $AEGIS_ZK_PROVER_HASH"
+          npx playwright install --with-deps chromium
+          npx playwright test
       - name: Build and Push Phala CVM Image
         id: docker_build
         uses: docker/build-push-action@v4

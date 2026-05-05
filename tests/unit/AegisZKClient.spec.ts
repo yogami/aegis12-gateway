@@ -19,12 +19,9 @@ describe('AegisZKClient (Unit)', () => {
         process.env = originalEnv;
     });
 
-    it('throws if binary not found when not in simulation/test mode', () => {
+    it('throws if binary not found', () => {
         vi.mocked(fs.existsSync).mockReturnValue(false);
-        const originalEnv = process.env.NODE_ENV;
-        process.env.NODE_ENV = 'production';
         expect(() => new AegisZKClient()).toThrow(/ZK Prover binary not found/);
-        process.env.NODE_ENV = originalEnv;
     });
 
     it('throws if AEGIS_ZK_PROVER_HASH is missing', () => {
