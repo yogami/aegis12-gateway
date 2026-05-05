@@ -16,10 +16,32 @@ async function verify() {
     const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
     console.log(`[Auditor] 🔍 Auditing Substance at ${baseUrl}...`);
 
+    const privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+    const wallet = new ethers.Wallet(privateKey);
+    const nonce = "verify-" + Date.now();
+    
+    const domain = { name: "Aegis-12-Compliance-Matrix", version: "1.0.0", chainId: 1399811149 };
+    const types = { Policy: [
+        { name: 'policyId', type: 'string' }, { name: 'tenantId', type: 'string' },
+        { name: 'version', type: 'string' }, { name: 'chainId', type: 'uint256' },
+        { name: 'crossChainTarget', type: 'string' }, { name: 'maxAnomalyScore', type: 'uint256' },
+        { name: 'financialLimitsString', type: 'string' }, { name: 'expiresAt', type: 'uint256' },
+        { name: 'nonce', type: 'string' }
+    ]};
+
+    const policyConfig = {
+        policyId: "p-audit-001", tenantId: "tenant-001", version: "1.0.0", chainId: 1399811149,
+        crossChainTarget: "solana:devnet", maxAnomalyScore: 100, financialLimitsString: "{\"T4\":1000000}",
+        expiresAt: Math.floor(Date.now() / 1000) + 3600, nonce: nonce
+    };
+
+    const signature = await wallet._signTypedData(domain, types, policyConfig);
+
     const payload = {
         agent: { id: "agent-audit-001", tenantId: "tenant-001", currentTier: "T4" },
         action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 1, token: "SOL" } },
-        context: { timestamp: new Date().toISOString(), currentAnomalyScore: 0.1 }
+        context: { timestamp: new Date().toISOString(), currentAnomalyScore: 0.1 },
+        dynamicPolicy: { policyConfig, ownerPublicKey: wallet.address, signature }
     };
 
     const response = await fetch(`${baseUrl}/sign_and_execute`, {
@@ -106,10 +128,15 @@ async function verify() {
     // SUBSTANCE AUDIT 4: HOTL ESCALATION
     console.log(`[Auditor] 🔍 Auditing Article 14 (HOTL) Cryptographic Envelope...`);
     
+    const hotlNonce = "hotl-" + Date.now();
+    const hotlPolicyConfig = { ...policyConfig, nonce: hotlNonce };
+    const hotlSignature = await wallet._signTypedData(domain, types, hotlPolicyConfig);
+
     const hotlPayload = {
         agent: { id: "agent-audit-001", tenantId: "tenant-001", currentTier: "T4" },
         action: { toolId: "solana_transfer", actionType: "transfer", parameters: { to: "11111111111111111111111111111111", amount: 5000000000000, token: "SOL" } },
-        context: { timestamp: new Date().toISOString(), currentAnomalyScore: 0.1 }
+        context: { timestamp: new Date().toISOString(), currentAnomalyScore: 0.1 },
+        dynamicPolicy: { policyConfig: hotlPolicyConfig, ownerPublicKey: wallet.address, signature: hotlSignature }
     };
 
     const hotlResponse = await fetch(`${baseUrl}/sign_and_execute`, {
