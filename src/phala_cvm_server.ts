@@ -91,7 +91,7 @@ const server = http.createServer(async (req, res) => {
         return;
     }
 
-    const isAegisRoute = req.url?.includes("/enforce") || req.url?.includes("/evidence");
+    const isAegisRoute = req.url?.includes("/sign_and_execute") || req.url?.includes("/evidence");
 
     if (req.method === "POST" && isAegisRoute) {
         let body = "";
@@ -147,7 +147,7 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ 
             status: "error", 
             error: "Enclave Invalid Route",
-            suggestion: "Try /enforce or /evidence"
+            suggestion: "Try /sign_and_execute or /evidence"
         }));
     }
 });
