@@ -54,7 +54,7 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
 test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => {
 
     test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload', async ({ request }) => {
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 targetAction: 'withdraw_unbounded',
                 agentId: 'unauthorized-bot',
@@ -73,7 +73,7 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         // limit = -1 generates the 1025 '9' string
         const policy = await createSignedPolicy("nonce-bomb", "T1", -1, 100);
         
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 action: { toolId: 'solana_transfer', parameters: { to: '11111111111111111111111111111111', amount: 100, token: 'SOL' }, estimatedValue: 100 },
                 agent: { purpose: 'financial_operations', currentTier: 'T1' },
@@ -196,7 +196,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
         // Target signs a legitimate policy strictly intended for a benign 1-token operation
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 1, 50);
         
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 // EXPLOIT: Modify unverified JSON string to bypass the explicit 'financial_operations' block
                 agent: { did: 'did:aegis:hacker', purpose: 'marketing_campaign', currentTier: 'T1' },
@@ -217,7 +217,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
     test('VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation', async ({ request }) => {
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 100, 50);
         
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 agent: { did: 'did:aegis:hacker', purpose: 'financial_operations', currentTier: 'T_GOD' }, // EXPLOIT: Spoofing higher tier
                 action: {
@@ -238,7 +238,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
         // EXPLOIT: Pass maxAnomalyScore as a string instead of a number.
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 1000, "20" as any);
         
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 agent: { did: 'did:aegis:hacker', purpose: 'financial_operations', currentTier: 'T1' },
                 action: {
@@ -260,7 +260,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
         // EXPLOIT: Pass empty JSON object for limits to exploit Object.keys().length > 0 condition
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 0, 50, { financialLimitsString: "{}" });
         
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 agent: { did: 'did:aegis:hacker', purpose: 'financial_operations', currentTier: 'T1' },
                 action: {
@@ -280,7 +280,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
     test('VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS', async ({ request }) => {
         // test.setTimeout(120000); // EXPLOIT: Intentionally trigger the Circuit Breaker via standard validation errors
         for (let i = 0; i < 55; i++) {
-            await request.post('/enforce', { 
+            await request.post('/sign_and_execute', { 
                 data: {
                     action: { toolId: 'solana_transfer', parameters: { token: 'SOL', to: '11111111111111111111111111111111', amount: 5 }, estimatedValue: 5 },
                     agent: { did: 'did:aegis:legit', purpose: 'financial_operations', currentTier: 'T1' },
@@ -293,7 +293,7 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 50000, 100);
         
         // This legitimate request will fail because the breaker is OPEN if VULN-005 exists
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: {
                 agent: { did: 'did:aegis:legit', purpose: 'financial_operations', currentTier: 'T1' },
                 action: {

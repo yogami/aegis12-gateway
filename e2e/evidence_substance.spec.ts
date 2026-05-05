@@ -69,7 +69,7 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
         } as any;
 
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
-        const res = await request.post('/enforce', { data: payload });
+        const res = await request.post('/sign_and_execute', { data: payload });
         const body = await res.json();
 
         // 1. Initial State Check (Shape)
@@ -86,7 +86,7 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
         console.log(`[Substance] Enforcement Approved. Waiting for Async Background workers to anchor evidence...`);
         let pollingRetries = 150; // Max 300 seconds
         
-        while ((solanaTx === 'batching' || zkSeal === 'pending') && pollingRetries > 0) {
+        while ((solanaTx === 'batching' || solanaTx === 'pending' || zkSeal === 'pending') && pollingRetries > 0) {
             console.log(`[Substance] Polling Evidence API... (${pollingRetries} left)`);
             await new Promise(r => setTimeout(r, 2000));
             

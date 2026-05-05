@@ -63,7 +63,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         const massiveNonce = 'A'.repeat(50000) + crypto.randomUUID();
         const policy = await createSignedPolicy(massiveNonce);
 
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: buildPayload(1, policy)
         });
         
@@ -81,7 +81,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         const maliciousLimits = JSON.stringify({ "Gold": 1, "perTx": 9999 });
         const policy = await createSignedPolicy(Date.now().toString(), { financialLimitsString: maliciousLimits });
 
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             // Spend amount is 5. If perTx works, this passes (5 < 9999). If Gold limit works, this fails (5 > 1).
             data: buildPayload(5, policy, 'Gold')
         });
@@ -99,7 +99,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         // Attack: Inject an amount that evaluates to Infinity when cast to Number
         const policy = await createSignedPolicy(Date.now().toString(), { financialLimitsString: JSON.stringify({ "T1": 10000000 }) });
 
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: buildPayload("9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999", policy)
         });
 
@@ -119,7 +119,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
         for (let i = 0; i < 15; i++) {
             const policyPromise = createSignedPolicy(`nonce-breaker-${i}-${crypto.randomUUID()}`).then(policy => {
                 policy.signature = "0x" + "00".repeat(65);
-                return request.post('/enforce', {
+                return request.post('/sign_and_execute', {
                     data: buildPayload(1, policy, 'T1')
                 }).then(r => r.json());
             });
@@ -134,7 +134,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
 
         // Verify the gateway is still healthy by sending a valid request
         const validPolicy = await createSignedPolicy(`nonce-breaker-valid-${crypto.randomUUID()}`);
-        const validRes = await request.post('/enforce', {
+        const validRes = await request.post('/sign_and_execute', {
             data: buildPayload(1, validPolicy, 'T1')
         });
         const validBody = await validRes.json();
@@ -153,7 +153,7 @@ test.describe('APT-Council DeepThink Security Remediation Verification', () => {
             financialLimitsString: JSON.stringify({ "T1": 100000000000 })
         });
 
-        const res = await request.post('/enforce', {
+        const res = await request.post('/sign_and_execute', {
             data: buildPayload(50000000000, policy, 'T1') // Massive transfer amount
         });
 

@@ -164,7 +164,7 @@ test.describe("NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anom
         },
       };
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(corruptedPolicy, { anomalyScore: 0.99 }),
       });
 
@@ -190,7 +190,7 @@ test.describe("NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anom
         maxAnomalyScore: 0, // Zero tolerance
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.01 }),
       });
 
@@ -212,7 +212,7 @@ test.describe("NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anom
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.49 }),
       });
 
@@ -234,7 +234,7 @@ test.describe("NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anom
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.51 }),
       });
 
@@ -263,7 +263,7 @@ test.describe("NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safet
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             // Unrecognized tool — PolicyValidator.normalizeParameters will throw
@@ -308,7 +308,7 @@ test.describe("NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safet
         expiresAt: Math.floor(Date.now() / 1000) - 1, // 1 second in the past
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.1 }),
       });
 
@@ -342,7 +342,7 @@ test.describe("NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safet
       // Ensure the forged sig is 65 bytes (130 hex chars after 0x)
       const paddedForgedSig = "0x" + "aa".repeat(32) + "bb".repeat(32) + "1c";
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(
           { ...policy, signature: paddedForgedSig },
           { anomalyScore: 0.1 }
@@ -384,7 +384,7 @@ test.describe("NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Subs
         // for swap we still use T1 tier limit
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "swap",
@@ -434,7 +434,7 @@ test.describe("NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Subs
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "swap",
@@ -479,7 +479,7 @@ test.describe("NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Subs
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "swap",
@@ -527,7 +527,7 @@ test.describe("NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Subs
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "swap",
@@ -587,7 +587,7 @@ test.describe("NEW-VULN-003: Error Response Oracle — Stack Trace / Internal St
         signature: "0x" + "cc".repeat(32) + "dd".repeat(32) + "1b",
       };
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(corruptedPolicy),
       });
 
@@ -617,7 +617,7 @@ test.describe("NEW-VULN-003: Error Response Oracle — Stack Trace / Internal St
 
       const SENTINEL_TOOL_ID = "REAUDIT_CANARY_TOOL_LEAKAGE_PROBE_XYZ";
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: SENTINEL_TOOL_ID,
@@ -672,7 +672,7 @@ test.describe("Nonce 2PC State Machine: Boundary Conditions and Rollback Correct
         maxAnomalyScore: 10, // threshold: 10%
       });
 
-      const firstRes = await request.post("/enforce", {
+      const firstRes = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.5 }), // 50% > 10%
       });
 
@@ -684,7 +684,7 @@ test.describe("Nonce 2PC State Machine: Boundary Conditions and Rollback Correct
       // Per 2PC design: nonce was RESERVED then ROLLED BACK on bounds failure
       // So the nonce SHOULD be available for a legitimate retry
       // This test verifies the rollback actually freed the nonce
-      const secondRes = await request.post("/enforce", {
+      const secondRes = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.05 }), // 5% < 10% — valid
       });
 
@@ -710,7 +710,7 @@ test.describe("Nonce 2PC State Machine: Boundary Conditions and Rollback Correct
       });
 
       // First request: must succeed
-      const firstRes = await request.post("/enforce", {
+      const firstRes = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy),
       });
 
@@ -719,7 +719,7 @@ test.describe("Nonce 2PC State Machine: Boundary Conditions and Rollback Correct
       expect(firstBody.status).toBe("approved");
 
       // Second request: nonce was committed — must be denied as replay
-      const secondRes = await request.post("/enforce", {
+      const secondRes = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy),
       });
 
@@ -742,7 +742,7 @@ test.describe("Nonce 2PC State Machine: Boundary Conditions and Rollback Correct
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "solana_transfer",
@@ -804,7 +804,7 @@ test.describe("Prototype Pollution and Structural Injection: financialLimitsStri
         financialLimitsStringOverride: POLLUTION_PAYLOAD,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.1, tier: "T1" }),
       });
 
@@ -837,7 +837,7 @@ test.describe("Prototype Pollution and Structural Injection: financialLimitsStri
         financialLimitsStringOverride: CONSTRUCTOR_POLLUTION,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.1, tier: "T1" }),
       });
 
@@ -864,7 +864,7 @@ test.describe("Prototype Pollution and Structural Injection: financialLimitsStri
         financialLimitsStringOverride: MULTI_TIER_BYPASS,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, {
           anomalyScore: 0.1,
           tier: "T_GOD",
@@ -897,7 +897,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 0.0 }),
       });
 
@@ -921,7 +921,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
       // anomalyScore = 1.0 is technically valid per the guard (< 0 or > 1.0 throws)
       // But 1.0 * 100 = 100 > secureScore=100 is FALSE (not strictly greater)
       // So this should PASS — testing the boundary is not accidentally rejected
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 1.0 }),
       });
 
@@ -943,7 +943,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: buildBaseTransferPayload(policy, { anomalyScore: 1.1 }),
       });
 
@@ -965,7 +965,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "solana_transfer",
@@ -1010,7 +1010,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         // NOTE: JSON.stringify(Infinity) = "null" — so we use a number that
         // becomes Infinity after arithmetic, or test via a crafted JSON string.
         // Most JSON parsers convert Infinity to null. This tests that null is rejected.
@@ -1059,7 +1059,7 @@ test.describe("Input Validation Edge Cases: Boundary Conditions and Type Safety"
         maxAnomalyScore: 50,
       });
 
-      const res = await request.post("/enforce", {
+      const res = await request.post("/sign_and_execute", {
         data: {
           action: {
             toolId: "solana_transfer",

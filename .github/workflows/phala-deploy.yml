@@ -15,9 +15,7 @@ on:
       - 'package-lock.json'
       - 'tsconfig.json'
       - '!apps/dashboard/**'
-      - '!e2e/**'
       - '!tests/**'
-      - '!scripts/**'
       - '!**/*.md'
   workflow_dispatch: # Allows manual trigger from the GitHub UI
 
@@ -45,6 +43,13 @@ jobs:
 
       - name: Vitest Quality Gate
         run: npx vitest run
+
+      - name: Playwright E2E Quality Gate
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
