@@ -70,7 +70,7 @@ export class AegisZKClient {
                 console.log(`[Aegis-12] ZK Prover Binary Verified: ${hex}`);
             }
         } else {
-            if (process.env.NODE_ENV === 'simulation') {
+            if (process.env.NODE_ENV === 'simulation' || process.env.NODE_ENV === 'test') {
                 console.warn(`[Aegis-12] Fallback: ZK Prover binary not found. Utilizing synthetic ZK-Seals for Simulation Mode.`);
                 this.isSimulationMode = true;
             } else {
