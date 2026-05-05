@@ -11,6 +11,7 @@ import * as crypto from 'crypto';
  */
 export class AegisZKClient {
     private proverBinaryPath: string;
+    private isSimulationMode: boolean = false;
 
     private static isVerified = false;
 
@@ -69,7 +70,12 @@ export class AegisZKClient {
                 console.log(`[Aegis-12] ZK Prover Binary Verified: ${hex}`);
             }
         } else {
-             throw new Error(`[TERMINAL REFUSAL] ZK Prover binary not found at ${this.proverBinaryPath}`);
+            if (process.env.NODE_ENV === 'simulation') {
+                console.warn(`[Aegis-12] Fallback: ZK Prover binary not found. Utilizing synthetic ZK-Seals for Simulation Mode.`);
+                this.isSimulationMode = true;
+            } else {
+                throw new Error(`[TERMINAL REFUSAL] ZK Prover binary not found at ${this.proverBinaryPath}`);
+            }
         }
     }
 
@@ -87,6 +93,14 @@ export class AegisZKClient {
     }
 
     private async executeProverProcess(input: any): Promise<any> {
+        if (this.isSimulationMode) {
+            return {
+                seal: 'mock_zk_seal_' + crypto.randomBytes(64).toString('hex'),
+                vkey: 'risc0:image:aegis_compliance_v1_mock',
+                journal: input
+            };
+        }
+
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
             // Reduced timeout to 60 seconds (60000ms). If it takes longer on the 2GB Phala CVM,
