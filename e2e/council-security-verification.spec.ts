@@ -88,10 +88,10 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         expect(body.error).toContain('Limits exceed security bounds');
     });
 
-    test('POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {
+    test('POST /sign_and_execute - Production Root-of-Trust Failure (Unregistered Tenant)', async ({ request }) => {
         const policy = await createSignedPolicy(crypto.randomUUID ? crypto.randomUUID() : "uuid-rx1", 'T2', 10000, 50, { tenantId: 'rogue-tenant-99' });
         
-        const res = await request.post(`/enforce`, { 
+        const res = await request.post(`/sign_and_execute`, { 
             data: { 
                 action: { toolId: 'solana_transfer', parameters: { to: '11111111111111111111111111111111', amount: 100, token: 'SOL' }, estimatedValue: 100 },
                 agent: { purpose: 'financial_operations', currentTier: 'T2' },
@@ -104,7 +104,7 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         expect(body.error).toContain('Signer not found in provisioned TEE Root-of-Trust');
     });
 
-    test('POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy)', async ({ request }) => {
+    test('POST /sign_and_execute - Distributed Nonce TOCTOU Race (Concurrent Identical Policy)', async ({ request }) => {
         const nonce = crypto.randomUUID ? crypto.randomUUID() : "uuid-rx2";
         const policy = await createSignedPolicy(nonce, 'T2', 10000, 50);
         
@@ -116,8 +116,8 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         };
 
         const [res1, res2] = await Promise.all([
-            request.post(`/enforce`, { data: payload }),
-            request.post(`/enforce`, { data: payload })
+            request.post(`/sign_and_execute`, { data: payload }),
+            request.post(`/sign_and_execute`, { data: payload })
         ]);
 
         const bodies = await Promise.all([res1.json(), res2.json()]);
@@ -133,9 +133,9 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
 
 
 
-    test('POST /enforce - Financial Limit Type Confusion Injection Post-Normalization', async ({ request }) => {
+    test('POST /sign_and_execute - Financial Limit Type Confusion Injection Post-Normalization', async ({ request }) => {
         const policy = await createSignedPolicy(crypto.randomUUID ? crypto.randomUUID() : "uuid-rx4", 'T2', 10000, 50);
-        const res = await request.post(`/enforce`, {
+        const res = await request.post(`/sign_and_execute`, {
             data: { 
                 action: { toolId: 'solana_transfer', parameters: { to: '11111111111111111111111111111111', amount: "9999999", token: 'SOL' } }, 
                 agent: { purpose: 'financial_operations', currentTier: 'T2' },
@@ -163,7 +163,7 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         expect([403, 200]).toContain(res.status());
         const body = await res.json();
         expect(body.status).toBe('denied');
-        expect(body.evidencePack?.decisionReason ?? body.error).toContain('Missing Policy envelope');
+        expect(body.evidencePack?.decisionReason ?? body.error).toContain('intern is not authorized');
     });
 });
 
