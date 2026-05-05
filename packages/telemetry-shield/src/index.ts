@@ -4,7 +4,7 @@ import { EvidenceWAL } from "./wal";
 
 export * from "./types";
 export * from "./anchors/phala";
-export * from "./anchors/lit";
+
 export * from "./anchors/zk_hybrid";
 export * from "./wal";
 

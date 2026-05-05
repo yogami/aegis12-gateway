@@ -38,7 +38,7 @@ jobs:
         run: npm ci
 
       - name: Security Audit Gate
-        run: npm audit --audit-level=critical || echo "Audit failed due to upstream dependencies. Proceeding for Hackathon."
+        run: npm audit --audit-level=critical
 
       - name: Code Linting Gate
         run: npm run check-types && npx eslint src tests

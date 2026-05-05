@@ -53,7 +53,6 @@
     "@coral-xyz/anchor": "^0.32.1",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
-    "@lit-protocol/lit-node-client-nodejs": "^7.4.0",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.1",
     "@noble/post-quantum": "^0.6.1",
@@ -65,7 +64,6 @@
     "fastify": "^5.7.4",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.6.0",
-    "siwe": "^3.0.0",
     "tweetnacl": "^1.0.3",
     "undici": "^8.1.0",
     "x402-solana": "^2.0.4"
