@@ -61,8 +61,8 @@ To ensure clarity and precision, this specification is strictly divided by user 
 - **Requirement:** Access to the Dashboard requires a connected Solana Web3 Wallet (e.g., Phantom).
 - **Edge Case (Unauthorized Wallet):** If a wallet is not registered as an Admin in the `tenantTrustStore`, access to the policy configuration pages is restricted.
 
-### 3.2 Human-on-the-Loop (HOTL) Configuration
-- **Requirement:** Admins define the `squadsMultisig` address and the financial limits (`maxAnomalyScore`, `T4` transfer limits).
+### 3.2 Human-on-the-Loop (HOTL) Configuration (Article 14 Escalation)
+- **Requirement:** Admins define the `squadsMultisig` address and the financial limits (`maxAnomalyScore`, `T4` transfer limits). If an intent breaches these limits (e.g., Massive Transfer), it triggers an "Article 14 HOTL Escalation".
 - **Edge Case (Misconfigured Multisig):** If an admin inputs an invalid `squadsMultisig` Base58 address, the Dashboard must prevent the policy from saving.
 - **Edge Case (Hardware Attestation Spoofing):** When the gateway generates a Squads proposal, the Dashboard verifies the `VALID_SQUADS_PCR0_WHITELIST`. Only proposals originating from an attested Phala CVM are recognized as legitimate in the UI.
 

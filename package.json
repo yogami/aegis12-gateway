@@ -12,7 +12,15 @@
     "build": "tsc",
     "start": "tsx src/server.ts",
     "start:cvm": "tsx src/phala_cvm_server.ts",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "eslint .",
+    "pre-commit": "npm audit --audit-level=high && lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "npm run test --passWithNoTests"
+    ]
   },
   "keywords": [
     "solana",
@@ -38,6 +46,8 @@
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^10.2.1",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-sonarjs": "^4.0.3",
     "husky": "^9.1.7",
     "jest": "^30.3.0",
     "lint-staged": "^16.4.0",

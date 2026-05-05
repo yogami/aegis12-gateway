@@ -513,6 +513,48 @@ describe("AegisPEP Chaos Testing Suite", () => {
     });
 
     /**
+     * Case 11B: Aegis Attestation Verifier Program Escalation Compatibility
+     */
+    it("escalates high-value transactions and generates a strict Anchor-compatible AegisIntentEnvelope", async () => {
+        const config: any = {
+            policyId: "verifierPolicy123",
+            tenantId: "tenant-abc",
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana:devnet",
+            maxAnomalyScore: 100,
+            financialLimitsString: JSON.stringify({ 'T4': 500000000 }),
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "verifier-nonce-" + Math.random(),
+            ...SQUADS_DEFAULTS
+        };
+
+        const typesWithLimits = { ...types }; // Assume signature logic passes normally
+
+        const sig = await ceoWallet._signTypedData(domain, typesWithLimits, config);
+
+        const request: any = {
+            // Amount is > 10_000_000_000n in the backend logic (6 decimals = 10,000 USD)
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "11111111111111111111111111111111", amount: 20000000000 }, estimatedValue: 20000000000 },
+            agent: { did: "did:example:777", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 0.1, currentSlot: 200000 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        const receipt = await aegisPEP.enforce(request);
+        
+        // Assert Escalation
+        expect(receipt.decision).toBe('escalated');
+        
+        // Assert Aegis Attestation Verifier Program Compatibility
+        expect(receipt.envelope).toBeDefined();
+        expect(receipt.envelope?.domain_separator).toBe("AEGIS12_ESCALATE_V1");
+        expect(receipt.envelope?.vault_pda).toBe(SQUADS_DEFAULTS.vaultPda);
+        expect(receipt.envelope?.squads_multisig).toBe(SQUADS_DEFAULTS.squadsMultisig);
+        expect(receipt.envelope?.state_predicates.valid_until_slot).toBe(201000); // 200000 + 1000
+    });
+
+    /**
      * Case 12: VERA API Timeout Simulation (Graceful Degradation)
      */
     it("simulates VERA API timeout to ensure graceful degradation of the trust score loop", async () => {

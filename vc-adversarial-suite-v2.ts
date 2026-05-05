@@ -126,6 +126,42 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     expect(receipt.hardware_attestation).toBe("mock_quote");
   });
 
+  it("handles escalation workflows and generates AegisIntentEnvelope for the on-chain verifier", async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ 
+        status: 'escalated', 
+        envelope: {
+            domain_separator: "AEGIS12_ESCALATE_V1",
+            vault_pda: "TestVault_Default",
+            squads_multisig: "TestSquads_Default",
+            instruction_digest: "0xmockdigest",
+            state_predicates: { valid_until_slot: 1000000 },
+            policy_hash: "pol-1"
+        },
+        evidence_package: { zk_seal: 'mock_seal' }, 
+        hardware_quote: 'mock_quote' 
+      })
+    }));
+
+    const receipt = await AegisSDK.signAndExecute(baseAction, {
+        agentId: "agent-1",
+        tenantId: "tenant-unit-test",
+        policySignature: "mock_sig",
+        enclaveUrl: "http://localhost/sign_and_execute",
+        useDurableNonce: false,
+        nonceAccountPublickey: "mock",
+        nonceAuthorityPublickey: "mock"
+    });
+
+    expect(receipt.status).toBe("escalated");
+    expect(receipt.envelope).toBeDefined();
+    expect(receipt.envelope?.domain_separator).toBe("AEGIS12_ESCALATE_V1");
+    expect(receipt.envelope?.vault_pda).toBeDefined();
+    expect(receipt.envelope?.squads_multisig).toBeDefined();
+  });
+
   it("blocks the exact same nonce (replay attack)", async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: false,

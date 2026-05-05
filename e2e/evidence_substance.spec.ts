@@ -121,6 +121,11 @@ test.describe('Aegis-12: High-Veracity Evidence Substance Audit', () => {
         expect(ep.actionTaxonomy, "Taxonomy must be recorded").toBe("solana_transfer");
         expect(receipt.x402PaymentHeader, "x402 payment header must be cryptographically bound").toBe("mock_solana_tx_signature_x402");
 
+        // 2.6 AEGIS ATTESTATION VERIFIER COMPATIBILITY
+        // Ensure that the gateway is actively processing the on-chain trust anchor fields
+        expect(policyConfig.vaultPda, "Must contain vaultPda for on-chain Aegis Verifier").toBeDefined();
+        expect(policyConfig.squadsMultisig, "Must contain squadsMultisig for on-chain Aegis Verifier").toBeDefined();
+
         // 3. ZK SUBSTANCE VALIDATION
         expect(zkSeal, "ZK Seal must not be mocked").not.toBe("mock-seal-for-demo");
         expect(zkSeal, "ZK Seal must be a non-empty string").toBeTruthy();

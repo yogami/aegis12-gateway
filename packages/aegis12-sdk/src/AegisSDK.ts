@@ -111,15 +111,17 @@ export class AegisSDK {
 
             const decision = await response.json() as any;
             
-            if (decision.status !== 'approved') {
+            if (decision.status !== 'approved' && decision.status !== 'escalated') {
                 throw new Error(`Aegis Enforcement Denied: ${decision.error || 'Policy Violation'}`);
             }
 
             return {
+                status: decision.status,
                 decision: 'ALLOW',
                 tx_hash: decision.tx_hash,
                 evidence_package: decision.evidence_package,
-                hardware_attestation: decision.hardware_quote
+                hardware_attestation: decision.hardware_quote,
+                envelope: decision.envelope
             };
 
         } catch (err: any) {

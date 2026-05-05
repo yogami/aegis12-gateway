@@ -1,0 +1,36 @@
+name: Backend Quality Gate 🛡️
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install Dependencies
+        run: npm ci || npm install --legacy-peer-deps
+      
+      - name: Security Vulnerability Scan
+        run: npm audit --audit-level=high
+      
+      - name: Strict Linting (Cyclomatic Complexity, Size, Dependencies)
+        run: npm run lint
+        
+      - name: Highest Test Coverage
+        run: npm run test
+        
+      - name: Verify Anchor Program (Aegis Attestation Verifier)
+        run: |
+          cd aegis_onchain
+          cargo test

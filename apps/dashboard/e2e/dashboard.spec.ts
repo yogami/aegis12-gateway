@@ -17,5 +17,10 @@ test.describe('Aegis-12 Dashboard Control Panel', () => {
 
     // Verify the SDK Documentation link
     await expect(page.getByRole('link', { name: /Read the SDK Documentation/i })).toBeVisible();
+
+    // Verify the Aegis Attestation Verifier Program section
+    await expect(page.getByRole('heading', { name: 'Aegis On-Chain Verifier Registry' })).toBeVisible();
+    await expect(page.locator('text=VALID_SQUADS_PCR0_WHITELIST')).toBeVisible();
+    await expect(page.locator('code')).toContainText('require!(aegis::verify_attestation());');
   });
 });
