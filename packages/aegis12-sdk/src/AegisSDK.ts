@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { ethers } from 'ethers';
 
 export interface AegisConfig {
@@ -61,95 +60,71 @@ export class AegisSDK {
     }
 
     /**
-     * withAegis — The Drop-in SDK wrapper for hardware compliance.
-     * Wraps an agent's intended action and ensures it is verified by the Phala TEE Gateway.
+     * @deprecated The 'withAegis' wrapper is deprecated. Agents must not hold private keys.
+     * Use 'signAndExecute' instead for the Zero-Custody TEE Facilitator model.
      */
     static withAegis(action: Function, config: AegisConfig) {
-        if (!config.policySignature || config.policySignature.length < 10) {
-            throw new Error('[Aegis SDK] policySignature is required. The gateway will reject requests without a valid EIP-712 signature.');
-        }
+        throw new Error('[Aegis SDK] withAegis is deprecated. You must use signAndExecute. Agents cannot hold private keys.');
+    }
 
+    /**
+     * signAndExecute — The Drop-in SDK for the TEE Remote Signer.
+     * The agent passes an unsigned intent. The Phala TEE evaluates the policy, signs the transaction securely,
+     * submits via Jito ShredStream, and returns the tx_hash and Evidence Package.
+     */
+    static async signAndExecute(intent: any, config: AegisConfig) {
         const gatewayUrl = config.gatewayUrl || 'https://aegis12-dashboarduprailwayapp-production.up.railway.app/api';
+        const timeoutMs = config.timeoutMs || 5000;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-        return async (...args: any[]) => {
-            const timeoutMs = config.timeoutMs || 5000;
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
-            try {
-                // Execute the agent action to get its intent (tool and parameters)
-                const agentAction = await action(...args);
-                
-                // Construct the payload required by the Aegis-12 Gateway
-                const payload = {
-                    agent: {
-                        id: config.agentId,
-                        tenantId: config.tenantId,
-                        currentTier: config.agentTier || 'T1'
-                    },
-                    action: {
-                        toolId: agentAction.toolId || 'unknown',
-                        parameters: agentAction.parameters || agentAction
-                    },
-                    context: {
-                        timestamp: new Date().toISOString(),
-                        currentAnomalyScore: config.currentAnomalyScore ?? 0.5
-                    },
-                    dynamicPolicy: {
-                        signature: config.policySignature,
-                        policyConfig: {
-                            policyId: `${config.tenantId}-policy`,
-                            tenantId: config.tenantId,
-                            nonce: Date.now().toString(),
-                            // Hackathon default expiration (1 hour)
-                            expiresAt: Math.floor(Date.now() / 1000) + 3600,
-                            financialLimitsString: "{}",
-                            // Required EIP-712 fields matching the backend schema
-                            version: "1",
-                            chainId: 1, // Usually Ethereum Mainnet for signing
-                            crossChainTarget: "solana:devnet",
-                            maxAnomalyScore: 100, // Very lenient for hackathons
-                            vaultPda: "11111111111111111111111111111111",
-                            squadsMultisig: "11111111111111111111111111111111",
-                            allowedProgramIds: []
-                        }
-                    }
-                };
-
-                const response = await fetch(`${gatewayUrl}/enforce`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal as any
-                });
-
-                clearTimeout(timeout);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown Gateway Error' })) as any;
-                    throw new Error(`Aegis Enforcement Rejected: ${errorData.error || response.statusText}`);
+        try {
+            const payload = {
+                agent: {
+                    id: config.agentId,
+                    tenantId: config.tenantId,
+                    currentTier: config.agentTier || 'T1'
+                },
+                action: {
+                    toolId: intent.toolId || 'unsigned_transaction',
+                    parameters: intent.parameters || intent
+                },
+                context: {
+                    timestamp: new Date().toISOString(),
+                    currentAnomalyScore: config.currentAnomalyScore ?? 0.5
                 }
+            };
 
-                const decision = await response.json() as any;
-                
-                // Fail-closed enforcement on the SDK side just in case
-                if (decision.status !== 'approved') {
-                    throw new Error(`Aegis Enforcement Denied: ${decision.error || 'Policy Violation'}`);
-                }
+            const response = await fetch(`${gatewayUrl}/sign_and_execute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                signal: controller.signal as any
+            });
 
-                return {
-                    ...agentAction,
-                    decision: 'ALLOW',
-                    receipt: decision.receipt,
-                    solanaTx: decision.solana_tx,
-                    hardware_attestation: decision.hardware
-                };
-
-            } catch (err: any) {
-                clearTimeout(timeout);
-                // Fail-closed: if gateway is unreachable or denied, the action throws.
-                throw err;
+            clearTimeout(timeout);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ error: 'Unknown Gateway Error' })) as any;
+                throw new Error(`Aegis Enforcement Rejected: ${errorData.error || response.statusText}`);
             }
-        };
+
+            const decision = await response.json() as any;
+            
+            if (decision.status !== 'approved') {
+                throw new Error(`Aegis Enforcement Denied: ${decision.error || 'Policy Violation'}`);
+            }
+
+            return {
+                decision: 'ALLOW',
+                tx_hash: decision.tx_hash,
+                evidence_package: decision.evidence_package,
+                hardware_attestation: decision.hardware_quote
+            };
+
+        } catch (err: any) {
+            clearTimeout(timeout);
+            throw err;
+        }
     }
 }

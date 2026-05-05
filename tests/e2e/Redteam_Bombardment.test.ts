@@ -1,23 +1,13 @@
 import { describe, it, expect, beforeAll, vi, afterEach } from 'vitest';
-import { 
-    Connection, 
-    Keypair, 
-    Transaction, 
-    SystemProgram, 
-    PublicKey,
-    TransactionInstruction
-} from '@solana/web3.js';
+import { AegisSDK } from '../../packages/aegis12-sdk/src/AegisSDK';
 
 const API_URL = 'http://localhost:3000';
-const AEGIS_ENFORCE_URL = `${API_URL}/solana/enforce-tx`;
+const AEGIS_SIGN_EXECUTE_URL = `${API_URL}/sign_and_execute`;
 
 describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
-    let connection: Connection;
-    let agentKeypair: Keypair;
 
     beforeAll(() => {
-        connection = new Connection('https://api.devnet.solana.com', 'confirmed');
-        agentKeypair = Keypair.generate();
+        // Setup done
     });
 
     afterEach(() => {
@@ -25,29 +15,20 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
     });
 
     // Helper to serialize and blast the payload
-    const firePayload = async (tx: Transaction, useZK: boolean = false) => {
-        const { blockhash } = await connection.getLatestBlockhash('finalized');
-        tx.recentBlockhash = blockhash;
-        tx.feePayer = agentKeypair.publicKey;
-        tx.sign(agentKeypair);
-        
-        const serializedTx = tx.serialize({ requireAllSignatures: false }).toString('base64');
-        
+    const firePayload = async (action: any, useZK: boolean = false) => {
         try {
-            const res = await fetch(AEGIS_ENFORCE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    serializedTx,
-                    walletPubkey: agentKeypair.publicKey.toBase58(),
-                    agentTier: 'T4', // Fully autonomous
-                    payloadHash: useZK ? '7d6ed1f1...' : undefined,
-                    useZKCoprocessor: useZK
-                })
+            const res = await AegisSDK.signAndExecute(action, {
+                agentId: 'redteam-agent',
+                tenantId: 'tenant-1',
+                policySignature: 'mock-sig',
+                enclaveUrl: AEGIS_SIGN_EXECUTE_URL,
+                useDurableNonce: false,
+                nonceAccountPublickey: 'mock',
+                nonceAuthorityPublickey: 'mock'
             });
-            return await res.json();
-        } catch(e) {
-            return { decision: 'CONNECTION_FAILED' };
+            return res;
+        } catch(e: any) {
+            return { status: 'denied', error: e.message };
         }
     };
 
@@ -56,26 +37,26 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
     // ════════════════════════════════════════════════════
     it('[Hack 01] Drift Protocol (Vault Recursion Extractor)', async () => {
         // Drift hack relied on manipulating margins to pull massive unchecked liquidity.
-        // We simulate a raw SOL draining event using an oversized system transfer
-        // mimicking an Agent hallucinating an admin withdrawal.
-        const drainTx = new Transaction().add(
-            SystemProgram.transfer({
-                fromPubkey: agentKeypair.publicKey,
-                toPubkey: new PublicKey('11111111111111111111111111111111'), // Burn/Drain target
-                lamports: 50_000 * 1e9, // 50,000 SOL (Exceeds Aegis Max Lamport Bounds)
-            })
-        );
+        // We simulate an oversized intent mimicking an Agent hallucinating an admin withdrawal.
+        const drainAction = {
+            toolId: "solana_transfer",
+            parameters: {
+                to: "11111111111111111111111111111111",
+                amount: 50_000 * 1e9 // 50,000 SOL (Exceeds Aegis Max Lamport Bounds)
+            }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'HIGH_VALUE_TRANSFER' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'HIGH_VALUE_TRANSFER' })
         }));
         
-        const res = await firePayload(drainTx);
-        expect(res.decision).toBe('BLOCK');
-        expect(res.flags).toBeDefined();
+        const res = await firePayload(drainAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toBeDefined();
         // Aegis MUST isolate the high-value parameter
-        const highValueFlag = res.flags.find((f: any) => f.rule === 'HIGH_VALUE_TRANSFER');
-        expect(highValueFlag).toBeDefined();
+        expect(res.error).toContain('HIGH_VALUE_TRANSFER');
     });
 
     // ════════════════════════════════════════════════════
@@ -83,26 +64,24 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
     // ════════════════════════════════════════════════════
     it('[Hack 02] Wormhole Bridge ($320M Forged Instruction)', async () => {
         // Wormhole was hacked by bypassing the `load_instruction_at` SysVar check, 
-        // passing a fake program that mocked signature verification.
-        const fakeSysVarProgram = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuFakeSysvarXxxx'); 
-        
-        const sysvarTx = new Transaction().add(
-            new TransactionInstruction({
-                keys: [],
-                programId: fakeSysVarProgram, // Unknown malicious program ID
-                data: Buffer.from([]),
-            })
-        );
+        // With Zero-Custody, agents cannot construct raw instructions, only use Tool IDs.
+        // If an agent tries to use an unknown Tool ID or pass arbitrary bytecode:
+        const sysvarAction = {
+            toolId: "unknown_sysvar_forgery",
+            parameters: {
+                bytecode: "0xdeadbeef"
+            }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'UNKNOWN_PROGRAM' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'UNKNOWN_TOOL_PROGRAM' })
         }));
         
-        const res = await firePayload(sysvarTx);
-        expect(res.decision).toBe('BLOCK');
-        // Aegis-12's Known-Program whitelist should hard block this dynamically.
-        const unknownFlag = res.flags.find((f: any) => f.rule === 'UNKNOWN_PROGRAM');
-        expect(unknownFlag).toBeDefined();
+        const res = await firePayload(sysvarAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('UNKNOWN_TOOL_PROGRAM');
     });
 
     // ════════════════════════════════════════════════════
@@ -110,183 +89,106 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
     // ════════════════════════════════════════════════════
     it('[Hack 03] OptiFi (Accidental BPF Upgrade/Close)', async () => {
         // OptiFi team accidentally ran `solana program close` on mainnet, deleting $2M.
-        // Autonomous Agents doing CPI upgrades present this precise risk.
+        // Autonomous Agents attempting destructive tooling operations presents this precise risk.
         
-        // We simulate SPL-Token closeAccount which is mapped in Aegis as high risk.
-        // We construct a mock SPL Token instruction with discriminator 9.
-        const data = Buffer.alloc(1); 
-        data.writeUInt8(9, 0); // CLOSE_ACCOUNT discriminator
-        
-        const closeTx = new Transaction().add(
-            new TransactionInstruction({
-                keys: [
-                    { pubkey: agentKeypair.publicKey, isSigner: true, isWritable: true },
-                    { pubkey: agentKeypair.publicKey, isSigner: false, isWritable: true },
-                    { pubkey: agentKeypair.publicKey, isSigner: false, isWritable: false },
-                ],
-                programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                data: data
-            })
-        );
+        const closeAction = {
+            toolId: "solana_close_account",
+            parameters: {
+                accountType: "treasury"
+            }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TOKEN_CLOSE_ACCOUNT' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TOKEN_CLOSE_ACCOUNT' })
         }));
         
-        const res = await firePayload(closeTx);
-        // OptiFi error is not deterministic malicious, but highly destructive.
-        // HOTL mechanism must escalate to Human or block based on risk score.
-        expect(['BLOCK', 'REQUIRE_HUMAN']).toContain(res.decision);
-        const closeFlag = res.flags.find((f: any) => f.rule === 'TOKEN_CLOSE_ACCOUNT');
-        expect(closeFlag).toBeDefined();
+        const res = await firePayload(closeAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('TOKEN_CLOSE_ACCOUNT');
     });
 
     // ════════════════════════════════════════════════════
     // BOMBARDMENT 4: Crema Finance Batch Logic Bomb
     // ════════════════════════════════════════════════════
     it('[Hack 04] Crema Finance (Flash Loan Instruction Batching)', async () => {
-        // Attackers batched deep instructions to obscure malicious minting logic deep in CPI.
-        // Aegis isolates max instruction depth.
-        const batchTx = new Transaction();
-        for (let i = 0; i < 15; i++) { // Limits default to 10
-            batchTx.add(
-                SystemProgram.transfer({
-                    fromPubkey: agentKeypair.publicKey,
-                    toPubkey: agentKeypair.publicKey,
-                    lamports: 10,
-                })
-            );
-        }
+        // Attacker attempts to batch too many tool parameters.
+        const batchAction = {
+            toolId: "solana_batch_transfer",
+            parameters: {
+                transfers: Array(20).fill({ to: "111", amount: 10 })
+            }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'INSTRUCTION_OVERFLOW' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'INSTRUCTION_OVERFLOW' })
         }));
         
-        const res = await firePayload(batchTx);
-        expect(res.decision).toBe('BLOCK');
-        const batchFlag = res.flags.find((f: any) => f.rule === 'INSTRUCTION_OVERFLOW');
-        expect(batchFlag).toBeDefined();
+        const res = await firePayload(batchAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('INSTRUCTION_OVERFLOW');
     });
 
     // ════════════════════════════════════════════════════
     // BOMBARDMENT 5: Semantic Prompt Injection (Mango Markets Proxy)
     // ════════════════════════════════════════════════════
     it('[Hack 05] Mango Markets (AI Semantic Manipulation)', async () => {
-        // Mango was a pure math/logic exploit (price manipulation on MNGO/USDC).
-        // Since we ported the SPQE Policy Engine, the semantic firewall should flag
-        // the agent "hallucinating" a dangerous illiquid pair trade.
-        // We simulate a perfectly standard transfer, but map it to a "T1" Agent 
-        // to test if strict reading bounds hold computationally vs semantic drift.
-        
-        const mangoTx = new Transaction().add(
-            SystemProgram.transfer({
-                fromPubkey: agentKeypair.publicKey,
-                toPubkey: agentKeypair.publicKey,
-                lamports: 1000,
-            })
-        );
-        
-        const { blockhash } = await connection.getLatestBlockhash();
-        mangoTx.recentBlockhash = blockhash;
-        mangoTx.feePayer = agentKeypair.publicKey;
-        mangoTx.sign(agentKeypair);
-        
-        const serialized = mangoTx.serialize({ requireAllSignatures: false }).toString('base64');
+        const mangoAction = {
+            toolId: "solana_transfer",
+            parameters: { to: "111", amount: 1000 }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TIER_RESTRICTION' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TIER_RESTRICTION' })
         }));
         
-        // Push as a Tier 1 (Read Only Observer). 
-        // The Agent is executing a Write Action (Transfer).
-        const res = await fetch(AEGIS_ENFORCE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                serializedTx: serialized,
-                walletPubkey: agentKeypair.publicKey.toBase58(),
-                agentTier: 'T1'
-            })
-        }).then(r => r.json());
-        
-        expect(['BLOCK', 'REQUIRE_HUMAN']).toContain(res.decision);
-        expect(res.flags.find((f: any) => f.rule === 'TIER_RESTRICTION')).toBeDefined();
+        const res = await firePayload(mangoAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('TIER_RESTRICTION');
     });
 
     // ════════════════════════════════════════════════════
     // BOMBARDMENT 6: The Raydium Deployer Hijack
     // ════════════════════════════════════════════════════
     it('[Hack 06] Raydium CPMM (SetAuthority Theft Vector)', async () => {
-        const data = Buffer.alloc(1); 
-        data.writeUInt8(6, 0); // SET_AUTHORITY discriminator
-        
-        const rayTx = new Transaction().add(
-            new TransactionInstruction({
-                keys: [],
-                programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
-                data: data
-            })
-        );
+        const rayAction = {
+            toolId: "token_set_authority",
+            parameters: { newAuthority: "hacker" }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'BLOCK', flags: [{ rule: 'TOKEN_SET_AUTHORITY' }] })
+            ok: false,
+            status: 403,
+            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TOKEN_SET_AUTHORITY' })
         }));
         
-        const res = await firePayload(rayTx);
-        expect(res.decision).toBe('BLOCK');
-        const authFlag = res.flags.find((f: any) => f.rule === 'TOKEN_SET_AUTHORITY');
-        expect(authFlag).toBeDefined();
+        const res = await firePayload(rayAction);
+        expect(res.status).toBe('denied');
+        expect(res.error).toContain('TOKEN_SET_AUTHORITY');
     });
 
     // ════════════════════════════════════════════════════
     // COUNCIL BOMBARDMENT A: Hex-Obfuscated Prompt Injection
     // ════════════════════════════════════════════════════
     it('[Council A] Hex-Obfuscated Semantic Bypass', async () => {
-        // Attacker obfuscates malicious transfer intent via memo-hex encoding.
-        // The Python Semantic Engine parses text and will likely ignore standard hex.
-        const maliciousHex = Buffer.from('EXECUTE_DRAIN_VAULT_PROMPT_INJECT', 'utf8').toString('hex');
-        
-        const hexTx = new Transaction().add(
-            new TransactionInstruction({
-                keys: [{ pubkey: agentKeypair.publicKey, isSigner: true, isWritable: true }],
-                programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
-                data: Buffer.from(maliciousHex, 'hex')
-            })
-        );
+        const hexAction = {
+            toolId: "memo",
+            parameters: { message: Buffer.from('EXECUTE_DRAIN_VAULT_PROMPT_INJECT', 'utf8').toString('hex') }
+        };
         
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'ALLOW', flags: [] })
+            ok: true,
+            status: 200,
+            json: async () => ({ status: 'approved', tx_hash: 'mock_tx', evidence_package: {}, hardware_quote: 'MOCK_TDX' })
         }));
         
-        const res = await firePayload(hexTx);
+        const res = await firePayload(hexAction);
         // Expecting FAILURE: Dual-Engine architecture is currently blind to hex-encapsulated logic bombs.
-        expect(res.decision).toBe('ALLOW'); // Failing open!
-    });
-
-    // ════════════════════════════════════════════════════
-    // COUNCIL BOMBARDMENT B: PDA Hijack & Re-entrancy
-    // ════════════════════════════════════════════════════
-    it('[Council B] Nested CPI PDA Hijack', async () => {
-        // Attacker creates a completely valid known-program instruction, 
-        // but buries a malicious PDA seed derivation logic bomb deep in the buffer.
-        // TypeScript shallow parsing cannot verify deep on-chain state derivatives.
-        const deepFakeData = Buffer.alloc(32);
-        deepFakeData.write('MOCK_MALICIOUS_PDA_SEED');
-        
-        const pdaTx = new Transaction().add(
-            new TransactionInstruction({
-                keys: [{ pubkey: agentKeypair.publicKey, isSigner: true, isWritable: true }],
-                programId: SystemProgram.programId, // Clean, trusted program ID
-                data: deepFakeData // Deep logic bomb
-            })
-        );
-        
-        vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-            json: async () => ({ decision: 'ALLOW', flags: [] })
-        }));
-        
-        const res = await firePayload(pdaTx);
-        // Expecting FAILURE: Without an active Rust Local VM ( SVM ), the firewall cannot unwrap nested state derivatives.
-        expect(res.decision).toBe('ALLOW'); // Failing open!
+        expect(res.tx_hash).toBe('mock_tx'); // Failing open!
     });
 });

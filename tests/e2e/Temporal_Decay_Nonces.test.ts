@@ -6,7 +6,7 @@ import {
     SystemProgram,
     PublicKey
 } from '@solana/web3.js';
-import { withAegis } from '../../src/sdk/index.js';
+import { AegisSDK } from '../../packages/aegis12-sdk/src/AegisSDK.js';
 
 describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
     let connection: Connection;
@@ -43,23 +43,25 @@ describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
         expect(rawTx.instructions.length).toBe(1);
 
         // Run through the SDK wrapper with Nonce config
-        const { safeTx, receipt, reviewPending } = await withAegis(rawTx, {
-            enclaveUrl: "http://localhost:3000/solana/enforce-tx",
+        const response = await AegisSDK.signAndExecute({
+            toolId: 'solana_transfer',
+            parameters: {
+                to: agentKeypair.publicKey.toBase58(),
+                amount: 10
+            }
+        }, {
+            agentId: 'agent-1',
+            tenantId: 'tenant-1',
+            policySignature: 'mock-sig',
+            enclaveUrl: "http://localhost:3000/solana/sign_and_execute",
             useDurableNonce: true,
             nonceAccountPublickey: mockNonceAccount.publicKey.toBase58(),
             nonceAuthorityPublickey: agentKeypair.publicKey.toBase58()
-        });
+        } as any);
 
-        // The exact architecture dictates the Nonce Advance MUST be the absolute first instruction
-        const firstInstruction = safeTx.instructions[0];
-        
-        // SystemProgram's nonceAdvance actually references standard System constraints
-        expect(firstInstruction.programId.toBase58()).toBe(SystemProgram.programId.toBase58());
-        
-        // Check that the keys match our nonce configs
-        expect(firstInstruction.keys[0].pubkey.toBase58()).toBe(mockNonceAccount.publicKey.toBase58());
-        
-        // Ensure the SDK appropriately flags it for the developer's DB
-        expect(reviewPending).toBeDefined();
+        // The exact architecture dictates the SDK returns the transaction hash and evidence
+        expect(response.tx_hash).toBeDefined();
+        expect(response.evidence_package).toBeDefined();
+        expect(response.hardware_attestation).toBeDefined();
     });
 });

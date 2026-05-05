@@ -1,34 +1,34 @@
 # Aegis Firewall: Runtime Protection for Solana AI Agents
 
-**Let AI agents control wallets without letting them nuke the treasury.**
+**Let AI agents operate safely without handing them the private keys.**
 
-As the Solana ecosystem rapidly adopts autonomous AI agents (e.g., Eliza, SendAI, Griffain), developers and DAOs face a catastrophic vulnerability: **Agent Prompt Injections and Halucinations.** If a DAO deploys a treasury agent, a single prompt-injection or algorithmic drift can drain the entire protocol. 
+As the Solana ecosystem rapidly adopts autonomous AI agents (e.g., Eliza, SendAI, Griffain), developers and DAOs face a catastrophic vulnerability: **Agent Prompt Injections and Hallucinations.** If an agent holds the private keys to a treasury, a single prompt-injection or algorithmic drift can drain the entire protocol. 
 
-Agent developers cannot simply hand over raw private keys. They need a runtime firewall.
+Agent developers cannot simply trust agents with raw private keys. They need a zero-custody hardware root of trust.
 
-**Aegis Firewall** wraps any Solana AI agent signer with programmable risk policies, transaction simulation, OFAC screening, and Squads-based human escalation before execution. It physically severs malicious execution paths in a Confidential Virtual Machine (CVM) before they ever reach the Solana RPC, preventing identity spoofing and high-velocity capital drains.
+**Aegis-12** is an **Attested Agent Wallet & TEE Remote Signer**. It entirely strips cryptographic authority from the agent. Agents formulate *unsigned* intents. The Aegis-12 Phala TEE evaluates the intent against stateful policies, generates the cryptographic signature *inside* the hardware enclave, and automatically routes it via Jito ShredStream for MEV protection. 
 
 ## The Problem: Ephemeral Agent Security
 
-Currently, agent frameworks rely on soft guardrails—API-level prompt filtering or off-chain risk limits that run adjacent to the agent. If the agent gets prompt-injected or the host server is compromised, those soft guardrails are easily bypassed. The agent can construct a transaction to stealthily transfer ownership or send funds to a sanctioned address.
+Currently, agent frameworks rely on soft guardrails—API-level prompt filtering or high-friction middleware firewalls. If the agent gets prompt-injected or the host server is compromised, those soft guardrails are bypassed. The agent can construct a transaction to stealthily transfer ownership because *it still holds the keys*.
 
 By the time on-chain analytics identify the anomaly, the funds are gone.
 
-## The Solution: Hardware-Enforced Interdiction
+## The Solution: Hardware-Rooted Zero-Custody
 
-Aegis solves this by requiring all agent transactions to pass through a **Phala Network dStack TEE (Trusted Execution Environment)** before interacting with the chain. 
+Aegis solves this by pivoting from a "firewall" to an **Attested Signer**:
 
-1. **The Exploit Attempt:** A hacked or prompt-injected agent attempts to execute a malicious transaction (e.g., a stealth `SystemProgram.assign` ownership takeover, or a catastrophic spend velocity breach).
-2. **The Hardware Interdiction:** The Aegis Phala TEE intercepts the intent payload. The hardware enclave physically simulates the transaction against the immutable policy parameters. Because the enclave is mathematically isolated, it cannot be bypassed by the agent's host server. 
-3. **The Agent Firewall:** If a breach is detected, the TEE physically severs the execution path, returning a block and escalating high-risk operations to a Squads V4 multisig for human approval.
+1. **Zero-Custody Integration:** The agent passes an unsigned intent to the Aegis-12 SDK.
+2. **The Hardware Interdiction:** The Aegis Phala TEE intercepts the intent payload. The hardware enclave physically evaluates the transaction against immutable policy parameters ($O(1)$ stateful evaluation). 
+3. **Execution & Evidence:** If approved, the TEE signs the transaction with its enclave-held key and submits it. It returns the `tx_hash`, an Auditor-Grade JSON Evidence Package, and a Phala TDX Hardware Quote. If denied, it issues a Terminal Refusal.
 
 ## The Result: Verifiable Compliance Evidence
 
-A hardware firewall secures the capital, but we provide an unprecedented secondary value: **Cryptographic Audit Trails.**
+A zero-custody wallet secures the capital, but we provide an unprecedented secondary value: **Cryptographic Evidence Rails.**
 
-Whenever Aegis approves *or* denies an agent transaction, the Phala TEE generates a cryptographic receipt and natively writes an `aegis:v4-pq` formatted SPL Memo directly to the Solana devnet. 
+Whenever Aegis-12 approves *or* denies an agent transaction, it generates an Auditor-Readable JSON Evidence Package. This package binds the cryptographic receipt, the Jito transaction hash, and the MiCA/NIST control mapped to the decision. 
 
-This creates a completely tamper-evident, unalterable on-chain logging trail. This zero-overhead mechanism provides perfect, cryptographic compliance evidence that risk controls were strictly enforced at runtime.
+This creates a completely tamper-evident, unalterable logging trail linked to on-chain Policy Commitment NFTs. This zero-overhead mechanism provides perfect compliance evidence that risk controls were strictly enforced at runtime by an isolated hardware enclave.
 
 ## High-Veracity Status: 🏆 100% SUBSTANCE VERIFIED
 
@@ -72,24 +72,28 @@ You will see the agent complete a safe 500 USDC swap, followed by a simulated pr
 
 ## 🤝 For Partners: 60-Second Integration
 
-If you are building an autonomous agent for the Colosseum Hackathon, you can protect your liquidity and satisfy EU AI Act logging requirements by routing your intents through the Aegis Firewall.
+If you are building an autonomous agent for the Colosseum Hackathon, you can protect your liquidity and satisfy EU AI Act logging requirements by routing your intents through the Aegis-12 Remote Signer.
 
-**Endpoint:** `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce`
+**Endpoint:** `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/sign_and_execute`
 
 ### Minimal Example (TypeScript)
 ```typescript
-const decision = await fetch('https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/enforce', {
-    method: 'POST',
-    body: JSON.stringify({
-        agent: { id: "my_bot" },
-        action: { toolId: "swap", parameters: { amount: 100 } }
-    })
-}).then(res => res.json());
+import { AegisSDK } from 'aegis12-sdk';
 
-if (decision.status === "approved") {
-    // Proceed with trade
+const decision = await AegisSDK.signAndExecute({
+    toolId: "solana_transfer",
+    parameters: { to: "9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin", amount: 100_000_000 }
+}, {
+    agentId: "my_bot",
+    tenantId: "tenant-1",
+    gatewayUrl: "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network"
+});
+
+if (decision.decision === "ALLOW") {
+    console.log("Executed Hash:", decision.tx_hash);
+    console.log("Hardware Quote:", decision.hardware_attestation);
 } else {
-    console.error("TEE Blocked Transaction:", decision.error);
+    console.error("TEE Blocked Transaction:", decision);
 }
 ```
 

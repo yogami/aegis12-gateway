@@ -18,8 +18,10 @@ import logging
 import httpx
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Dict, Any
+import hashlib
 
 from domain.policy_engine import PolicyEngine, PolicyConfig
 from domain.slm_evaluator import SLMEvaluator
@@ -47,6 +49,24 @@ class EvaluationResponse(BaseModel):
     risk_score: float = Field(..., description="Risk score 0.0 to 1.0")
     evaluation_ms: int = Field(..., description="Evaluation latency in ms")
     evaluator: str = Field(..., description="Which evaluator produced the verdict")
+
+class AgentMetadata(BaseModel):
+    id: str
+    tenantId: str
+    currentTier: str
+
+class ActionMetadata(BaseModel):
+    toolId: str
+    parameters: Dict[str, Any]
+
+class ContextMetadata(BaseModel):
+    timestamp: str
+    currentAnomalyScore: float
+
+class SignAndExecuteRequest(BaseModel):
+    agent: AgentMetadata
+    action: ActionMetadata
+    context: ContextMetadata
 
 async def get_pyth_price(asset: str = "SOL") -> float:
     # Pyth SOL/USD feed ID
@@ -171,6 +191,66 @@ async def evaluate_intent(intent: TransactionIntent):
         evaluation_ms=elapsed_ms,
         evaluator="slm" if slm_verdict.raw_output != "rule-based-fallback" else "slm_fallback",
     )
+
+
+@app.post("/sign_and_execute")
+async def sign_and_execute(req: SignAndExecuteRequest):
+    """
+    Zero-Custody TEE Remote Signer Endpoint.
+    Ingests an unsigned intent, evaluates it, and if approved,
+    simulates enclave key derivation to sign and execute the transaction.
+    """
+    start = time.time()
+    
+    # Extract intent for the engine
+    action_type = req.action.toolId
+    target = req.action.parameters.get("to", "unknown")
+    amount = req.action.parameters.get("amount", 0)
+    agent_id = req.agent.id
+    
+    # Stage 1: Rule-based evaluation ($O(1)$ pDFA Mock)
+    rule_verdict = policy_engine.evaluate(
+        action=action_type,
+        target=target,
+        amount=amount,
+        agent_id=agent_id,
+    )
+
+    if not rule_verdict.approved:
+        return JSONResponse(status_code=403, content={
+            "status": "denied",
+            "error": "Policy Violation",
+            "reasoning": rule_verdict.reasoning,
+            "risk_score": rule_verdict.risk_score
+        })
+
+    # (Skipping SLM evaluation in this mock endpoint for speed, as rules govern the strict constraints)
+    
+    # Simulate Jito ShredStream Submission & Key Derivation
+    mock_tx_hash = "5Jito" + hashlib.sha256(str(time.time()).encode()).hexdigest()[:80]
+    
+    # Generate Auditor-Readable Evidence Package
+    evidence_package = {
+        "timestamp": req.context.timestamp,
+        "policy_id": f"{req.agent.tenantId}-policy",
+        "agent_id": agent_id,
+        "risk_tier": req.agent.currentTier,
+        "action": action_type,
+        "amount": amount,
+        "target": target,
+        "zk_seal": "0x" + hashlib.sha256(b"zk_proof_mock").hexdigest(),
+        "compliance_control": "MiCA-ART-14"
+    }
+
+    elapsed_ms = int((time.time() - start) * 1000)
+
+    return {
+        "status": "approved",
+        "tx_hash": mock_tx_hash,
+        "evidence_package": evidence_package,
+        "hardware_quote": f"MOCK_TDX_QUOTE_{hashlib.sha256(b'phala_cvm_image_hash').hexdigest()}",
+        "evaluation_ms": elapsed_ms
+    }
 
 
 @app.get("/health")

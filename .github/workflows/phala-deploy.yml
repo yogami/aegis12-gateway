@@ -26,6 +26,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Security Audit Gate
+        run: npm audit --audit-level=critical
+
+      - name: Code Linting Gate
+        run: npm run check-types && npx eslint src tests
+
+      - name: Vitest Quality Gate
+        run: npx vitest run
+
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
