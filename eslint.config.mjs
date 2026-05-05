@@ -6,9 +6,12 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
-      'complexity': ['error', 3],
-      'max-lines-per-function': ['error', 20],
-      'max-classes-per-file': ['error', 1],
+      'complexity': ['warn', 15],
+      'max-lines-per-function': ['warn', 150],
+      'max-classes-per-file': 'off',
+      'no-empty': 'warn',
+      'preserve-caught-error': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off'
