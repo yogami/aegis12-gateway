@@ -16,13 +16,19 @@ async function runChaos() {
         { name: 'version', type: 'string' }, { name: 'chainId', type: 'uint256' },
         { name: 'crossChainTarget', type: 'string' }, { name: 'maxAnomalyScore', type: 'uint256' },
         { name: 'financialLimitsString', type: 'string' }, { name: 'expiresAt', type: 'uint256' },
-        { name: 'nonce', type: 'string' }
+        { name: 'nonce', type: 'string' },
+        { name: 'vaultPda', type: 'string' },
+        { name: 'squadsMultisig', type: 'string' },
+        { name: 'allowedProgramIds', type: 'string[]' }
     ]};
 
     const policyConfig = {
         policyId: "p-audit-001", tenantId: "tenant-001", version: "1.0.0", chainId: 1399811149,
         crossChainTarget: "solana:devnet", maxAnomalyScore: 100, financialLimitsString: "{\"T4\":1000000}",
-        expiresAt: Math.floor(Date.now() / 1000) + 3600, nonce: nonce
+        expiresAt: Math.floor(Date.now() / 1000) + 3600, nonce: nonce,
+        vaultPda: "VaultPDA_Test",
+        squadsMultisig: "SquadsMultisig_Test",
+        allowedProgramIds: ["11111111111111111111111111111111"]
     };
 
     const signature = await wallet._signTypedData(domain, types, policyConfig);

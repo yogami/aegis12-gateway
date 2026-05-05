@@ -36,7 +36,7 @@ async function buildSignedPolicy(nonce: string) {
     tenantId: "tenant-council",
     version: "1.0.0",
     chainId: 1399811149,
-    crossChainTarget: "solana:localnet",
+    crossChainTarget: "solana:devnet",
     maxAnomalyScore: 50,
     financialLimitsString: JSON.stringify({ "TIER_3": 1000000 }),
     expiresAt: Math.floor(Date.now() / 1000) + 3600,

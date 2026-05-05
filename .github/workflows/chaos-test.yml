@@ -21,6 +21,23 @@ jobs:
 
       - name: Install dependencies
         run: npm install ethers tsx @solana/web3.js
+      - name: Wait for API Warmup
+        env:
+          ENCLAVE_URL: "${{ github.event.inputs.enclave_url || 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network' }}"
+        run: |
+          echo "Waiting for Phala CVM Deployment to propagate before Chaos testing..."
+          MAX_RETRIES=60
+          RETRY_COUNT=0
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
+            if [ "$HTTP_STATUS" == "200" ] || [ "$HTTP_STATUS" == "404" ] || [ "$HTTP_STATUS" == "402" ]; then
+              echo "Phala CVM is online (Status: $HTTP_STATUS)!"
+              break
+            fi
+            echo "Attempt $RETRY_COUNT failed. Retrying in 10s..."
+            sleep 10
+            RETRY_COUNT=$((RETRY_COUNT+1))
+          done
 
       - name: Run Chaos OOM Bomb
         run: npx tsx scripts/chaos_oom_bomb.ts "${{ github.event.inputs.enclave_url || 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network' }}"
