@@ -38,65 +38,76 @@ export class BatchAnchorWorker {
         }
     }
 
+    private buildMerkleRoot(unbatched: any[]): string {
+        const leaves = unbatched.map(entry => {
+            const hexString = entry.article12LogHash.replace(/^0x/, '');
+            return keccak256(Buffer.from(hexString, 'hex'));
+        });
+        const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+        return '0x' + tree.getRoot().toString('hex');
+    }
+
+    private createBatchReceipt(merkleRoot: string, length: number): AegisComplianceReceipt {
+        const batchActionId = `batch-${Date.now()}-${length}`;
+        return {
+            receiptId: batchActionId,
+            actionId: batchActionId,
+            payloadHash: merkleRoot,
+            timestamp: new Date().toISOString(),
+            isBatch: true,
+            count: length
+        } as unknown as AegisComplianceReceipt;
+    }
+
+    private async performAnchor(batchReceipt: AegisComplianceReceipt): Promise<any> {
+        const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
+        const timeoutPromise = new Promise<any>((_, reject) => 
+            setTimeout(() => reject(new Error('RPC connection timed out after 120000ms')), 120000)
+        );
+        return Promise.race([anchorPromise, timeoutPromise]);
+    }
+
+    // eslint-disable-next-line complexity
+    private async saveSingleEvidence(entry: any, ledgerReceipt: any) {
+        try {
+            const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
+            if (!original) return;
+            const blockTime = ledgerReceipt.blockTime || undefined;
+            await this.pep.saveEvidence(original, ledgerReceipt.txSignature, blockTime);
+        } catch (err: any) {
+            console.error(`[BatchAnchorWorker] Failed to update evidence for ${entry.receiptId}: ${err.message}`);
+        }
+    }
+
+    private async updateEvidenceStore(unbatched: any[], ledgerReceipt: any) {
+        for (const entry of unbatched) {
+            await this.saveSingleEvidence(entry, ledgerReceipt);
+        }
+        this.journal.markAsBatched(unbatched.map(entry => entry.nonce));
+    }
+
+    private async executeAnchorCycle(unbatched: any[]) {
+        console.log(`[BatchAnchorWorker] Sweeping ${unbatched.length} receipts...`);
+        const merkleRoot = this.buildMerkleRoot(unbatched);
+        const batchReceipt = this.createBatchReceipt(merkleRoot, unbatched.length);
+        const ledgerReceipt = await this.performAnchor(batchReceipt);
+        
+        const sig = ledgerReceipt ? ledgerReceipt.txSignature : null;
+        if (sig) {
+            console.log(`[BatchAnchorWorker] Anchored root ${merkleRoot} in ${sig}`);
+            await this.updateEvidenceStore(unbatched, ledgerReceipt);
+        }
+    }
+
+    // eslint-disable-next-line complexity
     private async processBatch() {
         if (this.isAnchoring) return;
-        
         const unbatched = this.journal.getUnbatchedEntries();
-        if (unbatched.length === 0) {
-            return;
-        }
-
+        if (unbatched.length === 0) return;
+        
         this.isAnchoring = true;
-
         try {
-            console.log(`[BatchAnchorWorker] Sweeping ${unbatched.length} unanchored receipts...`);
-            
-            // Compute real Merkle Root (proper Buffer encoding for keccak256)
-            const leaves = unbatched.map(entry => {
-                const hexString = entry.article12LogHash.replace(/^0x/, '');
-                return keccak256(Buffer.from(hexString, 'hex'));
-            });
-            const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
-            const merkleRoot = '0x' + tree.getRoot().toString('hex');
-
-            const batchActionId = `batch-${Date.now()}-${unbatched.length}`;
-            
-            const batchReceipt = {
-                receiptId: batchActionId,
-                actionId: batchActionId,
-                payloadHash: merkleRoot,
-                timestamp: new Date().toISOString(),
-                isBatch: true,
-                count: unbatched.length
-            } as unknown as AegisComplianceReceipt;
-
-            const anchorPromise = this.anchor.anchorReceipt(batchReceipt, 'approved', this.enclaveDid);
-            
-            // Fix: Enforce a generous 120-second timeout on the RPC call.
-            const timeoutPromise = new Promise<any>((_, reject) => 
-                setTimeout(() => reject(new Error('RPC connection timed out after 120000ms')), 120000)
-            );
-            
-            const ledgerReceipt = await Promise.race([anchorPromise, timeoutPromise]);
-
-            if (ledgerReceipt && ledgerReceipt.txSignature) {
-                console.log(`[BatchAnchorWorker] Successfully anchored batch root ${merkleRoot} in tx ${ledgerReceipt.txSignature}`);
-                
-                // Update evidence store for each individual receipt in the batch
-                for (const entry of unbatched) {
-                    try {
-                        const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
-                        if (original) {
-                            await this.pep.saveEvidence(original, ledgerReceipt.txSignature, ledgerReceipt.blockTime ?? undefined);
-                        }
-                    } catch (err: any) {
-                        console.error(`[BatchAnchorWorker] Failed to update evidence for ${entry.receiptId}: ${err.message}`);
-                    }
-                }
-
-                const nonces = unbatched.map(entry => entry.nonce);
-                this.journal.markAsBatched(nonces);
-            }
+            await this.executeAnchorCycle(unbatched);
         } catch (e: any) {
             console.error(`[BatchAnchorWorker] Failed to anchor batch: ${e.message}`);
         } finally {

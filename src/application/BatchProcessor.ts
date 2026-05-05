@@ -30,39 +30,36 @@ export class AegisBatchProcessor {
         return keccak256(canonicalString);
     }
 
+    private buildMerkleTree(entries: AegisCanonicalMessage[]): { tree: MerkleTree, rootHash: string, leaves: Buffer[] } {
+        const leaves = entries.map(msg => this.hashMessage(msg));
+        const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+        return { tree, rootHash: tree.getHexRoot(), leaves };
+    }
+
+    private generateProofs(tree: MerkleTree, entries: AegisCanonicalMessage[], leaves: Buffer[]): Record<string, string[]> {
+        const proofs: Record<string, string[]> = {};
+        for (let i = 0; i < entries.length; i++) {
+            proofs[entries[i].nonce] = tree.getHexProof(leaves[i]);
+        }
+        return proofs;
+    }
+
     public async processBatch(): Promise<BatchCommitment | null> {
         const entries = this.journal.getUnbatchedEntries();
         if (entries.length === 0) return null;
 
         console.log(`[AegisBatchProcessor] 🌳 Processing batch of ${entries.length} intents...`);
 
-        // 1. Construct Merkle Tree
-        const leaves = entries.map(msg => this.hashMessage(msg));
-        const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
-        const rootHash = tree.getHexRoot();
-
-        // 2. Generate NIST FIPS 204 Signature over the Root Hash
-        const pqSignature = this.signer.signMLDSA(rootHash);
-
-        // 3. Generate proofs for each entry
-        const proofs: Record<string, string[]> = {};
-        for (let i = 0; i < entries.length; i++) {
-            const proof = tree.getHexProof(leaves[i]);
-            proofs[entries[i].nonce] = proof;
-        }
-
-        const batchId = `batch-${Date.now()}`;
+        const { tree, rootHash, leaves } = this.buildMerkleTree(entries);
         const commitment: BatchCommitment = {
-            batchId,
+            batchId: `batch-${Date.now()}`,
             merkleRoot: rootHash,
-            pqSignature,
-            proofs
+            pqSignature: this.signer.signMLDSA(rootHash),
+            proofs: this.generateProofs(tree, entries, leaves)
         };
 
-        // 4. Mark as batched in WAL
         this.journal.markAsBatched(entries.map(e => e.nonce));
-        
-        console.log(`[AegisBatchProcessor] ✅ Batch ${batchId} finalized. Merkle Root: ${rootHash}`);
+        console.log(`[AegisBatchProcessor] ✅ Batch ${commitment.batchId} finalized. Merkle Root: ${rootHash}`);
 
         return commitment;
     }
