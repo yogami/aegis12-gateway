@@ -10,7 +10,7 @@ It is governed by the global rules in **[berlin-ai-infra](https://github.com/yog
 
 # Aegis-12 Dashboard
 
-> Secure Hardware-Gated UI for the Aegis-12 Security Enclave.
+> Attested Agent Wallet UI for the Aegis-12 Zero-Custody TEE Remote Signer.
 
 ## 🎯 What This Does
 

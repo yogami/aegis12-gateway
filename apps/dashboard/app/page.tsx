@@ -18,7 +18,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { title: 'TEE Enclave Security', desc: 'Execute sensitive agent policies inside a secure, physically isolated hardware enclave.' },
-              { title: 'Cryptographic Policy', desc: 'Enforce strict runtime constraints on transaction parameters to prevent VaultBot heists.' },
+              { title: 'Zero-Custody Verification', desc: 'Provide hardware-attested execution receipts via intent delegation.' },
               { title: 'Solana Verifiable Logs', desc: 'Anchor all policy evaluations to the Solana blockchain for transparent, tamper-proof audits.' }
             ].map((feature, i) => (
               <div key={i} className="p-8 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-gray-100 dark:border-slate-700 hover:-translate-y-2 transition-transform duration-300">

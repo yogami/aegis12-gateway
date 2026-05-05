@@ -9,13 +9,13 @@ export default function VaultBotSimulator() {
 
   const runSimulation = async () => {
     setSimulationStatus('simulating');
-    setLogs(['Intercepting agent intent payload...', 'Routing through Aegis-12 TEE Firewall...', 'Simulating transaction constraints...']);
+    setLogs(['Intercepting agent intent payload...', 'Delegating intent to TEE Remote Signer...', 'Simulating transaction constraints...']);
 
     try {
       const safePolicy = {"policyConfig":{"policyId":"POL_SAFE_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":1000}","expiresAt":1893456000,"nonce":`nonce-safe-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0x329ad17451168076b5f3e28f43d0eaa68bb479b41f6c4747783ac5d0f7699ae57814402e94922c401b7078f8b034ce9e64e699abd4f4b7f0463654e6daf2fbec1c"};
       const malPolicy = {"policyConfig":{"policyId":"POL_MAL_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":1000}","expiresAt":1893456000,"nonce":`nonce-mal-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0xe777b5292a0266d4c3968206431666d686e1a64d7e84c1653cb82c8c5c0dce8e616df4444b13739a6284fe5bc26f5f47893390189dd3315c95204d14e12712bf1b"};
       
-      const response = await fetch('/api/enforce', {
+      const response = await fetch('/api/sign_and_execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -155,9 +155,9 @@ export default function VaultBotSimulator() {
         {/* Header */}
         <div className="border-b border-gray-800 pb-6">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent mb-2">
-            Aegis Agent Firewall
+            Aegis Remote Signer
           </h1>
-          <p className="text-gray-400 text-lg">Interactive Heist Simulator: Watch Aegis stop a rogue agent in real-time.</p>
+          <p className="text-gray-400 text-lg">Interactive Remote Signer Simulator: Watch Aegis securely execute or block an agent intent in real-time.</p>
         </div>
 
         {/* Dashboard Grid */}
@@ -250,7 +250,7 @@ export default function VaultBotSimulator() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 flex flex-col">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                🛡️ Aegis-12 TEE Firewall
+                🛡️ Aegis-12 TEE Remote Signer
               </h2>
               <div className="flex items-center gap-2">
                 <span className="relative flex h-3 w-3">

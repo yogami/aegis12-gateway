@@ -7,6 +7,9 @@ on:
     paths:
       - 'src/**'
       - 'aegis-zk-prover/**'
+      - 'packages/**'
+      - 'policy-evaluator/**'
+      - '.github/workflows/phala-deploy.yml'
       - 'Dockerfile*'
       - 'package.json'
       - 'package-lock.json'

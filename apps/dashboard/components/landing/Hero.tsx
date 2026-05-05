@@ -16,19 +16,19 @@ export function Hero() {
                 </span>
 
                 <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8">
-                    Hardware Firewall for <br />
+                    Zero-Custody Remote Signer for <br />
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 dark:from-blue-400 dark:via-indigo-300 dark:to-violet-400 animate-gradient-x">
                         Autonomous Agents
                     </span>
                 </h1>
 
                 <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed">
-                    Runtime protection for agentic wallets. We prevent VaultBot heists and secure autonomous DeFi transactions using the Phala TEE.
+                    Hardware-attested intent execution for agentic wallets. We provide verifiable Zero-Custody TEE isolation for autonomous DeFi transactions.
                 </p>
 
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <Button href="/simulator" size="lg" className="w-full sm:w-auto">
-                        Run Heist Simulator
+                        Run Remote Signer Simulator
                     </Button>
                     <Button href="#" variant="secondary" size="lg" className="w-full sm:w-auto">
                         View SDK Docs
