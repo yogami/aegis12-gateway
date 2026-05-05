@@ -9,7 +9,7 @@ test.describe('Aegis-12 Landing Page', () => {
     await expect(page.locator('nav')).toBeVisible();
 
     // Verify the Hero section
-    await expect(page.getByRole('heading', { name: /Hardware Firewall for/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Zero-Custody Remote Signer for/i })).toBeVisible();
 
     // Verify the Features section "Why Aegis-12?"
     await expect(page.getByRole('heading', { name: 'Why Aegis-12?' })).toBeVisible();
@@ -17,7 +17,7 @@ test.describe('Aegis-12 Landing Page', () => {
 
     // Verify specific feature cards
     await expect(page.getByRole('heading', { name: 'TEE Enclave Security' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Cryptographic Policy' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Zero-Custody Verification' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Solana Verifiable Logs' })).toBeVisible();
   });
 });
