@@ -52,7 +52,7 @@ describe('AegisFastifyServer (Unit)', () => {
         expect(mockFastify).toHaveBeenCalled();
         expect(mockGet).toHaveBeenCalledWith('/health', expect.any(Function));
         expect(mockGet).toHaveBeenCalledWith('/api/docs', expect.any(Function));
-        expect(mockPost).toHaveBeenCalledWith('/enforce', expect.any(Function));
+        expect(mockPost).toHaveBeenCalledWith('/sign_and_execute', expect.any(Function));
         expect(mockListen).toHaveBeenCalled();
     });
 
@@ -79,7 +79,7 @@ describe('AegisFastifyServer (Unit)', () => {
 
     it('enforce endpoint handles valid payment and approved action', async () => {
         await import('../../src/infrastructure/web/AegisFastifyServer');
-        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/enforce')[1];
+        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/sign_and_execute')[1];
         
         const req = {
             ip: '127.0.0.1',
@@ -102,7 +102,7 @@ describe('AegisFastifyServer (Unit)', () => {
     it('enforce endpoint handles payment required', async () => {
         mockCheckPaymentRequired.mockResolvedValueOnce({ status: 402 });
         await import('../../src/infrastructure/web/AegisFastifyServer');
-        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/enforce')[1];
+        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/sign_and_execute')[1];
         
         const req = {
             ip: '127.0.0.1',
@@ -124,7 +124,7 @@ describe('AegisFastifyServer (Unit)', () => {
     it('enforce endpoint handles invalid payment', async () => {
         mockVerifyPayment.mockResolvedValueOnce({ valid: false, error: 'invalid' });
         await import('../../src/infrastructure/web/AegisFastifyServer');
-        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/enforce')[1];
+        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/sign_and_execute')[1];
         
         const req = {
             ip: '127.0.0.1',
@@ -145,7 +145,7 @@ describe('AegisFastifyServer (Unit)', () => {
     it('enforce endpoint handles denied action', async () => {
         mockPhala.mockResolvedValueOnce(JSON.stringify({ status: 'denied' }));
         await import('../../src/infrastructure/web/AegisFastifyServer');
-        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/enforce')[1];
+        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/sign_and_execute')[1];
         
         const req = {
             ip: '127.0.0.1',
@@ -165,7 +165,7 @@ describe('AegisFastifyServer (Unit)', () => {
     it('enforce endpoint catches internal errors', async () => {
         mockPhala.mockRejectedValueOnce(new Error('Internal'));
         await import('../../src/infrastructure/web/AegisFastifyServer');
-        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/enforce')[1];
+        const enforceHandler = mockPost.mock.calls.find(call => call[0] === '/sign_and_execute')[1];
         
         const req = {
             ip: '127.0.0.1',

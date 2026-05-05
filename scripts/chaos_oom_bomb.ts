@@ -44,7 +44,7 @@ async function runChaos() {
     console.log(`[Chaos] 💣 Bomb Payload Size: ${(Buffer.byteLength(payloadString, 'utf8') / 1024).toFixed(2)} KB`);
 
     console.log(`[Chaos] ⏱️ Step 1: Firing initial request to spin up the ZK-Prover child process...`);
-    await fetch(`${baseUrl}/enforce`, {
+    await fetch(`${baseUrl}/sign_and_execute`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payloadString
     });
 
@@ -54,7 +54,7 @@ async function runChaos() {
     console.log(`[Chaos] 🚀 Step 2: Firing 150 concurrent OOM Bombs...`);
     const promises = [];
     for (let i = 0; i < 150; i++) {
-        promises.push(fetch(`${baseUrl}/enforce`, {
+        promises.push(fetch(`${baseUrl}/sign_and_execute`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payloadString
         }).then(res => res.status).catch(err => "NETWORK_ERROR"));
     }

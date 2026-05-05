@@ -2,8 +2,8 @@ import fetch from 'node-fetch';
 import { ethers } from 'ethers';
 
 const GATEWAY_URL = process.env.PHALA_CLOUD_URL 
-    ? process.env.PHALA_CLOUD_URL.replace(/\/evidence\/?$/, '') + '/enforce'
-    : 'http://127.0.0.1:8000/enforce';
+    ? process.env.PHALA_CLOUD_URL.replace(/\/evidence\/?$/, '') + '/sign_and_execute'
+    : 'http://127.0.0.1:8000/sign_and_execute';
 
 const EVIDENCE_URL = process.env.PHALA_CLOUD_URL
     ? process.env.PHALA_CLOUD_URL

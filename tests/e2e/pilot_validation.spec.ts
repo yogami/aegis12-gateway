@@ -28,7 +28,7 @@ test.describe('Enterprise Pilot Validation: Sovereign Sentinel', () => {
             context: { currentAnomalyScore: 0.85 } // Critical Anomaly
         };
 
-        const response = await request.post(`${API_URL}/enforce`, { data: payload });
+        const response = await request.post(`${API_URL}/sign_and_execute`, { data: payload });
         
         expect(response.status()).toBe(403);
         const result = await response.json();
@@ -47,7 +47,7 @@ test.describe('Enterprise Pilot Validation: Sovereign Sentinel', () => {
             context: { currentAnomalyScore: 0.05 } // Clean
         };
 
-        const response = await request.post(`${API_URL}/enforce`, { data: payload });
+        const response = await request.post(`${API_URL}/sign_and_execute`, { data: payload });
         
         expect(response.status()).toBe(200);
         const result = await response.json();

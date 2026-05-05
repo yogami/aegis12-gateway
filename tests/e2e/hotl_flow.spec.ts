@@ -48,7 +48,7 @@ test.describe('Enterprise Cryptographic Envelope: HOTL Flow', () => {
             }
         };
 
-        const response = await request.post(`${API_URL}/enforce`, { data: payload });
+        const response = await request.post(`${API_URL}/sign_and_execute`, { data: payload });
         
         expect(response.status()).toBe(200);
         

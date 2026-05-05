@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const GATEWAY_URL = 'http://localhost:8000/enforce';
+const GATEWAY_URL = 'http://localhost:8000/sign_and_execute';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

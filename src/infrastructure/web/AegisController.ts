@@ -30,7 +30,7 @@ export class AegisController {
             status: 'ONLINE',
             enclaveDid: enclave.signer?.enclaveDid || "initializing",
             endpoints: {
-                'POST /enforce': 'Policy Enforcement',
+                'POST /sign_and_execute': 'Policy Enforcement',
                 'POST /anchor-receipt': 'Universal Ledger Anchoring',
                 'POST /solana/enforce-tx': 'Transaction Firewall',
                 'POST /governance/evaluate': 'Squads V4 Risk Evaluation',
@@ -60,14 +60,14 @@ export class AegisController {
             }
 
             const payloadStr = typeof request.body === 'string' ? request.body : JSON.stringify(request.body);
-            console.log(`[Aegis-12] /enforce payload (${Buffer.byteLength(payloadStr)}B)`);
+            console.log(`[Aegis-12] /sign_and_execute payload (${Buffer.byteLength(payloadStr)}B)`);
             const resultJson = await phalaEntrypoint(payloadStr);
-            console.log(`[Aegis-12] /enforce completed.`);
+            console.log(`[Aegis-12] /sign_and_execute completed.`);
             const result = JSON.parse(resultJson);
             
             return result.status === 'denied' ? reply.status(403).send(result) : reply.status(200).send(result);
         } catch (err: any) {
-            console.error(`[Aegis-12] /enforce ERROR: ${err.message}`);
+            console.error(`[Aegis-12] /sign_and_execute ERROR: ${err.message}`);
             const status = err.message.includes('[TERMINAL REFUSAL]') ? 403 : 500;
             return reply.status(status).send({ status: 'error', error: err.message });
         }

@@ -24,7 +24,7 @@ fastify.get('/health', controller.health.bind(controller));
 fastify.get('/api/docs', controller.getDocs.bind(controller));
 
 // 2. CORE ENFORCEMENT
-fastify.post('/enforce', controller.enforce.bind(controller));
+fastify.post('/sign_and_execute', controller.enforce.bind(controller));
 
 // 3. SOLANA RECEIPT ANCHORING
 fastify.post('/anchor-receipt', controller.anchorReceipt.bind(controller));
