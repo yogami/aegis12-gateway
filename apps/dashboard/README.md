@@ -8,13 +8,13 @@ It is governed by the global rules in **[berlin-ai-infra](https://github.com/yog
 
 ---
 
-# Agent Trust Protocol
+# Aegis-12 Dashboard
 
-> Decentralized reputation and compliance protocol for autonomous AI agents.
+> Secure Hardware-Gated UI for the Aegis-12 Security Enclave.
 
 ## 🎯 What This Does
 
-The Agent Trust Protocol tracks and verifies AI agent behavior across the Berlin AI ecosystem. It provides:
+The Aegis-12 Dashboard tracks and verifies AI agent behavior across the Berlin AI ecosystem. It provides:
 - **Reputation Scoring**: Quantified trust metrics based on historical compliance and uptime
 - **Identity Verification**: DID-based agent identity for cross-service authentication
 - **Regulatory Alignment**: EU AI Act compliance tracking for insurers and auditors
@@ -75,13 +75,13 @@ npm run test:e2e
 
 | Service | Purpose | Production URL |
 | :--- | :--- | :--- |
-| Agent Trust Verifier | DID resolution & credential verification | `https://agent-trust-verifier-production.up.railway.app` |
+| Aegis-12 Enclave | Cryptographic gating & verification | `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network` |
 | Supabase | PostgreSQL database | Shared instance (table prefix: `atp_`) |
 
 ## 📊 Status
 
 - **Deployment**: Railway
-- **Production URL**: `https://agent-trust-protocol-production.up.railway.app`
+- **Production URL**: `https://aegis12-dashboarduprailwayapp-production.up.railway.app`
 - **Catalog Entry**: [Microservices_Catalog.md](../Microservices_Catalog.md)
 - **OpenAPI**: ✅ Agent-Ready
 

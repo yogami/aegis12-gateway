@@ -19,6 +19,7 @@ test.describe('Aegis Healthtech API E2E', () => {
         // Fastify should return 200 OK for approved actions
         expect(response.ok()).toBeTruthy();
         const body = await response.json();
+        console.log("TEST 1 BODY:", body);
 
         expect(body.status).toBe('approved');
         expect(body.evidencePack).toBeDefined();

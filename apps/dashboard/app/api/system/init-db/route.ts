@@ -48,12 +48,22 @@ export async function GET() {
     try {
         await db.query(ddl);
         
-        // Insert some seed data for the demo
+        // Insert E2E test data and demo seed data
         await db.query(`
-            INSERT INTO public.agents (name, description, website_url, compliance_tags, is_verified)
-            VALUES 
-                ('Aegis Sentinel', 'Hardware-attested sovereign monitoring agent', 'https://aegis12.com', ARRAY['GDPR', 'SOC2'], true),
-                ('MediBot Pro', 'Clinical documentation assistant', 'https://medibot.health', ARRAY['HIPAA'], true)
+            WITH new_agents AS (
+                INSERT INTO public.agents (name, description, website_url, compliance_tags, is_verified)
+                VALUES 
+                    ('Aegis Sentinel', 'Hardware-attested sovereign monitoring agent', 'https://aegis12.com', ARRAY['GDPR', 'SOC2'], true),
+                    ('MediBot Pro', 'Clinical documentation assistant', 'https://medibot.health', ARRAY['HIPAA'], true),
+                    ('MediChat AI', 'Symptom checker and preliminary diagnosis assistant.', 'https://medichat.ai', ARRAY['GDPR', 'HIPAA'], true),
+                    ('PharmaCompliance Bot', 'Automated compliance checks for marketing.', 'https://pharmabot.io', ARRAY['GDPR'], false),
+                    ('MentalHealth Ally', '24/7 mental health support companion.', 'https://mally.com', ARRAY['MDR', 'GDPR'], true)
+                RETURNING id, name
+            )
+            INSERT INTO public.trust_scores (agent_id, overall_score)
+            SELECT id, 95 FROM new_agents WHERE name = 'MediChat AI'
+            UNION ALL
+            SELECT id, 88 FROM new_agents WHERE name = 'MentalHealth Ally'
             ON CONFLICT DO NOTHING;
         `);
 

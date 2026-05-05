@@ -28,7 +28,7 @@ async function createSignedPolicy(nonceStr: string, customFields: any = {}) {
         tenantId: "tenant-e2e", 
         version: "1.0.0",
         chainId: 1399811149,
-        crossChainTarget: "solana:localnet",
+        crossChainTarget: "solana:devnet",
         maxAnomalyScore: 50,
         financialLimitsString: JSON.stringify({ "T1": 10 }),
         expiresAt: Math.floor(Date.now() / 1000) + 3600,

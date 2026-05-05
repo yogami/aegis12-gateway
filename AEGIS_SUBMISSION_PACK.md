@@ -30,7 +30,7 @@
 
 ## 5. Live Deployment
 - **CVM Endpoint**: `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/`
-- **Dashboard**: `https://aegis12-gateway-production.up.railway.app/`
+- **Dashboard**: `https://aegis12-dashboarduprailwayapp-production.up.railway.app/`
 
 ## 6. Regulatory Impact (EU AI Act)
 Aegis-12 is the first production-ready gateway to address the **traceability and transparency** requirements of High-Risk AI systems (Article 12/14):

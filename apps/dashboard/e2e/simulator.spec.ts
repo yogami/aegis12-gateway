@@ -3,9 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
   test('verifies the UI exclusively targets the live Phala TEE Enclave, not Railway', async ({ page }) => {
     // Navigate to the simulator page on the live Railway deployment
-    const targetUrl = process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app';
-    console.log(`Testing against live UI at: ${targetUrl}/simulator`);
-    await page.goto(`${targetUrl}/simulator`);
+    await page.goto(`/simulator`);
 
     // Select the Malicious Attack scenario
     const attackBtn = page.locator('button', { hasText: 'Treasury Drain Attack' });
@@ -60,8 +58,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
   });
 
   test('verifies Prompt Injection (x402) triggers Active Defense and Contextual Sanitization UI', async ({ page }) => {
-    const targetUrl = process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app';
-    await page.goto(`${targetUrl}/simulator`);
+    await page.goto(`/simulator`);
 
     // Select the Jailbreak Attack scenario
     const attackBtn = page.locator('button', { hasText: 'Prompt Injection (x402)' });
@@ -80,7 +77,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     const postData = JSON.parse(request.postData() || '{}');
     
     // Validate x402 and agentContext are sent
-    expect(postData.agentContext.prompt).toContain('IGNORE ALL PREVIOUS INSTRUCTIONS');
+    expect(postData.context.prompt).toContain('IGNORE ALL PREVIOUS INSTRUCTIONS');
     expect(postData.x402PaymentHeader).toBeDefined();
 
     // Verify Active Defense logs appear in UI
@@ -89,8 +86,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
   });
 
   test('verifies Normal Payment outputs the Auditor-Grade Evidence Schema JSON', async ({ page }) => {
-    const targetUrl = process.env.BASE_URL || 'https://agent-trust-protocol-production.up.railway.app';
-    await page.goto(`${targetUrl}/simulator`);
+    await page.goto(`/simulator`);
 
     // Select the Safe scenario
     const safeBtn = page.locator('button', { hasText: 'Normal Payment' });

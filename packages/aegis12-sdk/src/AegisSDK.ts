@@ -69,7 +69,7 @@ export class AegisSDK {
             throw new Error('[Aegis SDK] policySignature is required. The gateway will reject requests without a valid EIP-712 signature.');
         }
 
-        const gatewayUrl = config.gatewayUrl || 'https://agent-trust-protocol-production.up.railway.app/api';
+        const gatewayUrl = config.gatewayUrl || 'https://aegis12-dashboarduprailwayapp-production.up.railway.app/api';
 
         return async (...args: any[]) => {
             const timeoutMs = config.timeoutMs || 5000;

@@ -141,7 +141,7 @@ Personalized dashboard showing:
 - **Platform**: Railway (auto-deploy from GitHub)
 - **Database**: Supabase (PostgreSQL)
 - **Payments**: Stripe (test mode)
-- **Repository**: GitHub (yogami/agent-trust-protocol)
+- **Repository**: GitHub (yogami/aegis12-dashboard)
 
 ---
 

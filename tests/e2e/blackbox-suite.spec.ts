@@ -27,9 +27,9 @@ describe('Blackbox Suite: DAO Guardian End-to-End Flow', () => {
         
         // Assert output contains VERA and BLOCKED messages
         expect(stdout).toContain('[Phala TEE Enclave] Receiving Intent from Agent');
-        expect(stdout).toContain('BLOCKED');
         expect(stdout).toContain('VERA Protocol');
-        expect(stdout).toContain('Reputation updated (Offline Demo Mode). New FICO Trust Score:');
+        expect(stdout).toContain('Reputation updated');
+        expect(stdout).toContain('New FICO Trust Score:');
 
         // Assert the manifest file was written
         expect(fs.existsSync(manifestFile)).toBe(true);

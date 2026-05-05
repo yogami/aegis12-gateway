@@ -22,14 +22,14 @@ export async function GET() {
     return NextResponse.json({
         framework: 'VERA — Verifiable Enforcement for Runtime Agents',
         spec: 'https://github.com/berlinailabs/vera-reference-implementation',
-        implementedBy: 'Berlin AI Labs — agent-trust-protocol',
+        implementedBy: 'Berlin AI Labs — aegis12-dashboard',
         version: '2.0.0',
         pillars: {
             identity: { status: 'implemented', service: 'agent-trust-verifier' },
             proofOfExecution: { status: 'implemented', service: 'veracity-core (pdp-protocol)' },
             dataSovereignty: { status: 'implemented', service: 'convoguard-ai' },
-            segmentation: { status: 'implemented', service: 'agent-trust-protocol/vera' },
-            containment: { status: 'implemented', service: 'agent-pentest + agent-trust-protocol/vera' },
+            segmentation: { status: 'implemented', service: 'aegis12-dashboard/vera' },
+            containment: { status: 'implemented', service: 'agent-pentest + aegis12-dashboard/vera' },
         },
         trustTiers: {
             levels: ['T1-intern', 'T2-junior', 'T3-senior', 'T4-principal'],

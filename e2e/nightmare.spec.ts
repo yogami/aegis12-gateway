@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Aegis-12 Nightmare Mode Production Bombardment', () => {
 
     test.beforeEach(async ({ page }) => {
-        const target = process.env.TEST_API_URL || 'https://aegis12-gateway.up.railway.app';
+        const target = process.env.TEST_API_URL || 'https://aegis12-dashboarduprailwayapp-production.up.railway.app';
         await page.goto(`${target}/demo`);
     });
 

@@ -243,7 +243,7 @@ npm run lint && npm run build
 
 ### Current Deployment
 - **Platform**: Railway
-- **Repository**: `https://github.com/yogami/agent-trust-protocol`
+- **Repository**: `https://github.com/yogami/aegis12-dashboard`
 - **Branch**: `main`
 - **Auto-deploy**: Enabled (pushes to main trigger deployment)
 
@@ -389,7 +389,7 @@ npm run lint && npm run build
 
 ## Contact & Resources
 
-- **Repository**: https://github.com/yogami/agent-trust-protocol
+- **Repository**: https://github.com/yogami/aegis12-dashboard
 - **Supabase Project**: https://ddlylujurovcogbqudvh.supabase.co
 - **Stripe Dashboard**: https://dashboard.stripe.com/test/dashboard
 - **Railway**: (Add URL after deployment)
@@ -399,7 +399,7 @@ npm run lint && npm run build
 ## File Structure Reference
 
 ```
-agent-trust-protocol/
+aegis12-dashboard/
 ├── app/
 │   ├── admin/
 │   │   ├── agents/new/page.tsx    # Agent registration form
