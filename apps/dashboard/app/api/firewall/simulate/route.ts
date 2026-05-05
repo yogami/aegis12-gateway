@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
             riskScore: Math.min(riskScore, 1.0)
         });
 
-    } catch (e) {
+    } catch (_e) {
         return NextResponse.json({ error: 'Simulation failed' }, { status: 500 });
     }
 }
