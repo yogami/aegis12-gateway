@@ -15,6 +15,7 @@ on:
       - 'package-lock.json'
       - 'tsconfig.json'
       - 'e2e/**'
+      - 'scripts/**'
       - '!apps/dashboard/**'
       - '!tests/**'
       - '!**/*.md'
