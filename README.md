@@ -42,6 +42,11 @@ Aegis-12 implements the **High-Veracity Mandate**. Every agent action is backed 
 > **View the live Proof of Execution:**
 > Run `npx tsx scripts/verify_substance.ts` to audit the live Phala CVM and verify the cryptographic integrity of the Aegis Kill Switch.
 
+## 📖 Master Technical Specification
+
+For the complete, exhaustive single source of truth regarding all rules, edge cases, and user personas (SDK Developers, API Integrators, and Dashboard Admins), please refer to the absolute canonical document:
+👉 **[Aegis-12 Master Technical Specification](TECHNICAL_MASTER_SPEC.md)**
+
 ## Hackathon Codebase Overview
 
 This repository contains the live Aegis-12 backend and the terminal agent demo built for the Colosseum Frontier Hackathon.
