@@ -50,9 +50,13 @@ async function runChaos() {
     console.log(`[Chaos] 💣 Bomb Payload Size: ${(Buffer.byteLength(payloadString, 'utf8') / 1024).toFixed(2)} KB`);
 
     console.log(`[Chaos] ⏱️ Step 1: Firing initial request to spin up the ZK-Prover child process...`);
-    await fetch(`${baseUrl}/sign_and_execute`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payloadString
-    });
+    try {
+        await fetch(`${baseUrl}/sign_and_execute`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payloadString
+        });
+    } catch (e: any) {
+        console.warn(`[Chaos] ⚠️ Initial fetch threw: ${e.message}. The Enclave may be cold-starting. Continuing to bomb phase...`);
+    }
 
     console.log(`[Chaos] ⏳ Waiting 2500ms for ZK-Prover memory allocation to peak...`);
     await new Promise(r => setTimeout(r, 2500));

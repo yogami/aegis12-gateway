@@ -12,7 +12,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     // Set up a promise to wait for the specific backend request
     const requestPromise = page.waitForRequest(request => {
       // It routes through the proxy to hit the Phala Enclave
-      const isTargetUrl = request.url().includes('/api/enforce');
+      const isTargetUrl = request.url().includes('/api/sign_and_execute');
       const isPost = request.method() === 'POST';
       return isTargetUrl && isPost;
     }, { timeout: 15000 });
@@ -22,7 +22,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     
     // We will wait for the RESPONSE from the proxied Phala TEE to prove it actually connected and returned
     const responsePromise = page.waitForResponse(response => 
-      response.url().includes('/api/enforce') && 
+      response.url().includes('/api/sign_and_execute') && 
       response.request().method() === 'POST'
     , { timeout: 15000 });
 
@@ -32,7 +32,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     const request = await requestPromise;
     const response = await responsePromise;
     
-    expect(request.url()).toContain('/api/enforce');
+    expect(request.url()).toContain('/api/sign_and_execute');
 
     // Prove it to the user by logging the actual response from the Phala TEE
     const responseBody = await response.json();
@@ -67,7 +67,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     // Verify Agent Context updates correctly
     await expect(page.locator('text=IGNORE ALL PREVIOUS INSTRUCTIONS')).toBeVisible();
 
-    const requestPromise = page.waitForRequest(request => request.url().includes('/api/enforce') && request.method() === 'POST');
+    const requestPromise = page.waitForRequest(request => request.url().includes('/api/sign_and_execute') && request.method() === 'POST');
     
     // Click the execute button
     const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
@@ -100,5 +100,27 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=POL_SAFE_01')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 10000 });
+  });
+  test('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
+    await page.goto(`/simulator`);
+
+    // Select the HOTL Trigger scenario
+    const hotlBtn = page.locator('button', { hasText: 'Massive Transfer (HOTL Trigger)' });
+    await hotlBtn.click();
+
+    const requestPromise = page.waitForRequest(request => request.url().includes('/api/sign_and_execute') && request.method() === 'POST');
+
+    // Click the execute button
+    const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
+    await executeBtn.click();
+
+    const request = await requestPromise;
+    const postData = JSON.parse(request.postData() || '{}');
+    
+    expect(postData.action.parameters.amount).toBe(50000000000);
+
+    // Wait for the HOTL Escalation logs to appear
+    await expect(page.locator('text=Massive transfer exceeds HOTL thresholds')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Transaction rerouted to Squads V4 Multisig')).toBeVisible({ timeout: 10000 });
   });
 });

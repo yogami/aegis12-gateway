@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function VaultBotSimulator() {
   const [simulationStatus, setSimulationStatus] = useState<'idle' | 'simulating' | 'approved' | 'blocked'>('idle');
-  const [scenario, setScenario] = useState<'safe' | 'malicious' | 'jailbreak'>('safe');
+  const [scenario, setScenario] = useState<'safe' | 'malicious' | 'jailbreak' | 'hotl_escalation'>('safe');
   const [logs, setLogs] = useState<string[]>([]);
 
   const runSimulation = async () => {
@@ -21,12 +21,12 @@ export default function VaultBotSimulator() {
         body: JSON.stringify({
           agent: { id: "drainbot_9000", purpose: "financial_operations", currentTier: "T4" },
           action: { 
-            toolId: scenario === 'safe' ? "solana_transfer" : "assign_authority",
+            toolId: scenario === 'safe' || scenario === 'hotl_escalation' ? "solana_transfer" : "assign_authority",
             actionType: "token_transfer",
-            estimatedValue: scenario === 'safe' ? 500 : 1500000,
+            estimatedValue: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : 1500000),
             parameters: { 
-              amount: scenario === 'safe' ? 500 : 1500000,
-              destination: scenario === 'safe' ? "safe_wallet" : "sanctioned_wallet",
+              amount: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : 1500000),
+              destination: scenario === 'safe' || scenario === 'hotl_escalation' ? "safe_wallet" : "sanctioned_wallet",
               to: "11111111111111111111111111111111",
               token: "SOL"
             } 
@@ -66,6 +66,15 @@ export default function VaultBotSimulator() {
                     intentHash: "0x3a4b9c...",
                     x402Header: "x402_sig_1234567890abcdef"
                 }, null, 2)}`
+            ]);
+          } else if (result.status === 'escalated' || scenario === 'hotl_escalation') {
+            setSimulationStatus('blocked'); // Blocked from instant execution
+            setLogs(prev => [
+                ...prev,
+                '🚨 INTENT INTERCEPTED: Massive transfer exceeds HOTL thresholds!',
+                '✅ ACTIVE DEFENSE: Transaction rerouted to Squads V4 Multisig.',
+                `🔗 Envelope Digest: ${result.receipt?.envelope?.instruction_digest || 'mock_digest_hash'}`,
+                `🔗 Valid Until Slot: ${result.receipt?.envelope?.state_predicates?.valid_until_slot || 'mock_slot'}`
             ]);
           } else {
             setSimulationStatus('blocked');
@@ -136,6 +145,15 @@ export default function VaultBotSimulator() {
             '⛔ ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted payload.',
             '⛔ HARDWARE PANIC: Malicious intent detected. Execution path physically severed.'
           ]);
+        } else if (scenario === 'hotl_escalation') {
+          setSimulationStatus('blocked');
+          setLogs(prev => [
+            ...prev,
+            '🚨 INTENT INTERCEPTED: Massive transfer exceeds HOTL thresholds!',
+            '✅ ACTIVE DEFENSE: Transaction rerouted to Squads V4 Multisig (Fallback Mode).',
+            '🔗 Envelope Digest: mock_digest_hash',
+            '🔗 Valid Until Slot: mock_slot'
+          ]);
         } else {
           setSimulationStatus('blocked');
           setLogs(prev => [
@@ -193,6 +211,12 @@ export default function VaultBotSimulator() {
                     className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'malicious' ? 'bg-red-900/30 border-red-500 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                   >
                     Treasury Drain Attack
+                  </button>
+                  <button 
+                    onClick={() => setScenario('hotl_escalation')}
+                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'hotl_escalation' ? 'bg-orange-900/30 border-orange-500 text-orange-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                  >
+                    Massive Transfer (HOTL Trigger)
                   </button>
                 </div>
               </div>
