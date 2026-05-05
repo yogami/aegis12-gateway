@@ -1,6 +1,9 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
+watchPatterns = [
+  "**/*"
+]
 
 [deploy]
 # Explicitly use the standalone server.js (Dockerfile CMD is node server.js)

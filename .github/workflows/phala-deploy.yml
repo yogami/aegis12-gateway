@@ -7,11 +7,15 @@ on:
     paths:
       - 'src/**'
       - 'aegis-zk-prover/**'
-      - 'scripts/**'
       - 'Dockerfile*'
       - 'package.json'
       - 'package-lock.json'
       - 'tsconfig.json'
+      - '!apps/dashboard/**'
+      - '!e2e/**'
+      - '!tests/**'
+      - '!scripts/**'
+      - '!**/*.md'
   workflow_dispatch: # Allows manual trigger from the GitHub UI
 
 jobs:
