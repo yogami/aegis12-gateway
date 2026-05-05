@@ -7,11 +7,11 @@ vi.mock('@solana/web3.js', async (importOriginal) => {
     const actual = await importOriginal() as any;
     return {
         ...actual,
-        Connection: vi.fn().mockImplementation(() => ({
-            getLatestBlockhash: vi.fn().mockResolvedValue({ blockhash: 'MockBlockhash', lastValidBlockHeight: 100000 }),
-            getSlot: vi.fn().mockResolvedValue(200000),
-            getAccountInfo: vi.fn().mockResolvedValue(null)
-        }))
+        Connection: class {
+            getLatestBlockhash = vi.fn().mockResolvedValue({ blockhash: 'MockBlockhash', lastValidBlockHeight: 100000 });
+            getSlot = vi.fn().mockResolvedValue(200000);
+            getAccountInfo = vi.fn().mockResolvedValue(null);
+        }
     };
 });
 
