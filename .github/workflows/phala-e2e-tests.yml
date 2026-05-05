@@ -1,13 +1,10 @@
 name: Aegis-12 Phala Live Tests
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'apps/dashboard/**'
-      - '**/*.md'
-      - '.github/workflows/dashboard-playwright.yml'
+  workflow_run:
+    workflows: ["Phala CVM Deployment"]
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
