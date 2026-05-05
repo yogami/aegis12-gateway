@@ -135,7 +135,7 @@ async function verify() {
     console.log(`[Auditor] ✅ ZK-Seal Verified: Mathematical proof of execution present.`);
 
     // SUBSTANCE AUDIT 3: TEE QUOTE
-    const attestation = body.hardware_quote;
+    const attestation = body.attestation;
     if (!attestation || attestation === "unknown" || attestation === "not_available_in_simulation") {
         console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Hardware attestation is missing or invalid: ${attestation}`);
         process.exit(1);
