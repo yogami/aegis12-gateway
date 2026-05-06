@@ -21,8 +21,8 @@ jobs:
       - name: Setup Rust & Solana
         run: |
           sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
-          # Install Solana Toolchain (Force IPv4 to bypass SSL_ERROR_SYSCALL)
-          sh -c "$(curl -4 -sSfL https://release.solana.com/v1.18.18/install)"
+          # Install Solana Toolchain (Using Anza Agave validator endpoint)
+          sh -c "$(curl -sSfL https://release.anza.xyz/v1.18.18/install)"
           export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
 
