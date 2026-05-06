@@ -95,21 +95,21 @@ export class SolanaAnchor implements ILedgerAnchor {
         };
         const memo = `a12:${Buffer.from(JSON.stringify(memoObj)).toString('base64url')}`;
 
-        // Attempt to use Registry Client if available
+        // Attempt to use Registry Client if enabled
         if (this.registryClient) {
-            try {
-                // Ensure receipt payload format matches AegisComplianceReceipt
-                const formattedReceipt = {
-                    receiptId: receipt.actionId || receipt.receiptId,
-                    article12LogHash: "0x" + receiptHash,
-                    signature: "0x" + (receipt.signature || Buffer.alloc(64).toString('hex')), // Mock or real signature
-                    article14OversightSignature: null,
-                    timestamp: receipt.timestamp,
-                    tenantId: "tenant-001",
-                    policyId: receipt.policyId || "unknown",
-                    agentId: receipt.agentId || enclaveDid
-                };
+            // Ensure receipt payload format matches AegisComplianceReceipt
+            const formattedReceipt = {
+                receiptId: receipt.actionId || receipt.receiptId,
+                article12LogHash: "0x" + receiptHash,
+                signature: "0x" + (receipt.signature || Buffer.alloc(64).toString('hex')), // Mock or real signature
+                article14OversightSignature: null,
+                timestamp: receipt.timestamp,
+                tenantId: "tenant-001",
+                policyId: receipt.policyId || "unknown",
+                agentId: receipt.agentId || enclaveDid
+            };
 
+            try {
                 const txSignature = await this.registryClient.anchorReceipt(formattedReceipt as any);
                 const slot = await this.connection.getSlot('confirmed');
 
@@ -123,10 +123,12 @@ export class SolanaAnchor implements ILedgerAnchor {
                     isZkSharded
                 };
             } catch (e: any) {
-                console.warn(`[SolanaAnchor] AegisRegistryClient failed (${e.message}). Falling back to Legacy Memo...`);
+                console.error(`[SolanaAnchor] AegisRegistryClient STRICT FAILURE: ${e.message}`);
+                throw new Error(`[TERMINAL REFUSAL] Evidence Anchoring Failed: ${e.message}`);
             }
         }
 
+        // Legacy Memo Fallback ONLY used if ENABLE_ONCHAIN_REGISTRY is not set
         const transaction = new Transaction().add(createMemoInstruction(memo));
         const { blockhash } = await this.connection.getLatestBlockhash('confirmed');
         transaction.recentBlockhash = blockhash;

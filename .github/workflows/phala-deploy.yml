@@ -163,6 +163,8 @@ jobs:
                 - MANTLE_RPC_URL=${{ vars.MANTLE_RPC_URL || '' }}
                 - AUTHORIZED_TENANTS='{"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-council":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-e2e":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}'
                 - SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
+                - ENABLE_ONCHAIN_REGISTRY=true
+                - AEGIS_ONCHAIN_PROGRAM_ID=FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS
               volumes:
                 - /var/run/dstack.sock:/var/run/dstack.sock
           EOF

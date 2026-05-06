@@ -1,0 +1,70 @@
+name: Deploy Smart Contract to Devnet
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Setup Rust & Solana
+        run: |
+          sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
+          # Install Solana Toolchain
+          sh -c "$(curl -sSfL https://release.solana.com/v1.18.18/install)"
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          solana --version
+
+          # Install Anchor CLI
+          cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+          avm install 0.30.1
+          avm use 0.30.1
+          anchor --version
+
+      - name: Build Anchor Program
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          export PATH="/home/runner/.avm/bin:$PATH"
+          cd aegis_onchain
+          
+          # Restore the deterministic keypair
+          mkdir -p target/deploy
+          cp ../.github/keys/aegis_onchain-keypair.json target/deploy/aegis_onchain-keypair.json
+          
+          anchor build
+
+      - name: Deploy to Devnet
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+        run: |
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          
+          # Setup Solana Config
+          solana config set --url devnet
+          
+          # Save secret key to deployer.json
+          echo "$SOLANA_PAYER_SECRET" > deployer_base64.txt
+          node -e "const fs = require('fs'); const b64 = fs.readFileSync('deployer_base64.txt', 'utf8').trim(); const decoded = Buffer.from(b64, 'base64'); fs.writeFileSync('deployer.json', JSON.stringify(Array.from(decoded)));"
+          
+          # Airdrop some SOL if necessary
+          solana airdrop 2 deployer.json --url devnet || echo "Airdrop failed, proceeding assuming funded"
+          
+          cd aegis_onchain
+          anchor deploy --provider.cluster devnet --provider.wallet ../deployer.json
+
+      - name: Initialize Tenant PDA
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+        run: |
+          npx tsx scripts/init_tenant.ts
