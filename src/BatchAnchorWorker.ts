@@ -67,7 +67,6 @@ export class BatchAnchorWorker {
         return Promise.race([anchorPromise, timeoutPromise]);
     }
 
-    // eslint-disable-next-line complexity
     private async saveSingleEvidence(entry: any, ledgerReceipt: any) {
         try {
             const original = await this.pep.getEvidenceByReceiptId(entry.receiptId);
@@ -99,7 +98,6 @@ export class BatchAnchorWorker {
         }
     }
 
-    // eslint-disable-next-line complexity
     private async processBatch() {
         if (this.isAnchoring) return;
         const unbatched = this.journal.getUnbatchedEntries();

@@ -85,6 +85,47 @@ export class SolanaAnchor implements ILedgerAnchor {
         const isZkSharded = !!receipt.zkSnarkProof;
         const receiptHash = this.computeReceiptHash(receipt);
         
+        // Attempt to use Registry Client if enabled
+        if (this.registryClient) {
+            return this.anchorWithRegistry(receipt, receiptHash, enclaveDid, isZkSharded);
+        }
+
+        return this.anchorWithMemo(receipt, receiptHash, decision, enclaveDid, isZkSharded);
+    }
+
+    private async anchorWithRegistry(receipt: any, receiptHash: string, enclaveDid: string, isZkSharded: boolean): Promise<AnchorResult> {
+        // Ensure receipt payload format matches AegisComplianceReceipt
+        const formattedReceipt = {
+            receiptId: receipt.actionId || receipt.receiptId,
+            article12LogHash: "0x" + receiptHash,
+            signature: "0x" + (receipt.signature || Buffer.alloc(64).toString('hex')), // Mock or real signature
+            article14OversightSignature: null,
+            timestamp: receipt.timestamp,
+            tenantId: "tenant-001",
+            policyId: receipt.policyId || "unknown",
+            agentId: receipt.agentId || enclaveDid
+        };
+
+        try {
+            const txSignature = await this.registryClient!.anchorReceipt(formattedReceipt as any);
+            const slot = await this.connection.getSlot('confirmed');
+
+            return {
+                txSignature,
+                receiptHash,
+                slot,
+                cluster: this.cluster,
+                explorerUrl: `https://explorer.solana.com/tx/${txSignature}?cluster=${this.cluster}`,
+                anchoredAt: new Date().toISOString(),
+                isZkSharded
+            };
+        } catch (e: any) {
+            console.error(`[SolanaAnchor] AegisRegistryClient STRICT FAILURE: ${e.message}`);
+            throw new Error(`[TERMINAL REFUSAL] Evidence Anchoring Failed: ${e.message}`);
+        }
+    }
+
+    private async anchorWithMemo(receipt: any, receiptHash: string, decision: string, enclaveDid: string, isZkSharded: boolean): Promise<AnchorResult> {
         const memoObj = {
             v: 'aegis:v8',
             act: receipt.actionId,
@@ -94,39 +135,6 @@ export class SolanaAnchor implements ILedgerAnchor {
             ts: receipt.timestamp
         };
         const memo = `a12:${Buffer.from(JSON.stringify(memoObj)).toString('base64url')}`;
-
-        // Attempt to use Registry Client if enabled
-        if (this.registryClient) {
-            // Ensure receipt payload format matches AegisComplianceReceipt
-            const formattedReceipt = {
-                receiptId: receipt.actionId || receipt.receiptId,
-                article12LogHash: "0x" + receiptHash,
-                signature: "0x" + (receipt.signature || Buffer.alloc(64).toString('hex')), // Mock or real signature
-                article14OversightSignature: null,
-                timestamp: receipt.timestamp,
-                tenantId: "tenant-001",
-                policyId: receipt.policyId || "unknown",
-                agentId: receipt.agentId || enclaveDid
-            };
-
-            try {
-                const txSignature = await this.registryClient.anchorReceipt(formattedReceipt as any);
-                const slot = await this.connection.getSlot('confirmed');
-
-                return {
-                    txSignature,
-                    receiptHash,
-                    slot,
-                    cluster: this.cluster,
-                    explorerUrl: `https://explorer.solana.com/tx/${txSignature}?cluster=${this.cluster}`,
-                    anchoredAt: new Date().toISOString(),
-                    isZkSharded
-                };
-            } catch (e: any) {
-                console.error(`[SolanaAnchor] AegisRegistryClient STRICT FAILURE: ${e.message}`);
-                throw new Error(`[TERMINAL REFUSAL] Evidence Anchoring Failed: ${e.message}`);
-            }
-        }
 
         // Legacy Memo Fallback ONLY used if ENABLE_ONCHAIN_REGISTRY is not set
         const transaction = new Transaction().add(createMemoInstruction(memo));

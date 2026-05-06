@@ -95,7 +95,11 @@ export class WALEngine {
     }
 
     public releaseLock(lockPath: string): void {
-        try { if (fs.existsSync(lockPath)) fs.unlinkSync(lockPath); } catch (e) {}
+        try { 
+            if (fs.existsSync(lockPath)) fs.unlinkSync(lockPath); 
+        } catch (e) {
+            // Ignore file not found errors during unlock
+        }
     }
 
     public atomicWriteSync(tempPath: string, targetPath: string, data: string): void {
