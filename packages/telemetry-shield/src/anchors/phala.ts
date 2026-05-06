@@ -26,52 +26,51 @@ export class PhalaTeeAnchor implements ITeeAnchor {
     public async submitEvidence(record: AgentEvidenceRecord): Promise<void> {
         try {
             console.log(`[Aegis-12: Phala Anchor] Dispatching payload to encrypted TEE Enclave...`);
+            const response = await this._postEvidence(record);
             
-            // Send exactly the schema that src/phala-entry.ts expects (PolicyEvaluationRequest)
-            // Even though this is telemetry data, we pack it so the enclave accepts it natively.
-            const response = await fetch(this.phalaRpcUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Aegis-Trace": "v1.0"
-                },
-                body: JSON.stringify({
-                    intentId: record.input_snapshot_hash,
-                    agentIdentifier: record.agent_id,
-                    requestedTask: JSON.stringify(record),
-                    contextData: []
-                })
-            });
-
             if (!response.ok) {
                 console.warn(`[Aegis-12: Phala Anchor] ❌ HTTP ${response.status}: Enclave unreachable.`);
                 return;
             }
 
             const data = await response.json();
-            
-            if (data.status === "approved") {
-                console.log(`[Aegis-12: Phala Anchor] ✅ Execution Completed inside Intel SGX CVM.`);
-                console.log(`🔒 Enclave DID: ${data.enclaveDid}`);
-                console.log(`📜 Receipt: ${JSON.stringify(data.receipt)}`);
-                
-                // Cryptographic validation of the returned payload
-                const isSecure = await this.verifyHardwareAttestation(data.attestation, data.enclaveDid);
-                if (!isSecure) {
-                    console.log(`⚠️  [Aegis-12: Phala Anchor] Hardware quote is a Mock (Running in Local Mode)`);
-                } else {
-                    console.log(`✅  [Aegis-12: Phala Anchor] Cryptographic Remote Attestation strongly verified!`);
-                }
-                
-                // At this point, the Hybrid Loop would natively pipe the data.receipt hash 
-                // to the SolanaMemoAnchor!
-                console.log(`🔗 Hybrid Action: Phala Trace is ready for Solana Memo Insertion.`);
-            } else {
-                console.error(`[Aegis-12: Phala Anchor] ❌ Enclave DENIED execution: ${data.error}`);
-            }
-
+            await this._handleResponse(data);
         } catch (error: any) {
             console.warn(`[Aegis-12: Phala Anchor] ❌ Phala SDK Proxy unreachable: ${error.message}`);
+        }
+    }
+
+    private async _postEvidence(record: AgentEvidenceRecord) {
+        return fetch(this.phalaRpcUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Aegis-Trace": "v1.0"
+            },
+            body: JSON.stringify({
+                intentId: record.input_snapshot_hash,
+                agentIdentifier: record.agent_id,
+                requestedTask: JSON.stringify(record),
+                contextData: []
+            })
+        });
+    }
+
+    private async _handleResponse(data: any) {
+        if (data.status === "approved") {
+            console.log(`[Aegis-12: Phala Anchor] ✅ Execution Completed inside Intel SGX CVM.`);
+            console.log(`🔒 Enclave DID: ${data.enclaveDid}`);
+            console.log(`📜 Receipt: ${JSON.stringify(data.receipt)}`);
+            
+            const isSecure = await this.verifyHardwareAttestation(data.attestation, data.enclaveDid);
+            if (!isSecure) {
+                console.log(`⚠️  [Aegis-12: Phala Anchor] Hardware quote is a Mock (Running in Local Mode)`);
+            } else {
+                console.log(`✅  [Aegis-12: Phala Anchor] Cryptographic Remote Attestation strongly verified!`);
+            }
+            console.log(`🔗 Hybrid Action: Phala Trace is ready for Solana Memo Insertion.`);
+        } else {
+            console.error(`[Aegis-12: Phala Anchor] ❌ Enclave DENIED execution: ${data.error}`);
         }
     }
 }

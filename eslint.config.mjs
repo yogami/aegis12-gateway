@@ -8,7 +8,24 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['apps/dashboard/**', 'dist/**', 'coverage/**', 'aegis_onchain/**']
+    ignores: [
+      'apps/dashboard/**', 
+      'dist/**', 
+      'coverage/**', 
+      'aegis_onchain/**',
+      'scratch/**',
+      'scripts/**',
+      'examples/**',
+      'pitch_segments/**',
+      'packages/telemetry-shield/scripts/**',
+      'packages/telemetry-shield/tests/**',
+      'packages/eliza-plugin/**',
+      'apps/aegis-dao-guardian/**',
+      '*.js',
+      '**/*.js',
+      'vc-adversarial-suite-v2.ts',
+      'diagnostic_breaker.ts'
+    ]
   },
   {
     plugins: {

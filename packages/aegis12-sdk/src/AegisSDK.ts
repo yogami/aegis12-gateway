@@ -79,54 +79,50 @@ export class AegisSDK {
         const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
         try {
-            const payload = {
-                agent: {
-                    id: config.agentId,
-                    tenantId: config.tenantId,
-                    currentTier: config.agentTier || 'T1'
-                },
-                action: {
-                    toolId: intent.toolId || 'unsigned_transaction',
-                    parameters: intent.parameters || intent
-                },
-                context: {
-                    timestamp: new Date().toISOString(),
-                    currentAnomalyScore: config.currentAnomalyScore ?? 0.5
-                }
-            };
-
-            const response = await fetch(`${gatewayUrl}/sign_and_execute`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                signal: controller.signal as any
-            });
-
+            const payload = AegisSDK._buildPayload(intent, config);
+            const decision = await AegisSDK._postRequest(gatewayUrl, payload, controller);
             clearTimeout(timeout);
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: 'Unknown Gateway Error' })) as any;
-                throw new Error(`Aegis Enforcement Rejected: ${errorData.error || response.statusText}`);
-            }
-
-            const decision = await response.json() as any;
-            
-            if (decision.status !== 'approved' && decision.status !== 'escalated') {
-                throw new Error(`Aegis Enforcement Denied: ${decision.error || 'Policy Violation'}`);
-            }
-
-            return {
-                status: decision.status,
-                decision: 'ALLOW',
-                tx_hash: decision.tx_hash,
-                evidence_package: decision.evidence_package,
-                hardware_attestation: decision.hardware_quote,
-                envelope: decision.envelope
-            };
-
+            return AegisSDK._formatResponse(decision);
         } catch (err: any) {
             clearTimeout(timeout);
             throw err;
         }
+    }
+
+    private static _buildPayload(intent: any, config: AegisConfig) {
+        return {
+            agent: { id: config.agentId, tenantId: config.tenantId, currentTier: config.agentTier || 'T1' },
+            action: { toolId: intent.toolId || 'unsigned_transaction', parameters: intent.parameters || intent },
+            context: { timestamp: new Date().toISOString(), currentAnomalyScore: config.currentAnomalyScore ?? 0.5 }
+        };
+    }
+
+    private static async _postRequest(gatewayUrl: string, payload: any, controller: AbortController) {
+        const response = await fetch(`${gatewayUrl}/sign_and_execute`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal as any
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown Gateway Error' })) as any;
+            throw new Error(`Aegis Enforcement Rejected: ${errorData.error || response.statusText}`);
+        }
+        return await response.json() as any;
+    }
+
+    private static _formatResponse(decision: any) {
+        if (decision.status !== 'approved' && decision.status !== 'escalated') {
+            throw new Error(`Aegis Enforcement Denied: ${decision.error || 'Policy Violation'}`);
+        }
+        return {
+            status: decision.status,
+            decision: 'ALLOW',
+            tx_hash: decision.tx_hash,
+            evidence_package: decision.evidence_package,
+            hardware_attestation: decision.hardware_quote,
+            envelope: decision.envelope
+        };
     }
 }
