@@ -8,6 +8,9 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    ignores: ['apps/dashboard/**', 'dist/**', 'coverage/**', 'aegis_onchain/**']
+  },
+  {
     plugins: {
       sonarjs,
       import: importPlugin
