@@ -86,7 +86,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
   });
 
   test('verifies Normal Payment outputs the Auditor-Grade Evidence Schema JSON', async ({ page }) => {
-    test.setTimeout(90000); // Allow up to 90 seconds for real Devnet anchoring and TEE proof generation
+    test.setTimeout(150000); // Allow up to 150 seconds for real Devnet anchoring and TEE proof generation
     await page.goto(`/simulator`);
 
     // Select the Safe scenario
@@ -98,13 +98,14 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await executeBtn.click();
 
     // Wait for the Evidence Package to be dumped to the terminal logs
-    // Increase timeout to 90s because we are waiting for real Devnet anchoring and Phala proofs which can take 60s+
-    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 90000 });
+    // Increase timeout to 150s because we are waiting for real Devnet anchoring and Phala proofs which can take 120s+
+    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 150000 });
     // Expect dynamic properties rather than hardcoded POL_SAFE_01 string since we don't mock the inner contents anymore
-    await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 90000 });
-    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 90000 });
+    await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 150000 });
   });
   test('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
+    test.setTimeout(150000); // Allow up to 150 seconds for TEE processing
     await page.goto(`/simulator`);
 
     // Select the HOTL Trigger scenario
@@ -123,7 +124,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     expect(postData.action.parameters.amount).toBe(50000000000);
 
     // Wait for the HOTL Escalation logs to appear
-    await expect(page.locator('text=Massive transfer exceeds HOTL thresholds')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=Transaction rerouted to Squads V4 Multisig')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Massive transfer exceeds HOTL thresholds')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=Transaction rerouted to Squads V4 Multisig')).toBeVisible({ timeout: 150000 });
   });
 });

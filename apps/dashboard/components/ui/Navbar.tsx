@@ -45,18 +45,21 @@ export function Navbar() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/simulator/firewall" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
+                            <Link href="#" className="flex items-center py-2 px-3 text-gray-400 cursor-not-allowed rounded md:p-0 dark:text-gray-500 pointer-events-none">
                                 Wallet Firewall
+                                <span className="text-[10px] bg-purple-900 text-purple-200 px-1.5 py-0.5 rounded ml-2 font-bold tracking-wider">PHASE 2</span>
                             </Link>
                         </li>
                         <li>
-                            <Link href="/agents" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
+                            <Link href="#" className="flex items-center py-2 px-3 text-gray-400 cursor-not-allowed rounded md:p-0 dark:text-gray-500 pointer-events-none">
                                 Directory
+                                <span className="text-[10px] bg-purple-900 text-purple-200 px-1.5 py-0.5 rounded ml-2 font-bold tracking-wider">PHASE 2</span>
                             </Link>
                         </li>
                         <li>
-                            <Link href="/leaderboard" className="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700">
+                            <Link href="#" className="flex items-center py-2 px-3 text-gray-400 cursor-not-allowed rounded md:p-0 dark:text-gray-500 pointer-events-none">
                                 Leaderboard
+                                <span className="text-[10px] bg-purple-900 text-purple-200 px-1.5 py-0.5 rounded ml-2 font-bold tracking-wider">PHASE 2</span>
                             </Link>
                         </li>
                         <li>
