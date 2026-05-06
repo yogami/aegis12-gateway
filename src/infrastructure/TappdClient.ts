@@ -11,12 +11,22 @@ import { PhalaTappdMock } from './PhalaTappdMock';
  * Fallback: PhalaTappdMock (for local development/simulated runs).
  */
 export class TappdClient {
-    private readonly socketPath = '/var/run/dstack.sock';
+    private readonly socketPath: string;
     private readonly isTee: boolean;
 
     constructor() {
         const envSignal = process.env.TEE_ENV === 'phala';
-        const socketSignal = require('fs').existsSync(this.socketPath);
+        const fs = require('fs');
+        
+        let foundSocket = '';
+        if (fs.existsSync('/var/run/tappd.sock')) {
+            foundSocket = '/var/run/tappd.sock';
+        } else if (fs.existsSync('/var/run/dstack.sock')) {
+            foundSocket = '/var/run/dstack.sock';
+        }
+        
+        this.socketPath = foundSocket || '/var/run/dstack.sock'; // fallback default
+        const socketSignal = foundSocket !== '';
         
         console.log(`[TappdClient] Detection: TEE_ENV_SIGNAL=${envSignal}, SOCKET_SIGNAL=${socketSignal} (path: ${this.socketPath})`);
         

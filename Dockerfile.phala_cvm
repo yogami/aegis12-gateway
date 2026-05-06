@@ -67,11 +67,11 @@ RUN echo '#!/bin/sh\n\
 export AEGIS_ZK_PROVER_HASH=$(sha256sum /app/bin/aegis-zk-prover | cut -d" " -f1)\n\
 echo "[Aegis-12] Calculated Prover Hash: $AEGIS_ZK_PROVER_HASH"\n\
 \n\
-# Wait for dStack sidecar socket if in TEE mode\n\
+# Wait for sidecar socket if in TEE mode\n\
 if [ "$TEE_ENV" = "phala" ]; then\n\
-    echo "[Aegis-12] Waiting for /var/run/dstack.sock..." \n\
+    echo "[Aegis-12] Waiting for /var/run/tappd.sock or /var/run/dstack.sock..." \n\
     for i in $(seq 1 30); do\n\
-        if [ -S /var/run/dstack.sock ]; then\n\
+        if [ -S /var/run/tappd.sock ] || [ -S /var/run/dstack.sock ]; then\n\
             echo "[Aegis-12] Hardware socket found."\n\
             break\n\
         fi\n\
