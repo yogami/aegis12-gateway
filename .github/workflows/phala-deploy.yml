@@ -226,7 +226,7 @@ jobs:
 
       - name: Install verification dependencies
         if: "!contains(github.event.head_commit.message, '[skip-audit]')"
-        run: npm install ethers tsx @solana/web3.js
+        run: npm install ethers tsx @solana/web3.js --legacy-peer-deps
 
       - name: Verify Live Deployment (Substance Audit)
         if: "!contains(github.event.head_commit.message, '[skip-audit]')"
