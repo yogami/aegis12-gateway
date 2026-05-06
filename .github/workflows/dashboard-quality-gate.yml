@@ -37,7 +37,7 @@ jobs:
       
       - name: Install Dependencies (Node)
         if: steps.detect.outputs.type == 'node'
-        run: npm ci || npm install
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
       
       - name: TypeScript Check
         if: steps.detect.outputs.type == 'node'

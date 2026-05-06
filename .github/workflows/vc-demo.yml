@@ -24,9 +24,9 @@ jobs:
 
       - name: Synchronize Master Environment Dependencies
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           cd packages/telemetry-shield
-          npm ci
+          npm ci --legacy-peer-deps
 
       - name: Execute Cryptographic Thesis Matrix
         env:

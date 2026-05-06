@@ -35,7 +35,7 @@ jobs:
           node-version: '20'
 
       - name: Install Node Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Security Audit Gate
         run: npm audit --audit-level=critical
