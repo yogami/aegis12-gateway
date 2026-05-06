@@ -40,18 +40,18 @@ export class AegisRegistryClient {
             this.program.programId
         );
 
-        // Convert the Keccak-256 hex string to bytes32 array
-        const logHashBytes = Array.from(Buffer.from(receipt.article12LogHash.slice(2), 'hex'));
+        // Convert the Keccak-256 hex string to Buffer
+        const logHashBytes = Buffer.from(receipt.article12LogHash.slice(2), 'hex');
         
         // Convert the Ed25519 signature to byte array
-        const teeSignatureBytes = Array.from(Buffer.from(receipt.signature.slice(2), 'hex'));
+        const teeSignatureBytes = Buffer.from(receipt.signature.slice(2), 'hex');
 
         try {
             const tx = await this.program.methods
                 .anchorComplianceReceipt(
                     receipt.receiptId,
-                    logHashBytes,
-                    receipt.article14OversightSignature,
+                    Array.from(logHashBytes), // Must be Array for [u8; 32]
+                    receipt.article14OversightSignature || "none",
                     teeSignatureBytes
                 )
                 .accounts({

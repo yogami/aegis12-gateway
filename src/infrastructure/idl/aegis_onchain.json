@@ -5,6 +5,7 @@
   "instructions": [
     {
       "name": "anchorComplianceReceipt",
+      "discriminator": [34, 51, 29, 108, 204, 93, 6, 46],
       "accounts": [
         {
           "name": "registryEntry",
@@ -50,6 +51,7 @@
     },
     {
       "name": "checkpointNonce",
+      "discriminator": [45, 32, 183, 11, 70, 24, 101, 127],
       "accounts": [
         {
           "name": "nonceCheckpoint",
@@ -77,6 +79,16 @@
           "type": "u64"
         }
       ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "registryEntry",
+      "discriminator": [48, 198, 240, 252, 155, 186, 72, 16]
+    },
+    {
+      "name": "nonceCheckpoint",
+      "discriminator": [223, 35, 197, 217, 206, 153, 120, 213]
     }
   ]
 }
