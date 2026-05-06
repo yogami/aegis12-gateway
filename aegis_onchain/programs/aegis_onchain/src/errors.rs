@@ -13,4 +13,7 @@ pub enum AegisError {
 
     #[msg("Attestation envelope expired.")]
     AttestationExpired,
+
+    #[msg("The provided nonce is older than or equal to the current checkpoint. Replay attack detected.")]
+    StaleNonce,
 }

@@ -28,6 +28,24 @@ pub mod aegis_onchain {
     ) -> Result<()> {
         instructions::verify_attestation_instruction(ctx, envelope, signature, enclave_pubkey)
     }
+
+    pub fn anchor_compliance_receipt(
+        ctx: Context<AnchorComplianceReceipt>,
+        receipt_id: String,
+        log_hash: [u8; 32],
+        article14_signature: Option<String>,
+        tee_signature: Vec<u8>
+    ) -> Result<()> {
+        instructions::anchor_compliance_receipt(ctx, receipt_id, log_hash, article14_signature, tee_signature)
+    }
+
+    pub fn checkpoint_nonce(
+        ctx: Context<CheckpointNonce>,
+        tenant_id: String,
+        new_nonce: u64
+    ) -> Result<()> {
+        instructions::checkpoint_nonce(ctx, tenant_id, new_nonce)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -70,5 +88,20 @@ mod tests {
         let result = instructions::verify_attestation(&envelope, 150, &signature, &pubkey);
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), errors::AegisError::AttestationExpired.into());
+    }
+
+    #[test]
+    fn test_checkpoint_nonce_increases_monotonically() {
+        let mut checkpoint = state::NonceCheckpoint { last_nonce: 5 };
+        
+        // Green Phase: Attempting to checkpoint a lower nonce should fail
+        let result = instructions::registry::checkpoint_nonce_logic(&mut checkpoint, 3);
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), errors::AegisError::StaleNonce.into());
+
+        // Green Phase: Higher nonce should pass
+        let result2 = instructions::registry::checkpoint_nonce_logic(&mut checkpoint, 6);
+        assert!(result2.is_ok());
+        assert_eq!(checkpoint.last_nonce, 6);
     }
 }

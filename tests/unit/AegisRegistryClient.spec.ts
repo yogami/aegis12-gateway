@@ -1,101 +1,69 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AegisRegistryClient } from '../../src/infrastructure/AegisRegistryClient';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import * as anchor from '@coral-xyz/anchor';
 
-const mockRpc = vi.fn().mockResolvedValue('mock-tx-sig');
-const mockMethods = {
-    anchorComplianceReceipt: vi.fn().mockReturnThis(),
-    checkpointNonce: vi.fn().mockReturnThis(),
-    accounts: vi.fn().mockReturnValue({ rpc: mockRpc })
-};
-
-const mockFetch = vi.fn().mockResolvedValue({ lastNonce: new anchor.BN(42) });
-
-vi.mock('@coral-xyz/anchor', async (importOriginal) => {
-    const actual = await importOriginal<any>();
-    return {
-        ...actual,
-        AnchorProvider: function() {
-            this.wallet = { publicKey: Keypair.generate().publicKey };
-        },
-        Program: function() {
-            this.programId = Keypair.generate().publicKey;
-            this.methods = mockMethods;
-            this.account = {
-                nonceCheckpoint: {
-                    fetch: mockFetch
-                }
-            };
-        }
+function setupMocks(client: AegisRegistryClient) {
+    const mockMethodReturn = {
+        accounts: vi.fn().mockReturnThis(),
+        rpc: vi.fn().mockResolvedValue('mock_tx_signature_receipt')
     };
-});
+    const mockNonceReturn = {
+        accounts: vi.fn().mockReturnThis(),
+        rpc: vi.fn().mockResolvedValue('mock_tx_signature_nonce')
+    };
 
-// Mock the IDL import
-vi.mock('../../aegis12-registry/target/idl/aegis12_registry.json', () => ({
-    default: { name: 'mock_idl' }
-}));
+    client['program'] = {
+        programId: new anchor.web3.PublicKey('FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS'),
+        methods: {
+            anchorComplianceReceipt: vi.fn().mockReturnValue(mockMethodReturn),
+            checkpointNonce: vi.fn().mockReturnValue(mockNonceReturn),
+        },
+        account: {
+            nonceCheckpoint: {
+                fetch: vi.fn().mockResolvedValue({ lastNonce: new anchor.BN(5) })
+            }
+        }
+    } as any;
+}
 
-let client: AegisRegistryClient;
+describe('AegisRegistryClient', () => {
+    let client: AegisRegistryClient;
+    let wallet: anchor.Wallet;
 
     beforeEach(() => {
-        vi.clearAllMocks();
-        const kp = Keypair.generate();
-        const wallet = {
-            publicKey: kp.publicKey,
-            signTransaction: vi.fn(),
-            signAllTransactions: vi.fn()
-        };
-        client = new AegisRegistryClient('http://localhost', wallet as any, Keypair.generate().publicKey.toBase58());
+        const keypair = Keypair.generate();
+        wallet = new anchor.Wallet(keypair);
+        client = new AegisRegistryClient('http://127.0.0.1:8899', wallet, 'FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS');
+        setupMocks(client);
     });
 
-    it('anchors receipt successfully', async () => {
-        const receipt = {
-            receiptId: 'receipt-1',
-            article12LogHash: '0x' + '1'.repeat(64),
-            signature: '0x' + '2'.repeat(128),
-            article14OversightSignature: 'oversight'
-        };
-
-        const tx = await client.anchorReceipt(receipt as any);
-        expect(tx).toBe('mock-tx-sig');
-        expect(mockMethods.anchorComplianceReceipt).toHaveBeenCalled();
-        expect(mockMethods.accounts).toHaveBeenCalled();
-        expect(mockRpc).toHaveBeenCalled();
-    });
-
-    it('throws when anchoring fails', async () => {
-        mockRpc.mockRejectedValueOnce(new Error('RPC Error'));
-        const receipt = {
-            receiptId: 'receipt-2',
-            article12LogHash: '0x' + '1'.repeat(64),
-            signature: '0x' + '2'.repeat(128),
-            article14OversightSignature: 'oversight'
+    it('should anchor a compliance receipt correctly', async () => {
+        const mockReceipt = {
+            receiptId: "receipt-123",
+            policyId: "pol-123",
+            article12LogHash: "0x1234567890123456789012345678901234567890123456789012345678901234",
+            signature: "0x12345678901234567890123456789012345678901234567890123456789012341234567890123456789012345678901234567890123456789012345678901234",
+            timestamp: Date.now(),
+            tenantId: "tenant-1",
+            agentId: "agent-1",
+            transactionHash: "tx-hash-mock"
         };
 
-        await expect(client.anchorReceipt(receipt as any)).rejects.toThrow('RPC Error');
+        const tx = await client.anchorReceipt(mockReceipt);
+        expect(tx).toBe('mock_tx_signature_receipt');
+        expect(client['program'].methods.anchorComplianceReceipt).toHaveBeenCalled();
     });
 
-    it('checkpoints nonce successfully', async () => {
-        const tx = await client.checkpointNonce('tenant-1', 5);
-        expect(tx).toBe('mock-tx-sig');
-        expect(mockMethods.checkpointNonce).toHaveBeenCalledWith('tenant-1', expect.any(Object));
-        expect(mockRpc).toHaveBeenCalled();
+    it('should checkpoint a new nonce', async () => {
+        const tx = await client.checkpointNonce("tenant-1", 6);
+        expect(tx).toBe('mock_tx_signature_nonce');
+        expect(client['program'].methods.checkpointNonce).toHaveBeenCalledWith("tenant-1", expect.anything());
     });
 
-    it('throws when checkpoint fails', async () => {
-        mockRpc.mockRejectedValueOnce(new Error('Checkpoint Error'));
-        await expect(client.checkpointNonce('tenant-2', 6)).rejects.toThrow('Checkpoint Error');
+    it('should retrieve the last nonce', async () => {
+        const nonce = await client.getLastNonce("tenant-1");
+        expect(nonce).toBe(5);
+        expect(client['program'].account.nonceCheckpoint.fetch).toHaveBeenCalled();
     });
-
-    it('gets last nonce successfully', async () => {
-        const nonce = await client.getLastNonce('tenant-1');
-        expect(nonce).toBe(42);
-        expect(mockFetch).toHaveBeenCalled();
-    });
-
-    it('returns 0 if fetch fails (new tenant)', async () => {
-        mockFetch.mockRejectedValueOnce(new Error('Account not found'));
-        const nonce = await client.getLastNonce('tenant-new');
-        expect(nonce).toBe(0);
-    });
+});

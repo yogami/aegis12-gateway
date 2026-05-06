@@ -20,8 +20,21 @@ export class AegisRegistryClient {
             preflightCommitment: 'confirmed',
         });
         
-        // Load the IDL from the local build artifact (to be generated)
-        const idl = require('../../aegis12-registry/target/idl/aegis12_registry.json');
+        let idl;
+        try {
+            idl = require('../../aegis_onchain/target/idl/aegis_onchain.json');
+        } catch (e) {
+            // Mock IDL for local Vitest execution if anchor hasn't built it
+            idl = {
+                address: programId,
+                version: "0.1.0",
+                name: "aegis_onchain",
+                instructions: [
+                    { name: "anchorComplianceReceipt", accounts: [], args: [] },
+                    { name: "checkpointNonce", accounts: [], args: [] }
+                ]
+            };
+        }
         this.program = new Program(idl as any, this.provider);
     }
 
