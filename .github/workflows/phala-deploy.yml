@@ -16,6 +16,7 @@ on:
       - 'tsconfig.json'
       - 'e2e/**'
       - 'scripts/**'
+      - '!scripts/aegis12_venture_demo.ts'
       - '!apps/dashboard/**'
       - '!tests/**'
       - '!**/*.md'
