@@ -14,11 +14,15 @@ import { AegisComplianceReceipt } from '../types';
 import { AegisSigner } from './AegisSigner';
 import { JsonUtils } from './JsonUtils';
 import { ILedgerAnchor, AnchorResult, VerificationResult } from '../ports/ILedgerAnchor';
+import { AegisRegistryClient } from './AegisRegistryClient';
+import * as anchor from '@coral-xyz/anchor';
 
 export class SolanaAnchor implements ILedgerAnchor {
     private connection: Connection;
     private payer: Keypair;
     private cluster: string;
+
+    private registryClient: AegisRegistryClient | null = null;
 
     constructor(cluster: string = process.env.SOLANA_CLUSTER || 'devnet', payerSecretKey?: Uint8Array) {
         this.cluster = cluster;
@@ -33,6 +37,18 @@ export class SolanaAnchor implements ILedgerAnchor {
         } else {
             if (cluster === 'mainnet-beta') throw new Error('SOLANA_PAYER_SECRET required for mainnet-beta.');
             this.payer = Keypair.generate();
+        }
+
+        // Initialize Registry Client if enabled
+        if (process.env.ENABLE_ONCHAIN_REGISTRY === 'true') {
+            try {
+                const wallet = new anchor.Wallet(this.payer as any);
+                // PROGRAM_ID fallback
+                const programId = process.env.AEGIS_ONCHAIN_PROGRAM_ID || 'FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS';
+                this.registryClient = new AegisRegistryClient(primaryRpc, wallet, programId);
+            } catch (e: any) {
+                console.warn(`[SolanaAnchor] Failed to initialize AegisRegistryClient: ${e.message}`);
+            }
         }
     }
 
@@ -78,6 +94,38 @@ export class SolanaAnchor implements ILedgerAnchor {
             ts: receipt.timestamp
         };
         const memo = `a12:${Buffer.from(JSON.stringify(memoObj)).toString('base64url')}`;
+
+        // Attempt to use Registry Client if available
+        if (this.registryClient) {
+            try {
+                // Ensure receipt payload format matches AegisComplianceReceipt
+                const formattedReceipt = {
+                    receiptId: receipt.actionId || receipt.receiptId,
+                    article12LogHash: "0x" + receiptHash,
+                    signature: "0x" + (receipt.signature || Buffer.alloc(64).toString('hex')), // Mock or real signature
+                    article14OversightSignature: null,
+                    timestamp: receipt.timestamp,
+                    tenantId: "tenant-001",
+                    policyId: receipt.policyId || "unknown",
+                    agentId: receipt.agentId || enclaveDid
+                };
+
+                const txSignature = await this.registryClient.anchorReceipt(formattedReceipt as any);
+                const slot = await this.connection.getSlot('confirmed');
+
+                return {
+                    txSignature,
+                    receiptHash,
+                    slot,
+                    cluster: this.cluster,
+                    explorerUrl: `https://explorer.solana.com/tx/${txSignature}?cluster=${this.cluster}`,
+                    anchoredAt: new Date().toISOString(),
+                    isZkSharded
+                };
+            } catch (e: any) {
+                console.warn(`[SolanaAnchor] AegisRegistryClient failed (${e.message}). Falling back to Legacy Memo...`);
+            }
+        }
 
         const transaction = new Transaction().add(createMemoInstruction(memo));
         const { blockhash } = await this.connection.getLatestBlockhash('confirmed');

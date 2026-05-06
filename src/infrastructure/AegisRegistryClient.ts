@@ -20,21 +20,9 @@ export class AegisRegistryClient {
             preflightCommitment: 'confirmed',
         });
         
-        let idl;
-        try {
-            idl = require('../../aegis_onchain/target/idl/aegis_onchain.json');
-        } catch (e) {
-            // Mock IDL for local Vitest execution if anchor hasn't built it
-            idl = {
-                address: programId,
-                version: "0.1.0",
-                name: "aegis_onchain",
-                instructions: [
-                    { name: "anchorComplianceReceipt", accounts: [], args: [] },
-                    { name: "checkpointNonce", accounts: [], args: [] }
-                ]
-            };
-        }
+        // Load the static IDL so CI/CD and Docker environments don't require the Rust compiler
+        const idl = require('./idl/aegis_onchain.json');
+        
         this.program = new Program(idl as any, this.provider);
     }
 

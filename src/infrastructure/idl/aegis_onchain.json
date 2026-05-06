@@ -1,0 +1,82 @@
+{
+  "address": "FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS",
+  "version": "0.1.0",
+  "name": "aegis_onchain",
+  "instructions": [
+    {
+      "name": "anchorComplianceReceipt",
+      "accounts": [
+        {
+          "name": "registryEntry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "agentSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "receiptId",
+          "type": "string"
+        },
+        {
+          "name": "logHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "article14Signature",
+          "type": {
+            "option": "string"
+          }
+        },
+        {
+          "name": "teeSignature",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "checkpointNonce",
+      "accounts": [
+        {
+          "name": "nonceCheckpoint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tenantId",
+          "type": "string"
+        },
+        {
+          "name": "newNonce",
+          "type": "u64"
+        }
+      ]
+    }
+  ]
+}

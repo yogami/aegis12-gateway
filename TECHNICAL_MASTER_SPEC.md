@@ -67,11 +67,12 @@ To ensure clarity and precision, this specification is strictly divided by user 
 - **Edge Case (Hardware Attestation Spoofing):** When the gateway generates a Squads proposal, the Dashboard verifies the `VALID_SQUADS_PCR0_WHITELIST`. Only proposals originating from an attested Phala CVM are recognized as legitimate in the UI.
 
 ### 3.3 Auditability & Evidence Packages (The Evidence Rail)
-- **Requirement:** The Dashboard provides a view of the cryptographic receipts linked to Policy Commitment Tokens.
-- **Schema:** Evidence Packages must contain:
+- **Requirement:** The Dashboard provides a view of the cryptographic receipts anchored via the `aegis_onchain` smart contract (`FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS`).
+- **Schema:** Evidence Packages are tied to a PDA generated via `[b"aegis_compliance_v1", AgentPubKey, ReceiptID]` and contain:
   - The Phala TDX Hardware Quote (proving hardware integrity and code hash).
   - The ZK Seal (proving policy execution).
   - The `tx_hash` mapping to the on-chain execution.
   - The specific MiCA/NIST control mapped to the decision.
-- **Edge Case (Ledger Failure):** If the Write-Ahead Log (WAL) fails to anchor, the Dashboard shows "Pending Anchor" while the gateway retries.
+- **Failover Security:** The Evidence Rail uses a Monotonic Nonce Checkpoint on the Solana ledger. Each execution increments the nonce. Replay attacks during failover are blocked by evaluating `new_nonce > last_nonce`.
+- **Edge Case (Ledger/Anchor Failure):** If the Anchor program connection fails or is unavailable on a specific cluster, the system degrades gracefully by using legacy Memo (`createMemoInstruction`) to anchor the `receiptHash` to ensure the Write-Ahead Log (WAL) can still proceed without data loss.
 
