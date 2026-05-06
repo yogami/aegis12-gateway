@@ -27,10 +27,17 @@ export async function POST(request: Request) {
         // Ethers v6 requires signTypedData
         // Let's check which one works by trying v6 first, then falling back to v5
         let signature;
-        if (typeof (wallet as any).signTypedData === 'function') {
-            signature = await (wallet as any).signTypedData(domain, types, policyConfig);
+        type EthersSigner = { 
+            signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
+            _signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
+        };
+        const w = wallet as unknown as EthersSigner;
+        if (typeof w.signTypedData === 'function') {
+            signature = await w.signTypedData(domain, types, policyConfig);
+        } else if (typeof w._signTypedData === 'function') {
+            signature = await w._signTypedData(domain, types, policyConfig);
         } else {
-            signature = await (wallet as any)._signTypedData(domain, types, policyConfig);
+            throw new Error("Ethers wallet does not support typed data signing");
         }
 
         // Reconstruct the payload with the dynamically generated valid signature
@@ -61,7 +68,8 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(data);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

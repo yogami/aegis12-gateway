@@ -71,7 +71,9 @@ export default function VaultBotSimulator() {
                     if (evData.ledger_tx && evData.ledger_tx !== "batching") txHash = evData.ledger_tx;
                     if (evData.ars_anchor && evData.ars_anchor !== "pending") zkSeal = evData.ars_anchor;
                   }
-                } catch(e) {}
+                } catch {
+                  // ignore
+                }
               }
             }
             
