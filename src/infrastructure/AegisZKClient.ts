@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
+import * as os from 'os';
 
 /**
  * AegisZKClient
@@ -89,14 +90,21 @@ export class AegisZKClient {
     private async executeProverProcess(input: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
+            const totalMemGB = os.totalmem() / (1024 * 1024 * 1024);
+            const isLowMem = totalMemGB < 4;
+            
+            const envVars: any = { ...process.env };
+            if (isLowMem) {
+                envVars.RAYON_NUM_THREADS = '1';
+                console.log(`[Aegis-12] Low Memory Detected (${totalMemGB.toFixed(1)}GB). Restricting ZK Prover to 1 thread.`);
+            } else {
+                console.log(`[Aegis-12] High Memory Detected (${totalMemGB.toFixed(1)}GB). Unleashing ZK Prover full concurrency.`);
+            }
+
             const child = execFile(this.proverBinaryPath, [], { 
-                timeout: 60000, 
+                timeout: 120000, // Increased to 120s to allow full proofs on large payloads
                 maxBuffer: 52428800, // 50MB for verbose logs
-                env: { 
-                    ...process.env, 
-                    RAYON_NUM_THREADS: '1',
-                    RUST_LOG: 'info,risc0_zkvm=info'
-                }
+                env: envVars
             }, (error, stdout, stderr) => this.handleProverResult(error, stdout, stderr, resolve, reject));
 
             this.setupProverProcess(child, inputStr);
