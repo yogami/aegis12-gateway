@@ -9,7 +9,7 @@ vi.mock('../../src/application/PepFactory', () => ({
     PepFactory: { 
         createPep: vi.fn().mockResolvedValue({ 
             pep: { getEvidenceByReceiptId: vi.fn(), enforce: vi.fn(), updateZkSeal: vi.fn(), signReceipt: vi.fn() }, 
-            journal: {} 
+            journal: { getUnbatchedEntries: vi.fn().mockReturnValue([]) } 
         }) 
     }
 }));
