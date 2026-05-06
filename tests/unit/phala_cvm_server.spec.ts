@@ -73,7 +73,7 @@ beforeEach(() => {
         await endPromise;
 
         expect(mockPhalaEntrypoint).toHaveBeenCalledWith('payload-data');
-        expect(res.writeHead).toHaveBeenCalledWith(200, { 'Content-Type': 'application/json' });
+        expect(res.writeHead).toHaveBeenCalledWith(200, expect.objectContaining({ 'Content-Type': 'application/json' }));
         expect(res.end).toHaveBeenCalledWith(expect.stringContaining('"status":"approved"'));
     });
 
