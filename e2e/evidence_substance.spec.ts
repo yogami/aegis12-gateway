@@ -78,7 +78,7 @@ async function validateOnChainTransaction(connection: any, solanaTx: string, rec
     expect(memoObj.did, "Enclave DID must match").toBe(body.enclaveDid);
 }
 
-function validateSubstanceChecks(body: any, receipt: any, zkSeal: string, policyConfig: any) {
+function validateSubstanceChecks(body: any, receipt: any, zkSeal: string, policyConfig: any, solanaTx: string) {
     const attestation = body.attestation;
     const pcr0 = body.pcr0;
     expect(attestation, "TEE Attestation must not be mocked").not.toBe("not_available_in_mock");
@@ -100,8 +100,8 @@ function validateSubstanceChecks(body: any, receipt: any, zkSeal: string, policy
     expect(zkSeal, "ZK Seal must be a non-empty string").toBeTruthy();
     expect(zkSeal, "ZK Seal must not be stuck in pending").not.toBe("pending");
     expect(zkSeal.length, "ZK Seal length suggests real cryptographic proof").toBeGreaterThan(100);
-    expect(body.ledger_tx || "batching", "Solana TX ID must not be mocked").not.toContain("mock_tx_");
-    expect(body.ledger_tx || "batching", "Solana TX ID must not be stuck in batching").not.toBe("batching");
+    expect(solanaTx, "Solana TX ID must not be mocked").not.toContain("mock_tx_");
+    expect(solanaTx, "Solana TX ID must not be stuck in batching").not.toBe("batching");
 }
 
 const getPayload = (nonce: string, policyConfig: any, e2eWallet: any, signature: string) => ({
@@ -148,7 +148,7 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         const receipt = body.receipt;
         const { solanaTx, zkSeal } = await pollForEvidence(request, receipt.receiptId, body.ledger_tx || "batching");
 
-        validateSubstanceChecks(body, receipt, zkSeal, policyConfig);
+        validateSubstanceChecks(body, receipt, zkSeal, policyConfig, solanaTx);
         
         console.log(`[Substance] Fetching Solana Transaction ${solanaTx} from Devnet...`);
         
