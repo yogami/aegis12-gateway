@@ -32,46 +32,50 @@ export class AegisSolanaAgent {
         txIndex?: number
     ): Promise<string> {
         if (useSquadsCoSign) {
-            if (!this.config.multisigPda || txIndex === undefined) {
-                throw new Error("multisigPda and txIndex required for co-signing");
-            }
-            // Ask Aegis to cryptographically co-sign the Squads proposal
-            const response = await fetch(`${this.config.gatewayUrl}/solana/cosign-proposal`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    multisigPda: this.config.multisigPda,
-                    transactionIndex: txIndex,
-                })
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(`Aegis rejected co-signing: ${result.reason || result.error}`);
-            }
-
-            return `Squads Proposal ${txIndex} co-signed by Aegis. Transaction is ready to execute on-chain.`;
+            return this.executeWithSquads(txIndex);
         } else {
-            // Standard enforcement + SPL Memo Anchor
-            const response = await fetch(`${this.config.gatewayUrl}/solana/enforce-tx`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    serializedTx: serializedTxBase64,
-                    walletPubkey: this.config.agentKeypair.publicKey.toBase58(),
-                    agentTier: this.config.agentTier,
-                    agentDid: this.config.agentDid
-                })
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(`Aegis enforcement failed: ${result.reason || result.error}`);
-            }
-
-            // Since Aegis allowed it, anchor the receipt and optionally send tx
-            // For a production agent, the actual send raw transaction would happen here
-            return `Transaction allowed. Aegis risk score: ${result.riskScore}.`;
+            return this.executeStandardEnforcement(serializedTxBase64);
         }
+    }
+
+    private async executeWithSquads(txIndex?: number): Promise<string> {
+        if (!this.config.multisigPda || txIndex === undefined) {
+            throw new Error("multisigPda and txIndex required for co-signing");
+        }
+        const response = await fetch(`${this.config.gatewayUrl}/solana/cosign-proposal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                multisigPda: this.config.multisigPda,
+                transactionIndex: txIndex,
+            })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(`Aegis rejected co-signing: ${result.reason || result.error}`);
+        }
+
+        return `Squads Proposal ${txIndex} co-signed by Aegis. Transaction is ready to execute on-chain.`;
+    }
+
+    private async executeStandardEnforcement(serializedTxBase64: string): Promise<string> {
+        const response = await fetch(`${this.config.gatewayUrl}/solana/enforce-tx`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                serializedTx: serializedTxBase64,
+                walletPubkey: this.config.agentKeypair.publicKey.toBase58(),
+                agentTier: this.config.agentTier,
+                agentDid: this.config.agentDid
+            })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(`Aegis enforcement failed: ${result.reason || result.error}`);
+        }
+
+        return `Transaction allowed. Aegis risk score: ${result.riskScore}.`;
     }
 }

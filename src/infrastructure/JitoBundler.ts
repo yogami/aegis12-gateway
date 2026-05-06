@@ -36,49 +36,31 @@ export class JitoBundler {
                 jsonrpc: "2.0",
                 id: 1,
                 method: "sendBundle",
-                params: [
-                    [
-                        // Transaction 1: TEE fee + Anchor
-                        serializedAegisTx, 
-                        // Transaction 2: Agent intent (guaranteed atomic equivalence)
-                        serializedAgentTx  
-                    ]
-                ]
+                params: [[serializedAegisTx, serializedAgentTx]]
             };
 
-            // Non-blocking simulated fetch against the block engine (since hackathon happens on devnet
-            // and Jito only operates on mainnet). We return a structurally sound simulated success.
             const isMainnet = process.env.SOLANA_CLUSTER === 'mainnet-beta';
-            
-            if (isMainnet) {
-                const response = await fetch(this.jitoEndpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                const data = await response.json() as any;
-                if (data.error) {
-                    return { status: 'error', error: data.error.message };
-                }
-                return { status: 'success', bundleId: data.result };
-            } else {
-                /**
-                 * ACCEPTED RISK (Berlin AI Rules §2): Jito Block Engine only operates on mainnet-beta.
-                 * On devnet/testnet, we return a simulated success to allow integration testing
-                 * of the bundle construction logic without mainnet access.
-                 * This is NOT a mock — it is a documented architectural boundary.
-                 */
-                console.warn(`[JitoBundler] ACCEPTED_RISK: Devnet simulation active. Jito bundles require mainnet-beta. Cluster: ${process.env.SOLANA_CLUSTER || 'devnet'}`);
-                return { 
-                    status: 'simulated', 
-                    bundleId: `jito-devnet-sim-${Date.now()}` 
-                };
-            }
+            if (isMainnet) return await this.executeMainnet(payload);
+            return this.executeDevnet();
 
         } catch (e: any) {
             console.error(`[JitoBundler] Broadcast failed:`, e);
             return { status: 'error', error: e.message };
         }
+    }
+    private async executeMainnet(payload: any) {
+        const response = await fetch(this.jitoEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json() as any;
+        if (data.error) return { status: 'error', error: data.error.message };
+        return { status: 'success', bundleId: data.result };
+    }
+
+    private executeDevnet() {
+        console.warn(`[JitoBundler] ACCEPTED_RISK: Devnet simulation active. Jito bundles require mainnet-beta. Cluster: ${process.env.SOLANA_CLUSTER || 'devnet'}`);
+        return { status: 'simulated', bundleId: `jito-devnet-sim-${Date.now()}` };
     }
 }

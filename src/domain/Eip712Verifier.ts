@@ -22,8 +22,6 @@ export class Eip712Verifier {
             ]
         };
 
-
-
         let signerAddress: string;
         try {
             signerAddress = ethers.utils.verifyTypedData(domain, types, policy.policyConfig, policy.signature).toLowerCase();

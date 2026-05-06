@@ -103,79 +103,62 @@ export class SquadsGovernance {
      * - BLOCKED: high risk, immediate deny
      */
     public async evaluateAction(
-        anomalyScore: number,
-        agentTier: TrustTier,
-        estimatedValue: number,
-        actionContext: {
-            agentDid: string;
-            toolId: string;
-            actionType: string;
-            parameters: Record<string, unknown>;
-        }
+        anomalyScore: number, agentTier: TrustTier, estimatedValue: number,
+        actionContext: { agentDid: string; toolId: string; actionType: string; parameters: Record<string, unknown>; }
     ): Promise<GovernanceResult> {
         const spendingLimit = this.config.tierSpendingLimits[agentTier];
         const timestamp = new Date().toISOString();
 
-        // HARD BLOCK: anomaly score exceeds hard threshold
         if (anomalyScore >= this.config.hardBlockThreshold) {
-            return {
-                decision: 'BLOCKED',
-                reason: `Anomaly score ${anomalyScore.toFixed(3)} exceeds hard block threshold ${this.config.hardBlockThreshold}. ` +
-                    `Action blocked per EU AI Act Article 9 (Risk Management). No multisig proposal generated.`,
-                anomalyScore,
-                agentTier,
-                spendingLimit,
-                receipt: this.generateReceipt('BLOCKED', anomalyScore, actionContext, timestamp),
-            };
+            return this.handleHardBlock(anomalyScore, agentTier, spendingLimit, actionContext, timestamp);
         }
 
-        // REQUIRE_HUMAN: moderate risk OR value exceeds tier spending limit
         const exceedsTierLimit = estimatedValue > spendingLimit;
         const moderateRisk = anomalyScore >= this.config.humanReviewThreshold;
 
         if (moderateRisk || exceedsTierLimit) {
-            const proposalId = this.generateProposalId(actionContext, timestamp);
-            // Deterministic transaction index: derived from proposal hash to avoid
-            // relying on volatile in-memory state that resets on enclave restart (G-05).
-            const transactionIndex = parseInt(proposalId.replace('aegis-proposal-', '').slice(0, 8), 16) % 1_000_000;
-
-            const reason = moderateRisk
-                ? `Anomaly score ${anomalyScore.toFixed(3)} triggers human oversight per EU AI Act Article 14. ` +
-                  `Squads V4 multisig proposal created for compliance officer review.`
-                : `Estimated value ${estimatedValue} lamports exceeds ${agentTier} spending limit of ${spendingLimit} lamports. ` +
-                  `Requires human approval via Squads V4 multisig.`;
-
-            if (!this.config.multisigPda) {
-                throw new Error('[TERMINAL REFUSAL] Squads multisigPda is not configured. Cannot create governance proposal without an on-chain multisig account.');
-            }
-
-            return {
-                decision: 'REQUIRE_HUMAN',
-                reason,
-                anomalyScore,
-                agentTier,
-                spendingLimit,
-                proposal: {
-                    proposalId,
-                    multisigPda: this.config.multisigPda,
-                    transactionIndex,
-                    requiredApprovals: this.getRequiredApprovals(agentTier, anomalyScore),
-                    expiresAt: new Date(Date.now() + 3600_000).toISOString(), // 1 hour expiry
-                    euAiActArticle: 'Article 14 (Human Oversight)',
-                },
-                receipt: this.generateReceipt('REQUIRE_HUMAN', anomalyScore, actionContext, timestamp),
-            };
+            return this.handleRequireHuman(anomalyScore, agentTier, estimatedValue, spendingLimit, actionContext, timestamp, moderateRisk);
         }
 
-        // AUTONOMOUS: low risk, within spending limits
+        return this.handleAutonomous(anomalyScore, agentTier, spendingLimit, actionContext, timestamp);
+    }
+    
+    private handleHardBlock(anomalyScore: number, agentTier: TrustTier, spendingLimit: number, actionContext: any, timestamp: string): GovernanceResult {
+        return {
+            decision: 'BLOCKED',
+            reason: `Anomaly score ${anomalyScore.toFixed(3)} exceeds hard block threshold ${this.config.hardBlockThreshold}. Action blocked per EU AI Act Article 9 (Risk Management). No multisig proposal generated.`,
+            anomalyScore, agentTier, spendingLimit,
+            receipt: this.generateReceipt('BLOCKED', anomalyScore, actionContext, timestamp),
+        };
+    }
+
+    private handleRequireHuman(anomalyScore: number, agentTier: TrustTier, estimatedValue: number, spendingLimit: number, actionContext: any, timestamp: string, moderateRisk: boolean): GovernanceResult {
+        const proposalId = this.generateProposalId(actionContext, timestamp);
+        const transactionIndex = parseInt(proposalId.replace('aegis-proposal-', '').slice(0, 8), 16) % 1_000_000;
+
+        const reason = moderateRisk
+            ? `Anomaly score ${anomalyScore.toFixed(3)} triggers human oversight per EU AI Act Article 14. Squads V4 multisig proposal created for compliance officer review.`
+            : `Estimated value ${estimatedValue} lamports exceeds ${agentTier} spending limit of ${spendingLimit} lamports. Requires human approval via Squads V4 multisig.`;
+
+        if (!this.config.multisigPda) throw new Error('[TERMINAL REFUSAL] Squads multisigPda is not configured. Cannot create governance proposal without an on-chain multisig account.');
+
+        return {
+            decision: 'REQUIRE_HUMAN', reason, anomalyScore, agentTier, spendingLimit,
+            proposal: {
+                proposalId, multisigPda: this.config.multisigPda, transactionIndex,
+                requiredApprovals: this.getRequiredApprovals(agentTier, anomalyScore),
+                expiresAt: new Date(Date.now() + 3600_000).toISOString(),
+                euAiActArticle: 'Article 14 (Human Oversight)',
+            },
+            receipt: this.generateReceipt('REQUIRE_HUMAN', anomalyScore, actionContext, timestamp),
+        };
+    }
+
+    private handleAutonomous(anomalyScore: number, agentTier: TrustTier, spendingLimit: number, actionContext: any, timestamp: string): GovernanceResult {
         return {
             decision: 'AUTONOMOUS',
-            reason: `Anomaly score ${anomalyScore.toFixed(3)} below threshold. ` +
-                `${agentTier} agent operating within spending limit of ${spendingLimit} lamports. ` +
-                `No human oversight required.`,
-            anomalyScore,
-            agentTier,
-            spendingLimit,
+            reason: `Anomaly score ${anomalyScore.toFixed(3)} below threshold. ${agentTier} agent operating within spending limit of ${spendingLimit} lamports. No human oversight required.`,
+            anomalyScore, agentTier, spendingLimit,
             receipt: this.generateReceipt('AUTONOMOUS', anomalyScore, actionContext, timestamp),
         };
     }
@@ -211,29 +194,17 @@ export class SquadsGovernance {
      * Create the Squads multisig configuration for deploying a new governance vault.
      * Returns the configuration object and instructions (not executed — for demo/docs).
      */
-    public getMultisigConfig(
-        members: string[], // Public key strings for compliance officers
-        threshold: number
-    ): {
-        members: { key: string; permissions: string }[];
-        threshold: number;
-        tierLimits: Record<string, number>;
-        instructions: string;
-    } {
+    public getMultisigConfig(members: string[], threshold: number): any {
         return {
-            members: members.map((key, i) => ({
-                key,
-                permissions: i === 0
-                    ? 'Proposer, Voter, Executor'
-                    : 'Voter',
-            })),
+            members: members.map((key, i) => ({ key, permissions: i === 0 ? 'Proposer, Voter, Executor' : 'Voter' })),
             threshold,
-            tierLimits: Object.fromEntries(
-                Object.entries(this.config.tierSpendingLimits).map(
-                    ([tier, limit]) => [tier, limit / LAMPORTS_PER_SOL]
-                )
-            ),
-            instructions: `
+            tierLimits: Object.fromEntries(Object.entries(this.config.tierSpendingLimits).map(([tier, limit]) => [tier, limit / LAMPORTS_PER_SOL])),
+            instructions: this.generateInstructionsString(members, threshold),
+        };
+    }
+
+    private generateInstructionsString(members: string[], threshold: number): string {
+        return `
 // Squads V4 Multisig Creation (TypeScript)
 import * as multisig from '@sqds/multisig';
 
@@ -247,13 +218,11 @@ const ix = multisig.instructions.multisigCreateV2({
     multisigPda,
     configAuthority: null,
     threshold: ${threshold},
-    members: [${members.map((m, i) => `
-        { key: new PublicKey("${m}"), permissions: multisig.types.Permissions.${i === 0 ? 'all' : 'fromPermissions({ voter: true })'} }`).join(',')}
+    members: [${members.map((m, i) => `\n        { key: new PublicKey("${m}"), permissions: multisig.types.Permissions.${i === 0 ? 'all' : 'fromPermissions({ voter: true })'} }`).join(',')}
     ],
     timeLock: 0,
     rentCollector: null,
-});`.trim(),
-        };
+});`.trim();
     }
 
     /**

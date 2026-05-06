@@ -73,49 +73,15 @@ export class AegisPEP {
             const { sanit } = normalized;
             const limits = this.getValidatedLimits(request);
 
-            // [ACTIVE DEFENSE] Pre-Hashing Contextual Sanitization
-            if (request.agentContext?.prompt) {
-                const promptUpper = request.agentContext.prompt.toUpperCase();
-                if (promptUpper.includes('IGNORE ALL PREVIOUS INSTRUCTIONS') || promptUpper.includes('MALICIOUS_INTENT')) {
-                    throw new TerminalRefusalError('Malicious intent detected in context prompt.');
-                }
-            }
+            this.sanitizeContext(request);
 
             await this.reserveNonce(ctx.scopedNonce);
             ctx.nonceReserved = true;
 
-            // [PHASE 1] Verify cryptographic signature + anomaly score BEFORE escalation decision.
-            // Tier limit check is deferred — high-value txns must escalate, not be flat-denied.
             await this.verifySignatureAndAnomaly({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } });
-
-            // [ANTI-EVASION] TEE-Sandboxed Transaction Simulation
             await SimulationEngine.simulateAndParse(sanit);
 
-            let decision: 'approved' | 'escalated' = 'approved';
-            let envelope;
-
-            // [ARTICLE 14] HOTL Escalate Condition
-            const ESCALATE_THRESHOLD = 10_000_000_000n; // e.g., 10k USDC with 6 decimals
-            if (amountBig >= ESCALATE_THRESHOLD) {
-                decision = 'escalated';
-                envelope = {
-                    domain_separator: "AEGIS12_ESCALATE_V1",
-                    vault_pda: request.dynamicPolicy?.policyConfig?.vaultPda || "VaultPDA_Fallback",
-                    squads_multisig: request.dynamicPolicy?.policyConfig?.squadsMultisig || "SquadsMultisig_Fallback",
-                    instruction_digest: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'),
-                    state_predicates: {
-                        max_input_amount: amountBig.toString(),
-                        allowed_program_ids: request.dynamicPolicy?.policyConfig?.allowedProgramIds || ["TargetProgramID_Fallback"],
-                        valid_until_slot: request.context?.currentSlot ? request.context.currentSlot + 1000 : 1000000
-                    },
-                    policy_hash: request.dynamicPolicy!.policyConfig.policyId
-                };
-            } else {
-                // [PHASE 2] Only check tier limit for non-escalated (autonomous) transactions.
-                await this.verifyTierLimit({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } }, limits);
-                await this.stateStore.tryIncrementSpend(ctx.tenantId, amountBig, limits.limit);
-                ctx.spendIncremented = true;
-            }
+            const { decision, envelope } = await this.evaluateEscalation(amountBig, request, sanit, limits, ctx);
 
             const receipt = await this.generateReceipt(request, sanit, ctx.tenantId, ctx.nonce, decision, envelope);
             await this.commitTransaction(receipt, ctx.scopedNonce);
@@ -124,6 +90,47 @@ export class AegisPEP {
             await this.compensate(ctx, amountBig);
             throw e;
         }
+    }
+
+    private sanitizeContext(request: PolicyEvaluationRequest): void {
+        if (request.agentContext?.prompt) {
+            const promptUpper = request.agentContext.prompt.toUpperCase();
+            if (promptUpper.includes('IGNORE ALL PREVIOUS INSTRUCTIONS') || promptUpper.includes('MALICIOUS_INTENT')) {
+                throw new TerminalRefusalError('Malicious intent detected in context prompt.');
+            }
+        }
+    }
+
+    private async evaluateEscalation(amountBig: bigint, request: PolicyEvaluationRequest, sanit: any, limits: any, ctx: any) {
+        const ESCALATE_THRESHOLD = 10_000_000_000n;
+        if (amountBig >= ESCALATE_THRESHOLD) {
+            return { decision: 'escalated' as const, envelope: this.buildEscalationEnvelope(amountBig, request, sanit) };
+        } else {
+            await this.verifyTierLimit({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } }, limits);
+            await this.stateStore.tryIncrementSpend(ctx.tenantId, amountBig, limits.limit);
+            ctx.spendIncremented = true;
+            return { decision: 'approved' as const, envelope: undefined };
+        }
+    }
+
+    private buildEscalationEnvelope(amountBig: bigint, request: PolicyEvaluationRequest, sanit: any) {
+        const config = request.dynamicPolicy?.policyConfig;
+        return {
+            domain_separator: "AEGIS12_ESCALATE_V1",
+            vault_pda: config?.vaultPda || "VaultPDA_Fallback",
+            squads_multisig: config?.squadsMultisig || "SquadsMultisig_Fallback",
+            instruction_digest: '0x' + keccak256(Buffer.from(JsonUtils.stableStringify(sanit), 'utf8')).toString('hex'),
+            state_predicates: this.buildStatePredicates(amountBig, request, config),
+            policy_hash: config?.policyId || "unknown"
+        };
+    }
+
+    private buildStatePredicates(amountBig: bigint, request: PolicyEvaluationRequest, config: any) {
+        return {
+            max_input_amount: amountBig.toString(),
+            allowed_program_ids: config?.allowedProgramIds || ["TargetProgramID_Fallback"],
+            valid_until_slot: request.context?.currentSlot ? request.context.currentSlot + 1000 : 1000000
+        };
     }
 
     private async reserveNonce(scopedNonce: string): Promise<void> {
@@ -265,6 +272,12 @@ export class AegisPEP {
             enclaveDid: this.signer.enclaveDid
         };
 
+        this.attachEvidencePackage(receipt, req, ts);
+        this.attachPaymentHeader(receipt, req);
+        return receipt;
+    }
+
+    private attachEvidencePackage(receipt: AegisComplianceReceipt, req: PolicyEvaluationRequest, ts: string): void {
         if (req.agentContext) {
             receipt.evidencePackage = {
                 policyId: req.dynamicPolicy!.policyConfig.policyId,
@@ -276,12 +289,12 @@ export class AegisPEP {
                 timestamp: Math.floor(new Date(ts).getTime() / 1000)
             };
         }
+    }
 
+    private attachPaymentHeader(receipt: AegisComplianceReceipt, req: PolicyEvaluationRequest): void {
         if ((req as any).x402PaymentHeader) {
             receipt.x402PaymentHeader = (req as any).x402PaymentHeader;
         }
-
-        return receipt;
     }
 
     public async saveEvidence(receipt: AegisComplianceReceipt, ledgerTxHash?: string): Promise<void> {
@@ -316,19 +329,17 @@ export class AegisPEP {
     private validateExpiry(expiry: any): void {
         if (typeof expiry !== 'number' || !Number.isSafeInteger(expiry) || expiry <= 0) throw new TerminalRefusalError('Invalid expiry.');
         if (expiry < Math.floor(Date.now() / 1000)) throw new TerminalRefusalError('Policy Expired.');
-        
-        // CRIT-01: Eviction Replay Defense. If this policy was signed before the oldest nonces were evicted,
-        // we must reject it to prevent an attacker from replaying an old, valid-but-evicted policy.
+        this.checkEvictionWatermark(expiry);
+    }
+
+    private checkEvictionWatermark(expiry: number): void {
         try {
-            // Find the active watermark file in either the cwd or the data dir
             const basePath = (this.stateStore as any)['dataDir'] ? path.resolve((this.stateStore as any)['dataDir'], '.aegis_wal') : path.resolve('/tmp', '.aegis_wal');
             const watermarkPath = `${basePath}_watermark.json`;
             if (fs.existsSync(watermarkPath)) {
                 const data = JSON.parse(fs.readFileSync(watermarkPath, 'utf8'));
-                if (data && typeof data.evictionWatermark === 'number') {
-                    if (expiry < data.evictionWatermark) {
-                        throw new TerminalRefusalError('Policy rejected by Eviction Watermark (Anti-Replay).');
-                    }
+                if (data && typeof data.evictionWatermark === 'number' && expiry < data.evictionWatermark) {
+                    throw new TerminalRefusalError('Policy rejected by Eviction Watermark (Anti-Replay).');
                 }
             }
         } catch (e: any) {

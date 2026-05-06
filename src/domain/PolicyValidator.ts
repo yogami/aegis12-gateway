@@ -80,13 +80,7 @@ function normalizeTransfer(params: any): Record<string, unknown> {
 }
 
 function normalizeSwap(params: any): Record<string, unknown> {
-    const slippage = params.slippageBps ?? MAX_SLIPPAGE_CACHE;
-    if (typeof slippage !== 'number' || !Number.isSafeInteger(slippage) || slippage > MAX_SLIPPAGE_CACHE) {
-        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-${MAX_SLIPPAGE_CACHE}.`);
-    }
-    if (slippage < 0) {
-        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Negative values are not permitted for slippage.`);
-    }
+    const slippage = validateSlippage(params.slippageBps);
     // SEC-07: Accept fromMint/toMint as aliases for token_in/token_out
     const tokenIn = params.token_in || params.fromMint;
     const tokenOut = params.token_out || params.toMint;
@@ -113,6 +107,17 @@ function normalizeSwap(params: any): Record<string, unknown> {
         amount: assertSafeFinancialAmount(params.amount, 'amount'),
         slippageBps: slippage
     };
+}
+
+function validateSlippage(input: any): number {
+    const slippage = input ?? MAX_SLIPPAGE_CACHE;
+    if (typeof slippage !== 'number' || !Number.isSafeInteger(slippage) || slippage > MAX_SLIPPAGE_CACHE) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-${MAX_SLIPPAGE_CACHE}.`);
+    }
+    if (slippage < 0) {
+        throw new TerminalRefusalError(`[TERMINAL REFUSAL] Negative values are not permitted for slippage.`);
+    }
+    return slippage;
 }
 
 export function assertBase58Address(id: any, fieldName: string): string {

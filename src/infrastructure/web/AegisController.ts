@@ -109,26 +109,31 @@ export class AegisController {
                 return reply.status(404).send({ status: 'error', error: ledgerResult.error });
             }
             
-            return reply.status(200).send({
-                txSignature,
-                status: (ledgerResult.verified && localEvidence) ? "VERIFIED" : "PARTIAL_PROOF",
-                onChain: {
-                    verified: ledgerResult.verified,
-                    memo: ledgerResult.onChainMemo,
-                    slot: ledgerResult.timestamp || null,
-                    blockTime: ledgerResult.timestamp || null
-                },
-                enclaveEvidence: {
-                    found: !!localEvidence,
-                    signatureValid: ledgerResult.verified,
-                    receiptId: localEvidence?.receiptId,
-                    complianceStandard: localEvidence?.complianceStandard || "ARS-01+"
-                },
-                note: (ledgerResult.verified && localEvidence) ? "Full cryptographic substance confirmed across Ledger and Enclave." : "Partial evidence found. Chain of trust may be incomplete."
-            });
+            return reply.status(200).send(this.formatSignatureVerificationResult(txSignature, ledgerResult, localEvidence));
         } catch (err: any) {
             return reply.status(500).send({ status: 'error', error: err.message });
         }
+    }
+
+    private formatSignatureVerificationResult(txSignature: string, ledgerResult: any, localEvidence: any) {
+        const verifiedAndFound = ledgerResult.verified && localEvidence;
+        return {
+            txSignature,
+            status: verifiedAndFound ? "VERIFIED" : "PARTIAL_PROOF",
+            onChain: {
+                verified: ledgerResult.verified,
+                memo: ledgerResult.onChainMemo,
+                slot: ledgerResult.timestamp || null,
+                blockTime: ledgerResult.timestamp || null
+            },
+            enclaveEvidence: {
+                found: !!localEvidence,
+                signatureValid: ledgerResult.verified,
+                receiptId: localEvidence?.receiptId,
+                complianceStandard: localEvidence?.complianceStandard || "ARS-01+"
+            },
+            note: verifiedAndFound ? "Full cryptographic substance confirmed across Ledger and Enclave." : "Partial evidence found. Chain of trust may be incomplete."
+        };
     }
 
     public async getEvidenceStatus(request: FastifyRequest<{ Params: { receiptId: string } }>, reply: FastifyReply) {
@@ -242,76 +247,60 @@ export class AegisController {
 
     public async healthtechEnforce(request: FastifyRequest, reply: FastifyReply) {
         try {
-            // Validate inputs BEFORE expensive enclave init (fail-fast)
             const payload = request.body as any;
-            console.log(`[Aegis-12] /healthtech/enforce request from ${payload?.agentId || 'unknown'}`);
             const { agentId, agentRole, targetAction, payloadData } = payload;
             
-            const CLINICIAN_ALLOWED_ACTIONS = ['READ_RECORD', 'WRITE_RECORD', 'READ_SCHEDULE'];
-            const isAuthorized = (agentRole === "SCHEDULER" && (targetAction === "READ_SCHEDULE" || targetAction === "WRITE_SCHEDULE")) ||
-                                 (agentRole === "CLINICIAN" && CLINICIAN_ALLOWED_ACTIONS.includes(targetAction));
+            const rbacError = this.checkHealthtechRBAC(agentId, agentRole, targetAction);
+            if (rbacError) return reply.status(403).send(rbacError);
 
-            if (!isAuthorized) {
-                console.warn(`[Aegis-12] RBAC_VIOLATION: ${agentId} (${agentRole}) attempted ${targetAction}`);
-                return reply.status(403).send({
-                    status: 'denied',
-                    error: 'RBAC_VIOLATION',
-                    evidencePack: { 
-                        status: 'denied',
-                        decisionReason: `Agent role ${agentRole} is not authorized for ${targetAction}`,
-                        regulatoryMapping: 'HIPAA_MINIMUM_NECESSARY_STANDARD'
-                    }
-                });
-            }
+            const hipaaError = this.checkHealthtechHIPAA(agentId, payloadData);
+            if (hipaaError) return reply.status(403).send(hipaaError);
 
-            const ssnPattern = /\b\d{3}-\d{2}-\d{4}\b/;
-            if (payloadData?.query && ssnPattern.test(payloadData.query)) {
-                console.warn(`[Aegis-12] HIPAA_VIOLATION: SSN detected in payload from ${agentId}`);
-                return reply.status(403).send({
-                    status: 'denied',
-                    error: 'HIPAA Violation: SSN exfiltration detected.',
-                    evidencePack: { 
-                        status: 'denied',
-                        decisionReason: 'Payload contains restricted PII/PHI matching pattern (SSN)',
-                        regulatoryMapping: 'HIPAA_PRIVACY_RULE_164.502' 
-                    }
-                });
-            }
-
-            const enclave = AegisEnclave.getInstance();
-            await enclave.initialize();
-            const receiptId = `aegis-v1-ht-${Date.now()}`;
-            const signature = enclave.signer!.sign(JSON.stringify({ agentId, targetAction, receiptId }));
-
-            const { attestation, pcr0 } = await enclave.getHardwareMetadata();
-
-            const result = {
-                status: 'approved',
-                agentRole,
-                evidencePack: { 
-                    status: 'approved',
-                    decisionReason: 'Action complies with active RBAC and PHI filtering rules.',
-                    regulatoryMapping: 'HIPAA_PRIVACY_RULE'
-                },
-                cryptographicReceipt: {
-                    receiptId,
-                    enclaveSignature: signature,
-                    timestamp: new Date().toISOString()
-                },
-                hardwareAttestation: {
-                    teeProvider: 'Phala dStack',
-                    enclaveDid: enclave.signer!.enclaveDid,
-                    pcr0: pcr0,
-                    quote: attestation
-                }
-            };
-            console.log(`[Aegis-12] /healthtech/enforce approved: ${receiptId}`);
-            return reply.send(result);
+            return reply.send(await this.generateHealthtechApproval(agentId, targetAction, agentRole));
         } catch (err: any) {
-            console.error(`[Aegis-12] /healthtech/enforce ERROR: ${err.message}`);
             const status = err.message.includes('[TERMINAL REFUSAL]') ? 403 : 500;
             return reply.status(status).send({ status: 'error', error: err.message });
         }
+    }
+
+    private checkHealthtechRBAC(agentId: string, agentRole: string, targetAction: string) {
+        const CLINICIAN_ALLOWED_ACTIONS = ['READ_RECORD', 'WRITE_RECORD', 'READ_SCHEDULE'];
+        const isAuthorized = (agentRole === "SCHEDULER" && (targetAction === "READ_SCHEDULE" || targetAction === "WRITE_SCHEDULE")) ||
+                             (agentRole === "CLINICIAN" && CLINICIAN_ALLOWED_ACTIONS.includes(targetAction));
+
+        if (!isAuthorized) {
+            return {
+                status: 'denied', error: 'RBAC_VIOLATION',
+                evidencePack: { status: 'denied', decisionReason: `Agent role ${agentRole} is not authorized for ${targetAction}`, regulatoryMapping: 'HIPAA_MINIMUM_NECESSARY_STANDARD' }
+            };
+        }
+        return null;
+    }
+
+    private checkHealthtechHIPAA(agentId: string, payloadData: any) {
+        const ssnPattern = /\b\d{3}-\d{2}-\d{4}\b/;
+        if (payloadData?.query && ssnPattern.test(payloadData.query)) {
+            return {
+                status: 'denied', error: 'HIPAA Violation: SSN exfiltration detected.',
+                evidencePack: { status: 'denied', decisionReason: 'Payload contains restricted PII/PHI matching pattern (SSN)', regulatoryMapping: 'HIPAA_PRIVACY_RULE_164.502' }
+            };
+        }
+        return null;
+    }
+
+    private async generateHealthtechApproval(agentId: string, targetAction: string, agentRole: string) {
+        const enclave = AegisEnclave.getInstance();
+        await enclave.initialize();
+        const receiptId = `aegis-v1-ht-${Date.now()}`;
+        const signature = enclave.signer!.sign(JSON.stringify({ agentId, targetAction, receiptId }));
+        const { attestation, pcr0 } = await enclave.getHardwareMetadata();
+
+        return {
+            status: 'approved', agentRole,
+            evidencePack: { status: 'approved', decisionReason: 'Action complies with active RBAC and PHI filtering rules.', regulatoryMapping: 'HIPAA_PRIVACY_RULE' },
+            cryptographicReceipt: { receiptId, enclaveSignature: signature, timestamp: new Date().toISOString() },
+            hardwareAttestation: { teeProvider: 'Phala dStack', enclaveDid: enclave.signer!.enclaveDid, pcr0: pcr0, quote: attestation }
+        };
     }
 
     public async provisionTestKey(request: FastifyRequest, reply: FastifyReply) {

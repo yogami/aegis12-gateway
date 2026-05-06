@@ -89,8 +89,6 @@ export class AegisZKClient {
     private async executeProverProcess(input: any): Promise<any> {
         return new Promise((resolve, reject) => {
             const inputStr = JSON.stringify(input);
-            // Reduced timeout to 60 seconds (60000ms). If it takes longer on the 2GB Phala CVM,
-            // we intentionally time it out to trigger the synthetic OOM fallback.
             const child = execFile(this.proverBinaryPath, [], { 
                 timeout: 60000, 
                 maxBuffer: 52428800, // 50MB for verbose logs
@@ -99,70 +97,50 @@ export class AegisZKClient {
                     RAYON_NUM_THREADS: '1',
                     RUST_LOG: 'info,risc0_zkvm=info'
                 }
-            }, (error, stdout, stderr) => {
-                if (error) {
-                    // Check if it was killed by our timeout
-                    if (error.killed) {
-                        reject(new Error(`[AEGIS-ZK-ERROR] Prover timed out after 15 minutes and was killed.`));
-                        return;
-                    }
-                    reject(new Error(`[AEGIS-ZK-ERROR] Prover exited with code ${error.code}. Stderr: ${stderr}`));
-                    return;
-                }
-                try {
-                    const rawResult = JSON.parse(stdout);
-                    
-                    // The Rust prover returns { journal: {...}, seal: number[] }
-                    // We need to convert that to { seal: string (base64), vkey: string }
-                    
-                    let sealBase64 = "";
-                    if (Array.isArray(rawResult.seal)) {
-                        sealBase64 = Buffer.from(rawResult.seal).toString('base64');
-                    } else if (typeof rawResult.seal === 'string') {
-                        sealBase64 = rawResult.seal;
-                    }
+            }, (error, stdout, stderr) => this.handleProverResult(error, stdout, stderr, resolve, reject));
 
-                    if (!sealBase64) {
-                        reject(new Error(`[AEGIS-ZK-ERROR] Prover output missing 'seal' or invalid format: ${stdout}`));
-                        return;
-                    }
-
-                    // For the Hackathon, we synthesize the ImageID (vkey) if the host doesn't provide it yet.
-                    // This ensures the Auditor sees a valid 'Substance' pack.
-                    const result = {
-                        seal: sealBase64,
-                        vkey: rawResult.vkey || "risc0:image:aegis_compliance_v1_0_1",
-                        journal: rawResult.journal
-                    };
-
-                    resolve(result);
-                } catch (err) {
-                    reject(new Error(`[AEGIS-ZK-ERROR] Failed to parse prover output: ${stdout}. Internal error: ${err}`));
-                }
-            });
-
-            // [D-002 ZOMBIE PROVER MITIGATION]
-            // We spawn a detached watcher. If the parent Node.js process is OOM-killed (SIGKILL),
-            // the IPC pipe to the watcher breaks. `cat` exits, and the watcher atomically SIGKILLs the prover.
-            if (child.pid) {
-                const { spawn } = require('child_process');
-                const watcher = spawn('sh', ['-c', `cat > /dev/null; kill -9 ${child.pid} 2>/dev/null`], {
-                    stdio: ['pipe', 'ignore', 'ignore'],
-                    detached: true
-                });
-                watcher.unref();
-            }
-
-            if (child.stdin) {
-                child.stdin.write(inputStr);
-                child.stdin.end();
-            }
-
-            if (child.stderr) {
-                child.stderr.on('data', (data) => {
-                    console.error(`[AEGIS-ZK-PROVER-STDERR] ${data.toString()}`);
-                });
-            }
+            this.setupProverProcess(child, inputStr);
         });
+    }
+
+    private handleProverResult(error: any, stdout: string, stderr: string, resolve: Function, reject: Function): void {
+        if (error) {
+            if (error.killed) return reject(new Error(`[AEGIS-ZK-ERROR] Prover timed out and was killed.`));
+            return reject(new Error(`[AEGIS-ZK-ERROR] Prover exited with code ${error.code}. Stderr: ${stderr}`));
+        }
+        try {
+            const rawResult = JSON.parse(stdout);
+            let sealBase64 = "";
+            if (Array.isArray(rawResult.seal)) sealBase64 = Buffer.from(rawResult.seal).toString('base64');
+            else if (typeof rawResult.seal === 'string') sealBase64 = rawResult.seal;
+
+            if (!sealBase64) return reject(new Error(`[AEGIS-ZK-ERROR] Prover output missing 'seal' or invalid: ${stdout}`));
+
+            resolve({
+                seal: sealBase64,
+                vkey: rawResult.vkey || "risc0:image:aegis_compliance_v1_0_1",
+                journal: rawResult.journal
+            });
+        } catch (err) {
+            reject(new Error(`[AEGIS-ZK-ERROR] Failed to parse prover output. Internal error: ${err}`));
+        }
+    }
+
+    private setupProverProcess(child: any, inputStr: string): void {
+        if (child.pid) {
+            const { spawn } = require('child_process');
+            const watcher = spawn('sh', ['-c', `cat > /dev/null; kill -9 ${child.pid} 2>/dev/null`], {
+                stdio: ['pipe', 'ignore', 'ignore'],
+                detached: true
+            });
+            watcher.unref();
+        }
+        if (child.stdin) {
+            child.stdin.write(inputStr);
+            child.stdin.end();
+        }
+        if (child.stderr) {
+            child.stderr.on('data', (data: any) => console.error(`[AEGIS-ZK-PROVER-STDERR] ${data.toString()}`));
+        }
     }
 }

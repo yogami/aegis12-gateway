@@ -77,18 +77,7 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
                 const encryptedCommitted = this.walEngine.encryptWal(JSON.stringify(Array.from(nextCommitted)));
                 const encryptedPending = this.walEngine.encryptWal(JSON.stringify(Array.from(nextPending)));
 
-                const fdCommitted = fs.openSync(tempCommittedPath, 'w');
-                const fdPending = fs.openSync(tempPendingPath, 'w');
-                try {
-                    fs.writeSync(fdCommitted, encryptedCommitted);
-                    fs.fdatasyncSync(fdCommitted);
-                    fs.writeSync(fdPending, encryptedPending);
-                    fs.fdatasyncSync(fdPending);
-                } finally {
-                    fs.closeSync(fdCommitted);
-                    fs.closeSync(fdPending);
-                }
-                
+                this.writeBothWalSync(tempCommittedPath, tempPendingPath, encryptedCommitted, encryptedPending);
                 // Atomic renames
                 fs.renameSync(tempCommittedPath, this.committedWalPath);
                 fs.renameSync(tempPendingPath, this.pendingWalPath);
@@ -100,6 +89,20 @@ export class AegisLocalNonceRegistry implements INonceRegistry {
             throw new Error("Failed to atomically commit nonce to WAL");
         } finally {
             this.walEngine.releaseLock(this.lockPath);
+        }
+    }
+
+    private writeBothWalSync(tempCommittedPath: string, tempPendingPath: string, encryptedCommitted: any, encryptedPending: any): void {
+        const fdCommitted = fs.openSync(tempCommittedPath, 'w');
+        const fdPending = fs.openSync(tempPendingPath, 'w');
+        try {
+            fs.writeSync(fdCommitted, encryptedCommitted);
+            fs.fdatasyncSync(fdCommitted);
+            fs.writeSync(fdPending, encryptedPending);
+            fs.fdatasyncSync(fdPending);
+        } finally {
+            fs.closeSync(fdCommitted);
+            fs.closeSync(fdPending);
         }
     }
 

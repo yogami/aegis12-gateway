@@ -41,44 +41,49 @@ export class EvidenceRegistry {
      */
     public async getRecentAnchors(limit: number = 20): Promise<AnchoredEvidence[]> {
         const signatures = await this.connection.getSignaturesForAddress(this.aegisPda, { limit });
-
         const evidenceList: AnchoredEvidence[] = [];
 
         for (const sigInfo of signatures) {
-            let agentDid = "Unknown";
-            let memoInstruction = "";
-
-            try {
-                const tx = await this.connection.getParsedTransaction(sigInfo.signature, { maxSupportedTransactionVersion: 0 });
-                if (tx && tx.transaction.message.instructions) {
-                    const memoIx = tx.transaction.message.instructions.find((ix: any) => 
-                        ix.programId.toBase58() === 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' || 
-                        ix.programId.toBase58() === 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo'
-                    );
-                    if (memoIx && 'parsed' in memoIx) {
-                        memoInstruction = typeof memoIx.parsed === 'string' ? memoIx.parsed : JSON.stringify(memoIx.parsed);
-                        try {
-                            const receiptMatch = memoInstruction.match(/({.*})/);
-                            if (receiptMatch) {
-                                const receipt = JSON.parse(receiptMatch[1]);
-                                if (receipt.agentPubKey) agentDid = receipt.agentPubKey;
-                            }
-                        } catch (e) {}
-                    }
-                }
-            } catch (e) {
-                // Ignore fetching errors
-            }
-            
+            const txDetails = await this.fetchTransactionDetails(sigInfo.signature);
             evidenceList.push({
                 signature: sigInfo.signature,
                 blockTime: sigInfo.blockTime,
                 status: sigInfo.err ? 'Failed' : 'Success',
-                agentDid: agentDid,
-                memoInstruction: memoInstruction || `[ARS-01] Anchored Decision metadata for ${sigInfo.signature}`,
+                agentDid: txDetails.agentDid,
+                memoInstruction: txDetails.memoInstruction || `[ARS-01] Anchored Decision metadata for ${sigInfo.signature}`,
             });
         }
-
         return evidenceList;
+    }
+
+    private async fetchTransactionDetails(signature: string): Promise<{ agentDid: string, memoInstruction: string }> {
+        let agentDid = "Unknown";
+        let memoInstruction = "";
+
+        try {
+            const tx = await this.connection.getParsedTransaction(signature, { maxSupportedTransactionVersion: 0 });
+            if (tx && tx.transaction.message.instructions) {
+                const memoIx = tx.transaction.message.instructions.find((ix: any) => 
+                    ix.programId.toBase58() === 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' || 
+                    ix.programId.toBase58() === 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo'
+                );
+                if (memoIx && 'parsed' in memoIx) {
+                    memoInstruction = typeof memoIx.parsed === 'string' ? memoIx.parsed : JSON.stringify(memoIx.parsed);
+                    try {
+                        const receiptMatch = memoInstruction.match(/({.*})/);
+                        if (receiptMatch) {
+                            const receipt = JSON.parse(receiptMatch[1]);
+                            if (receipt.agentPubKey) agentDid = receipt.agentPubKey;
+                        }
+                    } catch (e) {
+                        // ignore parsing error
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore fetching errors
+        }
+
+        return { agentDid, memoInstruction };
     }
 }

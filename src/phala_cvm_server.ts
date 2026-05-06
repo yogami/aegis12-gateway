@@ -23,134 +23,138 @@ console.warn = function(...args) { interceptLog('WARN', args); originalWarn.appl
 
 // Production Micro-Server mapped explicitly for the Phala Network dStack CVM
 const server = http.createServer(async (req, res) => {
-    // Cross-Origin configuration required for some TEE RPC interfaces
     res.setHeader("Access-Control-Allow-Origin", process.env.ALLOWED_ORIGIN || "https://studio.berlinailabs.com");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Aegis-Trace, Authorization");
 
-    if (req.method === "OPTIONS") {
-        res.writeHead(204);
-        res.end();
-        return;
-    }
-
+    if (req.method === "OPTIONS") return handleOptions(res);
+    
     console.log(`[dStack CVM] Incoming Request: ${req.method} ${req.url}`);
     
-    if (req.method === "GET" && req.url === "/logs") {
-        if (req.headers.authorization !== `Bearer ${process.env.ADMIN_LOG_TOKEN || 'aegis-dev-token'}`) {
-            res.writeHead(401, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ error: "Unauthorized" }));
+    if (req.method === "GET") return handleGet(req, res);
+    if (req.method === "POST") return handlePost(req, res);
+
+    return handleNotFound(res);
+});
+
+async function handleGet(req: http.IncomingMessage, res: http.ServerResponse) {
+    const url = req.url || "";
+    if (url === "/logs") return handleLogs(req, res);
+    if (url === "/health") return handleHealth(res);
+    if (url.includes("/evidence/")) return handleEvidence(req, res);
+    return handleNotFound(res);
+}
+
+function handlePost(req: http.IncomingMessage, res: http.ServerResponse) {
+    const url = req.url || "";
+    if (url.includes("/sign_and_execute") || url.includes("/evidence")) return handleAegisRoute(req, res);
+    return handleNotFound(res);
+}
+
+function handleOptions(res: http.ServerResponse) {
+    res.writeHead(204);
+    res.end();
+}
+
+function handleLogs(req: http.IncomingMessage, res: http.ServerResponse) {
+    if (req.headers.authorization !== `Bearer ${process.env.ADMIN_LOG_TOKEN || 'aegis-dev-token'}`) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Unauthorized" }));
+        return;
+    }
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ logs: logBuffer }));
+}
+
+async function handleHealth(res: http.ServerResponse) {
+    try {
+        const enclave = AegisEnclave.getInstance();
+        await enclave.initialize();
+        const health = {
+            status: "alive", ledgerPayer: enclave.anchor?.getPayerPublicKey(), enclaveDid: enclave.signer?.enclaveDid,
+            version: "v1.0.1-unmocked", commit_hash: process.env.GIT_COMMIT_SHA || "unknown",
+            hardware: "phala-dstack-cvm", timestamp: new Date().toISOString()
+        };
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify(health));
+    } catch (err: any) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "error", error: "Hardware Init Failed", details: err.message }));
+    }
+}
+
+async function handleEvidence(req: http.IncomingMessage, res: http.ServerResponse) {
+    try {
+        const rawReceiptId = req.url!.split("/evidence/")[1];
+        if (!rawReceiptId) throw new Error("Missing Receipt ID in evidence lookup.");
+        const receiptId = assertSafeIdentifier(decodeURIComponent(rawReceiptId), 'receiptId');
+        
+        console.log(`[dStack CVM] Evidence Lookup: ${receiptId}`);
+        const enclave = AegisEnclave.getInstance();
+        const status = await enclave.getEvidenceStatus(receiptId);
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(status);
+    } catch (err: any) {
+        console.error(`[dStack CVM] Lookup Error: ${err.message}`);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "error", error: err.message }));
+    }
+}
+
+function handleAegisRoute(req: http.IncomingMessage, res: http.ServerResponse) {
+    let body = "";
+    let bodySize = 0;
+    req.on("data", chunk => {
+        bodySize += chunk.length;
+        if (bodySize > MAX_BODY_SIZE) {
+            req.destroy();
+            res.writeHead(413, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ status: "error", error: `Payload exceeds ${MAX_BODY_SIZE} byte limit.` }));
             return;
         }
+        body += chunk.toString();
+    });
+    req.on("error", (err: Error) => {
+        console.error(`[dStack CVM] Stream Error: ${err.message}`);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "error", error: `Stream Error: ${err.message}` }));
+    });
+    req.on("end", async () => {
+        await processAegisRequest(body, res);
+    });
+}
+
+async function processAegisRequest(body: string, res: http.ServerResponse) {
+    console.log(`[dStack CVM] Request body received (${body.length} bytes). Processing...`);
+    try {
+        const enclaveResponse = await phalaEntrypoint(body);
+        console.log(`[dStack CVM] Enclave Response received: ${enclaveResponse.substring(0, 100)}...`);
+        
+        let parsed;
+        try {
+            parsed = JSON.parse(enclaveResponse);
+        } catch (pe) {
+            console.error(`[dStack CVM] CRITICAL: phalaEntrypoint returned non-JSON: ${enclaveResponse}`);
+            throw new Error("Internal Enclave Protocol Error: Malformed JSON response");
+        }
+        
+        const response = {
+            ...parsed, version: "v1.0.1-unmocked", hardware: "phala-dstack-cvm", timestamp: new Date().toISOString()
+        };
+
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ logs: logBuffer }));
-        return;
+        res.end(JSON.stringify(response));
+        console.log(`[dStack CVM] Response sent successfully.`);
+    } catch (err: any) {
+        console.error(`[dStack CVM] Processing Error: ${err.message}`);
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "error", error: err.message }));
     }
-    
-    if (req.method === "GET" && req.url === "/health") {
+}
 
-        try {
-            const enclave = AegisEnclave.getInstance();
-            await enclave.initialize();
-            const health = {
-                status: "alive",
-                ledgerPayer: enclave.anchor?.getPayerPublicKey(),
-                enclaveDid: enclave.signer?.enclaveDid,
-                version: "v1.0.1-unmocked",
-                commit_hash: process.env.GIT_COMMIT_SHA || "unknown",
-                hardware: "phala-dstack-cvm",
-                timestamp: new Date().toISOString()
-            };
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(health));
-        } catch (err: any) {
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ status: "error", error: "Hardware Init Failed", details: err.message }));
-        }
-        return;
-    }
-
-    // [PHASE 2.2: SUBSTANCE DISCOVERY]
-    // Manual URL Routing for GET /evidence/:receiptId
-    // Resilient to double-slashes or proxy prefixes
-    if (req.method === "GET" && req.url?.includes("/evidence/")) {
-        try {
-            const rawReceiptId = req.url.split("/evidence/")[1];
-            if (!rawReceiptId) throw new Error("Missing Receipt ID in evidence lookup.");
-            const receiptId = assertSafeIdentifier(decodeURIComponent(rawReceiptId), 'receiptId');
-            
-            console.log(`[dStack CVM] Evidence Lookup: ${receiptId}`);
-            const enclave = AegisEnclave.getInstance();
-            const status = await enclave.getEvidenceStatus(receiptId);
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(status);
-        } catch (err: any) {
-            console.error(`[dStack CVM] Lookup Error: ${err.message}`);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ status: "error", error: err.message }));
-        }
-        return;
-    }
-
-    const isAegisRoute = req.url?.includes("/sign_and_execute") || req.url?.includes("/evidence");
-
-    if (req.method === "POST" && isAegisRoute) {
-        let body = "";
-        let bodySize = 0;
-        req.on("data", chunk => {
-            bodySize += chunk.length;
-            if (bodySize > MAX_BODY_SIZE) {
-                req.destroy();
-                res.writeHead(413, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ status: "error", error: `Payload exceeds ${MAX_BODY_SIZE} byte limit.` }));
-                return;
-            }
-            body += chunk.toString();
-        });
-        req.on("error", (err: Error) => {
-            console.error(`[dStack CVM] Stream Error: ${err.message}`);
-            res.writeHead(500, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({ status: "error", error: `Stream Error: ${err.message}` }));
-        });
-        req.on("end", async () => {
-            console.log(`[dStack CVM] Request body received (${body.length} bytes). Processing...`);
-            try {
-                const enclaveResponse = await phalaEntrypoint(body);
-                console.log(`[dStack CVM] Enclave Response received: ${enclaveResponse.substring(0, 100)}...`);
-                
-                let parsed;
-                try {
-                    parsed = JSON.parse(enclaveResponse);
-                } catch (pe) {
-                    console.error(`[dStack CVM] CRITICAL: phalaEntrypoint returned non-JSON: ${enclaveResponse}`);
-                    throw new Error("Internal Enclave Protocol Error: Malformed JSON response");
-                }
-                
-                // Final Production Verification Stamp
-                const response = {
-                    ...parsed,
-                    version: "v1.0.1-unmocked",
-                    hardware: "phala-dstack-cvm",
-                    timestamp: new Date().toISOString()
-                };
-
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify(response));
-                console.log(`[dStack CVM] Response sent successfully.`);
-            } catch (err: any) {
-                console.error(`[dStack CVM] Processing Error: ${err.message}`);
-                res.writeHead(500, { "Content-Type": "application/json" });
-                res.end(JSON.stringify({ status: "error", error: err.message }));
-            }
-        });
-    } else {
-        res.writeHead(404);
-        res.end(JSON.stringify({ 
-            status: "error", 
-            error: "Enclave Invalid Route",
-            suggestion: "Try /sign_and_execute or /evidence"
-        }));
-    }
-});
+function handleNotFound(res: http.ServerResponse) {
+    res.writeHead(404);
+    res.end(JSON.stringify({ status: "error", error: "Enclave Invalid Route", suggestion: "Try /sign_and_execute or /evidence" }));
+}
 
 server.listen(Number(PORT), "0.0.0.0", () => {
     console.log(`[Aegis-12] Secure Enclave Production v1.0.1 online on port ${PORT}`);

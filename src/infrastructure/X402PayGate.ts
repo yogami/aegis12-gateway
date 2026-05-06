@@ -109,54 +109,41 @@ export class X402PayGate {
         paymentHeader?: string,
         endpoint: string = '/enforce'
     ): Promise<X402PaymentRequirement | null> {
-        // If x402 is disabled, always pass through
-        if (!this.config.enabled) return null;
+        if (!this.config.enabled || paymentHeader) return null;
+        if (this.isFreeTierAvailable(clientIp)) return null;
+        return this.generatePaymentRequirement(clientIp, endpoint);
+    }
 
-        // If payment header is present, verify it (handled separately)
-        if (paymentHeader) return null;
-
+    private isFreeTierAvailable(clientIp: string): boolean {
         const now = Date.now();
         if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'staging' || process.env.NODE_ENV === 'test') {
             const tracker = freeTierTracker.get(clientIp);
-
             if (!tracker || tracker.resetAt < now) {
-                // Reset or create tracker
                 freeTierTracker.set(clientIp, { count: 1, resetAt: now + 3600_000 });
-                return null; // Free tier has capacity
+                return true;
             }
-
             if (tracker.count < this.config.freeTierLimit) {
                 tracker.count++;
-                return null; // Still within free tier
+                return true;
             }
         }
+        return false;
+    }
 
-        // Free tier exhausted or production mode — require payment
-        
-        // Oracle: Fetch dynamic SOL price and calculate cost
+    private async generatePaymentRequirement(clientIp: string, endpoint: string): Promise<X402PaymentRequirement> {
+        const now = Date.now();
         const dynamicPriceUsdc = await this.getDynamicPrice();
         const finalPrice = Math.max(this.config.pricePerCall, dynamicPriceUsdc);
 
-        const network = this.config.cluster === 'mainnet-beta'
-            ? SOLANA_MAINNET_CAIP2
-            : SOLANA_DEVNET_CAIP2;
-
-        const nonce = createHash('sha256')
-            .update(`${clientIp}:${now}:${Math.random()}`)
-            .digest('hex')
-            .substring(0, 32);
+        const network = this.config.cluster === 'mainnet-beta' ? SOLANA_MAINNET_CAIP2 : SOLANA_DEVNET_CAIP2;
+        const nonce = createHash('sha256').update(`${clientIp}:${now}:${Math.random()}`).digest('hex').substring(0, 32);
 
         return {
-            status: 402,
-            protocol: 'x402-v2',
-            network,
+            status: 402, protocol: 'x402-v2', network,
             payTo: this.config.recipientAddress || 'NOT_CONFIGURED',
-            amount: toAtomicUnits(finalPrice, 6).toString(), // USDC = 6 decimals
-            currency: 'USDC',
+            amount: toAtomicUnits(finalPrice, 6).toString(), currency: 'USDC',
             description: `Aegis-12 Web3 Infrastructure Fee: Dynamic Price ${finalPrice.toFixed(4)} USDC (Covers BFT Quorum + Jito Atomicity)`,
-            validFor: 300, // 5 minutes
-            nonce,
-            endpoint,
+            validFor: 300, nonce, endpoint,
         };
     }
 
@@ -242,38 +229,34 @@ export class X402PayGate {
      * Verify that a payment was made correctly.
      * Validates the Solana transaction signature against on-chain state.
      */
-    public async verifyPayment(
-        paymentHeader: string
-    ): Promise<X402PaymentVerification> {
-        if (!paymentHeader) {
-            return { valid: false, paidAmount: 0, payer: '', error: 'No payment header' };
-        }
+    public async verifyPayment(paymentHeader: string): Promise<X402PaymentVerification> {
+        if (!paymentHeader) return { valid: false, paidAmount: 0, payer: '', error: 'No payment header' };
 
         try {
-            const tx = await this.connection.getParsedTransaction(
-                paymentHeader,
-                { commitment: 'confirmed', maxSupportedTransactionVersion: 0 }
-            );
-
+            const tx = await this.connection.getParsedTransaction(paymentHeader, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
             if (!tx) return { valid: false, paidAmount: 0, payer: '', error: 'Transaction not found' };
 
             const payer = tx.transaction.message.accountKeys[0]?.pubkey?.toBase58() || '';
             if (tx.meta?.err !== null) return { valid: false, paidAmount: 0, payer, error: 'Transaction failed on-chain' };
 
-            const requiredUsdc = Math.max(this.config.pricePerCall, await this.getDynamicPrice());
-            const { valid, actualAmount } = this.validateTokenTransfer(tx, requiredUsdc);
-
-            if (!valid) {
-                return { valid: false, paidAmount: actualAmount, payer, error: `Invalid payment: expected at least ${requiredUsdc} canonical USDC to ${this.config.recipientAddress}, found ${actualAmount}` };
-            }
-
-            const replayError = this.checkReplay(paymentHeader);
-            if (replayError) return { valid: false, paidAmount: actualAmount, payer, error: replayError };
-
-            return { valid: true, paidAmount: actualAmount, payer, txSignature: paymentHeader };
+            return await this.validateTransactionDetails(tx, paymentHeader, payer);
         } catch (e: any) {
             return { valid: false, paidAmount: 0, payer: '', error: e.message };
         }
+    }
+
+    private async validateTransactionDetails(tx: any, paymentHeader: string, payer: string): Promise<X402PaymentVerification> {
+        const requiredUsdc = Math.max(this.config.pricePerCall, await this.getDynamicPrice());
+        const { valid, actualAmount } = this.validateTokenTransfer(tx, requiredUsdc);
+
+        if (!valid) {
+            return { valid: false, paidAmount: actualAmount, payer, error: `Invalid payment: expected at least ${requiredUsdc} canonical USDC to ${this.config.recipientAddress}, found ${actualAmount}` };
+        }
+
+        const replayError = this.checkReplay(paymentHeader);
+        if (replayError) return { valid: false, paidAmount: actualAmount, payer, error: replayError };
+
+        return { valid: true, paidAmount: actualAmount, payer, txSignature: paymentHeader };
     }
 
     /**
