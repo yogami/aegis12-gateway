@@ -98,11 +98,11 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await executeBtn.click();
 
     // Wait for the Evidence Package to be dumped to the terminal logs
-    // Increase timeout to 60s because we are waiting for real Devnet anchoring and Phala proofs
-    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 60000 });
+    // Increase timeout to 90s because we are waiting for real Devnet anchoring and Phala proofs which can take 60s+
+    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 90000 });
     // Expect dynamic properties rather than hardcoded POL_SAFE_01 string since we don't mock the inner contents anymore
-    await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 60000 });
-    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 60000 });
+    await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 90000 });
+    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 90000 });
   });
   test('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
     await page.goto(`/simulator`);
