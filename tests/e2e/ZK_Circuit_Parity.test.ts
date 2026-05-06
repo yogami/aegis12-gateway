@@ -7,8 +7,7 @@ import {
 } from '@solana/web3.js';
 import { withAegis } from '../../src/sdk/index.js';
 
-describe('TDD: Zero-Knowledge Circuit Verification Parity', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
 
     beforeAll(() => {
@@ -47,4 +46,3 @@ describe('TDD: Zero-Knowledge Circuit Verification Parity', () => {
             })
         ).rejects.toThrow(/VULNERABLE_ZK_CIRCUIT/);
     });
-});

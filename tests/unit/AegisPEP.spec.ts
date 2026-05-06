@@ -8,8 +8,7 @@ vi.mock('../../src/infrastructure/AegisSigner', () => ({
     AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', sign: vi.fn(), signEIP712: vi.fn().mockResolvedValue("mock-signature").mockResolvedValue('sig') }) }
 }));
 
-describe('AegisPEP (Unit)', () => {
-    let pep: AegisPEP;
+let pep: AegisPEP;
     let signer: any;
 
     beforeEach(async () => {
@@ -105,4 +104,3 @@ describe('AegisPEP (Unit)', () => {
         expect(receipt.evidencePackage!.intentHash).toBeDefined();
         expect(receipt.x402PaymentHeader).toBe('mock_payment_signature');
     });
-});

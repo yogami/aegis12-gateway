@@ -16,13 +16,13 @@ vi.mock('@coral-xyz/anchor', async (importOriginal) => {
     const actual = await importOriginal<any>();
     return {
         ...actual,
-        AnchorProvider: class {
-            wallet = { publicKey: Keypair.generate().publicKey };
+        AnchorProvider: function() {
+            this.wallet = { publicKey: Keypair.generate().publicKey };
         },
-        Program: class {
-            programId = Keypair.generate().publicKey;
-            methods = mockMethods;
-            account = {
+        Program: function() {
+            this.programId = Keypair.generate().publicKey;
+            this.methods = mockMethods;
+            this.account = {
                 nonceCheckpoint: {
                     fetch: mockFetch
                 }
@@ -36,8 +36,7 @@ vi.mock('../../aegis12-registry/target/idl/aegis12_registry.json', () => ({
     default: { name: 'mock_idl' }
 }));
 
-describe('AegisRegistryClient (Unit)', () => {
-    let client: AegisRegistryClient;
+let client: AegisRegistryClient;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -100,4 +99,3 @@ describe('AegisRegistryClient (Unit)', () => {
         const nonce = await client.getLastNonce('tenant-new');
         expect(nonce).toBe(0);
     });
-});

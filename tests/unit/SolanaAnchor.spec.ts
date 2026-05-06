@@ -1,38 +1,37 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SolanaAnchor } from '../../src/infrastructure/SolanaAnchor';
 
-vi.mock('@solana/web3.js', () => {
-    class MockConnection {
-        getLatestBlockhash = vi.fn().mockResolvedValue({ blockhash: 'mock-blockhash' });
-        getSlot = vi.fn().mockResolvedValue(12345);
-        getParsedTransaction = vi.fn().mockImplementation((sig) => {
-            if (sig === 'tx-sig') {
-                const memoContent = 'a12:eyJoIjoiaGFzaDEyMzQiLCJhY3QiOiJhY3QtMSIsImQiOiJhcHByb3ZlZCIsImRpZCI6InVua25vd24ifQ';
-                return Promise.resolve({
-                    slot: 12345,
-                    blockTime: 1625097600,
-                    transaction: {
-                        message: {
-                            instructions: [
-                                {
-                                    programId: { toBase58: () => 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' },
-                                    // Simulate Buffer from RPC
-                                    data: Buffer.from(memoContent, 'utf8')
-                                }
-                            ]
-                        }
-                    }
-                });
+const mockGetParsedTransaction = (sig: string) => {
+    if (sig === 'tx-sig') {
+        const memoContent = 'a12:eyJoIjoiaGFzaDEyMzQiLCJhY3QiOiJhY3QtMSIsImQiOiJhcHByb3ZlZCIsImRpZCI6InVua25vd24ifQ';
+        return Promise.resolve({
+            slot: 12345,
+            blockTime: 1625097600,
+            transaction: {
+                message: {
+                    instructions: [{
+                        programId: { toBase58: () => 'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr' },
+                        data: Buffer.from(memoContent, 'utf8')
+                    }]
+                }
             }
-            return Promise.resolve(null);
         });
     }
+    return Promise.resolve(null);
+};
 
-    class MockTransaction {
-        recentBlockhash = '';
-        feePayer = null;
-        add = vi.fn().mockReturnThis();
-    }
+vi.mock('@solana/web3.js', () => {
+    const MockConnection = function() {
+        this.getLatestBlockhash = vi.fn().mockResolvedValue({ blockhash: 'mock-blockhash' });
+        this.getSlot = vi.fn().mockResolvedValue(12345);
+        this.getParsedTransaction = vi.fn().mockImplementation(mockGetParsedTransaction);
+    };
+
+    const MockTransaction = function() {
+        this.recentBlockhash = '';
+        this.feePayer = null;
+        this.add = vi.fn().mockReturnThis();
+    };
 
     return {
         Connection: MockConnection,
@@ -50,8 +49,7 @@ vi.mock('@solana/spl-memo', () => ({
     createMemoInstruction: vi.fn().mockReturnValue({})
 }));
 
-describe('SolanaAnchor (Unit)', () => {
-    let anchor: SolanaAnchor;
+let anchor: SolanaAnchor;
 
     beforeEach(() => {
         anchor = new SolanaAnchor('devnet');
@@ -86,4 +84,3 @@ describe('SolanaAnchor (Unit)', () => {
         const res = await anchor.verifyAnchoredReceipt('tx-sig', receipt, signer);
         expect(res.verified).toBe(true);
     });
-});

@@ -7,8 +7,7 @@ import {
 } from '@solana/web3.js';
 import { withAegis } from '../../src/sdk/index.js';
 
-describe('TDD: God-Mode Governance (PCR0 Allowance Registry)', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
 
     beforeAll(() => {
@@ -50,4 +49,3 @@ describe('TDD: God-Mode Governance (PCR0 Allowance Registry)', () => {
             })
         ).rejects.toThrow(/UNREGISTERED_MEASUREMENT/);
     });
-});

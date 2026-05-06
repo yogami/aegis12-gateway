@@ -4,9 +4,7 @@ import { AegisSDK } from '../../packages/aegis12-sdk/src/AegisSDK';
 const API_URL = 'http://localhost:3000';
 const AEGIS_SIGN_EXECUTE_URL = `${API_URL}/sign_and_execute`;
 
-describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
-
-    beforeAll(() => {
+beforeAll(() => {
         // Setup done
     });
 
@@ -191,4 +189,3 @@ describe('Aegis-12 Redteam Bombardment (Historical Protocol Hacks)', () => {
         // Expecting FAILURE: Dual-Engine architecture is currently blind to hex-encapsulated logic bombs.
         expect(res.tx_hash).toBe('mock_tx'); // Failing open!
     });
-});

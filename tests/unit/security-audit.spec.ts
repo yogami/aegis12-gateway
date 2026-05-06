@@ -10,8 +10,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // ─────────────────────────────────────────────────────────────────────────────
 // SEC-01 (P0): CLINICIAN God-Mode Bypass
 // ─────────────────────────────────────────────────────────────────────────────
-describe('SEC-01: CLINICIAN Role Must Have Action Restrictions', () => {
-    it('should DENY a CLINICIAN attempting DELETE_ALL_RECORDS', async () => {
+it('should DENY a CLINICIAN attempting DELETE_ALL_RECORDS', async () => {
         // This exploits the fact that agentRole === "CLINICIAN" is a blanket true
         // with no action check. Any CLINICIAN can do anything.
         const { AegisController } = await import('../../src/infrastructure/web/AegisController');
@@ -55,7 +54,6 @@ describe('SEC-01: CLINICIAN Role Must Have Action Restrictions', () => {
         expect(controllerCode).toContain("'READ_RECORD'");
         expect(controllerCode).toContain("'WRITE_RECORD'");
     });
-});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEC-06 (P2): Unvalidated Anchor Decision

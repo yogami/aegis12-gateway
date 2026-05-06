@@ -10,8 +10,7 @@ vi.mock('ethers', () => ({
     }
 }));
 
-describe('Eip712Verifier (Unit)', () => {
-    it('throws if signer is not in tenant trust store', () => {
+it('throws if signer is not in tenant trust store', () => {
         vi.mocked(ethers.utils.verifyTypedData).mockReturnValueOnce('0xMalicious');
 
         const policy = {
@@ -86,4 +85,3 @@ describe('Eip712Verifier (Unit)', () => {
         expect(() => Eip712Verifier.verifySignature(policy, trustStore, 'domain', '1', 1, '0xContract'))
             .not.toThrow();
     });
-});

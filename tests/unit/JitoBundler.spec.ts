@@ -7,8 +7,7 @@ vi.mock('node-fetch', () => ({
     default: mockFetch
 }));
 
-describe('JitoBundler (Unit)', () => {
-    let bundler: JitoBundler;
+let bundler: JitoBundler;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -63,4 +62,3 @@ describe('JitoBundler (Unit)', () => {
         expect(res.status).toBe('error');
         expect(res.error).toBe('Network Timeout');
     });
-});

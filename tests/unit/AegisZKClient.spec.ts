@@ -6,8 +6,7 @@ import * as child_process from 'child_process';
 vi.mock('fs');
 vi.mock('child_process');
 
-describe('AegisZKClient (Unit)', () => {
-    let originalEnv: NodeJS.ProcessEnv;
+let originalEnv: NodeJS.ProcessEnv;
 
     beforeEach(() => {
         originalEnv = process.env;
@@ -116,4 +115,3 @@ describe('AegisZKClient (Unit)', () => {
 
         await expect(client.generateProof({})).rejects.toThrow(/Prover output missing 'seal' or invalid/);
     });
-});

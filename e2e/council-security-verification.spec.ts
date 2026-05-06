@@ -51,9 +51,7 @@ async function createSignedPolicy(nonceStr: string, tier: string, limit: number,
 // COUNCIL SECURITY RE-AUDIT — PRODUCTION E2E (no mocks)
 // ═══════════════════════════════════════════════════════════════
 
-test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => {
-
-    test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload', async ({ request }) => {
+test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload', async ({ request }) => {
         const res = await request.post('/sign_and_execute', {
             data: {
                 targetAction: 'withdraw_unbounded',
@@ -165,7 +163,6 @@ test.describe('Aegis-12: Independent Council Security Re-Audit E2E Base', () => 
         expect(body.status).toBe('denied');
         expect(body.evidencePack?.decisionReason ?? body.error).toContain('intern is not authorized');
     });
-});
 
 test.describe('Aegis-12: Solana Transaction Firewall Hardening', () => {
     test('POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense)', async ({ request }) => {
@@ -190,9 +187,7 @@ test.describe('Aegis-12: Solana Transaction Firewall Hardening', () => {
     });
 });
 
-test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () => {
-
-    test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits', async ({ request }) => {
+test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits', async ({ request }) => {
         // Target signs a legitimate policy strictly intended for a benign 1-token operation
         const dynamicPolicy = await createSignedPolicy(crypto.randomUUID(), 'T1', 1, 50);
         
@@ -313,5 +308,3 @@ test.describe('Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses', () =
         const body = await res.json();
         expect(body.status).toBe('approved');
     });
-
-});

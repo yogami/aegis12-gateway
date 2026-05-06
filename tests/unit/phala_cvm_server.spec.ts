@@ -18,8 +18,7 @@ vi.mock('../../src/application/PhalaEntrypoint', () => ({
     default: mockPhalaEntrypoint
 }));
 
-describe('phala_cvm_server (Unit)', () => {
-    beforeEach(() => {
+beforeEach(() => {
         vi.clearAllMocks();
         vi.resetModules();
     });
@@ -142,4 +141,3 @@ describe('phala_cvm_server (Unit)', () => {
         expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('Stream Error'));
         consoleSpy.mockRestore();
     });
-});

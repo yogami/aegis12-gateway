@@ -10,8 +10,7 @@ vi.mock('@sqds/multisig', () => ({
     }
 }));
 
-describe('SquadsGovernance (Unit)', () => {
-    let gov: SquadsGovernance;
+let gov: SquadsGovernance;
     const actionCtx = { agentDid: 'did:aegis:123', toolId: 't1', actionType: 'tx', parameters: {} };
 
     beforeEach(() => {
@@ -77,4 +76,3 @@ describe('SquadsGovernance (Unit)', () => {
         expect(config.members[1].permissions).toBe('Voter');
         expect(config.instructions).toContain('multisigCreateV2');
     });
-});

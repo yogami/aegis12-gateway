@@ -3,8 +3,7 @@ import { AegisX402Client } from '../../packages/x402-poi/src/client';
 import { TerminalRefusalError } from '../../src/errors';
 import { getCircuitBreaker } from '../../src/infrastructure/CircuitBreaker';
 
-describe('AegisX402Client (x402-PoI Active Policy Engine)', () => {
-    let client: AegisX402Client;
+let client: AegisX402Client;
     const testConfig = {
         enclaveEndpoint: 'https://cvm.phala.network/test',
         apiKey: 'test-api-key',
@@ -90,4 +89,3 @@ describe('AegisX402Client (x402-PoI Active Policy Engine)', () => {
         const finalOptions = await client.injectPoI(safePrompt, {}, initialOptions);
         expect(finalOptions).toBeDefined();
     });
-});

@@ -2,8 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { TierEvaluator } from '../../src/domain/TierEvaluator';
 import { PolicyEvaluationRequest } from '../../src/types';
 
-describe('TierEvaluator (Unit)', () => {
-    let req: PolicyEvaluationRequest;
+let req: PolicyEvaluationRequest;
     let limits: { tier: string, limit: bigint };
 
     beforeEach(() => {
@@ -47,4 +46,3 @@ describe('TierEvaluator (Unit)', () => {
         expect(() => TierEvaluator.verifyBoundsWithLimits(req, limits))
             .toThrow('Action value 600 exceeds signed Tier limit 500');
     });
-});

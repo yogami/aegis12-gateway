@@ -7,18 +7,7 @@ import { Connection, Transaction, PublicKey } from '@solana/web3.js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-/**
- * ============================================================================
- * VC ASSURANCE BLACK-BOX TEST SUITE
- * ============================================================================
- * This test suite provides mathematical and cryptographic guarantees that
- * the claims made in the Aegis-12 Pitch Deck and technical whitepaper are
- * enforced in production. Any regression in security posture will fail this suite.
- */
-
-describe('VC Assurance & Architectural Integrity', () => {
-
-    describe('Claim 1: "Strict Cryptographic Identity via TEE & EIP-712"', () => {
+describe('Claim 1: "Strict Cryptographic Identity via TEE & EIP-712"', () => {
         it('should derive keys exclusively from the TEE hardware seed and not from plaintext environment variables', async () => {
             // Guarantee: The enclave cannot generate ephemeral throwaway keys and spoof an identity.
             // Ensure no plaintext keys exist in memory.
@@ -116,5 +105,3 @@ describe('VC Assurance & Architectural Integrity', () => {
             expect(result!.amount).toBeDefined();
         });
     });
-
-});

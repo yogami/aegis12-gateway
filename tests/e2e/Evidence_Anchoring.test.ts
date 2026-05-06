@@ -7,8 +7,7 @@ import {
 } from '@solana/web3.js';
 import { withAegis } from '../../src/sdk/index.js';
 
-describe('TDD: Evidence Anchoring MVP (SPL Memo Injection)', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
 
     beforeAll(() => {
@@ -55,4 +54,3 @@ describe('TDD: Evidence Anchoring MVP (SPL Memo Injection)', () => {
         expect(injectedMemoText).toContain('Aegis ARS:');
         expect(injectedMemoText).toContain(receipt.arsToken);
     });
-});

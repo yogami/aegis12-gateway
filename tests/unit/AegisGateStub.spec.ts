@@ -5,9 +5,7 @@ import { AegisGateStub } from '../../src/infrastructure/AegisGateStub';
 import { AegisIntentEnvelope } from '../../src/types';
 import { JsonUtils } from '../../src/infrastructure/JsonUtils';
 
-describe('AegisGateStub (On-Chain Verifier Simulation)', () => {
-
-    const generateMockEnvelope = (validSlot: number): AegisIntentEnvelope => {
+const generateMockEnvelope = (validSlot: number): AegisIntentEnvelope => {
         return {
             domain_separator: "AEGIS12_ESCALATE_V1",
             vault_pda: "VaultA",
@@ -109,4 +107,3 @@ describe('AegisGateStub (On-Chain Verifier Simulation)', () => {
             );
         }).toThrow(/Execution Rejected: Missing TEE Signature/);
     });
-});

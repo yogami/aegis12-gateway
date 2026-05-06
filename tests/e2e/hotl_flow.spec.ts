@@ -11,42 +11,42 @@ import { test, expect } from '@playwright/test';
 
 const API_URL = process.env.TEST_API_URL || 'http://localhost:8000';
 
-test.describe('Enterprise Cryptographic Envelope: HOTL Flow', () => {
+const getPayload = () => ({
+    agent: { did: 'did:aegis:treasury-agent', purpose: 'financial_operations', currentTier: 'T3' },
+    action: { 
+        toolId: 'solana_tx', 
+        actionType: 'execute', 
+        parameters: { 
+            recipient: '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
+            amount: 50000000000 // 50k USDC
+        } 
+    },
+    context: { 
+        currentAnomalyScore: 0.1,
+        currentSlot: 1000000 
+    },
+    dynamicPolicy: {
+        policyConfig: {
+            policyId: 'pol_hq_treasury_01',
+            tenantId: 'tenant-e2e',
+            version: '1.0.0',
+            chainId: 1399811149,
+            crossChainTarget: 'solana:devnet',
+            maxAnomalyScore: 60,
+            financialLimitsString: '{"T3":"100000000000"}', // Limit is 100k, so PEP doesn't deny it immediately
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: `nonce-${Date.now()}`,
+            vaultPda: 'VaultPDA_E2E',
+            squadsMultisig: 'Squads_E2E',
+            allowedProgramIds: ['Program_E2E']
+        },
+        ownerPublicKey: 'OwnerKey_E2E',
+        signature: '0xMockSignature'
+    }
+});
 
-    test('AC-1 & AC-2: Escalate high-value transaction and generate intent envelope', async ({ request }) => {
-        const payload = {
-            agent: { did: 'did:aegis:treasury-agent', purpose: 'financial_operations', currentTier: 'T3' },
-            action: { 
-                toolId: 'solana_tx', 
-                actionType: 'execute', 
-                parameters: { 
-                    recipient: '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin',
-                    amount: 50000000000 // 50k USDC
-                } 
-            },
-            context: { 
-                currentAnomalyScore: 0.1,
-                currentSlot: 1000000 
-            },
-            dynamicPolicy: {
-                policyConfig: {
-                    policyId: 'pol_hq_treasury_01',
-                    tenantId: 'tenant-e2e',
-                    version: '1.0.0',
-                    chainId: 1399811149,
-                    crossChainTarget: 'solana:devnet',
-                    maxAnomalyScore: 60,
-                    financialLimitsString: '{"T3":"100000000000"}', // Limit is 100k, so PEP doesn't deny it immediately
-                    expiresAt: Math.floor(Date.now() / 1000) + 3600,
-                    nonce: `nonce-${Date.now()}`,
-                    vaultPda: 'VaultPDA_E2E',
-                    squadsMultisig: 'Squads_E2E',
-                    allowedProgramIds: ['Program_E2E']
-                },
-                ownerPublicKey: 'OwnerKey_E2E',
-                signature: '0xMockSignature'
-            }
-        };
+test('AC-1 & AC-2: Escalate high-value transaction and generate intent envelope', async ({ request }) => {
+        const payload = getPayload();
 
         const response = await request.post(`${API_URL}/sign_and_execute`, { data: payload });
         
@@ -72,4 +72,3 @@ test.describe('Enterprise Cryptographic Envelope: HOTL Flow', () => {
         expect(envelope.tee_signature).toBeDefined();
         expect(result.receipt.signature).toBeDefined();
     });
-});

@@ -6,8 +6,7 @@ import { AegisCanonicalMessage } from '../../src/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('AegisBatchProcessor (Merkle Finality)', () => {
-    const journalPath = path.resolve(process.cwd(), '.aegis_test_batch_journal.log');
+const journalPath = path.resolve(process.cwd(), '.aegis_test_batch_journal.log');
     let journal: AegisJournal;
     let signer: AegisSigner;
     let processor: AegisBatchProcessor;
@@ -66,4 +65,3 @@ describe('AegisBatchProcessor (Merkle Finality)', () => {
         const batchCommitment = await processor.processBatch();
         expect(batchCommitment).toBeNull();
     });
-});

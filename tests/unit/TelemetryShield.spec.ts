@@ -18,15 +18,7 @@ vi.mock('@solana/web3.js', async (importOriginal) => {
 // Import AFTER mock is hoisted
 import { AegisShield } from '../../packages/telemetry-shield/src';
 
-/**
- * TelemetryShield.spec.ts
- * 
- * Deterministic unit tests for the Aegis-12 Telemetry Shield.
- * Replaces the 'bunk' Python-based LLM chaos scripts with verifiable logic.
- */
-
-describe('AegisShield (Telemetry Shield SDK)', () => {
-    let shield: AegisShield;
+let shield: AegisShield;
     let mockAnchor: ITeeAnchor;
 
     beforeEach(() => {
@@ -105,7 +97,6 @@ describe('AegisShield (Telemetry Shield SDK)', () => {
         await expect(resilientShield.logIntent('agent-1', { foo: 'bar' })).resolves.not.toThrow();
         expect(failingAnchor.submitEvidence).toHaveBeenCalled();
     });
-});
 
 describe('EvidenceWAL (Write-Ahead Log)', () => {
     it('should protect against Out Of Memory (OOM) via FIFO ejection', async () => {

@@ -3,8 +3,7 @@ import { SolanaTransactionFirewall } from '../../src/infrastructure/SolanaTransa
 import { Connection, Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 
-describe('SolanaTransactionFirewall (Unit)', () => {
-    let mockSigner: any;
+let mockSigner: any;
     let mockConnections: any[];
     let firewall: SolanaTransactionFirewall;
 
@@ -255,4 +254,3 @@ describe('SolanaTransactionFirewall (Unit)', () => {
         const res = await firewall.inspectTransaction(tx.serialize({ requireAllSignatures: false }).toString('base64'), kp.publicKey.toBase58());
         expect(res.flags.some(f => f.rule === 'HIGH_COMPUTE_BUDGET')).toBe(true);
     });
-});

@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ethers, Wallet } from 'ethers';
 import { MantleAnchor } from '../../src/infrastructure/MantleAnchor';
 
-describe('MantleAnchor (Unit)', () => {
-    let anchor: MantleAnchor;
+let anchor: MantleAnchor;
     const mockPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
     const mockWallet = new Wallet(mockPrivateKey);
 
@@ -30,27 +29,12 @@ describe('MantleAnchor (Unit)', () => {
 
     it('anchors receipt with correct memo format', async () => {
         const mockTxHash = '0xabc123def456';
-        const mockSendTransaction = vi.fn().mockResolvedValue({
-            hash: mockTxHash,
-            wait: vi.fn().mockResolvedValue({ status: 1 })
-        });
+        const mockSendTransaction = vi.fn().mockResolvedValue({ hash: mockTxHash, wait: vi.fn().mockResolvedValue({ status: 1 }) });
         
         // Override the wallet's sendTransaction
-        (anchor as any).wallet = { 
-            ...mockWallet, 
-            address: mockWallet.address,
-            sendTransaction: mockSendTransaction 
-        };
+        (anchor as any).wallet = { ...mockWallet, address: mockWallet.address, sendTransaction: mockSendTransaction };
 
-        const receipt = {
-            receiptId: 'aegis-v1-tenant-001-test123',
-            actionId: 'act-test-001',
-            article12LogHash: '0xdeadbeef',
-            timestamp: '2026-04-29T22:00:00.000Z',
-            decision: 'approved',
-            enclaveDid: 'did:aegis:enclave:test',
-            signature: '0x1234',
-        } as any;
+        const receipt = { receiptId: 'aegis-v1-tenant-001-test123', actionId: 'act-test-001', article12LogHash: '0xdeadbeef', timestamp: '2026-04-29T22:00:00.000Z', decision: 'approved', enclaveDid: 'did:aegis:enclave:test', signature: '0x1234', } as any;
 
         const result = await anchor.anchorReceipt(receipt, 'approved', 'did:aegis:enclave:test');
         
@@ -105,7 +89,6 @@ describe('MantleAnchor (Unit)', () => {
         expect(result.verified).toBe(false);
         expect(result.error).toContain('not found');
     });
-});
 
 describe('LedgerAnchorFactory (Unit)', () => {
     it('creates SolanaAnchor by default', async () => {

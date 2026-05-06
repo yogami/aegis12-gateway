@@ -11,8 +11,7 @@ vi.mock('../../src/infrastructure/AegisSigner', () => ({
     AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', sign: vi.fn(), signEIP712: vi.fn().mockResolvedValue("mock-signature").mockResolvedValue('sig') }) }
 }));
 
-describe('Audit Remediation (P3 Hardening)', () => {
-    let pep: AegisPEP;
+let pep: AegisPEP;
     let signer: any;
 
     let testDir: string;
@@ -73,4 +72,3 @@ describe('Audit Remediation (P3 Hardening)', () => {
             await expect(pep.enforce(request as any)).rejects.toThrow('Limits exceed security bounds');
         });
     });
-});

@@ -3,8 +3,7 @@ import { HealthtechPEP } from '../../src/infrastructure/HealthtechPEP';
 import { HealthtechRequest, HealthtechPolicy } from '../../src/healthtech-types';
 import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 
-describe('HealthtechPEP (Unit)', () => {
-    let pep: HealthtechPEP;
+let pep: HealthtechPEP;
     let mockPolicy: HealthtechPolicy;
     let signer: AegisSigner;
 
@@ -52,4 +51,3 @@ describe('HealthtechPEP (Unit)', () => {
         expect(result.status).toBe('denied');
         expect(result.evidencePack.decisionReason).toContain('Payload contains restricted PII');
     });
-});

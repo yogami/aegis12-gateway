@@ -2,8 +2,7 @@ import { it, expect, describe } from 'vitest';
 import { AegisZKClient } from '../src/infrastructure/AegisZKClient';
 import * as path from 'path';
 
-describe('Aegis Duo: ZK-Prover Integration', () => {
-    it('should generate a mathematical compliance seal via RISC Zero', async () => {
+it('should generate a mathematical compliance seal via RISC Zero', async () => {
         console.log("--- Aegis Duo: ZK-Prover Smoke Test ---");
         
         // Path to the freshly built debug binary
@@ -40,4 +39,3 @@ describe('Aegis Duo: ZK-Prover Integration', () => {
         
         console.log(`[3/3] VERDICT: PASS. (Mathematical proof bytes: ${result.seal.length})`);
     }, 60000); // 60s timeout for ZK proof generation
-});

@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 
-describe('AegisSigner', () => {
-    it('should generate a new keypair if no private key is provided', () => {
+it('should generate a new keypair if no private key is provided', () => {
         const signer = AegisSigner.createSync();
         expect(signer.getPublicKeyHex()).toBeDefined();
         expect(signer.getPublicKeyHex().length).toBeGreaterThan(0);
@@ -82,4 +81,3 @@ describe('AegisSigner', () => {
         const isValid = signer.verifyMLDSA('tampered', signature, signer.getPQPublicKeyHex());
         expect(isValid).toBe(false);
     });
-});

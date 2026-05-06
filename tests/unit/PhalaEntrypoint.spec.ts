@@ -14,8 +14,7 @@ vi.mock('../../src/application/PepFactory', () => ({
     }
 }));
 
-describe('phala-entry (Unit)', () => {
-    let enclave: AegisEnclave;
+let enclave: AegisEnclave;
 
     beforeEach(() => {
         AegisEnclave.reset();
@@ -101,4 +100,3 @@ describe('phala-entry (Unit)', () => {
         const status = JSON.parse(statusStr);
         expect(status.status).toBe('NOT_FOUND');
     });
-});

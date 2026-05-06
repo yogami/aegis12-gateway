@@ -10,8 +10,7 @@ vi.mock('node-fetch', () => {
     };
 });
 
-describe('X402PayGate (Unit)', () => {
-    let payGate: X402PayGate;
+let payGate: X402PayGate;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -119,4 +118,3 @@ describe('X402PayGate (Unit)', () => {
         expect(metrics.enabled).toBe(true);
         expect(metrics.currency).toBe('USDC');
     });
-});

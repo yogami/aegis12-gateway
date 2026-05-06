@@ -7,8 +7,7 @@ import {
 } from '@solana/web3.js';
 import { withAegis } from '../../src/sdk/index.js';
 
-describe('TDD: Enclave Circuit-Breaker Fallback (Livelock Prevention)', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
 
     beforeAll(() => {
@@ -58,4 +57,3 @@ describe('TDD: Enclave Circuit-Breaker Fallback (Livelock Prevention)', () => {
         // Assert that the receipt flags that a cluster fallback occurred.
         expect(receipt.clusterFallbackTriggered).toBeDefined();
     });
-});

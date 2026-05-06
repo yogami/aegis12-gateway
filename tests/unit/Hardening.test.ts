@@ -20,8 +20,7 @@ vi.mock('../../src/application/PepFactory', () => ({
     }
 }));
 
-describe('Aegis-12 Hardening Tests', () => {
-    let pep: AegisPEP;
+let pep: AegisPEP;
     let signer: any;
 
     let testDir: string;
@@ -82,4 +81,3 @@ describe('Aegis-12 Hardening Tests', () => {
             await expect(pep.enforce(request as any)).rejects.toThrow('exceeds signed Tier limit 500');
         });
     });
-});

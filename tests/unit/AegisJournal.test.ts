@@ -4,8 +4,7 @@ import { AegisCanonicalMessage } from '../../src/types';
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('AegisJournal (Synchronous WAL)', () => {
-    const journalPath = path.resolve(process.cwd(), '.aegis_test_journal.log');
+const journalPath = path.resolve(process.cwd(), '.aegis_test_journal.log');
     let journal: AegisJournal;
 
     beforeEach(() => {
@@ -61,4 +60,3 @@ describe('AegisJournal (Synchronous WAL)', () => {
         expect(unbatched.length).toBe(1);
         expect(unbatched[0].nonce).toBe('n1');
     });
-});

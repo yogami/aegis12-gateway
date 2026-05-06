@@ -6,8 +6,7 @@ import fs from 'fs';
 
 const execAsync = util.promisify(exec);
 
-describe('Blackbox Suite: DAO Guardian End-to-End Flow', () => {
-    const guardianScript = path.resolve(__dirname, '../../apps/aegis-dao-guardian/src/index.ts');
+const guardianScript = path.resolve(__dirname, '../../apps/aegis-dao-guardian/src/index.ts');
     const manifestFile = path.resolve(__dirname, '../../apps/aegis-dao-guardian/src/squadmanifest.json');
 
     beforeAll(() => {
@@ -48,4 +47,3 @@ describe('Blackbox Suite: DAO Guardian End-to-End Flow', () => {
              expect(manifest.evidencePackage.jurisdiction).toBeDefined();
         }
     }, 15000);
-});

@@ -3,8 +3,7 @@ import { AegisLocalNonceRegistry } from '../../src/infrastructure/NonceRegistry'
 import * as fs from 'fs';
 import * as path from 'path';
 
-describe('NonceRegistry (Unit)', () => {
-    const testWalPath = path.resolve(process.cwd(), '.aegis_wal.json');
+const testWalPath = path.resolve(process.cwd(), '.aegis_wal.json');
     const committedWalPath = testWalPath.replace('.json', '_committed.json');
     const pendingWalPath = testWalPath.replace('.json', '_pending.json');
     const lockPath = testWalPath.replace('.json', '.lock');
@@ -77,4 +76,3 @@ describe('NonceRegistry (Unit)', () => {
         const res = await registry.reserve('nonce-3');
         expect(res).toBe(true);
     });
-});

@@ -5,19 +5,17 @@ const mockGetSignaturesForAddress = vi.fn();
 const mockGetParsedTransaction = vi.fn();
 
 vi.mock('@solana/web3.js', () => ({
-    Connection: class {
-        getSignaturesForAddress = mockGetSignaturesForAddress;
-        getParsedTransaction = mockGetParsedTransaction;
+    Connection: function() {
+        this.getSignaturesForAddress = mockGetSignaturesForAddress;
+        this.getParsedTransaction = mockGetParsedTransaction;
     },
-    PublicKey: class {
-        key: string;
-        constructor(key: string) { this.key = key; }
-        toBase58() { return this.key; }
+    PublicKey: function(key: string) {
+        this.key = key;
+        this.toBase58 = function() { return this.key; };
     }
 }));
 
-describe('EvidenceRegistry (Unit)', () => {
-    let registry: EvidenceRegistry;
+let registry: EvidenceRegistry;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -120,4 +118,3 @@ describe('EvidenceRegistry (Unit)', () => {
         const res = await registry.getRecentAnchors(1);
         expect(res[0].agentDid).toBe('did:mock2');
     });
-});

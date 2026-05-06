@@ -39,8 +39,7 @@ vi.mock('../../src/infrastructure/X402PayGate', () => ({
     }
 }));
 
-describe('AegisFastifyServer (Unit)', () => {
-    beforeEach(() => {
+beforeEach(() => {
         vi.clearAllMocks();
         // Clear require cache to re-evaluate the file
         vi.resetModules();
@@ -182,4 +181,3 @@ describe('AegisFastifyServer (Unit)', () => {
         expect(reply.status).toHaveBeenCalledWith(500);
         expect(reply.send).toHaveBeenCalledWith(expect.objectContaining({ status: 'error', error: expect.any(String) }));
     });
-});

@@ -5,8 +5,7 @@ import Fastify from 'fastify';
 // For the sake of this ATDD test, we will create a mock fastify instance that mirrors our planned implementation.
 // Once ATDD passes, we will replicate the logic inside server.ts.
 
-describe('Server Async Orchestration (ATDD)', () => {
-    let app: ReturnType<typeof Fastify>;
+let app: ReturnType<typeof Fastify>;
 
     // The in-memory map we plan to build in server.ts
     const asyncMap = new Map<string, { status: string; signature?: string }>();
@@ -26,16 +25,10 @@ describe('Server Async Orchestration (ATDD)', () => {
                     asyncMap.set(txnId, { status: 'APPROVED', signature: 'squads-sig-789' });
                 }, 100);
 
-                return reply.status(202).send({
-                    status: 'PENDING_BFT_CONSENSUS',
-                    transactionId: txnId
-                });
+                return reply.status(202).send({ status: 'PENDING_BFT_CONSENSUS', transactionId: txnId });
             }
 
-            return reply.status(200).send({
-                decision: 'ALLOW',
-                signature: 'instant-sig-123'
-            });
+            return reply.status(200).send({ decision: 'ALLOW', signature: 'instant-sig-123' });
         });
 
         app.get('/solana/enforce-tx/status', async (req, reply) => {
@@ -100,4 +93,3 @@ describe('Server Async Orchestration (ATDD)', () => {
         expect(JSON.parse(poll2.payload).status).toBe('APPROVED');
         expect(JSON.parse(poll2.payload).signature).toBe('squads-sig-789');
     });
-});

@@ -12,9 +12,7 @@ import { AegisSigner } from '../../src/infrastructure/AegisSigner';
 
 const API_URL = process.env.TEST_API_URL || 'http://localhost:8000';
 
-test.describe('Enterprise Pilot Validation: Sovereign Sentinel', () => {
-    
-    test('AC-1: Block transactions violating Trust Threshold', async ({ request }) => {
+test('AC-1: Block transactions violating Trust Threshold', async ({ request }) => {
         const payload = {
             agent: { did: 'did:aegis:malicious-agent', purpose: 'arbitrage', currentTier: 'T1' },
             action: { 
@@ -82,4 +80,3 @@ test.describe('Enterprise Pilot Validation: Sovereign Sentinel', () => {
         const result = await response.json();
         expect(result.decision).toBe('BLOCK');
     });
-});

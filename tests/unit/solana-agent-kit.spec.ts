@@ -8,8 +8,7 @@ vi.mock('node-fetch', () => ({
     default: mockFetch
 }));
 
-describe('AegisSolanaAgent (Unit)', () => {
-    let agent: AegisSolanaAgent;
+let agent: AegisSolanaAgent;
     let config: AegisAgentConfig;
 
     beforeEach(() => {
@@ -84,4 +83,3 @@ describe('AegisSolanaAgent (Unit)', () => {
         await expect(agent.executeSafeTransaction('tx-base64', false))
             .rejects.toThrow('Aegis enforcement failed: System Error');
     });
-});

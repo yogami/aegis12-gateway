@@ -7,8 +7,7 @@ import {
 } from '@solana/web3.js';
 import { withAegis } from '../../src/sdk/index.js';
 
-describe('TDD: SVM State Desync & Temporal Versioning', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
 
     beforeAll(() => {
@@ -48,4 +47,3 @@ describe('TDD: SVM State Desync & Temporal Versioning', () => {
         expect(typeof receipt.simulatedBlockhash).toBe('string');
         expect(receipt.simulatedBlockhash.length).toBeGreaterThan(10);
     });
-});

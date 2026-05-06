@@ -8,8 +8,7 @@ import {
 } from '@solana/web3.js';
 import { AegisSDK } from '../../packages/aegis12-sdk/src/AegisSDK.js';
 
-describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
-    let connection: Connection;
+let connection: Connection;
     let agentKeypair: Keypair;
     let mockNonceAccount: Keypair;
 
@@ -64,4 +63,3 @@ describe('TDD: Temporal Decay Nonces (Backlog Item 1)', () => {
         expect(response.evidence_package).toBeDefined();
         expect(response.hardware_attestation).toBeDefined();
     });
-});
