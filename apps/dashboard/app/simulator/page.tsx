@@ -6,6 +6,7 @@ export default function VaultBotSimulator() {
   const [simulationStatus, setSimulationStatus] = useState<'idle' | 'simulating' | 'approved' | 'blocked'>('idle');
   const [scenario, setScenario] = useState<'safe' | 'malicious' | 'jailbreak' | 'hotl_escalation'>('safe');
   const [logs, setLogs] = useState<string[]>([]);
+  const [ledgerTx, setLedgerTx] = useState<string>('');
 
   const runSimulation = async () => {
     setSimulationStatus('simulating');
@@ -53,18 +54,39 @@ export default function VaultBotSimulator() {
         if (response.ok) {
           const result = await response.json();
           if (result.status === 'approved' || scenario === 'safe') {
+            let txHash = result.ledger_tx || "batching";
+            let zkSeal = result.evidence_package?.zk_seal || "pending";
+            const receiptId = result.receipt?.receiptId || 'aegis_mock_receipt';
+
+            if (txHash === "batching" || zkSeal === "pending") {
+              setLogs(prev => [...prev, '⏳ Polling Enclave for asynchronous Ledger Anchor and ZK-Seal... (this may take up to 30s)']);
+              let attempts = 0;
+              while ((txHash === "batching" || zkSeal === "pending") && attempts < 15) {
+                await new Promise(r => setTimeout(r, 5000));
+                attempts++;
+                try {
+                  const evRes = await fetch(`/api/evidence/${receiptId}`);
+                  if (evRes.ok) {
+                    const evData = await evRes.json();
+                    if (evData.ledger_tx && evData.ledger_tx !== "batching") txHash = evData.ledger_tx;
+                    if (evData.ars_anchor && evData.ars_anchor !== "pending") zkSeal = evData.ars_anchor;
+                  }
+                } catch(e) {}
+              }
+            }
+            
+            setLedgerTx(txHash !== "batching" ? txHash : "");
             setSimulationStatus('approved');
             setLogs(prev => [
                 ...prev, 
                 '✅ Pre-Hashing Contextual Sanitization: Clean.',
                 '✅ TEE Simulation Passed: No policy violations detected.', 
                 '✅ Transaction Approved & Signed.', 
-                `Receipt: ${result.receipt?.receiptId || 'aegis_mock_receipt'}`,
+                `Receipt: ${receiptId}`,
                 `Evidence Package:\n${JSON.stringify({
-                    policyId: "POL_SAFE_01",
-                    riskTier: "T4",
-                    intentHash: "0x3a4b9c...",
-                    x402Header: "x402_sig_1234567890abcdef"
+                    ledgerTx: txHash,
+                    zkSeal: zkSeal.substring(0, 32) + '...',
+                    x402Header: result.evidence_package?.x402_payment_header || "x402_sig_1234567890abcdef"
                 }, null, 2)}`
             ]);
           } else if (result.status === 'escalated' || scenario === 'hotl_escalation') {
@@ -310,7 +332,11 @@ export default function VaultBotSimulator() {
             {simulationStatus === 'approved' && (
               <div className="bg-green-900/30 border border-green-500 text-green-400 p-4 rounded-lg flex items-center justify-between">
                 <span className="font-bold">✓ Transaction Approved</span>
-                <a href="#" className="text-sm underline hover:text-green-300">View On-Chain Receipt</a>
+                {ledgerTx ? (
+                    <a href={`https://explorer.solana.com/tx/${ledgerTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-sm underline hover:text-green-300">View On-Chain Receipt</a>
+                ) : (
+                    <span className="text-sm text-green-600 animate-pulse">Anchoring...</span>
+                )}
               </div>
             )}
 

@@ -86,6 +86,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
   });
 
   test('verifies Normal Payment outputs the Auditor-Grade Evidence Schema JSON', async ({ page }) => {
+    test.setTimeout(90000); // Allow up to 90 seconds for real Devnet anchoring and TEE proof generation
     await page.goto(`/simulator`);
 
     // Select the Safe scenario
@@ -97,9 +98,11 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await executeBtn.click();
 
     // Wait for the Evidence Package to be dumped to the terminal logs
-    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=POL_SAFE_01')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 10000 });
+    // Increase timeout to 60s because we are waiting for real Devnet anchoring and Phala proofs
+    await expect(page.locator('text=Evidence Package:')).toBeVisible({ timeout: 60000 });
+    // Expect dynamic properties rather than hardcoded POL_SAFE_01 string since we don't mock the inner contents anymore
+    await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 60000 });
+    await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 60000 });
   });
   test('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
     await page.goto(`/simulator`);
