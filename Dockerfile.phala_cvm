@@ -44,6 +44,10 @@ RUN mkdir -p /app/bin
 COPY zk-artifacts/aegis-zk-prover /app/bin/aegis-zk-prover
 RUN chmod +x /app/bin/aegis-zk-prover
 
+# Prefetch ONNX Model Weights to bake into image
+COPY scripts/prefetch_model.js /app/scripts/prefetch_model.js
+RUN node /app/scripts/prefetch_model.js
+
 # Fail-fast: verify all shared library dependencies are satisfied
 RUN ldd /app/bin/aegis-zk-prover && echo '✅ All shared libraries found' || (echo '❌ MISSING SHARED LIBRARIES — binary will crash at runtime' && ldd /app/bin/aegis-zk-prover && exit 1)
 

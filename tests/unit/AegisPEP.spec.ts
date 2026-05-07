@@ -45,7 +45,7 @@ let pep: AegisPEP;
         },
         context: { currentAnomalyScore: 0.1 },
         agentContext: {
-            prompt: 'Normal compliant prompt',
+            prompt: 'What is the weather today?',
             modelVersion: 'Llama-3.1-70B-Instruct',
             jurisdiction: 'EU_MiCA'
         }
