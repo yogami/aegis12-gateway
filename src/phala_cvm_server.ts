@@ -47,7 +47,7 @@ async function handleGet(req: http.IncomingMessage, res: http.ServerResponse) {
 
 function handlePost(req: http.IncomingMessage, res: http.ServerResponse) {
     const url = req.url || "";
-    if (url.includes("/sign_and_execute") || url.includes("/evidence")) return handleAegisRoute(req, res);
+    if (url.includes("/sign_and_execute") || url.includes("/evidence") || url.includes("/vault/policy")) return handleAegisRoute(req, res);
     return handleNotFound(res);
 }
 
@@ -120,8 +120,33 @@ function handleAegisRoute(req: http.IncomingMessage, res: http.ServerResponse) {
         res.end(JSON.stringify({ status: "error", error: `Stream Error: ${err.message}` }));
     });
     req.on("end", async () => {
-        await processAegisRequest(body, res);
+        if (req.url?.includes("/vault/policy")) {
+            await handleVaultPolicyRoute(body, res);
+        } else {
+            await processAegisRequest(body, res);
+        }
     });
+}
+
+async function handleVaultPolicyRoute(body: string, res: http.ServerResponse) {
+    console.log(`[dStack CVM] Vault upload body received (${body.length} bytes).`);
+    try {
+        const parsed = JSON.parse(body);
+        if (!parsed.tenantId || !parsed.policyId || !parsed.sensitiveData) throw new Error("Missing vault fields");
+        
+        const { AegisEnclave } = await import("./application/PhalaEntrypoint");
+        const enclave = AegisEnclave.getInstance();
+        await enclave.uploadVaultPolicy(parsed.tenantId, parsed.policyId, parsed.sensitiveData);
+        
+        const response = { status: "success", vaultId: parsed.policyId, message: "Policy vaulted successfully" };
+        const payloadStr = JSON.stringify(response);
+        res.writeHead(200, { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payloadStr) });
+        res.end(payloadStr);
+    } catch (err: any) {
+        console.error(`[dStack CVM] Vault Error: ${err.message}`);
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "error", error: err.message }));
+    }
 }
 
 async function processAegisRequest(body: string, res: http.ServerResponse) {

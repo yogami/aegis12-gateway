@@ -213,6 +213,12 @@ export class AegisEnclave {
         return JsonUtils.stableStringify({ status: "denied", error: errorMsg, enclaveDid: this._signer?.enclaveDid || "unknown", telemetry: tel.getMetrics() });
     }
 
+    public async uploadVaultPolicy(tenantId: string, policyId: string, sensitiveData: any): Promise<void> {
+        await this.initialize();
+        if (!this._vaultStore) throw new Error("VaultStore not initialized");
+        await this._vaultStore.savePolicy(tenantId, policyId, sensitiveData);
+    }
+
     private anchorDeniedIfSafe(e: any): void {
         const isTerminal = e instanceof TerminalRefusalError || e.name === 'TerminalRefusalError';
         if (!isTerminal) {
