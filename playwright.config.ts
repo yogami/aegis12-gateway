@@ -5,7 +5,7 @@ export default defineConfig({
     timeout: 30000,
     retries: 1,
     use: {
-        baseURL: process.env.TEST_API_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network',
+        baseURL: process.env.TEST_API_URL || 'http://localhost:8000',
         extraHTTPHeaders: {
             'Content-Type': 'application/json',
         },
