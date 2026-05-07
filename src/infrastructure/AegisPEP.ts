@@ -58,7 +58,6 @@ export class AegisPEP {
 
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         this.validateRequestStructure(request);
-        await this.mergeVaultedPolicy(request);
         const context = this.prepareContext(request);
         return this.executeEnforcement(request, context);
     }
@@ -83,9 +82,13 @@ export class AegisPEP {
         return { tenantId, nonce, scopedNonce: `${tenantId}::${nonce}`, spendIncremented: false, nonceReserved: false };
     }
 
-    private async executeEnforcement(request: PolicyEvaluationRequest, ctx: any): Promise<AegisComplianceReceipt> {
-        let amountBig = 0n;
+    private async executeEnforcement(request: PolicyEvaluationRequest, context: any): Promise<AegisComplianceReceipt> {
+        let amountBig = BigInt(0);
+        const ctx = context;
         try {
+            await this.verifySignatureAndAnomaly(request);
+            await this.mergeVaultedPolicy(request);
+
             const normalized = this.normalizeAction(request);
             amountBig = normalized.amountBig;
             const { sanit } = normalized;
@@ -96,7 +99,6 @@ export class AegisPEP {
             await this.reserveNonce(ctx.scopedNonce);
             ctx.nonceReserved = true;
 
-            await this.verifySignatureAndAnomaly({ ...request, action: { ...request.action, parameters: sanit, estimatedValue: amountBig } });
             await SimulationEngine.simulateAndParse(sanit);
 
             const { decision, envelope } = await this.evaluateEscalation(amountBig, request, sanit, limits, ctx);

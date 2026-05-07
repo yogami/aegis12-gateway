@@ -90,7 +90,7 @@ let enclaveSigner: AegisSigner;
             dynamicPolicy: forgedDynamicPolicy,
         };
 
-        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Tier mismatch/);
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Invalid cryptographic signature format/);
     });
 
     /**
