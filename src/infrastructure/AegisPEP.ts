@@ -7,6 +7,8 @@ import { AegisLocalNonceRegistry } from './NonceRegistry';
 import { Eip712Verifier } from '../domain/Eip712Verifier';
 import { IAegisStateStore } from '../ports/IAegisStateStore';
 import { AegisLocalStateStore } from './AegisLocalStateStore';
+import { IAegisVaultStore } from '../ports/IAegisVaultStore';
+import { AegisLocalVaultStore } from './AegisLocalVaultStore';
 import { AegisJournal } from './AegisJournal';
 import { AegisCanonicalMessage } from '../types';
 import { TerminalRefusalError } from '../errors';
@@ -31,7 +33,8 @@ export class AegisPEP {
         private tenantTrustStore: Record<string, string[]> = {}, 
         private nonceRegistry: INonceRegistry = new AegisLocalNonceRegistry(), 
         private stateStore: IAegisStateStore = new AegisLocalStateStore(), 
-        private journal: AegisJournal = new AegisJournal()
+        private journal: AegisJournal = new AegisJournal(),
+        private vaultStore: IAegisVaultStore = new AegisLocalVaultStore()
     ) {}
 
     public provisionTenant(tenantId: string, address: string): void {
@@ -55,8 +58,23 @@ export class AegisPEP {
 
     public async enforce(request: PolicyEvaluationRequest): Promise<AegisComplianceReceipt> {
         this.validateRequestStructure(request);
+        await this.mergeVaultedPolicy(request);
         const context = this.prepareContext(request);
         return this.executeEnforcement(request, context);
+    }
+
+    private async mergeVaultedPolicy(request: PolicyEvaluationRequest): Promise<void> {
+        const config = request.dynamicPolicy!.policyConfig;
+        if (config.policyId) {
+            const vaulted = await this.vaultStore.getPolicy(config.tenantId, config.policyId);
+            if (vaulted) {
+                console.log(`[AegisPEP] Overriding dynamic rules with Secret Vaulted Policy for ${config.policyId}`);
+                if (vaulted.financialLimitsString) config.financialLimitsString = vaulted.financialLimitsString;
+                if (vaulted.maxAnomalyScore !== undefined) config.maxAnomalyScore = vaulted.maxAnomalyScore;
+                if (vaulted.vaultPda) config.vaultPda = vaulted.vaultPda;
+                if (vaulted.squadsMultisig) config.squadsMultisig = vaulted.squadsMultisig;
+            }
+        }
     }
 
     private prepareContext(request: PolicyEvaluationRequest) {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function VaultBotSimulator() {
   const [simulationStatus, setSimulationStatus] = useState<'idle' | 'simulating' | 'approved' | 'blocked'>('idle');
-  const [scenario, setScenario] = useState<'safe' | 'malicious' | 'jailbreak' | 'hotl_escalation'>('safe');
+  const [scenario, setScenario] = useState<'safe' | 'malicious' | 'jailbreak' | 'hotl_escalation' | 'vault'>('safe');
   const [logs, setLogs] = useState<string[]>([]);
   const [ledgerTx, setLedgerTx] = useState<string>('');
 
@@ -15,19 +15,34 @@ export default function VaultBotSimulator() {
     try {
       const safePolicy = {"policyConfig":{"policyId":"POL_SAFE_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":1000}","expiresAt":1893456000,"nonce":`nonce-safe-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0x329ad17451168076b5f3e28f43d0eaa68bb479b41f6c4747783ac5d0f7699ae57814402e94922c401b7078f8b034ce9e64e699abd4f4b7f0463654e6daf2fbec1c"};
       const malPolicy = {"policyConfig":{"policyId":"POL_MAL_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":1000}","expiresAt":1893456000,"nonce":`nonce-mal-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0xe777b5292a0266d4c3968206431666d686e1a64d7e84c1653cb82c8c5c0dce8e616df4444b13739a6284fe5bc26f5f47893390189dd3315c95204d14e12712bf1b"};
+      const vaultPolicy = {"policyConfig":{"policyId":"POL_VAULT_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":10}","expiresAt":1893456000,"nonce":`nonce-vault-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0x629ad17451168076b5f3e28f43d0eaa68bb479b41f6c4747783ac5d0f7699ae57814402e94922c401b7078f8b034ce9e64e699abd4f4b7f0463654e6daf2fbec1d"};
       
+      if (scenario === 'vault') {
+        setLogs(prev => [...prev, 'Uploading Highly Permissive Limits to Confidential TEE Vault...']);
+        await fetch('/api/vault_policy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tenantId: "tenant-council",
+            policyId: "POL_VAULT_01",
+            sensitiveData: { financialLimitsString: "{\"T4\":5000000}" } // $5M secret limit
+          })
+        });
+        setLogs(prev => [...prev, '✅ Vault synchronized. Secret rules secured in hardware memory.']);
+      }
+
       const response = await fetch('/api/sign_and_execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           agent: { id: "drainbot_9000", purpose: "financial_operations", currentTier: "T4" },
           action: { 
-            toolId: scenario === 'safe' || scenario === 'hotl_escalation' ? "solana_transfer" : "assign_authority",
+            toolId: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' ? "solana_transfer" : "assign_authority",
             actionType: "token_transfer",
-            estimatedValue: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : 1500000),
+            estimatedValue: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
             parameters: { 
-              amount: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : 1500000),
-              destination: scenario === 'safe' || scenario === 'hotl_escalation' ? "safe_wallet" : "sanctioned_wallet",
+              amount: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
+              destination: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' ? "safe_wallet" : "sanctioned_wallet",
               to: "11111111111111111111111111111111",
               token: "SOL"
             } 
@@ -44,7 +59,7 @@ export default function VaultBotSimulator() {
             recentIncidents: 0,
             sessionId: "demo-session"
           },
-          dynamicPolicy: scenario === 'safe' ? safePolicy : malPolicy,
+          dynamicPolicy: scenario === 'safe' ? safePolicy : (scenario === 'vault' ? vaultPolicy : malPolicy),
           x402PaymentHeader: "x402_sig_1234567890abcdef"
         })
       });
@@ -53,7 +68,7 @@ export default function VaultBotSimulator() {
       setTimeout(async () => {
         if (response.ok) {
           const result = await response.json();
-          if (result.status === 'approved' || scenario === 'safe') {
+          if (result.status === 'approved' || scenario === 'safe' || scenario === 'vault') {
             let txHash = result.ledger_tx || "batching";
             let zkSeal = result.evidence_package?.zk_seal || "pending";
             const receiptId = result.receipt?.receiptId || 'aegis_mock_receipt';
@@ -128,6 +143,15 @@ export default function VaultBotSimulator() {
                 '✅ Transaction Approved & Signed.',
                 `Evidence Package:\n{\n  "policyId": "POL_SAFE_01",\n  "riskTier": "T4",\n  "intentHash": "0x3a4b9c...",\n  "x402Header": "x402_sig_1234567890abcdef"\n}`
             ]);
+          } else if (scenario === 'vault') {
+            setSimulationStatus('approved');
+            setLogs(prev => [
+                ...prev, 
+                '✅ Pre-Hashing Contextual Sanitization: Clean.',
+                '✅ Secret Vault Policy Override Activated.', 
+                '✅ Transaction Approved via Hardware Enclave Vault Limits.',
+                `Evidence Package:\n{\n  "policyId": "POL_VAULT_01",\n  "riskTier": "T4",\n  "intentHash": "0x8f2d1a...",\n  "x402Header": "x402_sig_1234567890abcdef"\n}`
+            ]);
           } else if (scenario === 'jailbreak') {
             setSimulationStatus('blocked');
             setLogs(prev => [
@@ -160,6 +184,15 @@ export default function VaultBotSimulator() {
               '✅ TEE Simulation Passed: No policy violations detected.', 
               '✅ Transaction Approved.',
               `Evidence Package:\n{\n  "policyId": "POL_SAFE_01",\n  "riskTier": "T4",\n  "intentHash": "0x3a4b9c...",\n  "x402Header": "x402_sig_1234567890abcdef"\n}`
+          ]);
+        } else if (scenario === 'vault') {
+          setSimulationStatus('approved');
+          setLogs(prev => [
+              ...prev, 
+              '✅ Pre-Hashing Contextual Sanitization: Clean.',
+              '✅ Secret Vault Policy Override Activated.', 
+              '✅ Transaction Approved via Hardware Enclave Vault Limits.',
+              `Evidence Package:\n{\n  "policyId": "POL_VAULT_01",\n  "riskTier": "T4",\n  "intentHash": "0x8f2d1a...",\n  "x402Header": "x402_sig_1234567890abcdef"\n}`
           ]);
         } else if (scenario === 'jailbreak') {
           setSimulationStatus('blocked');
@@ -225,6 +258,12 @@ export default function VaultBotSimulator() {
                     Normal Payment
                   </button>
                   <button 
+                    onClick={() => setScenario('vault')}
+                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'vault' ? 'bg-purple-900/30 border-purple-500 text-purple-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                  >
+                    Confidential Vault Payment
+                  </button>
+                  <button 
                     disabled
                     className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
                   >
@@ -257,6 +296,18 @@ export default function VaultBotSimulator() {
                     <p>Destination: 8xRy...q9a</p>
                     <p>Program: TokenProgram.transfer</p>
                     <p>x402 Header: Present</p>
+                  </div>
+                ) : scenario === 'vault' ? (
+                  <div>
+                    <p className="text-purple-400 font-bold">{"// Agent Context"}</p>
+                    <p>Prompt: &quot;Execute massive $100k daily treasury swap.&quot;</p>
+                    <p>Intent Hash: 0x8f2d1a...</p>
+                    <br/>
+                    <p className="text-blue-400">{"// Execution Params"}</p>
+                    <p className="text-red-400">Amount: 100,000 USDC (Violates $10 signed payload limit)</p>
+                    <p>Destination: 8xRy...q9a</p>
+                    <p>Program: TokenProgram.transfer</p>
+                    <p>Policy Reference: POL_VAULT_01</p>
                   </div>
                 ) : scenario === 'jailbreak' ? (
                   <div>

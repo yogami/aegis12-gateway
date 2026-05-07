@@ -14,6 +14,8 @@ import { PepFactory } from './PepFactory';
 import { Pcr0Verifier } from './Pcr0Verifier';
 import { ZkProofGenerator } from './ZkProofGenerator';
 import { SquadsRouter } from '../infrastructure/SquadsRouter';
+import { IAegisVaultStore } from '../ports/IAegisVaultStore';
+import { AegisLocalVaultStore } from '../infrastructure/AegisLocalVaultStore';
 
 /**
  * [EXTREME QUALITY] PhalaEntrypoint
@@ -26,6 +28,7 @@ export class AegisEnclave {
     private _anchor?: ILedgerAnchor;
     private _journal?: AegisJournal;
     private _batchWorker?: BatchAnchorWorker;
+    private _vaultStore?: IAegisVaultStore;
     private _initPromise: Promise<void> | null = null;
 
     private constructor() {}
@@ -38,6 +41,7 @@ export class AegisEnclave {
     public get signer() { return this._signer; }
     public get anchor() { return this._anchor; }
     public get pep() { return this._pep; }
+    public get vaultStore() { return this._vaultStore; }
 
     public static reset(): void {
         AegisEnclave.instance?.stopWorker();
@@ -56,7 +60,7 @@ export class AegisEnclave {
     }
 
     private isReady(): boolean {
-        return [this._signer, this._pep, this._anchor, this._batchWorker].every(Boolean);
+        return [this._signer, this._pep, this._anchor, this._batchWorker, this._vaultStore].every(Boolean);
     }
 
     private async startInitialization(): Promise<void> {
@@ -88,6 +92,7 @@ export class AegisEnclave {
 
     private async performInitializationSteps(): Promise<void> {
         this._signer = this._signer || await AegisSigner.create();
+        this._vaultStore = this._vaultStore || new AegisLocalVaultStore();
         await this.ensurePep();
         
         if (!this._anchor) {

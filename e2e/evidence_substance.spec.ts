@@ -137,6 +137,18 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         
         const payload = getPayload(nonce, policyConfig, e2eWallet, signature);
 
+        console.log(`[Substance] Uploading Confidential Vault Policy for actionId: ${nonce}...`);
+        const vaultRes = await fetch(`${process.env.TEST_API_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'}/vault/policy`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tenantId: policyConfig.tenantId,
+                policyId: policyConfig.policyId,
+                sensitiveData: { financialLimitsString: policyConfig.financialLimitsString }
+            })
+        });
+        expect(vaultRes.status, `Vault upload failed`).toBe(200);
+
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
         const res = await fetch(`${process.env.TEST_API_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'}/sign_and_execute`, {
             method: 'POST',

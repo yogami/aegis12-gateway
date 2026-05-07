@@ -23,8 +23,9 @@ const controller = new AegisController(payGate, governance);
 fastify.get('/health', controller.health.bind(controller));
 fastify.get('/api/docs', controller.getDocs.bind(controller));
 
-// 2. CORE ENFORCEMENT
+// 2. CORE ENFORCEMENT & POLICY VAULT
 fastify.post('/sign_and_execute', controller.enforce.bind(controller));
+fastify.post('/vault/policy', controller.uploadVaultPolicy.bind(controller));
 
 // 3. SOLANA RECEIPT ANCHORING
 fastify.post('/anchor-receipt', controller.anchorReceipt.bind(controller));

@@ -313,4 +313,30 @@ export class AegisController {
         console.log(`[E2E] Provisioning test tenant: ${tenantId} -> ${address}`);
         return reply.send({ status: 'provisioned' });
     }
+    public async uploadVaultPolicy(request: FastifyRequest, reply: FastifyReply) {
+        try {
+            const { tenantId, policyId, sensitiveData } = request.body as any;
+            if (!tenantId || !policyId || !sensitiveData) {
+                return reply.status(400).send({ error: 'Missing required fields: tenantId, policyId, sensitiveData' });
+            }
+
+            const enclave = AegisEnclave.getInstance();
+            await enclave.initialize();
+            
+            // Assume the vault is initialized as part of PEP (we will add it to AegisEnclave shortly)
+            if (!enclave.vaultStore) {
+                return reply.status(500).send({ error: 'Vault Store not initialized in Enclave.' });
+            }
+
+            await enclave.vaultStore.savePolicy(tenantId, policyId, sensitiveData);
+            
+            return reply.status(200).send({
+                status: 'success',
+                message: `Policy ${policyId} securely vaulted for tenant ${tenantId} inside the TEE.`,
+                vaultPolicyId: policyId
+            });
+        } catch (err: any) {
+            return reply.status(500).send({ status: 'error', error: err.message });
+        }
+    }
 }

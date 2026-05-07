@@ -130,4 +130,36 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await expect(page.locator('text=Massive transfer exceeds HOTL thresholds')).toBeVisible({ timeout: 150000 });
     await expect(page.locator('text=Transaction rerouted to Squads V4 Multisig')).toBeVisible({ timeout: 150000 });
   });
+
+  test('verifies Confidential Vault Payment successfully overrides dynamic limits', async ({ page }) => {
+    test.setTimeout(150000); 
+    await page.goto(`/simulator`);
+
+    // Select the Vault scenario
+    const vaultBtn = page.locator('button', { hasText: 'Confidential Vault Payment' });
+    await vaultBtn.click();
+
+    // Verify UI reflects Vault context
+    await expect(page.locator('text=Policy Reference: POL_VAULT_01')).toBeVisible();
+
+    const requestPromise = page.waitForRequest(request => request.url().includes('/api/sign_and_execute') && request.method() === 'POST');
+
+    // Click the execute button
+    const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
+    await executeBtn.click();
+
+    // Verify vault upload log
+    await expect(page.locator('text=Uploading Highly Permissive Limits to Confidential TEE Vault...')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Secret rules secured in hardware memory.')).toBeVisible({ timeout: 10000 });
+
+    const request = await requestPromise;
+    const postData = JSON.parse(request.postData() || '{}');
+    
+    expect(postData.action.parameters.amount).toBe(100000);
+    expect(postData.dynamicPolicy.policyConfig.policyId).toBe('POL_VAULT_01');
+
+    // Verify it was approved despite the massive transfer limit
+    await expect(page.locator('text=Transaction Approved via Hardware Enclave Vault Limits.')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=Secret Vault Policy Override Activated.')).toBeVisible({ timeout: 150000 });
+  });
 });

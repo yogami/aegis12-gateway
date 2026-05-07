@@ -450,3 +450,48 @@ let enclaveSigner: AegisSigner;
         // Enforce MUST aggressively trap this BEFORE it attempts to parse or hash the gigabytes of data into the parametersHash
         await expect(aegisPEP.enforce(request)).rejects.toThrow(/Malicious intent detected/i);
     });
+
+    /**
+     * Case 16: Confidential Policy Vault Override
+     */
+    it("overrides dynamic policy limits with secret limits securely stored in the Confidential Policy Vault", async () => {
+        // 1. Upload the highly permissive policy to the Vault
+        const vaultPolicyId = "vault-override-policy";
+        const tenantId = "legitTenant";
+        const secretLimits = { 'T4': 5000000 };
+        
+        // Use the vault store instance injected into the PEP
+        await (aegisPEP as any)['vaultStore'].savePolicy(tenantId, vaultPolicyId, {
+            financialLimitsString: JSON.stringify(secretLimits),
+            maxAnomalyScore: 99
+        });
+
+        // 2. Create a dynamic policy that asks for a tiny limit ($10) but references the Vault Policy
+        const config: any = {
+            policyId: vaultPolicyId,
+            tenantId: tenantId,
+            version: "1.0.0",
+            chainId: 1399811149,
+            crossChainTarget: "solana:devnet",
+            maxAnomalyScore: 10,
+            financialLimits: { 'T4': 10 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600,
+            nonce: "vault-override-nonce",
+            ...SQUADS_DEFAULTS
+        };
+        config.financialLimitsString = JSON.stringify(config.financialLimits);
+        const sig = await ceoWallet._signTypedData(domain, types, { ...config });
+
+        // 3. Attempt a massive $100,000 transfer which violates the signed $10 limit, but respects the Vault $5,000,000 limit
+        const request: any = {
+            action: { toolId: "solana_transfer", parameters: { token: "SOL", to: "11111111111111111111111111111111", amount: 100000 }, estimatedValue: 100000 },
+            agent: { did: "did:example:1002", purpose: "financial_operations", currentTier: "T4" },
+            context: { currentAnomalyScore: 0.1 },
+            dynamicPolicy: { policyConfig: config, signature: sig, ownerPublicKey: ceoWallet.address }
+        };
+
+        const receipt = await aegisPEP.enforce(request);
+        
+        // Assert it was approved, proving the Vault limits successfully overrode the dynamic payload limits
+        expect(receipt.decision).toBe('approved');
+    });
