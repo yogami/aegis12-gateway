@@ -51,17 +51,6 @@ jobs:
         run: npx vitest run
 
 
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: false
-          swap-storage: false
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -144,7 +133,7 @@ jobs:
           build-args: |
             GIT_COMMIT_SHA=${{ github.sha }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=min
 
       - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
         run: |
@@ -244,7 +233,7 @@ jobs:
           
           echo "Waiting for old container to terminate (expecting non-200)..."
           for i in {1..30}; do
-            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
+            RESPONSE_CODE=$(curl -s --connect-timeout 3 --max-time 5 -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
             if [ "$RESPONSE_CODE" != "200" ]; then
               echo "Old container is down (HTTP $RESPONSE_CODE)."
               break
@@ -259,7 +248,7 @@ jobs:
           TARGET_SHA="${{ github.sha }}"
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            HEALTH_JSON=$(curl -s "$ENCLAVE_URL/health" || echo "{}")
+            HEALTH_JSON=$(curl -s --connect-timeout 3 --max-time 5 "$ENCLAVE_URL/health" || echo "{}")
             COMMIT_HASH=$(echo "$HEALTH_JSON" | jq -r '.commit_hash // "unknown"')
             
             if [ "$COMMIT_HASH" == "$TARGET_SHA" ]; then
