@@ -13,6 +13,7 @@ services:
       - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-council":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
       - AEGIS_ZK_PROVER_HASH=aa1768de5e8cd154e33603d41e724a8378ae764cc93af09c52736197b5933850
       - SOLANA_PAYER_SECRET=Mm41pnRR9mtL1EGyCFgbtopsT+xTbl7EbPk0Gv7aT9W5640EhSQWzAqaWT9HnHLfZY+RsERhYxk4hoz2rbtJKw==
+      - SOLANA_RPC_URL=https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29
     volumes:
       # Crucial: Maps the host's dstack socket to the container
       - /var/run/dstack.sock:/var/run/dstack.sock

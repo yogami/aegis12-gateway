@@ -30,8 +30,8 @@ const eip712Types = {
     ]
 };
 
-const SOLANA_CLUSTER = 'localnet';
-const connection = new Connection(process.env.SOLANA_RPC_URL || 'http://localhost:8899', 'confirmed');
+const SOLANA_CLUSTER = 'devnet';
+const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29', 'confirmed');
 
 async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
     let solanaTx = initialSolanaTx;
@@ -118,7 +118,7 @@ const getPolicyConfig = (nonce: string) => ({
     tenantId: "tenant-e2e",
     version: "1.0.0",
     chainId: 1399811149,
-    crossChainTarget: "solana:localnet",
+    crossChainTarget: "solana:devnet",
     maxAnomalyScore: 100,
     financialLimitsString: JSON.stringify({ T1: 1000000 }),
     expiresAt: Math.floor(Date.now() / 1000) + 3600,
