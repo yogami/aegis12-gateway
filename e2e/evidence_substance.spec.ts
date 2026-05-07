@@ -263,7 +263,7 @@ test('EVIDENCE-SUBSTANCE-003: Prompt Injection is Blocked by In-Enclave Sanitize
     });
     const body = await res.json();
 
-    expect(res.status, `Request must return 200 (with denied status)`).toBe(200);
+    expect(res.status, `Request must return 403 (with denied status)`).toBe(403);
     expect(body.status, "Prompt injection must be denied").toBe('denied');
     expect(body.error, "Error must reference prompt injection").toContain('Prompt injection detected');
     console.log(`[Substance] ✅ SUBSTANCE VERIFIED: Prompt Injection blocked by in-enclave sanitizer.`);
