@@ -39,7 +39,7 @@ async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
     let pollingRetries = 150;
     while ((solanaTx === 'batching' || solanaTx === 'pending' || zkSeal === 'pending') && pollingRetries > 0) {
         await new Promise(r => setTimeout(r, 2000));
-        const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'http://127.0.0.1:8000'}/evidence/${receiptId}`);
+        const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'}/evidence/${receiptId}`);
         if (evidenceRes.status === 200) {
             const evidenceBody = await evidenceRes.json();
             if (evidenceBody.ledger_tx) solanaTx = evidenceBody.ledger_tx;
@@ -138,7 +138,7 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         const payload = getPayload(nonce, policyConfig, e2eWallet, signature);
 
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
-        const res = await fetch(`${process.env.TEST_API_URL || 'http://127.0.0.1:8000'}/sign_and_execute`, {
+        const res = await fetch(`${process.env.TEST_API_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'}/sign_and_execute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
