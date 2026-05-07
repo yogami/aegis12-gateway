@@ -61,8 +61,6 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1",
-    "@fastify/swagger": "^9.7.0",
-    "@fastify/swagger-ui": "^5.2.5",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.1",
     "@noble/post-quantum": "^0.6.1",
@@ -71,7 +69,6 @@
     "@sqds/multisig": "^2.1.4",
     "dotenv": "^17.4.2",
     "ethers": "^5.8.0",
-    "fastify": "^5.7.4",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.6.0",
     "tweetnacl": "^1.0.3",

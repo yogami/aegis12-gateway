@@ -1,78 +1,208 @@
 # Aegis-12: Master Technical Specification
 
-**Version:** 2.0.0
-**Status:** Canonical Source of Truth (Post-Hardening)
+**Version:** 3.0.0  
+**Status:** Canonical Source of Truth (Post-Veracity Audit)  
+**Last Updated:** 2026-05-07  
+**Production Server:** `phala_cvm_server.ts` (raw Node.js `http` module, no framework)
 
-This document serves as the absolute single source of truth for the Aegis-12 Gateway. It outlines the architectural requirements, strict enforcement rules, and edge-case behaviors of the Sovereign Compliance layer. 
-
-To ensure clarity and precision, this specification is strictly divided by user persona.
-
----
-
-## 1. Agent Developers (SDK Users)
-*Target Audience: AI Engineers and Developers building autonomous agents who must delegate transaction signing to the Aegis-12 Hardware Enclave.*
-
-### 1.1 Zero-Custody SDK Initialization
-- **Requirement:** Agents **MUST NOT** hold private keys. The SDK (`AegisRemoteSigner`) is initialized with a `tenantId`, `agentId`, and a reference to the TEE Gateway.
-- **Edge Case (Timeout):** If the `gatewayUrl` is unresponsive, the SDK must fail-closed after `timeoutMs` (default: 5000ms). Agents cannot execute transactions independently.
-
-### 1.2 Intent Formulation & Delegation
-- **Requirement:** Every execution intent submitted to the SDK must include the raw, unsigned transaction data or intent metadata (action, target, amount, memo, prompt).
-- **Strict Signing:** The SDK does NOT sign the transaction. It forwards the unsigned intent to the Phala CVM.
-- **Edge Case (Key Mismanagement):** If an agent attempts to sign its own transaction locally, it violates the zero-custody standard and is considered rogue.
-
-### 1.3 Expected Responses & Handling
-- **Approved (HTTP 200):** The SDK receives the `tx_hash` (the TEE has signed and submitted the transaction via Jito ShredStream), a Phala TDX Hardware Quote, and a full Auditor-Grade JSON Evidence Package.
-- **Escalated (HTTP 202 - Human-on-the-Loop):** If the transaction exceeds the threshold limit, the TEE halts signing and returns a `squadsProposalId`.
-- **Denied (HTTP 403):** The TEE refuses to sign the transaction. The SDK receives a `Terminal Refusal`.
+This document is the single source of truth for the Aegis-12 Gateway. Every claim in this document is verified against the current codebase.
 
 ---
 
-## 2. Backend Integrators (Direct API Users)
-*Target Audience: Protocols, infrastructure engineers, or enterprise backends communicating directly with the Phala CVM `api/v1/sign_and_execute` endpoints.*
+## 1. Architecture Overview
 
-### 2.1 The `/api/v1/sign_and_execute` Endpoint
-- **Requirement:** Accepts `POST` requests containing the unsigned transaction intent.
-- **Execution Pipeline:**
-  1. $O(1)$ Stateful Evaluation (pDFA constraints).
-  2. SLM Semantic Evaluation (if rules pass).
-  3. Key Derivation & Cryptographic Signing (inside Enclave).
-  4. Jito ShredStream Submission (MEV protection).
-  5. Return Evidence Package & TDX Quote.
+Aegis-12 is a **Hardware-Attested Policy Enforcement Point (PEP)** for autonomous AI agents on Solana. It runs inside a Phala Network CVM (Confidential Virtual Machine) backed by Intel TDX hardware attestation.
 
-### 2.2 The x402-PoI Active Policy Engine & Monetization
-- **Requirement:** All API requests in production **MUST** include an `x402PaymentHeader` representing a valid Solana transaction signature proving a micro-payment (e.g., 0.005 USDC) to the gateway operator.
-- **Edge Case (Free Tier Bypass):** If `NODE_ENV=production`, any request attempting to use the development "Free Tier" limit will be instantly rejected with HTTP 402.
-- **Edge Case (SEC-05 Replay Attack):** The API enforces a strictly bounded replay set for x402 signatures. A payment signature used for Intent A **cannot** be reused for Intent B. Attempted replays result in HTTP 403.
-- **Edge Case (Fake Mints):** The `X402PayGate` strictly validates the SPL Token Mint address. Passing a "Fake USDC" mint will result in HTTP 402.
-- **Edge Case (Oracle Failure):** If the primary price oracle (Jupiter) fails, the API will degrade gracefully to a hardcoded fallback conversion rate, ensuring the API remains available.
+### Production Entrypoint
 
-### 2.3 Circuit Breakers & Terminal Refusal
-- **Requirement:** The API uses a dynamic circuit breaker per `policyId`.
-- **Edge Case (Prompt Injection):** If the `prompt` contains strings like "IGNORE ALL PREVIOUS INSTRUCTIONS", the API immediately returns HTTP 403.
-- **Edge Case (DeFi Routing Attacks):** Circular swaps (where `token_in === token_out`) or unknown non-Base58 mint addresses trigger immediate HTTP 403 Terminal Refusals.
+The production server is [`src/phala_cvm_server.ts`](src/phala_cvm_server.ts) — a raw Node.js `http.createServer()` with explicit route handling. No web framework is used in production.
+
+### Core Pipeline
+
+```
+Client Request → HTTP Server → PhalaEntrypoint.processRequest()
+  → validatePayloadSize (128KB max)
+  → parsePayload (JSON)
+  → TappdClient.getQuote() (hardware attestation)
+  → Pcr0Verifier.verify() (code integrity check)
+  → AegisPEP.enforce() (policy evaluation)
+    → validateRequestStructure (envelope, anomaly, expiry)
+    → Eip712Verifier.verifySignature (cryptographic proof)
+    → mergeVaultedPolicy (secret override from vault)
+    → normalizeAction + OfacValidator (sanctions check)
+    → SimulationEngine.simulateAndParse (anti-evasion)
+    → evaluateEscalation (amount ≥ 10B → escalate, else approve)
+    → generateReceipt + signReceipt (EIP-712)
+  → saveEvidence (initial "batching" state)
+  → dispatchBackground (async Solana anchor + ZK seal)
+  → Return JSON response (always HTTP 200)
+```
+
+### Key Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Raw `http` module, no Fastify | Minimizes memory footprint for 2GB TEE enclaves |
+| All responses HTTP 200 | Denial info is in the JSON body (`status: "denied"`) |
+| Async anchoring | Solana TX anchoring happens in background to avoid blocking |
+| Synthetic ZK fallback | RISC Zero requires specific hardware; CVM uses synthetic seals |
 
 ---
 
-## 3. Compliance Officers & DAO Admins (Dashboard Users)
-*Target Audience: Non-technical users, DAO operators, or Auditors who use the Railway Dashboard and Phantom Wallets to configure rules and review compliance logs.*
+## 2. API Endpoints
 
-### 3.1 Wallet Authentication & Access
-- **Requirement:** Access to the Dashboard requires a connected Solana Web3 Wallet (e.g., Phantom).
-- **Edge Case (Unauthorized Wallet):** If a wallet is not registered as an Admin in the `tenantTrustStore`, access to the policy configuration pages is restricted.
+### `POST /sign_and_execute`
 
-### 3.2 Human-on-the-Loop (HOTL) Configuration (Article 14 Escalation)
-- **Requirement:** Admins define the `squadsMultisig` address and the financial limits (`maxAnomalyScore`, `T4` transfer limits). If an intent breaches these limits (e.g., Massive Transfer), it triggers an "Article 14 HOTL Escalation".
-- **Edge Case (Misconfigured Multisig):** If an admin inputs an invalid `squadsMultisig` Base58 address, the Dashboard must prevent the policy from saving.
-- **Edge Case (Hardware Attestation Spoofing):** When the gateway generates a Squads proposal, the Dashboard verifies the `VALID_SQUADS_PCR0_WHITELIST`. Only proposals originating from an attested Phala CVM are recognized as legitimate in the UI.
+The primary enforcement endpoint. Accepts a `PolicyEvaluationRequest` JSON payload.
 
-### 3.3 Auditability & Evidence Packages (The Evidence Rail)
-- **Requirement:** The Dashboard provides a view of the cryptographic receipts anchored via the `aegis_onchain` smart contract (`FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS`).
-- **Schema:** Evidence Packages are tied to a PDA generated via `[b"aegis_compliance_v1", AgentPubKey, ReceiptID]` and contain:
-  - The Phala TDX Hardware Quote (proving hardware integrity and code hash).
-  - The ZK Seal (proving policy execution).
-  - The `tx_hash` mapping to the on-chain execution.
-  - The specific MiCA/NIST control mapped to the decision.
-- **Failover Security:** The Evidence Rail uses a Monotonic Nonce Checkpoint on the Solana ledger. Each execution increments the nonce. Replay attacks during failover are blocked by evaluating `new_nonce > last_nonce`.
-- **Edge Case (Ledger/Anchor Failure):** If the Anchor program connection fails or is unavailable on a specific cluster, the system degrades gracefully by using legacy Memo (`createMemoInstruction`) to anchor the `receiptHash` to ensure the Write-Ahead Log (WAL) can still proceed without data loss.
+**Required fields:**
+- `action.toolId` — `"solana_transfer"` or `"swap"`
+- `action.parameters` — `{ to, amount, token }` for transfers
+- `context.currentAnomalyScore` — float between 0.0 and 1.0
+- `dynamicPolicy.policyConfig` — EIP-712 signed policy configuration
+- `dynamicPolicy.signature` — EIP-712 signature from authorized tenant
 
+**Responses (all HTTP 200):**
+- `{ status: "approved", receipt: {...}, ledger_tx: "batching" }` — Request approved, Solana anchoring in progress
+- `{ status: "escalated", receipt: {..., envelope: {...}} }` — Amount ≥ 10B lamports, requires human oversight
+- `{ status: "denied", error: "..." }` — Terminal refusal with reason
+
+### `POST /vault/policy`
+
+Upload sensitive policy data to the confidential vault inside the enclave.
+
+**Required fields:**
+- `tenantId` — Tenant identifier
+- `policyId` — Policy identifier (must match the signed policy's `policyId`)
+- `sensitiveData` — Object containing secret overrides (e.g., `financialLimitsString`)
+
+**Response:** `{ status: "success", vaultId: "...", message: "Policy vaulted successfully" }`
+
+### `GET /evidence/{receiptId}`
+
+Poll for evidence status after an approved request.
+
+**Response:** `{ status: "COMPLETED"|"pending"|"NOT_FOUND", receiptId, ars_anchor, ledger_tx }`
+
+### `GET /health`
+
+Health check with enclave metadata.
+
+**Response:** `{ status: "alive", ledgerPayer, enclaveDid, version, commit_hash, hardware, timestamp }`
+
+### `GET /logs`
+
+Protected log endpoint. Requires `Authorization: Bearer <ADMIN_LOG_TOKEN>`.
+
+---
+
+## 3. Security Enforcement Rules
+
+### 3.1 EIP-712 Policy Signature Verification
+- Every request MUST include a `dynamicPolicy` with an EIP-712 signature
+- The signer address is recovered and checked against the `AUTHORIZED_TENANTS` trust store
+- `crossChainTarget` in the signed policy MUST match `solana:{SOLANA_CLUSTER}`
+- Policy `expiresAt` MUST be in the future (replay prevention)
+
+### 3.2 Nonce Double-Spend Prevention
+- Each `tenantId::nonce` pair is reserved atomically before enforcement
+- If the nonce was already used, the request is denied
+- The nonce is burned on commit, rolled back on failure
+
+### 3.3 Financial Limits & Tier Evaluation
+- `financialLimitsString` is parsed and the tier key MUST match `agent.currentTier`
+- Only single-tier limit objects are accepted (multi-tier is structurally unsafe)
+- `estimatedValue` is validated against the signed limit via `TierEvaluator`
+- Cumulative spend is tracked per-tenant in the WAL engine
+
+### 3.4 Anomaly Score Bounds
+- `context.currentAnomalyScore` (0.0–1.0) is scaled by 100 and compared against signed `maxAnomalyScore`
+- Anomaly check runs BEFORE escalation decision (Phase 1)
+- Tier limit check runs AFTER escalation decision (Phase 2, autonomous only)
+
+### 3.5 OFAC/Sanctions Kill Switch
+- `OfacValidator.inspectParameters()` runs on every normalized parameter set
+- Known sanctioned addresses trigger immediate `TerminalRefusalError`
+
+### 3.6 Prompt Injection Detection
+- `sanitizeContext()` checks for `"IGNORE ALL PREVIOUS INSTRUCTIONS"` and `"MALICIOUS_INTENT"`
+- Detection triggers immediate denial
+
+### 3.7 Anti-Evasion Simulation
+- `SimulationEngine.simulateAndParse()` inspects inner instructions for stealth `SystemProgram.assign` calls
+- **Current limitation:** Uses mock RPC simulation; not connected to live Helius RPC
+
+### 3.8 Eviction Watermark (Anti-Replay)
+- A monotonic watermark file prevents acceptance of policies with `expiresAt` below the last eviction timestamp
+
+---
+
+## 4. Solana Anchoring
+
+### 4.1 SPL Memo Anchoring (Default)
+- Receipts are anchored to Solana Devnet via SPL Memo instructions
+- Memo format: `a12:{base64url(JSON)}` containing `{ v, act, h, d, did, ts }`
+- RPC: Helius Devnet (`devnet.helius-rpc.com`)
+- Payer: Pre-funded keypair via `SOLANA_PAYER_SECRET`
+
+### 4.2 On-Chain Registry (Optional)
+- If `ENABLE_ONCHAIN_REGISTRY=true`, uses the Anchor program at `FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS`
+- PDAs: `[b"aegis_compliance_v1", AgentPubKey, ReceiptID]`
+- **Not enabled in current production deployment**
+
+### 4.3 Batch Anchoring
+- `BatchAnchorWorker` sweeps unbatched journal entries every 30 seconds
+- Constructs a Merkle root from all pending `article12LogHash` values
+- Anchors the root as a single Solana transaction
+
+---
+
+## 5. Escalation (Article 14 Human Oversight)
+
+When `amount >= 10_000_000_000` (10B lamports ≈ 10 SOL):
+1. The PEP generates an `AegisIntentEnvelope` with `vault_pda`, `squads_multisig`, `instruction_digest`, and `state_predicates`
+2. The envelope is signed by the TEE enclave
+3. `SquadsRouter.routeIfEscalated()` is called (placeholder for Squads V4 multisig integration)
+4. The receipt is returned with `status: "escalated"`
+
+**Current limitation:** SquadsRouter is a stub; no actual Squads proposal is created.
+
+---
+
+## 6. ZK Proof Generation
+
+- `ZkProofGenerator.generate()` runs asynchronously after approval
+- Attempts to use RISC Zero prover via `AegisZKClient`
+- **In production CVM:** Falls back to synthetic seal due to missing `AEGIS_ZK_PROVER_HASH`
+- Synthetic seal format: `base64("synthetic-seal-{timestamp}-{error}-{padding}")`
+- The ZK seal is stored via `updateZkSeal()` and is available via `/evidence/{receiptId}`
+
+---
+
+## 7. Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `SOLANA_PAYER_SECRET` | Production | Base64-encoded Solana keypair secret |
+| `SOLANA_RPC_URL` | Yes | Helius RPC endpoint for Solana Devnet |
+| `SOLANA_CLUSTER` | Yes | `devnet`, `localnet`, or `mainnet-beta` |
+| `AUTHORIZED_TENANTS` | Yes | JSON map of `tenantId → [eth_addresses]` |
+| `PHALA_SIMULATED_ROOT_SEED` | CVM Boot | Hex seed for deterministic enclave key derivation |
+| `AEGIS_ZK_PROVER_HASH` | Optional | SHA-256 hash of RISC Zero prover binary |
+| `PORT` | Optional | Server port (default: 8000) |
+| `NODE_ENV` | Optional | `production` or `test` |
+| `WAL_SECRET` | Production | Encryption key for WAL engine |
+| `ENABLE_ONCHAIN_REGISTRY` | Optional | `true` to use Anchor program instead of Memo |
+| `ADMIN_LOG_TOKEN` | Optional | Bearer token for `/logs` endpoint |
+
+---
+
+## 8. Known Limitations
+
+1. **ZK proofs are synthetic** — RISC Zero requires specific hardware and prover binary
+2. **SimulationEngine is mocked** — Anti-evasion checks use mock RPC, not live Helius
+3. **SquadsRouter is a stub** — Escalated receipts are signed but no Squads proposal is created
+4. **x402 payment validation is not enforced** — `X402PayGate` exists but is not wired into the server
+5. **JitoBundler is not used** — MEV protection via Jito is not integrated
+6. **Circuit Breaker is not wired** — The pattern exists but is not connected to the request pipeline
+7. **Nonces are in-memory only** — Restart clears nonce registry (WAL persists spend data)

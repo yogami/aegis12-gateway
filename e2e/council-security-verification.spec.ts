@@ -208,7 +208,10 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(200);
+        const body = await res.json();
+        expect(body.status, 'VULN-001 FAILED: Unverified agent.purpose bypassed financial limits').toBe('denied');
+        expect(body.error).toContain('exceeds signed Tier limit');
     });
 
     test('VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation', async ({ request }) => {
@@ -228,7 +231,10 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(200);
+        const body = await res.json();
+        expect(body.status, 'VULN-002 FAILED: Unsigned currentTier granted privilege escalation').toBe('denied');
+        expect(body.error).toContain('Tier mismatch');
     });
 
     test('VULN-003: Assert JSON Type Confusion on maxAnomalyScore Cannot Bypass Defenses', async ({ request }) => {
@@ -250,7 +256,9 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(200);
+        const body = await res.json();
+        expect(body.status, 'VULN-003 FAILED: Type confusion on maxAnomalyScore bypassed defenses').toBe('denied');
     });
 
     test('VULN-004: Assert Empty Limits String "{}" Causes Fail-Closed Denial', async ({ request }) => {
@@ -271,7 +279,9 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(200);
+        const body = await res.json();
+        expect(body.status, 'VULN-004 FAILED: Empty limits string did not cause fail-closed denial').toBe('denied');
     });
 
     test('VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS', async ({ request }) => {

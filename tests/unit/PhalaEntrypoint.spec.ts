@@ -1,17 +1,52 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AegisEnclave } from '../../src/application/PhalaEntrypoint';
 
+// Use vi.hoisted so these are available inside vi.mock factories
+const { mockEnforce, mockSignReceipt, mockGetEvidenceByReceiptId, mockUpdateZkSeal, mockSaveEvidence } = vi.hoisted(() => ({
+    mockEnforce: vi.fn(),
+    mockSignReceipt: vi.fn(),
+    mockGetEvidenceByReceiptId: vi.fn(),
+    mockUpdateZkSeal: vi.fn(),
+    mockSaveEvidence: vi.fn(),
+}));
+
 vi.mock('../../src/infrastructure/AegisSigner', () => ({
-    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', getPublicKeyHex: vi.fn().mockReturnValue('pubkey123'), sign: vi.fn().mockResolvedValue('mock-signature') }) }
+    AegisSigner: { create: vi.fn().mockResolvedValue({ enclaveDid: 'did:aegis:123', getPublicKeyHex: vi.fn().mockReturnValue('pubkey123'), sign: vi.fn().mockResolvedValue('mock-signature'), signEIP712: vi.fn().mockResolvedValue('mock-eip712-sig'), verify: vi.fn().mockReturnValue(true) }) }
 }));
 
 vi.mock('../../src/application/PepFactory', () => ({
     PepFactory: { 
         createPep: vi.fn().mockResolvedValue({ 
-            pep: { getEvidenceByReceiptId: vi.fn(), enforce: vi.fn(), updateZkSeal: vi.fn(), signReceipt: vi.fn() }, 
-            journal: { getUnbatchedEntries: vi.fn().mockReturnValue([]) } 
+            pep: { 
+                enforce: mockEnforce,
+                signReceipt: mockSignReceipt,
+                getEvidenceByReceiptId: mockGetEvidenceByReceiptId, 
+                updateZkSeal: mockUpdateZkSeal,
+                saveEvidence: mockSaveEvidence,
+            }, 
+            journal: { getUnbatchedEntries: vi.fn().mockReturnValue([]), appendSync: vi.fn().mockReturnValue(true) } 
         }) 
     }
+}));
+
+vi.mock('../../src/infrastructure/LedgerAnchorFactory', () => ({
+    LedgerAnchorFactory: { create: vi.fn().mockResolvedValue({ anchorReceipt: vi.fn().mockResolvedValue({ txSignature: 'mock-tx' }), getPayerPublicKey: vi.fn().mockReturnValue('MockPayer'), anchorZkProof: vi.fn() }) }
+}));
+
+vi.mock('../../src/infrastructure/TappdClient', () => ({
+    TappdClient: class MockTappdClient { getQuote() { return Promise.resolve('mock-attestation'); } }
+}));
+
+vi.mock('../../src/application/Pcr0Verifier', () => ({
+    Pcr0Verifier: { verify: vi.fn() }
+}));
+
+vi.mock('../../src/infrastructure/SquadsRouter', () => ({
+    SquadsRouter: { routeIfEscalated: vi.fn() }
+}));
+
+vi.mock('../../src/application/ZkProofGenerator', () => ({
+    ZkProofGenerator: { generate: vi.fn().mockResolvedValue(undefined) }
 }));
 
 let enclave: AegisEnclave;
@@ -19,6 +54,7 @@ let enclave: AegisEnclave;
     beforeEach(() => {
         AegisEnclave.reset();
         enclave = AegisEnclave.getInstance();
+        vi.clearAllMocks();
     });
 
     it('denies payload exceeding 128KB', async () => {
@@ -37,19 +73,20 @@ let enclave: AegisEnclave;
     });
 
     it('processes valid request successfully', async () => {
+        mockEnforce.mockResolvedValue({
+            decision: 'approved',
+            receiptId: 'test_receipt',
+            authorizationNonce: 'nonce',
+            actionId: 'act-nonce'
+        });
+        mockSignReceipt.mockResolvedValue(undefined);
+        mockSaveEvidence.mockResolvedValue(undefined);
+
         const payload = JSON.stringify({
             agent: { did: "did:aegis:test" },
             action: { toolId: "test_tool" }
         });
         
-        // Mock enforce to return an approved receipt
-        const { PepFactory } = await import('../../src/application/PepFactory');
-        const mockEnforce = PepFactory.createPep().then((res: any) => res.pep.enforce.mockResolvedValue({
-            decision: 'approved',
-            receiptId: 'test_receipt',
-            authorizationNonce: 'nonce'
-        }));
-
         const resStr = await enclave.processRequest(payload);
         const res = JSON.parse(resStr);
         expect(res.status).toBe('approved');
@@ -58,19 +95,20 @@ let enclave: AegisEnclave;
     });
 
     it('signs escalated receipt envelope', async () => {
+        mockEnforce.mockResolvedValue({
+            decision: 'escalated',
+            receiptId: 'test_receipt',
+            authorizationNonce: 'nonce',
+            actionId: 'act-nonce',
+            envelope: { vault_pda: "test_pda" }
+        });
+        mockSignReceipt.mockResolvedValue(undefined);
+        mockSaveEvidence.mockResolvedValue(undefined);
+
         const payload = JSON.stringify({
             agent: { did: "did:aegis:test" },
             action: { toolId: "test_tool" }
         });
-        
-        // Mock enforce to return an escalated receipt
-        const { PepFactory } = await import('../../src/application/PepFactory');
-        const mockEnforce = PepFactory.createPep().then((res: any) => res.pep.enforce.mockResolvedValue({
-            decision: 'escalated',
-            receiptId: 'test_receipt',
-            authorizationNonce: 'nonce',
-            envelope: { vault_pda: "test_pda" }
-        }));
 
         const resStr = await enclave.processRequest(payload);
         const res = JSON.parse(resStr);
@@ -79,11 +117,10 @@ let enclave: AegisEnclave;
     });
 
     it('fetches evidence status successfully', async () => {
-        const { PepFactory } = await import('../../src/application/PepFactory');
-        const mockGetEvidence = PepFactory.createPep().then((res: any) => res.pep.getEvidenceByReceiptId.mockResolvedValue({
+        mockGetEvidenceByReceiptId.mockResolvedValue({
             ars_anchor: 'anchor_hash',
             ledger_tx: 'tx_hash'
-        }));
+        });
 
         const statusStr = await enclave.getEvidenceStatus('test_receipt');
         const status = JSON.parse(statusStr);
@@ -93,8 +130,7 @@ let enclave: AegisEnclave;
     });
 
     it('returns NOT_FOUND if evidence does not exist', async () => {
-        const { PepFactory } = await import('../../src/application/PepFactory');
-        const mockGetEvidence = PepFactory.createPep().then((res: any) => res.pep.getEvidenceByReceiptId.mockResolvedValue(null));
+        mockGetEvidenceByReceiptId.mockResolvedValue(null);
 
         const statusStr = await enclave.getEvidenceStatus('missing_receipt');
         const status = JSON.parse(statusStr);
