@@ -33,6 +33,34 @@ async function ensureFunded(connection: Connection, payer: Keypair): Promise<voi
     }
 }
 
+async function tryCreateMultisigAttempt(
+    connection: Connection,
+    payer: Keypair,
+    treasury: PublicKey,
+    attempt: number
+): Promise<PublicKey> {
+    const createKey = Keypair.generate();
+    const [multisigPda] = sqds.getMultisigPda({ createKey: createKey.publicKey });
+    console.log(`[Test] Creating Multisig (Attempt ${attempt}/3): ${multisigPda.toBase58()}`);
+
+    const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+    const signature = await sqds.rpc.multisigCreateV2({
+        connection, createKey, creator: payer, multisigPda,
+        configAuthority: null, treasury, timeLock: 0,
+        members: [{ key: payer.publicKey, permissions: sqds.types.Permissions.all() }],
+        threshold: 1, rentCollector: null,
+        sendOptions: { skipPreflight: false, maxRetries: 5 }
+    });
+
+    const res = await connection.confirmTransaction({
+        signature, blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+    }, 'confirmed');
+    
+    if (res.value.err) throw new Error(`On-chain error: ${JSON.stringify(res.value.err)}`);
+    return multisigPda;
+}
+
 /** Creates a fresh Squads V4 Multisig on Devnet. */
 async function createTestMultisig(
     connection: Connection,
@@ -41,34 +69,9 @@ async function createTestMultisig(
     const [programConfigPda] = sqds.getProgramConfigPda({ programId: sqds.PROGRAM_ID });
     const programConfig = await sqds.generated.ProgramConfig.fromAccountAddress(connection, programConfigPda);
 
-    let multisigPda: PublicKey;
     for (let i = 0; i < 3; i++) {
         try {
-            const createKey = Keypair.generate();
-            [multisigPda] = sqds.getMultisigPda({ createKey: createKey.publicKey });
-            console.log(`[Test] Creating Multisig (Attempt ${i + 1}/3): ${multisigPda.toBase58()}`);
-
-            const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-            const signature = await sqds.rpc.multisigCreateV2({
-                connection, createKey, creator: payer, multisigPda,
-                configAuthority: null, treasury: programConfig.treasury,
-                timeLock: 0,
-                members: [{ key: payer.publicKey, permissions: sqds.types.Permissions.all() }],
-                threshold: 1, rentCollector: null,
-                sendOptions: { skipPreflight: false, maxRetries: 5 }
-            });
-
-            const res = await connection.confirmTransaction({
-                signature,
-                blockhash: latestBlockhash.blockhash,
-                lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-            }, 'confirmed');
-            
-            if (res.value.err) {
-                console.warn(`[Test] Multisig creation error on-chain: ${JSON.stringify(res.value.err)}`);
-                continue;
-            }
-            
+            const multisigPda = await tryCreateMultisigAttempt(connection, payer, programConfig.treasury, i + 1);
             console.log(`[Test] Multisig created. Waiting for RPC sync...`);
             await new Promise(r => setTimeout(r, 3000));
             return multisigPda;
