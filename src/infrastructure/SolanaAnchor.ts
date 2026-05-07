@@ -77,7 +77,7 @@ export class SolanaAnchor implements ILedgerAnchor {
 
     public async anchorReceipt(
         receipt: any, 
-        decision: 'approved' | 'denied',
+        decision: 'approved' | 'denied' | 'escalated',
         enclaveDid: string
     ): Promise<AnchorResult> {
         await this.fundPayerIfEmpty();

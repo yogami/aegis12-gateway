@@ -17,7 +17,7 @@ export class MantleAnchor implements ILedgerAnchor {
 
     public async anchorReceipt(
         receipt: AegisComplianceReceipt, 
-        decision: 'approved' | 'denied',
+        decision: 'approved' | 'denied' | 'escalated',
         enclaveDid: string
     ): Promise<AnchorResult> {
         const receiptHash = JsonUtils.computeReceiptHash(receipt);

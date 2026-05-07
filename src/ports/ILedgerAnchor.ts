@@ -32,7 +32,7 @@ export interface ILedgerAnchor {
      */
     anchorReceipt(
         receipt: AegisComplianceReceipt, 
-        decision: 'approved' | 'denied', 
+        decision: 'approved' | 'denied' | 'escalated', 
         enclaveDid: string
     ): Promise<AnchorResult>;
 

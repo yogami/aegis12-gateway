@@ -196,7 +196,7 @@ export class AegisEnclave {
         return { attestation, pcr0 };
     }
 
-    private async anchorToLedger(receipt: any, decision: 'approved' | 'denied'): Promise<void> {
+    private async anchorToLedger(receipt: any, decision: 'approved' | 'denied' | 'escalated'): Promise<void> {
         const ledgerReceipt = await this._anchor!.anchorReceipt(receipt, decision, this._signer!.enclaveDid);
         if (decision === 'approved') await this._pep!.saveEvidence(receipt, ledgerReceipt.txSignature);
     }
