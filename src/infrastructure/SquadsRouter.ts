@@ -79,7 +79,7 @@ export class SquadsRouter {
             transactionIndex: txIndex, creator: payer.publicKey,
             vaultIndex: 0, ephemeralSigners: 0, transactionMessage,
             memo: "Aegis-12 Vault Transaction",
-            sendOptions: { skipPreflight: true }
+            sendOptions: { skipPreflight: false, maxRetries: 5 }
         });
 
         const txRes = await connection.confirmTransaction({
@@ -109,7 +109,7 @@ export class SquadsRouter {
         const signature = await sqds.rpc.proposalCreate({
             connection, creator: payer, multisigPda,
             transactionIndex: txIndex, feePayer: payer,
-            sendOptions: { skipPreflight: true }
+            sendOptions: { skipPreflight: false, maxRetries: 5 }
         });
 
         const res = await connection.confirmTransaction({

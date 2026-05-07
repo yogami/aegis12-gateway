@@ -38,34 +38,46 @@ async function createTestMultisig(
     connection: Connection,
     payer: Keypair
 ): Promise<PublicKey> {
-    const createKey = Keypair.generate();
-    const [multisigPda] = sqds.getMultisigPda({ createKey: createKey.publicKey });
-    console.log(`[Test] Creating Multisig: ${multisigPda.toBase58()}`);
-
     const [programConfigPda] = sqds.getProgramConfigPda({ programId: sqds.PROGRAM_ID });
     const programConfig = await sqds.generated.ProgramConfig.fromAccountAddress(connection, programConfigPda);
 
-    const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-    const signature = await sqds.rpc.multisigCreateV2({
-        connection, createKey, creator: payer, multisigPda,
-        configAuthority: null, treasury: programConfig.treasury,
-        timeLock: 0,
-        members: [{ key: payer.publicKey, permissions: sqds.types.Permissions.all() }],
-        threshold: 1, rentCollector: null,
-        sendOptions: { skipPreflight: true }
-    });
+    let multisigPda: PublicKey;
+    for (let i = 0; i < 3; i++) {
+        try {
+            const createKey = Keypair.generate();
+            [multisigPda] = sqds.getMultisigPda({ createKey: createKey.publicKey });
+            console.log(`[Test] Creating Multisig (Attempt ${i + 1}/3): ${multisigPda.toBase58()}`);
 
-    const res = await connection.confirmTransaction({
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-    }, 'confirmed');
-    if (res.value.err) {
-        throw new Error(`Multisig creation failed: ${JSON.stringify(res.value.err)}`);
+            const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+            const signature = await sqds.rpc.multisigCreateV2({
+                connection, createKey, creator: payer, multisigPda,
+                configAuthority: null, treasury: programConfig.treasury,
+                timeLock: 0,
+                members: [{ key: payer.publicKey, permissions: sqds.types.Permissions.all() }],
+                threshold: 1, rentCollector: null,
+                sendOptions: { skipPreflight: false, maxRetries: 5 }
+            });
+
+            const res = await connection.confirmTransaction({
+                signature,
+                blockhash: latestBlockhash.blockhash,
+                lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+            }, 'confirmed');
+            
+            if (res.value.err) {
+                console.warn(`[Test] Multisig creation error on-chain: ${JSON.stringify(res.value.err)}`);
+                continue;
+            }
+            
+            console.log(`[Test] Multisig created. Waiting for RPC sync...`);
+            await new Promise(r => setTimeout(r, 3000));
+            return multisigPda;
+        } catch (e: any) {
+            console.warn(`[Test] Multisig creation attempt ${i + 1} failed: ${e.message}`);
+            if (i === 2) throw e;
+        }
     }
-    console.log(`[Test] Multisig created. Waiting for RPC sync...`);
-    await new Promise(r => setTimeout(r, 3000));
-    return multisigPda;
+    throw new Error('Failed to create multisig after 3 attempts');
 }
 
 /** Builds a test compliance receipt targeting the given multisig. */
