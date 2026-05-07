@@ -36,8 +36,8 @@ async function verify() {
         policyId: "p-audit-001", tenantId: "tenant-001", version: "1.0.0", chainId: 1399811149,
         crossChainTarget: "solana:devnet", maxAnomalyScore: 100, financialLimitsString: "{\"T4\":1000000}",
         expiresAt: Math.floor(Date.now() / 1000) + 3600, nonce: nonce,
-        vaultPda: "SubstanceVault_Default",
-        squadsMultisig: "SubstanceSquads_Default",
+        vaultPda: "DkrgGxr4YfCDtMFhN1tGUix4ZLjMGBMrWbHc74P2fXvL",
+        squadsMultisig: "DkrgGxr4YfCDtMFhN1tGUix4ZLjMGBMrWbHc74P2fXvL",
         allowedProgramIds: ["11111111111111111111111111111111"]
     };
 
