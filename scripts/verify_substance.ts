@@ -1,4 +1,4 @@
-import { Connection, clusterApiUrl } from '@solana/web3.js';
+import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { ethers } from 'ethers';
 
 /**
@@ -172,6 +172,31 @@ async function verify() {
             console.error(`[Auditor] ❌ SUBSTANCE FAILURE: HOTL scenario returned status ${hotlBody.status} instead of escalated/denied.`);
             process.exit(1);
         }
+
+        const squadsProposalId = hotlBody.receipt?.squadsProposalId;
+        if (!squadsProposalId) {
+            console.error(`[Auditor] ❌ SUBSTANCE FAILURE: HOTL scenario did not return a squadsProposalId.`);
+            process.exit(1);
+        }
+
+        console.log(`[Auditor] 🏛️ Squads Proposal returned: ${squadsProposalId}`);
+        console.log(`[Auditor] Fetching Squads Proposal from Devnet to verify substance...`);
+        
+        const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29', 'confirmed');
+        let proposalAccountInfo = null;
+        let retries = 10;
+        while (!proposalAccountInfo && retries > 0) {
+            await new Promise(r => setTimeout(r, 5000));
+            proposalAccountInfo = await connection.getAccountInfo(new PublicKey(squadsProposalId), 'confirmed');
+            retries--;
+        }
+
+        if (!proposalAccountInfo) {
+            console.error(`[Auditor] ❌ SUBSTANCE FAILURE: Squads Proposal account does not exist on Devnet.`);
+            process.exit(1);
+        }
+        
+        console.log(`[Auditor] ✅ Squads Proposal verified cryptographically on Solana Devnet.`);
     }
     
     console.log(`[Auditor] ✅ Article 14 HOTL Enforcement Verified.`);

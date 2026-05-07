@@ -9,6 +9,6 @@ services:
       - NODE_ENV=production
       - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
       - AEGIS_ZK_PROVER_HASH=aa1768de5e8cd154e33603d41e724a8378ae764cc93af09c52736197b5933850
-      - SOLANA_PAYER_SECRET=Mm41pnRR9mtL1EGyCFgbtopsT+xTbl7EbPk0Gv7aT9W5640EhSQWzAqaWT9HnHLfZY+RsERhYxk4hoz2rbtJKw==
+      - SOLANA_PAYER_SECRET=${SOLANA_PAYER_SECRET:?SOLANA_PAYER_SECRET must be set}
     volumes:
       - /var/run/dstack.sock:/var/run/dstack.sock

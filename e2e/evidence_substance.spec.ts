@@ -189,3 +189,52 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         await validateOnChainTransaction(connection, solanaTx, receipt, body);
         console.log(`[Substance] ✅ SUBSTANCE VERIFIED: Receipt is anchored to Solana with matching cryptographic metadata.`);
     });
+
+async function sendEscalationRequest(payload: any): Promise<any> {
+    const res = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8080'}/sign_and_execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const body = await res.json();
+    expect(res.status, `Request failed: ${JSON.stringify(body)}`).toBe(200);
+    expect(body.status, "Status must be escalated").toBe('escalated');
+    return body;
+}
+
+async function pollForOnChainAccount(publicKeyStr: string): Promise<any> {
+    let accountInfo = null;
+    let retries = 10;
+    while (!accountInfo && retries > 0) {
+        await new Promise(r => setTimeout(r, 5000));
+        accountInfo = await connection.getAccountInfo(new PublicKey(publicKeyStr), 'confirmed');
+        retries--;
+    }
+    return accountInfo;
+}
+
+test('EVIDENCE-SUBSTANCE-002: Massive Transfer Triggers HOTL Escalation and Returns Authentic Squads Proposal', async ({ request }) => {
+    test.setTimeout(300000);
+    const nonce = "hotl-" + Date.now();
+    const policyConfig = getPolicyConfig(nonce);
+    const signature = await e2eWallet._signTypedData(eip712Domain, eip712Types, policyConfig);
+    const payload = getPayload(nonce, policyConfig, e2eWallet, signature);
+    payload.action.parameters.amount = 50000000000;
+
+    console.log(`[Substance] Uploading Vault Policy for HOTL test: ${nonce}...`);
+    await uploadVaultPolicy(policyConfig);
+
+    console.log(`[Substance] Sending HOTL enforcement request...`);
+    const body = await sendEscalationRequest(payload);
+
+    const receipt = body.receipt;
+    expect(receipt, "Receipt must exist").toBeDefined();
+    expect(receipt.squadsProposalId, "Squads Proposal ID must be returned").toBeDefined();
+    console.log(`[Substance] 🏛️ Proposal PDA: ${receipt.squadsProposalId}`);
+
+    console.log(`[Substance] Verifying Proposal on Devnet...`);
+    const proposalAccountInfo = await pollForOnChainAccount(receipt.squadsProposalId);
+    expect(proposalAccountInfo, "Squads Proposal must exist on-chain (No Mocks)").not.toBeNull();
+    console.log(`[Substance] ✅ SUBSTANCE VERIFIED: Squads Proposal anchored to Devnet.`);
+});
+

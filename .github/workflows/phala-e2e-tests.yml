@@ -67,6 +67,7 @@ jobs:
         env:
           PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
           SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
         run: |
           export TEST_API_URL="$PHALA_CLOUD_URL"
           npx playwright test e2e/evidence_substance.spec.ts

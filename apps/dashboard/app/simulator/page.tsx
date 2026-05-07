@@ -108,12 +108,13 @@ export default function VaultBotSimulator() {
             ]);
           } else if (result.status === 'escalated' || scenario === 'hotl_escalation') {
             setSimulationStatus('blocked'); // Blocked from instant execution
+            const proposalId = result.receipt?.squadsProposalId || 'mock_proposal_pda';
             setLogs(prev => [
                 ...prev,
                 '🚨 INTENT INTERCEPTED: Massive transfer exceeds HOTL thresholds!',
                 '✅ ACTIVE DEFENSE: Transaction rerouted to Squads V4 Multisig.',
                 `🔗 Envelope Digest: ${result.receipt?.envelope?.instruction_digest || 'mock_digest_hash'}`,
-                `🔗 Valid Until Slot: ${result.receipt?.envelope?.state_predicates?.valid_until_slot || 'mock_slot'}`
+                `🏛️ Squads Proposal ID: ${proposalId}`
             ]);
           } else {
             setSimulationStatus('blocked');
@@ -209,7 +210,7 @@ export default function VaultBotSimulator() {
             '🚨 INTENT INTERCEPTED: Massive transfer exceeds HOTL thresholds!',
             '✅ ACTIVE DEFENSE: Transaction rerouted to Squads V4 Multisig (Fallback Mode).',
             '🔗 Envelope Digest: mock_digest_hash',
-            '🔗 Valid Until Slot: mock_slot'
+            '🏛️ Squads Proposal ID: mock_proposal_pda'
           ]);
         } else {
           setSimulationStatus('blocked');
@@ -276,10 +277,10 @@ export default function VaultBotSimulator() {
                     Treasury Drain Attack [Phase 2]
                   </button>
                   <button 
-                    disabled
-                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
+                    onClick={() => setScenario('hotl_escalation')}
+                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'hotl_escalation' ? 'bg-orange-900/30 border-orange-500 text-orange-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                   >
-                    Massive Transfer (HOTL) [Phase 2]
+                    Massive Transfer (HOTL)
                   </button>
                 </div>
               </div>

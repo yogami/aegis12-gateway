@@ -107,12 +107,12 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await expect(page.locator('text=zkSeal')).toBeVisible({ timeout: 150000 });
     await expect(page.locator('text=ZK-Seal Cryptographically Anchored to Solana')).toBeVisible({ timeout: 150000 });
   });
-  test.skip('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
+  test('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
     test.setTimeout(150000); // Allow up to 150 seconds for TEE processing
     await page.goto(`/simulator`);
 
     // Select the HOTL Trigger scenario
-    const hotlBtn = page.locator('button', { hasText: 'Massive Transfer (HOTL Trigger)' });
+    const hotlBtn = page.locator('button', { hasText: 'Massive Transfer (HOTL)' });
     await hotlBtn.click();
 
     const requestPromise = page.waitForRequest(request => request.url().includes('/api/sign_and_execute') && request.method() === 'POST');
@@ -129,6 +129,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     // Wait for the HOTL Escalation logs to appear
     await expect(page.locator('text=Massive transfer exceeds HOTL thresholds')).toBeVisible({ timeout: 150000 });
     await expect(page.locator('text=Transaction rerouted to Squads V4 Multisig')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=Squads Proposal ID')).toBeVisible({ timeout: 150000 });
   });
 
   test('verifies Confidential Vault Payment successfully overrides dynamic limits', async ({ page }) => {

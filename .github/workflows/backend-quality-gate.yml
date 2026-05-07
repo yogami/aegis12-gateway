@@ -26,6 +26,9 @@ jobs:
         run: npm run lint
         
       - name: Highest Test Coverage
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
         run: npm run test
         
       - name: Verify Anchor Program (Aegis Attestation Verifier)

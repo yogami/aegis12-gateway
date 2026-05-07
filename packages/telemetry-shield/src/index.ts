@@ -95,14 +95,14 @@ export class AegisShield {
                                 const targetPool = ACTIVE_CORRELATED_POOLS[i % ACTIVE_CORRELATED_POOLS.length];
                                 await chaffConnection.getAccountInfo(targetPool);
                             }
-                        } catch(e) {}
+                        } catch { /* chaff call intentionally swallowed */ }
                         res(true);
                     }, jitterMs);
                 });
             });
             await Promise.all(promises);
             chaffLatency = performance.now() - chaffT0;
-        } catch (e) {}
+        } catch { /* chaff batch failure is non-critical */ }
 
         return { execution_ms: chaffLatency.toFixed(2), calls: dynamicCallCount };
     }

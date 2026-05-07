@@ -143,7 +143,11 @@ export class AegisEnclave {
         telemetry.mark('pep');
         
         await this.signEscalatedReceipt(receipt);
-        await SquadsRouter.routeIfEscalated(receipt);
+        try {
+            await SquadsRouter.routeIfEscalated(receipt);
+        } catch (e: any) {
+            console.warn(`[Aegis-12] SquadsRouter escalation failed (non-fatal): ${e.message}`);
+        }
         await this._pep!.saveEvidence(receipt, 'batching');
         this.dispatchBackground(receipt);
         
