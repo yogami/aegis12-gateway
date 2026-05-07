@@ -240,3 +240,4 @@ export class AegisEnclave {
 export const enclave = AegisEnclave.getInstance();
 export const phalaEntrypoint = (payload: string) => enclave.processRequest(payload);
 export default phalaEntrypoint;
+// Trigger CVM deployment: Vault Integration
