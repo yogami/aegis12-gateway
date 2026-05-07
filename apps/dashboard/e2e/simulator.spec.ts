@@ -103,6 +103,9 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     // Expect dynamic properties rather than hardcoded POL_SAFE_01 string since we don't mock the inner contents anymore
     await expect(page.locator('text=ledgerTx')).toBeVisible({ timeout: 150000 });
     await expect(page.locator('text=x402Header')).toBeVisible({ timeout: 150000 });
+    // Expect the new ZK Seal verification UI
+    await expect(page.locator('text=zkSeal')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=ZK-Seal Cryptographically Anchored to Solana')).toBeVisible({ timeout: 150000 });
   });
   test.skip('should escalate a massive transfer and return a Squads V4 envelope', async ({ page }) => {
     test.setTimeout(150000); // Allow up to 150 seconds for TEE processing

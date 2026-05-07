@@ -332,12 +332,19 @@ export default function VaultBotSimulator() {
 
             {/* Verdict Banner */}
             {simulationStatus === 'approved' && (
-              <div className="bg-green-900/30 border border-green-500 text-green-400 p-4 rounded-lg flex items-center justify-between">
-                <span className="font-bold">✓ Transaction Approved</span>
-                {ledgerTx ? (
-                    <a href={`https://explorer.solana.com/tx/${ledgerTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-sm underline hover:text-green-300">View On-Chain Receipt</a>
-                ) : (
-                    <span className="text-sm text-green-600 animate-pulse">Anchoring...</span>
+              <div className="bg-green-900/30 border border-green-500 text-green-400 p-4 rounded-lg flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold">✓ Transaction Approved</span>
+                  {ledgerTx ? (
+                      <a href={`https://explorer.solana.com/tx/${ledgerTx}?cluster=devnet`} target="_blank" rel="noopener noreferrer" className="text-sm underline hover:text-green-300">View On-Chain Receipt</a>
+                  ) : (
+                      <span className="text-sm text-green-600 animate-pulse">Anchoring...</span>
+                  )}
+                </div>
+                {ledgerTx && (
+                  <div className="text-sm text-green-500 mt-2 p-2 border border-green-800 rounded bg-black">
+                    <span className="font-mono">✓ ZK-Seal Cryptographically Anchored to Solana Devnet</span>
+                  </div>
                 )}
               </div>
             )}
