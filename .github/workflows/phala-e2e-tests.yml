@@ -26,7 +26,7 @@ jobs:
 
       - name: Wait for Phala Deployment
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+          PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
         run: |
           echo "Waiting for Phala CVM Deployment to propagate..."
           MAX_RETRIES=60
@@ -51,21 +51,21 @@ jobs:
 
       - name: E2E PEP Enforcement Suite
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+          PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
         run: |
           export TEST_API_URL="$PHALA_CLOUD_URL"
           npx vitest run tests/e2e/AegisPEP.e2e.spec.ts
 
       - name: Chaos Engineering Resilience Suite
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+          PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
         run: |
           export TEST_API_URL="$PHALA_CLOUD_URL"
           npx vitest run tests/chaos.spec.ts
 
       - name: Playwright Compliance Suite (Substance Audit)
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+          PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
           SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
         run: |
           export TEST_API_URL="$PHALA_CLOUD_URL"
@@ -73,7 +73,7 @@ jobs:
 
       - name: Master Venture Demo Sequence
         env:
-          PHALA_CLOUD_URL: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+          PHALA_CLOUD_URL: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
         run: |
           export TEST_API_URL="$PHALA_CLOUD_URL"
           npx tsx scripts/aegis12_venture_demo.ts
