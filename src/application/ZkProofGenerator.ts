@@ -12,29 +12,41 @@ export class ZkProofGenerator {
             const proof = await new AegisZKClient().generateProof(input);
             await pep.updateZkSeal(receipt.receiptId, proof);
 
-            // [Phase 2: ZK-Anchoring Moat]
-            // Push the generated proof to the Solana Ledger for immutable hardware attestation.
-            if (anchor && anchor.anchorZkProof) {
-                const sealStr = typeof proof.seal === 'string' ? proof.seal : Buffer.from(proof.seal).toString('base64');
-                await anchor.anchorZkProof(receipt.enclaveDid || 'unknown_agent', sealStr);
-                console.log(`[Aegis-12] 🛡️ ZK Proof anchored to Solana for agent ${receipt.enclaveDid}`);
-            }
+            await this.anchorProof(receipt, proof, anchor);
         } catch (e: any) {
             console.error(`ZK Error: ${e.message}`);
-            
-            // [PHASE 2.1 HACKATHON TEE OOM MITIGATION]
-            // If the RISC Zero prover OOM crashes inside the 2GB Phala CVM, we provide a synthetic 
-            // mathematical fallback seal so the pipeline doesn't hang.
-            if (e.message.includes('code null') || e.message.includes('code 137') || e.message.includes('OOM') || e.message.includes('timed out') || e.message.includes('strictly required')) {
-                console.warn("[Aegis-12] Fallback: Applying synthetic ZK-Seal due to CVM hardware constraints.");
-                await pep.updateZkSeal(receipt.receiptId, { 
-                    seal: Buffer.from(`synthetic-seal-${Date.now()}-${e.message}-${'0'.repeat(100)}`).toString('base64'), 
-                    vkey: "risc0:image:aegis_compliance_v1_0_1_synthetic" 
-                });
-            } else {
-                await pep.updateZkSeal(receipt.receiptId, { seal: "FAILED", vkey: e.message });
-            }
+            await this.handleGenerationError(receipt, pep, e.message);
         }
+    }
+
+    private static async anchorProof(receipt: AegisComplianceReceipt, proof: any, anchor?: ILedgerAnchor): Promise<void> {
+        if (!anchor || !anchor.anchorZkProof) return;
+        
+        const sealStr = typeof proof.seal === 'string' ? proof.seal : Buffer.from(proof.seal).toString('base64');
+        const enclaveDid = receipt.enclaveDid || 'unknown_agent';
+        
+        await anchor.anchorZkProof(enclaveDid, sealStr);
+        console.log(`[Aegis-12] 🛡️ ZK Proof anchored to Solana for agent ${enclaveDid}`);
+    }
+
+    private static async handleGenerationError(receipt: AegisComplianceReceipt, pep: any, msg: string): Promise<void> {
+        if (this.isConstraintError(msg)) {
+            console.warn("[Aegis-12] Fallback: Applying synthetic ZK-Seal due to CVM hardware constraints.");
+            await pep.updateZkSeal(receipt.receiptId, { 
+                seal: Buffer.from(`synthetic-seal-${Date.now()}-${msg}-${'0'.repeat(100)}`).toString('base64'), 
+                vkey: "risc0:image:aegis_compliance_v1_0_1_synthetic" 
+            });
+        } else {
+            await pep.updateZkSeal(receipt.receiptId, { seal: "FAILED", vkey: msg });
+        }
+    }
+
+    private static isConstraintError(msg: string): boolean {
+        return msg.includes('code null') || 
+               msg.includes('code 137') || 
+               msg.includes('OOM') || 
+               msg.includes('timed out') || 
+               msg.includes('strictly required');
     }
 
     private static validateAmount(amount: bigint): number {
