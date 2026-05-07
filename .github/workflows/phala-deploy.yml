@@ -45,6 +45,9 @@ jobs:
         run: npm run check-types && npx eslint src tests
 
       - name: Vitest Quality Gate
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+          SOLANA_RPC_URL: 'https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29'
         run: npx vitest run
 
 
