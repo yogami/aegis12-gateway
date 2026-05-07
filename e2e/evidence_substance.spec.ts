@@ -138,8 +138,8 @@ const getPolicyConfig = (nonce: string) => ({
     financialLimitsString: JSON.stringify({ T1: 1000000 }),
     expiresAt: Math.floor(Date.now() / 1000) + 3600,
     nonce: nonce,
-    vaultPda: "SubstanceVault_Default",
-    squadsMultisig: "SubstanceSquads_Default",
+    vaultPda: "DkrgGxr4YfCDtMFhN1tGUix4ZLjMGBMrWbHc74P2fXvL",
+    squadsMultisig: "DkrgGxr4YfCDtMFhN1tGUix4ZLjMGBMrWbHc74P2fXvL",
     allowedProgramIds: ["11111111111111111111111111111111"],
 });
 
