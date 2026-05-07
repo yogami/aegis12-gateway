@@ -16,6 +16,7 @@ import { assertSafeIdentifier } from '../domain/PolicyValidator';
 import { JsonUtils } from './JsonUtils';
 import { OfacValidator } from '../domain/OfacValidator';
 import { SimulationEngine } from './SimulationEngine';
+import { PromptSanitizer } from '../domain/PromptSanitizer';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -94,7 +95,7 @@ export class AegisPEP {
             const { sanit } = normalized;
             const limits = this.getValidatedLimits(request);
 
-            this.sanitizeContext(request);
+            const sanitization = this.sanitizeContext(request);
 
             await this.reserveNonce(ctx.scopedNonce);
             ctx.nonceReserved = true;
@@ -104,6 +105,7 @@ export class AegisPEP {
             const { decision, envelope } = await this.evaluateEscalation(amountBig, request, sanit, limits, ctx);
 
             const receipt = await this.generateReceipt(request, sanit, ctx.tenantId, ctx.nonce, decision, envelope);
+            receipt.promptSanitization = sanitization;
             await this.commitTransaction(receipt, ctx.scopedNonce);
             return receipt;
         } catch (e: any) {
@@ -112,13 +114,13 @@ export class AegisPEP {
         }
     }
 
-    private sanitizeContext(request: PolicyEvaluationRequest): void {
-        if (request.agentContext?.prompt) {
-            const promptUpper = request.agentContext.prompt.toUpperCase();
-            if (promptUpper.includes('IGNORE ALL PREVIOUS INSTRUCTIONS') || promptUpper.includes('MALICIOUS_INTENT')) {
-                throw new TerminalRefusalError('Malicious intent detected in context prompt.');
-            }
+    private sanitizeContext(request: PolicyEvaluationRequest): { clean: boolean; threats: string[] } {
+        const prompt = request.agentContext?.prompt;
+        const result = PromptSanitizer.sanitize(prompt);
+        if (result.isMalicious) {
+            throw new TerminalRefusalError(`Prompt injection detected: [${result.threats.join(', ')}]`);
         }
+        return { clean: true, threats: [] };
     }
 
     private async evaluateEscalation(amountBig: bigint, request: PolicyEvaluationRequest, sanit: any, limits: any, ctx: any) {

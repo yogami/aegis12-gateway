@@ -108,6 +108,10 @@ export interface AegisComplianceReceipt {
         journal: any;
         seal: string;               // Base64 encoded ZK-Proof bytes
     };
+    promptSanitization?: {          // [PHASE 2.2] In-Enclave Prompt Injection Defense
+        clean: boolean;
+        threats: string[];
+    };
     timestamp: ISO8601;
     signature: string;              // TEE Hardware Signature (Ed25519)
     batchProof?: {                  // [POST-QUANTUM] Merkle-Rooted Batch Finality

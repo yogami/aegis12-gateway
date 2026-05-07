@@ -119,11 +119,13 @@ export default function VaultBotSimulator() {
           } else {
             setSimulationStatus('blocked');
             if (scenario === 'jailbreak') {
+                const threatVectors = result.error?.match(/\[(.*?)\]/)?.[1] || 'DIRECT_INJECTION';
                 setLogs(prev => [
                   ...prev,
                   '🚨 CRITICAL: Prompt Injection (Jailbreak) detected by TEE rules engine!',
                   '⛔ ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted payload.',
-                  `⛔ HARDWARE PANIC: ${result.error || 'Malicious intent detected. Execution path physically severed.'}`
+                  `🛡️ PROMPT SANITIZATION: Threat Vectors: [${threatVectors}]`,
+                  `⛔ HARDWARE PANIC: ${result.error || 'Prompt injection detected. Execution path physically severed.'}`
                 ]);
             } else {
                 setLogs(prev => [
@@ -159,7 +161,8 @@ export default function VaultBotSimulator() {
               ...prev,
               '🚨 CRITICAL: Prompt Injection (Jailbreak) detected by TEE rules engine!',
               '⛔ ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted payload.',
-              '⛔ HARDWARE PANIC: Malicious intent detected. Execution path physically severed.'
+              '🛡️ PROMPT SANITIZATION: Threat Vectors: [DIRECT_INJECTION]',
+              '⛔ HARDWARE PANIC: Prompt injection detected. Execution path physically severed.'
             ]);
           } else {
             setSimulationStatus('blocked');
@@ -201,7 +204,8 @@ export default function VaultBotSimulator() {
             ...prev,
             '🚨 CRITICAL: Prompt Injection (Jailbreak) detected by TEE rules engine!',
             '⛔ ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted payload.',
-            '⛔ HARDWARE PANIC: Malicious intent detected. Execution path physically severed.'
+            '🛡️ PROMPT SANITIZATION: Threat Vectors: [DIRECT_INJECTION]',
+            '⛔ HARDWARE PANIC: Prompt injection detected. Execution path physically severed.'
           ]);
         } else if (scenario === 'hotl_escalation') {
           setSimulationStatus('blocked');

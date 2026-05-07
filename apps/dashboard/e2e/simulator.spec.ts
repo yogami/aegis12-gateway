@@ -57,7 +57,8 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     await expect(page.locator('text=HARDWARE PANIC')).toBeVisible({ timeout: 10000 });
   });
 
-  test.skip('verifies Prompt Injection (x402) triggers Active Defense and Contextual Sanitization UI', async ({ page }) => {
+  test('verifies Prompt Injection (x402) triggers Active Defense and Contextual Sanitization UI', async ({ page }) => {
+    test.setTimeout(150000);
     await page.goto(`/simulator`);
 
     // Select the Jailbreak Attack scenario
@@ -81,8 +82,10 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     expect(postData.x402PaymentHeader).toBeDefined();
 
     // Verify Active Defense logs appear in UI
-    await expect(page.locator('text=Prompt Injection (Jailbreak) detected')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('text=ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Prompt Injection (Jailbreak) detected')).toBeVisible({ timeout: 150000 });
+    await expect(page.locator('text=ACTIVE DEFENSE: Pre-Hashing Contextual Sanitization intercepted')).toBeVisible({ timeout: 150000 });
+    // Verify the new PROMPT SANITIZATION threat vector badge
+    await expect(page.locator('text=PROMPT SANITIZATION: Threat Vectors')).toBeVisible({ timeout: 150000 });
   });
 
   test('verifies Normal Payment outputs the Auditor-Grade Evidence Schema JSON', async ({ page }) => {

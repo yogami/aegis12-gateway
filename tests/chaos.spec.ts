@@ -448,7 +448,7 @@ let enclaveSigner: AegisSigner;
         };
 
         // Enforce MUST aggressively trap this BEFORE it attempts to parse or hash the gigabytes of data into the parametersHash
-        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Malicious intent detected/i);
+        await expect(aegisPEP.enforce(request)).rejects.toThrow(/Prompt injection detected/i);
     });
 
     /**
