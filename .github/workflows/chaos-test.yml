@@ -6,7 +6,7 @@ on:
       enclave_url:
         description: 'Enclave URL to test against'
         required: false
-        default: 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network'
+        default: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
   workflow_run:
     workflows: ["Phala CVM Deployment"]
     types:
@@ -23,7 +23,7 @@ jobs:
         run: npm install ethers tsx @solana/web3.js --legacy-peer-deps
       - name: Wait for API Warmup
         env:
-          ENCLAVE_URL: "${{ github.event.inputs.enclave_url || 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network' }}"
+          ENCLAVE_URL: "${{ github.event.inputs.enclave_url || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network' }}"
         run: |
           echo "Waiting for Phala CVM Deployment to propagate before Chaos testing..."
           MAX_RETRIES=60
@@ -40,4 +40,4 @@ jobs:
           done
 
       - name: Run Chaos OOM Bomb
-        run: npx tsx scripts/chaos_oom_bomb.ts "${{ github.event.inputs.enclave_url || 'https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network' }}"
+        run: npx tsx scripts/chaos_oom_bomb.ts "${{ github.event.inputs.enclave_url || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network' }}"
