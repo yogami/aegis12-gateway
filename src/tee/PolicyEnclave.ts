@@ -98,7 +98,7 @@ export class PolicyEnclave {
         const tx = new Transaction().add(oracleIx).add(transferIx);
 
         // 4. Execution
-        console.log(`[TEE Enclave] ⚡ Atomically submitting Oracle Proof + Trade to Solana...`);
+        console.log(`[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana...`);
         const startTime = Date.now();
         
         try {
