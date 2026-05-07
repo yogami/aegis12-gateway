@@ -468,15 +468,9 @@ let enclaveSigner: AegisSigner;
 
         // 2. Create a dynamic policy that asks for a tiny limit ($10) but references the Vault Policy
         const config: any = {
-            policyId: vaultPolicyId,
-            tenantId: tenantId,
-            version: "1.0.0",
-            chainId: 1399811149,
-            crossChainTarget: "solana:devnet",
-            maxAnomalyScore: 10,
-            financialLimits: { 'T4': 10 },
-            expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            nonce: "vault-override-nonce",
+            policyId: vaultPolicyId, tenantId: tenantId, version: "1.0.0", chainId: 1399811149,
+            crossChainTarget: "solana:devnet", maxAnomalyScore: 10, financialLimits: { 'T4': 10 },
+            expiresAt: Math.floor(Date.now() / 1000) + 3600, nonce: "vault-override-nonce",
             ...SQUADS_DEFAULTS
         };
         config.financialLimitsString = JSON.stringify(config.financialLimits);
