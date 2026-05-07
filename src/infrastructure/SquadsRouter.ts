@@ -67,9 +67,10 @@ export class SquadsRouter {
     ): Promise<string> {
         const memoStr = `Aegis-12 Escalation ID: ${receiptId}`;
         const instruction = createMemoInstruction(memoStr, [payer.publicKey]);
+        const latestBlockhash = await connection.getLatestBlockhash('confirmed');
         const transactionMessage = new TransactionMessage({
             payerKey: payer.publicKey,
-            recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+            recentBlockhash: latestBlockhash.blockhash,
             instructions: [instruction]
         });
 
@@ -81,7 +82,11 @@ export class SquadsRouter {
             sendOptions: { skipPreflight: true }
         });
 
-        const txRes = await connection.confirmTransaction(txSig, 'confirmed');
+        const txRes = await connection.confirmTransaction({
+            signature: txSig,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+        }, 'confirmed');
         if (txRes.value.err) {
             console.error(`[Aegis-12] Vault Transaction creation failed:`, txRes.value.err);
             throw new Error(`Vault Transaction failed: ${JSON.stringify(txRes.value.err)}`);
@@ -100,13 +105,18 @@ export class SquadsRouter {
     ): Promise<{ signature: string; proposalPda: PublicKey }> {
         const [proposalPda] = sqds.getProposalPda({ multisigPda, transactionIndex: txIndex });
 
+        const latestBlockhash = await connection.getLatestBlockhash('confirmed');
         const signature = await sqds.rpc.proposalCreate({
             connection, creator: payer, multisigPda,
             transactionIndex: txIndex, feePayer: payer,
             sendOptions: { skipPreflight: true }
         });
 
-        const res = await connection.confirmTransaction(signature, 'confirmed');
+        const res = await connection.confirmTransaction({
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+        }, 'confirmed');
         if (res.value.err) {
             console.error(`[Aegis-12] Proposal creation failed on-chain:`, res.value.err);
             throw new Error(`Proposal creation failed: ${JSON.stringify(res.value.err)}`);

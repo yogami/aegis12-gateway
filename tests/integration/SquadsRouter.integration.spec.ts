@@ -45,6 +45,7 @@ async function createTestMultisig(
     const [programConfigPda] = sqds.getProgramConfigPda({ programId: sqds.PROGRAM_ID });
     const programConfig = await sqds.generated.ProgramConfig.fromAccountAddress(connection, programConfigPda);
 
+    const latestBlockhash = await connection.getLatestBlockhash('confirmed');
     const signature = await sqds.rpc.multisigCreateV2({
         connection, createKey, creator: payer, multisigPda,
         configAuthority: null, treasury: programConfig.treasury,
@@ -54,7 +55,11 @@ async function createTestMultisig(
         sendOptions: { skipPreflight: true }
     });
 
-    const res = await connection.confirmTransaction(signature, 'confirmed');
+    const res = await connection.confirmTransaction({
+        signature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+    }, 'confirmed');
     if (res.value.err) {
         throw new Error(`Multisig creation failed: ${JSON.stringify(res.value.err)}`);
     }
