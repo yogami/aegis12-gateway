@@ -30,8 +30,8 @@ const eip712Types = {
     ]
 };
 
-const SOLANA_CLUSTER = 'devnet';
-const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
+const SOLANA_CLUSTER = 'localnet';
+const connection = new Connection(process.env.SOLANA_RPC_URL || 'http://localhost:8899', 'confirmed');
 
 async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
     let solanaTx = initialSolanaTx;
@@ -39,7 +39,7 @@ async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
     let pollingRetries = 150;
     while ((solanaTx === 'batching' || solanaTx === 'pending' || zkSeal === 'pending') && pollingRetries > 0) {
         await new Promise(r => setTimeout(r, 2000));
-        const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8000'}/evidence/${receiptId}`);
+        const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8080'}/evidence/${receiptId}`);
         if (evidenceRes.status === 200) {
             const evidenceBody = await evidenceRes.json();
             if (evidenceBody.ledger_tx) solanaTx = evidenceBody.ledger_tx;
@@ -115,12 +115,12 @@ const getPayload = (nonce: string, policyConfig: any, e2eWallet: any, signature:
 
 const getPolicyConfig = (nonce: string) => ({
     policyId: "POL_SUBSTANCE_001",
-    tenantId: "tenant-council",
+    tenantId: "tenant-e2e",
     version: "1.0.0",
     chainId: 1399811149,
-    crossChainTarget: "solana:devnet",
+    crossChainTarget: "solana:localnet",
     maxAnomalyScore: 100,
-    financialLimitsString: JSON.stringify({ T1: 1000 }),
+    financialLimitsString: JSON.stringify({ T1: 1000000 }),
     expiresAt: Math.floor(Date.now() / 1000) + 3600,
     nonce: nonce,
     vaultPda: "SubstanceVault_Default",
@@ -138,7 +138,7 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         const payload = getPayload(nonce, policyConfig, e2eWallet, signature);
 
         console.log(`[Substance] Uploading Confidential Vault Policy for actionId: ${nonce}...`);
-        const vaultRes = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8000'}/vault/policy`, {
+        const vaultRes = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8080'}/vault/policy`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -150,7 +150,7 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         expect(vaultRes.status, `Vault upload failed`).toBe(200);
 
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
-        const res = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8000'}/sign_and_execute`, {
+        const res = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8080'}/sign_and_execute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

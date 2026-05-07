@@ -59,7 +59,7 @@ export class SolanaAnchor implements ILedgerAnchor {
     private hasFundedPayer = false;
 
     private async fundPayerIfEmpty(): Promise<void> {
-        if (this.cluster !== 'devnet' || this.hasFundedPayer || process.env.SOLANA_PAYER_SECRET) return;
+        if ((this.cluster !== 'devnet' && this.cluster !== 'localnet') || this.hasFundedPayer || process.env.SOLANA_PAYER_SECRET) return;
         try {
             const balance = await this.connection.getBalance(this.payer.publicKey);
             if (balance < 10000000) { // Less than 0.01 SOL

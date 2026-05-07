@@ -118,7 +118,15 @@ export class AegisLocalStateStore implements IAegisStateStore {
 
     public async saveEvidence(receipt: AegisComplianceReceipt, ledgerTxHash?: string): Promise<void> {
         const txKey = ledgerTxHash || `pending-${receipt.receiptId}`;
-        const enrichedReceipt = { ...receipt, ledger_tx: ledgerTxHash };
+        const existingTxKey = this.evidenceByReceipt.get(receipt.receiptId);
+        let existingEvidence = {};
+        if (existingTxKey) {
+            existingEvidence = this.evidence.get(existingTxKey) || {};
+            if (existingTxKey !== txKey) {
+                this.evidence.delete(existingTxKey);
+            }
+        }
+        const enrichedReceipt = { ...existingEvidence, ...receipt, ledger_tx: ledgerTxHash };
         this.evidence.set(txKey, enrichedReceipt);
         this.evidenceByReceipt.set(receipt.receiptId, txKey);
         await this.persist();

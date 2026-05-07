@@ -144,6 +144,7 @@ export class AegisEnclave {
         
         await this.signEscalatedReceipt(receipt);
         await SquadsRouter.routeIfEscalated(receipt);
+        await this._pep!.saveEvidence(receipt, 'batching');
         this.dispatchBackground(receipt);
         
         return this.formatSuccess(receipt, metadata, telemetry);
@@ -180,6 +181,9 @@ export class AegisEnclave {
     }
 
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
+        this.anchorToLedger(receipt, receipt.decision).catch((err) => {
+            console.error(`[Aegis-12] ⚠️ Background Anchor FAILED for ${receipt.receiptId}: ${err.message}`);
+        });
         ZkProofGenerator.generate(receipt, receipt.authorizationNonce, this._pep, this._anchor).catch((err) => {
             console.error(`[Aegis-12] ⚠️ Background ZK FAILED for ${receipt.receiptId}: ${err.message}`);
         });
