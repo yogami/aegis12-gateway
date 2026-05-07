@@ -1,4 +1,6 @@
 use anchor_lang::prelude::*;
+use solana_program::sysvar::instructions::{load_instruction_at_checked, ID as IX_ID};
+use solana_program::ed25519_program::ID as ED25519_ID;
 
 declare_id!("5dPzR96rEawRNuB4ZViFu2we8JguC1eqMGi9HPbWDgiQ");
 
@@ -49,9 +51,38 @@ pub mod aegis12_registry {
         msg!("AEGIS-12 NONCE CHECKPOINT SYNCED: {} -> {}", checkpoint.tenant_id, checkpoint.last_nonce);
         Ok(())
     }
+
+    pub fn verify_intent(
+        ctx: Context<VerifyIntent>,
+        intent_hash: [u8; 32],
+        _tee_signature: [u8; 64],
+        enclave_pubkey: [u8; 32],
+    ) -> Result<()> {
+        // Enforce that the Ed25519 signature verification instruction was included in the transaction
+        let ix = load_instruction_at_checked(0, &ctx.accounts.ix_sysvar)?;
+        
+        require_keys_eq!(ix.program_id, ED25519_ID, AegisError::MissingSignatureInstruction);
+
+        let mut pubkey_found = false;
+        let mut msg_found = false;
+        
+        // Scan the instruction data to ensure our specific enclave pubkey and intent hash were passed to it
+        if ix.data.windows(32).any(|window| window == enclave_pubkey) {
+            pubkey_found = true;
+        }
+        if ix.data.windows(32).any(|window| window == intent_hash) {
+            msg_found = true;
+        }
+        
+        require!(pubkey_found && msg_found, AegisError::InvalidTeeAttestation);
+        
+        msg!("🛡️ AEGIS-12 CPI VERIFIED: Agent Intent {:?} cryptographically vetted by TEE Enclave.", intent_hash);
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
+#[instruction(receipt_id: String)]
 pub struct AttestCompliance<'info> {
     #[account(
         init,
@@ -86,6 +117,13 @@ pub struct CheckpointNonce<'info> {
     pub system_program: Program<'info, System>,
 }
 
+#[derive(Accounts)]
+pub struct VerifyIntent<'info> {
+    /// CHECK: Instructions sysvar checked via load_instruction_at_checked
+    #[account(address = solana_program::sysvar::instructions::ID)]
+    pub ix_sysvar: AccountInfo<'info>,
+}
+
 #[account]
 pub struct ComplianceEntry {
     pub agent_pubkey: Pubkey,
@@ -113,4 +151,8 @@ pub enum AegisError {
     InvalidHashSize,
     #[msg("The provided nonce is not greater than the checkpoint. Replay detected.")]
     InvalidNonceSequence,
+    #[msg("Missing Ed25519 verification instruction at index 0.")]
+    MissingSignatureInstruction,
+    #[msg("Invalid TEE attestation. The intent hash or enclave pubkey did not match the signature payload.")]
+    InvalidTeeAttestation,
 }

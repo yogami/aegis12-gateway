@@ -69,6 +69,27 @@ export class AegisRegistryClient {
     }
 
     /**
+     * Anchors the ZK Proof of Policy Execution to the Solana Ledger
+     * This provides the physical "Must-Have" hardware moat.
+     */
+    public async enforceExecutionIntent(agentId: string, zkReceiptProof: string): Promise<string> {
+        try {
+            const tx = await this.program.methods
+                .enforceExecutionIntent(agentId, zkReceiptProof)
+                .accounts({
+                    authority: this.provider.wallet.publicKey,
+                    systemProgram: anchor.web3.SystemProgram.programId,
+                } as any)
+                .rpc();
+
+            return tx;
+        } catch (error: any) {
+            console.error(`[AEGIS-REGISTRY-ERROR] Failed to enforce ZK execution intent for ${agentId}:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
      * Checkpoints the last used nonce to the Solana cluster.
      * Prevents cross-replica replay attacks during failover.
      */

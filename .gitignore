@@ -16,3 +16,7 @@ Cargo.lock
 .aegis_wal_pending.json
 packages/telemetry-shield/.aegis_wal.json
 .aegis_nonce_test_pending.json
+
+test-ledger/
+
+test-ledger/

@@ -1,15 +1,24 @@
 import { AegisZKClient } from '../infrastructure/AegisZKClient';
 import { AegisComplianceReceipt } from '../types';
 import keccak256 from 'keccak256';
+import { ILedgerAnchor } from '../ports/ILedgerAnchor';
 
 export class ZkProofGenerator {
-    public static async generate(receipt: AegisComplianceReceipt, nonce: string, pep: any): Promise<void> {
+    public static async generate(receipt: AegisComplianceReceipt, nonce: string, pep: any, anchor?: ILedgerAnchor): Promise<void> {
         try {
             const amountVal = receipt.validatedParams?.amount as string | number | bigint | undefined;
             const amount = this.validateAmount(BigInt(amountVal || 0));
             const input = this.createInput(receipt, amount, nonce);
             const proof = await new AegisZKClient().generateProof(input);
             await pep.updateZkSeal(receipt.receiptId, proof);
+
+            // [Phase 2: ZK-Anchoring Moat]
+            // Push the generated proof to the Solana Ledger for immutable hardware attestation.
+            if (anchor && anchor.anchorZkProof) {
+                const sealStr = typeof proof.seal === 'string' ? proof.seal : Buffer.from(proof.seal).toString('base64');
+                await anchor.anchorZkProof(receipt.enclaveDid || 'unknown_agent', sealStr);
+                console.log(`[Aegis-12] 🛡️ ZK Proof anchored to Solana for agent ${receipt.enclaveDid}`);
+            }
         } catch (e: any) {
             console.error(`ZK Error: ${e.message}`);
             

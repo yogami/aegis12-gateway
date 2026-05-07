@@ -225,22 +225,22 @@ export default function VaultBotSimulator() {
                     Normal Payment
                   </button>
                   <button 
-                    onClick={() => setScenario('jailbreak')}
-                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'jailbreak' ? 'bg-purple-900/30 border-purple-500 text-purple-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                    disabled
+                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
                   >
-                    Prompt Injection (x402)
+                    Prompt Injection (x402) [Phase 2]
                   </button>
                   <button 
-                    onClick={() => setScenario('malicious')}
-                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'malicious' ? 'bg-red-900/30 border-red-500 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                    disabled
+                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
                   >
-                    Treasury Drain Attack
+                    Treasury Drain Attack [Phase 2]
                   </button>
                   <button 
-                    onClick={() => setScenario('hotl_escalation')}
-                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'hotl_escalation' ? 'bg-orange-900/30 border-orange-500 text-orange-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                    disabled
+                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
                   >
-                    Massive Transfer (HOTL Trigger)
+                    Massive Transfer (HOTL) [Phase 2]
                   </button>
                 </div>
               </div>

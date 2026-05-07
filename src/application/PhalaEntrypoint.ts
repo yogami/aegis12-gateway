@@ -175,7 +175,7 @@ export class AegisEnclave {
     }
 
     private dispatchBackground(receipt: AegisComplianceReceipt): void {
-        ZkProofGenerator.generate(receipt, receipt.authorizationNonce, this._pep).catch((err) => {
+        ZkProofGenerator.generate(receipt, receipt.authorizationNonce, this._pep, this._anchor).catch((err) => {
             console.error(`[Aegis-12] ⚠️ Background ZK FAILED for ${receipt.receiptId}: ${err.message}`);
         });
     }

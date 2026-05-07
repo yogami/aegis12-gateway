@@ -125,6 +125,14 @@ export class SolanaAnchor implements ILedgerAnchor {
         }
     }
 
+    public async anchorZkProof(agentId: string, zkReceiptProof: string): Promise<string> {
+        if (!this.registryClient) {
+            console.warn(`[SolanaAnchor] ZK Anchoring skipped. On-chain registry not enabled.`);
+            return "skipped_no_registry";
+        }
+        return await this.registryClient.enforceExecutionIntent(agentId, zkReceiptProof);
+    }
+
     private async anchorWithMemo(receipt: any, receiptHash: string, decision: string, enclaveDid: string, isZkSharded: boolean): Promise<AnchorResult> {
         const memoObj = {
             v: 'aegis:v8',

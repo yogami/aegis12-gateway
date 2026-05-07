@@ -1,4 +1,5 @@
 import * as http from "http";
+import * as util from "util";
 import phalaEntrypoint, { AegisEnclave } from "./application/PhalaEntrypoint";
 import { assertSafeIdentifier } from "./domain/PolicyValidator";
 
@@ -12,7 +13,7 @@ const originalError = console.error;
 const originalWarn = console.warn;
 
 function interceptLog(level: string, args: any[]) {
-    const msg = `[${new Date().toISOString()}] [${level}] ` + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+    const msg = `[${new Date().toISOString()}] [${level}] ` + args.map(a => typeof a === 'string' ? a : util.inspect(a, { depth: 2 })).join(' ');
     logBuffer.push(msg);
     if (logBuffer.length > 200) logBuffer.shift();
 }
@@ -141,8 +142,12 @@ async function processAegisRequest(body: string, res: http.ServerResponse) {
             ...parsed, version: "v1.0.1-unmocked", hardware: "phala-dstack-cvm", timestamp: new Date().toISOString()
         };
 
-        res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(response));
+        const payloadStr = JSON.stringify(response);
+        res.writeHead(200, { 
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(payloadStr)
+        });
+        res.end(payloadStr);
         console.log(`[dStack CVM] Response sent successfully.`);
     } catch (err: any) {
         console.error(`[dStack CVM] Processing Error: ${err.message}`);

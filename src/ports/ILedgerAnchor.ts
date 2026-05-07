@@ -44,4 +44,9 @@ export interface ILedgerAnchor {
         localEvidence?: AegisComplianceReceipt,
         signer?: any
     ): Promise<VerificationResult>;
+
+    /**
+     * Anchors the ZK Proof of Execution to the blockchain ledger.
+     */
+    anchorZkProof?(agentId: string, zkReceiptProof: string): Promise<string>;
 }

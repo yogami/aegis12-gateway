@@ -20,7 +20,7 @@ export class BatchAnchorWorker {
         this.pep = pep;
     }
 
-    public start(intervalMs: number = 30000) {
+    public start(intervalMs: number = 2000) {
         if (this.intervalId) return;
         
         console.log(`[BatchAnchorWorker] Starting worker with interval ${intervalMs}ms`);

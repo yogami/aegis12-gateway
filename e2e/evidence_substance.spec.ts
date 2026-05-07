@@ -31,16 +31,16 @@ const eip712Types = {
 };
 
 const SOLANA_CLUSTER = 'devnet';
-const connection = new Connection(clusterApiUrl(SOLANA_CLUSTER), 'confirmed');
+const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
 
-async function pollForEvidence(request: any, receiptId: string, initialSolanaTx: string) {
+async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
     let solanaTx = initialSolanaTx;
     let zkSeal = "pending";
     let pollingRetries = 150;
     while ((solanaTx === 'batching' || solanaTx === 'pending' || zkSeal === 'pending') && pollingRetries > 0) {
         await new Promise(r => setTimeout(r, 2000));
-        const evidenceRes = await request.get(`/evidence/${receiptId}`);
-        if (evidenceRes.status() === 200) {
+        const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'http://127.0.0.1:8000'}/evidence/${receiptId}`);
+        if (evidenceRes.status === 200) {
             const evidenceBody = await evidenceRes.json();
             if (evidenceBody.ledger_tx) solanaTx = evidenceBody.ledger_tx;
             if (evidenceBody.ars_anchor) zkSeal = evidenceBody.ars_anchor;
@@ -138,15 +138,19 @@ test('EVIDENCE-SUBSTANCE-001: Valid Approval produces verifiable Solana Anchor a
         const payload = getPayload(nonce, policyConfig, e2eWallet, signature);
 
         console.log(`[Substance] Sending enforcement request for actionId: ${nonce}...`);
-        const res = await request.post('/sign_and_execute', { data: payload });
+        const res = await fetch(`${process.env.TEST_API_URL || 'http://127.0.0.1:8000'}/sign_and_execute`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
         const body = await res.json();
 
         // 1. Initial State Check (Shape)
-        expect(res.status(), `Request failed: ${JSON.stringify(body)}`).toBe(200);
+        expect(res.status, `Request failed: ${JSON.stringify(body)}`).toBe(200);
         expect(body.status).toBe('approved');
         
         const receipt = body.receipt;
-        const { solanaTx, zkSeal } = await pollForEvidence(request, receipt.receiptId, body.ledger_tx || "batching");
+        const { solanaTx, zkSeal } = await pollForEvidence(receipt.receiptId, body.ledger_tx || "batching");
 
         validateSubstanceChecks(body, receipt, zkSeal, policyConfig, solanaTx);
         
