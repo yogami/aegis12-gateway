@@ -2,6 +2,9 @@ import * as http from "http";
 import * as util from "util";
 import phalaEntrypoint, { AegisEnclave } from "./application/PhalaEntrypoint";
 import { assertSafeIdentifier } from "./domain/PolicyValidator";
+import { getCircuitBreaker, getAllCircuitBreakerStatuses } from "./infrastructure/CircuitBreaker";
+
+const requestBreaker = getCircuitBreaker('aegis-request-pipeline', { failureThreshold: 5, recoveryTimeMs: 30_000 });
 
 const MAX_BODY_SIZE = 128 * 1024; // 128KB — matches PhalaEntrypoint.validatePayloadSize
 
@@ -72,8 +75,9 @@ async function handleHealth(res: http.ServerResponse) {
         await enclave.initialize();
         const health = {
             status: "alive", ledgerPayer: enclave.anchor?.getPayerPublicKey(), enclaveDid: enclave.signer?.enclaveDid,
-            version: "v1.0.1-unmocked", commit_hash: process.env.GIT_COMMIT_SHA || "unknown",
-            hardware: "phala-dstack-cvm", timestamp: new Date().toISOString()
+            version: "v1.0.2-hardened", commit_hash: process.env.GIT_COMMIT_SHA || "unknown",
+            hardware: "phala-dstack-cvm", timestamp: new Date().toISOString(),
+            circuitBreakers: getAllCircuitBreakerStatuses(),
         };
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(health));
@@ -149,8 +153,31 @@ async function handleVaultPolicyRoute(body: string, res: http.ServerResponse) {
     }
 }
 
+function checkCircuitBreaker(res: http.ServerResponse): boolean {
+    if (!requestBreaker.canExecute()) {
+        const status = requestBreaker.getStatus();
+        console.error(`[dStack CVM] Circuit OPEN — blocking request. Recovery in ${Math.max(0, 30000 - (Date.now() - (status.lastFailure || 0)))}ms`);
+        res.writeHead(503, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ status: "denied", error: "Service temporarily unavailable. Circuit breaker OPEN due to infrastructure failures." }));
+        return false;
+    }
+    return true;
+}
+
+function sendEnclaveResponse(parsed: any, res: http.ServerResponse) {
+    const response = { ...parsed, version: "v1.0.2-hardened", hardware: "phala-dstack-cvm", timestamp: new Date().toISOString() };
+    const httpStatus = parsed.status === 'denied' ? 403 : 200;
+    const payloadStr = JSON.stringify(response);
+    res.writeHead(httpStatus, { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payloadStr) });
+    res.end(payloadStr);
+    requestBreaker.recordSuccess();
+    console.log(`[dStack CVM] Response sent (HTTP ${httpStatus}).`);
+}
+
 async function processAegisRequest(body: string, res: http.ServerResponse) {
     console.log(`[dStack CVM] Request body received (${body.length} bytes). Processing...`);
+    if (!checkCircuitBreaker(res)) return;
+
     try {
         const enclaveResponse = await phalaEntrypoint(body);
         console.log(`[dStack CVM] Enclave Response received: ${enclaveResponse.substring(0, 100)}...`);
@@ -160,22 +187,14 @@ async function processAegisRequest(body: string, res: http.ServerResponse) {
             parsed = JSON.parse(enclaveResponse);
         } catch (pe) {
             console.error(`[dStack CVM] CRITICAL: phalaEntrypoint returned non-JSON: ${enclaveResponse}`);
+            requestBreaker.recordFailure();
             throw new Error("Internal Enclave Protocol Error: Malformed JSON response");
         }
         
-        const response = {
-            ...parsed, version: "v1.0.1-unmocked", hardware: "phala-dstack-cvm", timestamp: new Date().toISOString()
-        };
-
-        const payloadStr = JSON.stringify(response);
-        res.writeHead(200, { 
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(payloadStr)
-        });
-        res.end(payloadStr);
-        console.log(`[dStack CVM] Response sent successfully.`);
+        sendEnclaveResponse(parsed, res);
     } catch (err: any) {
         console.error(`[dStack CVM] Processing Error: ${err.message}`);
+        requestBreaker.recordFailure();
         res.writeHead(500, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ status: "error", error: err.message }));
     }

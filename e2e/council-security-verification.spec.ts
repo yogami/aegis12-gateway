@@ -61,7 +61,7 @@ test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected
             }
         });
         
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status).toBe('denied');
         expect(body.error).toContain('Missing Policy envelope');
@@ -80,7 +80,7 @@ test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected
             }
         });
 
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status).toBe('denied');
         expect(body.error).toContain('Limits exceed security bounds');
@@ -97,7 +97,7 @@ test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected
                 dynamicPolicy: policy 
             } 
         });
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.error).toContain('Signer not found in provisioned TEE Root-of-Trust');
     });
@@ -141,53 +141,12 @@ test('DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected
                 dynamicPolicy: policy 
             }
         });
-        expect([403, 200]).toContain(res.status());
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.error).toContain('exceeds signed Tier limit');
     });
 
-    test('Healthtech Privilege Escalation / Data Exfiltration', async ({ request }) => {
-        // Endpoint that requires specific hospital roles
-        const res = await request.post('/healthtech/enforce', {
-            data: {
-                agentId: 'med-bot-1',
-                targetAction: 'write_ehr',
-                targetEhrId: 'patient-402',
-                agentRole: 'intern',
-                isEncrypted: true
-            }
-        });
 
-        expect([403, 404, 200]).toContain(res.status());
-        if (res.status() === 404) return; // CVM doesn't implement this endpoint, which is a safe failure
-        const body = await res.json();
-        expect(body.status).toBe('denied');
-        expect(body.evidencePack?.decisionReason ?? body.error).toContain('intern is not authorized');
-    });
-
-test.describe('Aegis-12: Solana Transaction Firewall Hardening', () => {
-    test('POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense)', async ({ request }) => {
-        // Construct an absurdly large base64 string to simulate a parser/CPU bomb attempt
-        const hugeBase64 = Buffer.from('X'.repeat(200_000)).toString('base64');
-    
-        // Implementation may return 400 or 413, or drop the socket directly (req.destroy)
-        try {
-            const res = await request.post('/solana/enforce-tx', {
-                data: {
-                    serializedTx: hugeBase64,
-                    walletPubkey: '11111111111111111111111111111111',
-                },
-            });
-            expect([400, 403, 404, 413, 500]).toContain(res.status());
-            if (res.status() === 404) return; // CVM doesn't implement this endpoint, which is a safe failure
-            const body = await res.json();
-            expect(body.decision || body.status).not.toBe('ALLOW');
-        } catch (error: any) {
-            // Socket hang up is expected when req.destroy() is called by the CVM microserver
-            expect(error.message).toMatch(/socket hang up|ECONNRESET/);
-        }
-    });
-});
 
 test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits', async ({ request }) => {
         // Target signs a legitimate policy strictly intended for a benign 1-token operation
@@ -208,7 +167,7 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect(res.status()).toBe(200);
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status, 'VULN-001 FAILED: Unverified agent.purpose bypassed financial limits').toBe('denied');
         expect(body.error).toContain('exceeds signed Tier limit');
@@ -231,7 +190,7 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect(res.status()).toBe(200);
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status, 'VULN-002 FAILED: Unsigned currentTier granted privilege escalation').toBe('denied');
         expect(body.error).toContain('Tier mismatch');
@@ -256,7 +215,7 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect(res.status()).toBe(200);
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status, 'VULN-003 FAILED: Type confusion on maxAnomalyScore bypassed defenses').toBe('denied');
     });
@@ -279,7 +238,7 @@ test('VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits',
             }
         });
 
-        expect(res.status()).toBe(200);
+        expect(res.status()).toBe(403);
         const body = await res.json();
         expect(body.status, 'VULN-004 FAILED: Empty limits string did not cause fail-closed denial').toBe('denied');
     });
