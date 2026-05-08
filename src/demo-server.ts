@@ -137,7 +137,6 @@ app.post('/sign_and_execute', express.json(), async (req, res) => {
     let status = 'approved';
     let txSig = 'batching';
     let squadsId = undefined;
-    let errorMessage = undefined;
 
     // Simulate Prompt Injection Denial
     if (payload.agentContext?.prompt?.includes('IGNORE ALL PREVIOUS INSTRUCTIONS')) {
