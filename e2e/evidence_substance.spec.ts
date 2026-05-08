@@ -69,7 +69,7 @@ async function validateOnChainTransaction(connection: any, solanaTx: string, rec
     expect(tx, "Transaction must exist on-chain").not.toBeNull();
     const memoLog = tx!.meta?.logMessages?.find((log: string) => log.includes('Program log: Memo'));
     expect(memoLog, "Transaction must contain an SPL Memo").toBeDefined();
-    const memoMatch = memoLog!.match(/Memo \(len \d+\): "(.*?)"/);
+    const memoMatch = memoLog!.match(/Memo \(len \d+\): "(.*)"/);
     expect(memoMatch, "Memo must match structured format").not.toBeNull();
     const memoStr = memoMatch![1];
     
