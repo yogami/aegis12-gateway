@@ -20,7 +20,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --legacy-peer-deps
 
     - name: Run Security Audit
       run: npm audit || true # Optional: fail if you want strict security, otherwise just warn
