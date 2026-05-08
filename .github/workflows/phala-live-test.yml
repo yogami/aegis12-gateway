@@ -14,26 +14,26 @@ jobs:
       - name: Wait for Phala TEE to pull image and boot (30s)
         run: sleep 30
         
-      - name: Run Live Verification Trade
-        # This hits the live endpoint. We use curl and grep the SSE stream for the success text.
-        # Timeout after 60s. We expect the stream to naturally terminate when "done: true" is sent.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+        
+      - name: Run Live Verification UI Tests
         run: |
-          echo "Hitting the live Phala Demo Console endpoint..."
+          echo "Hitting the live Phala Demo Console endpoint using Playwright..."
           
           if [ -z "${{ secrets.PHALA_IP_ADDRESS }}" ]; then
-            echo "⚠️ PHALA_IP_ADDRESS secret is not set. Skipping live hardware ping."
+            echo "⚠️ PHALA_IP_ADDRESS secret is not set. Skipping live hardware UI test."
             exit 0
           fi
           
-          # Note: Replace PHALA_IP with actual IP/domain in production via GitHub Secrets
-          # For now, we simulate the curl logic.
-          curl --max-time 60 http://${{ secrets.PHALA_IP_ADDRESS }}:8000/api/demo?type=valid > output.log || true
-          
-          if grep -q "✅ Execution successful!" output.log; then
-            echo "Success! Live hardware execution verified on Solana Devnet."
-            exit 0
-          else
-            echo "Failed! Could not verify successful execution in the live TEE."
-            cat output.log
-            exit 1
-          fi
+          # Pass the IP address to the test via environment variable
+          export PHALA_IP_ADDRESS=${{ secrets.PHALA_IP_ADDRESS }}
+          npx playwright test e2e/demo_ui.spec.ts

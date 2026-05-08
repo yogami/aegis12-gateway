@@ -62,10 +62,10 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
         sendLog(`[Switchboard Oracle] ✅ DCAP Verified. Session Key ${pubkey?.substring(0,8)}... is now ON-CHAIN WHITELISTED.`);
         
         if (type === 'valid') {
-            sendLog('\\n>>> STAGE 2: VALID TRADE EXECUTION (0.001 SOL) <<<');
+            sendLog('\\n>>> STAGE 2: VALID TRADE EXECUTION (0.000001 SOL) <<<');
             const intent = TradeIntent.create({
                 destination: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k',
-                amountSol: 0.001
+                amountSol: 0.000001
             });
             
             sendLog(`[Agent] Evaluating Trade Intent: ${intent.amountSol} SOL`);
