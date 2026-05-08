@@ -69,6 +69,8 @@
     "@solana/spl-memo": "^0.2.5",
     "@solana/web3.js": "^1.98.4",
     "@sqds/multisig": "^2.1.4",
+    "@switchboard-xyz/common": "^5.8.1",
+    "@switchboard-xyz/solana.js": "^3.2.5",
     "@xenova/transformers": "^2.17.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

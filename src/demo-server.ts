@@ -6,6 +6,7 @@ import { Connection } from '@solana/web3.js';
 import dotenv from 'dotenv';
 import { EnclaveService, FiduciaryEscalationError } from './application/EnclaveService';
 import { MockAttestationOracle } from './infrastructure/MockAttestationOracle';
+import { SwitchboardLiveOracle } from './infrastructure/SwitchboardLiveOracle';
 import { PhalaAttestationOracle } from './infrastructure/PhalaAttestationOracle';
 import { SolanaTransactionExecutor } from './infrastructure/SolanaTransactionExecutor';
 import { TradeIntent } from './domain/TradeIntent';
@@ -30,7 +31,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Set up the singleton infrastructure (this is the SDK)
 const isPhala = process.env.TEE_ENV === 'phala';
 const rpcConnection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
-const oracle = isPhala ? new PhalaAttestationOracle() : new MockAttestationOracle();
+const USE_LIVE_SWITCHBOARD = process.env.USE_LIVE_SWITCHBOARD === 'true';
+
+// Toggle between the Phala Mock and the Live Switchboard Network
+const oracle = USE_LIVE_SWITCHBOARD && process.env.SWITCHBOARD_QUEUE && process.env.SWITCHBOARD_FUNCTION
+    ? new SwitchboardLiveOracle(
+        process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+        process.env.SWITCHBOARD_QUEUE,
+        process.env.SWITCHBOARD_FUNCTION
+      )
+    : (isPhala ? new PhalaAttestationOracle() : new MockAttestationOracle());
+
 const executor = new SolanaTransactionExecutor(rpcConnection);
 
 const ruleset = {
