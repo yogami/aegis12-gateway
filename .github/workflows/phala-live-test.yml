@@ -14,6 +14,9 @@ jobs:
       - name: Wait for Phala TEE to pull image and boot (30s)
         run: sleep 30
         
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
