@@ -42,7 +42,9 @@ async function pollForEvidence(receiptId: string, initialSolanaTx: string) {
         const evidenceRes = await fetch(`${process.env.TEST_API_URL || 'http://localhost:8080'}/evidence/${receiptId}`);
         if (evidenceRes.status === 200) {
             const evidenceBody = await evidenceRes.json();
-            if (evidenceBody.ledger_tx) solanaTx = evidenceBody.ledger_tx;
+            if (evidenceBody.ledger_tx && evidenceBody.ledger_tx !== "mock_tx_or_real_tx_signature") {
+                solanaTx = evidenceBody.ledger_tx;
+            }
             if (evidenceBody.ars_anchor) {
                 zkSeal = evidenceBody.ars_anchor;
                 if (zkSeal === "synthetic-seal-for-substance-testing") {
