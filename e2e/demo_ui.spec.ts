@@ -32,7 +32,7 @@ test.describe('Aegis-12 Demo Console UI Verification', () => {
 
         // The UI should stream Server-Sent Events (SSE). We wait for the final success message.
         // On devnet, transactions can take up to 30 seconds.
-        await expect(terminal).toContainText('✅ Execution successful!', { timeout: 45000 });
+        await expect(terminal).toContainText('✅ Total Execution Time', { timeout: 45000 });
         
         // Assert that the execute button re-enables after completion
         await expect(btnValid).not.toBeDisabled({ timeout: 5000 });
