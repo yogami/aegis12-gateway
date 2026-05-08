@@ -40,4 +40,9 @@ jobs:
           # Pass the IP address to the test via environment variable
           export TEST_API_URL=${{ secrets.PHALA_IP_ADDRESS }}
           export SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
+          
+          echo "Running Data Plane UI Playwright tests..."
+          npx playwright test e2e/demo_ui.spec.ts
+          
+          echo "Running Hardware Cryptographic Substance tests..."
           npx playwright test e2e/evidence_substance.spec.ts
