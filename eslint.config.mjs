@@ -47,7 +47,7 @@ export default tseslint.config(
     }
   },
   {
-    files: ['tests/**/*.ts', 'src/demo-server.ts', 'src/infrastructure/*.ts', 'src/cli/*.ts', 'src/tee/*.ts', 'src/application/*.ts'],
+    files: ['tests/**/*.ts', 'e2e/**/*.ts', 'src/demo-server.ts', 'src/infrastructure/*.ts', 'src/cli/*.ts', 'src/tee/*.ts', 'src/application/*.ts'],
     rules: {
       'max-lines-per-function': 'off',
       'max-classes-per-file': 'off',
