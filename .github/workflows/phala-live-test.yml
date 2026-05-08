@@ -19,9 +19,15 @@ jobs:
         # Timeout after 60s. We expect the stream to naturally terminate when "done: true" is sent.
         run: |
           echo "Hitting the live Phala Demo Console endpoint..."
+          
+          if [ -z "${{ secrets.PHALA_IP_ADDRESS }}" ]; then
+            echo "⚠️ PHALA_IP_ADDRESS secret is not set. Skipping live hardware ping."
+            exit 0
+          fi
+          
           # Note: Replace PHALA_IP with actual IP/domain in production via GitHub Secrets
           # For now, we simulate the curl logic.
-          curl -s --max-time 60 http://${{ secrets.PHALA_IP_ADDRESS }}:8000/api/demo?type=valid > output.log || true
+          curl --max-time 60 http://${{ secrets.PHALA_IP_ADDRESS }}:8000/api/demo?type=valid > output.log || true
           
           if grep -q "✅ Execution successful!" output.log; then
             echo "Success! Live hardware execution verified on Solana Devnet."
