@@ -11,6 +11,7 @@
             --primary: #38bdf8;
             --success: #4ade80;
             --danger: #f87171;
+            --warning: #fbbf24;
             --text: #f8fafc;
             --text-dim: #94a3b8;
         }
@@ -20,35 +21,76 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             min-height: 100vh;
         }
-        .header {
-            text-align: center;
-            margin-top: 40px;
-            margin-bottom: 30px;
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            gap: 40px;
         }
-        .header h1 {
-            margin: 0;
+        .left-col {
+            flex: 1;
+            max-width: 500px;
+        }
+        .right-col {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            margin: 0 0 10px 0;
             font-size: 2.5rem;
             color: var(--primary);
             letter-spacing: -0.5px;
         }
-        .header p {
+        .subtitle {
             color: var(--text-dim);
             font-size: 1.1rem;
-            max-width: 600px;
-            margin: 10px auto;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .pitch-section {
+            background-color: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+        .pitch-section h3 {
+            margin-top: 0;
+            color: var(--text);
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .pitch-section p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+        ul.checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul.checklist li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.4;
         }
         .controls {
             display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
         }
         button {
-            padding: 12px 24px;
+            padding: 14px 24px;
             font-size: 1rem;
             font-weight: 600;
             border: none;
@@ -57,7 +99,8 @@
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            width: 100%;
         }
         button:disabled {
             opacity: 0.5;
@@ -71,8 +114,17 @@
             background-color: #7dd3fc;
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
         }
+        .btn-escalate {
+            background-color: transparent;
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        .btn-escalate:hover:not(:disabled) {
+            background-color: rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+        }
         .btn-malicious {
-            background-color: var(--surface);
+            background-color: transparent;
             color: var(--danger);
             border: 1px solid var(--danger);
         }
@@ -85,37 +137,23 @@
             border: 1px solid #334155;
             border-radius: 12px;
             width: 100%;
-            max-width: 900px;
-            height: 500px;
+            height: 100%;
+            min-height: 600px;
             overflow-y: auto;
             padding: 20px;
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
             font-size: 14px;
             line-height: 1.6;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
         }
-        .terminal::-webkit-scrollbar {
-            width: 8px;
-        }
-        .terminal::-webkit-scrollbar-track {
-            background: #000;
-        }
-        .terminal::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        .log-line {
-            margin-bottom: 4px;
-            word-break: break-all;
-        }
-        .log-time {
-            color: #64748b;
-            margin-right: 10px;
-        }
+        .terminal::-webkit-scrollbar { width: 8px; }
+        .terminal::-webkit-scrollbar-track { background: #000; }
+        .terminal::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        .log-line { margin-bottom: 4px; word-break: break-all; }
+        .log-time { color: #64748b; margin-right: 10px; }
         .log-info { color: #e2e8f0; }
         .log-success { color: var(--success); }
-        .log-warning { color: #fbbf24; }
+        .log-warning { color: var(--warning); }
         .log-error { color: var(--danger); }
         .log-highlight { color: var(--primary); }
         
@@ -127,44 +165,62 @@
             font-weight: bold;
             background: rgba(56, 189, 248, 0.2);
             color: var(--primary);
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
-        
-        a {
-            color: var(--primary);
-            text-decoration: underline;
-        }
+        a { color: var(--primary); text-decoration: underline; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="left-col">
+            <div class="status-badge">● PHALA dSTACK SECURE ENCLAVE ACTIVE</div>
+            <h1>Aegis-12 Gateway</h1>
+            <p class="subtitle">Hardware-Secured Fiduciary Firewall for Autonomous Agents.</p>
 
-    <div class="header">
-        <h1>Aegis-12 Gateway</h1>
-        <p>Zero-Latency Fiduciary Firewall. Intel TDX Enclave execution natively coupled with Switchboard Oracle whitelisting.</p>
-        <div class="status-badge">● TEE SECURE ENCLAVE ACTIVE</div>
-    </div>
+            <div class="pitch-section">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> The Problem: Opacity Gap</h3>
+                <p>AI Agents execute on-chain trades, but auditors cannot cryptographically prove <em>why</em> the agent acted. If the agent hallucinates, there is no Human-in-the-Loop circuit breaker.</p>
+            </div>
 
-    <div class="controls">
-        <button id="btn-valid" class="btn-valid" onclick="runDemo('valid')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            Simulate Valid Trade (0.001 SOL)
-        </button>
-        <button id="btn-malicious" class="btn-malicious" onclick="runDemo('malicious')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
-            Simulate Prompt Injection (1.5 SOL)
-        </button>
-        <button id="btn-clear" onclick="clearTerminal()" style="background: transparent; border: 1px solid #334155; color: var(--text-dim);">
-            Clear
-        </button>
-    </div>
+            <div class="pitch-section">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> The Solution & Compliance</h3>
+                <ul class="checklist">
+                    <li><span>✅</span> <div><strong>Zero-Latency Execution:</strong> Unlike 15-minute ZK-proofs, TEE enforcement executes in under 1 second.</div></li>
+                    <li><span>✅</span> <div><strong>EU AI Act Art. 12 (Transparency):</strong> Every execution generates a raw Intel SGX/TDX DCAP Quote to mathematically prove Intent.</div></li>
+                    <li><span>✅</span> <div><strong>EU AI Act Art. 14 (Human Oversight):</strong> Intents above risk thresholds automatically fall back to a Squads V4 Multisig.</div></li>
+                </ul>
+            </div>
 
-    <div class="terminal" id="terminal">
-        <div class="log-line"><span class="log-info">AEGIS-12 TEE CONSOLE INITIALIZED. WAITING FOR INTENT...</span></div>
+            <div class="controls">
+                <button id="btn-valid" class="btn-valid" onclick="runDemo('valid')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    Valid Trade (< 0.03 SOL)
+                </button>
+                <button id="btn-escalate" class="btn-escalate" onclick="runDemo('escalate')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Escalated Trade (0.04 SOL)
+                </button>
+                <button id="btn-malicious" class="btn-malicious" onclick="runDemo('malicious')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                    Prompt Injection (1.5 SOL)
+                </button>
+                <button id="btn-clear" onclick="clearTerminal()" style="background: transparent; border: 1px solid #334155; color: var(--text-dim); margin-top: 10px;">
+                    Clear Terminal
+                </button>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="terminal" id="terminal">
+                <div class="log-line"><span class="log-info">AEGIS-12 TEE CONSOLE INITIALIZED. WAITING FOR INTENT...</span></div>
+            </div>
+        </div>
     </div>
 
     <script>
         const terminal = document.getElementById('terminal');
         const btnValid = document.getElementById('btn-valid');
+        const btnEscalate = document.getElementById('btn-escalate');
         const btnMalicious = document.getElementById('btn-malicious');
         let currentEventSource = null;
 
@@ -178,7 +234,6 @@
             
             const time = new Date().toISOString().split('T')[1].substring(0, 12);
             
-            // Format links
             let formattedMessage = message;
             if (message.includes('https://explorer.solana.com')) {
                 const urlMatch = message.match(/(https:\/\/explorer\.solana\.com[^\s]+)/);
@@ -187,11 +242,10 @@
                 }
             }
 
-            // Apply color classes based on content if not explicitly provided
             let colorClass = `log-${type}`;
             if (message.includes('✅')) colorClass = 'log-success';
-            else if (message.includes('WARNING') || message.includes('ESCALATED')) colorClass = 'log-warning';
-            else if (message.includes('ERROR') || message.includes('DENIED') || message.includes('Failed')) colorClass = 'log-error';
+            else if (message.includes('WARNING') || message.includes('ESCALATED') || message.includes('[EU Art 14]')) colorClass = 'log-warning';
+            else if (message.includes('ERROR') || message.includes('DENIED') || message.includes('Failed') || message.includes('BLOCK')) colorClass = 'log-error';
             else if (message.includes('>>>') || message.includes('⚡')) colorClass = 'log-highlight';
 
             div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${colorClass}">${formattedMessage}</span>`;
@@ -201,13 +255,12 @@
 
         function setButtonsDisabled(disabled) {
             btnValid.disabled = disabled;
+            btnEscalate.disabled = disabled;
             btnMalicious.disabled = disabled;
         }
 
         function runDemo(type) {
-            if (currentEventSource) {
-                currentEventSource.close();
-            }
+            if (currentEventSource) currentEventSource.close();
 
             setButtonsDisabled(true);
             appendLog(`\n--- STARTING DEMO: ${type.toUpperCase()} ---`, 'highlight');
@@ -217,14 +270,12 @@
             currentEventSource.onmessage = function(event) {
                 try {
                     const data = JSON.parse(event.data);
-                    
                     if (data.done) {
                         currentEventSource.close();
                         setButtonsDisabled(false);
                         appendLog(`--- DEMO COMPLETE ---`, 'highlight');
                         return;
                     }
-                    
                     appendLog(data.message, 'info');
                 } catch (e) {
                     appendLog(event.data, 'info');

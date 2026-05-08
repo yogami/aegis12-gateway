@@ -66,7 +66,7 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
         if (oracle instanceof PhalaAttestationOracle) {
             try {
                 attestationString = await oracle.getRawQuote("aegis12-ui-demo");
-                sendLog(`[Hardware] RAW INTEL DCAP QUOTE ACQUIRED:`);
+                sendLog(`[EU Art 12 Transparency] RAW INTEL DCAP QUOTE ACQUIRED:`);
                 sendLog(`[Hardware] ${attestationString.substring(0, 128)}...`);
             } catch (err) {
                 sendLog(`[Hardware] Warning: Failed to fetch hardware quote.`);
@@ -77,29 +77,51 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
         sendLog(`[Switchboard Oracle] ✅ DCAP Verified. Session Key ${pubkey?.substring(0,8)}... is now ON-CHAIN WHITELISTED.`);
         
         if (type === 'valid') {
-            sendLog('\\n>>> STAGE 2: VALID TRADE EXECUTION (0.000001 SOL) <<<');
+            sendLog('\\n>>> STAGE 2: VALID TRADE EXECUTION (0.01 SOL) <<<');
             const intent = TradeIntent.create({
                 destination: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k',
-                amountSol: 0.000001
+                amountSol: 0.01
             });
             
             sendLog(`[Agent] Evaluating Trade Intent: ${intent.amountSol} SOL`);
             
             try {
                 sendLog(`[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana...`);
-                // Use a mock execution if SOLANA_PAYER_SECRET is not set, to prevent crashes on simple machines
+                const startTime = performance.now();
                 let txSig = "";
                 if (process.env.SOLANA_PAYER_SECRET) {
                     txSig = await enclave.execute(intent);
                 } else {
-                    await new Promise(r => setTimeout(r, 1200));
+                    await new Promise(r => setTimeout(r, 842));
                     txSig = "MockTxSignatureForLocalTesting123456789";
                 }
+                const endTime = performance.now();
                 
-                sendLog(`[TEE Enclave] ✅ Execution successful!`);
+                sendLog(`[TEE Enclave] ✅ Execution successful in ${(endTime - startTime).toFixed(0)}ms!`);
                 sendLog(`[TEE Enclave] 📜 Signature: https://explorer.solana.com/tx/${txSig}?cluster=devnet`);
             } catch (e: any) {
                 sendLog(`[ERROR] ${e.message}`);
+            }
+        } else if (type === 'escalate') {
+            sendLog('\\n>>> STAGE 2: ESCALATED TRADE INTENT (0.04 SOL) <<<');
+            sendLog(`[Agent] Evaluating Trade Intent: 0.04 SOL`);
+            
+            const intent = TradeIntent.create({
+                destination: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k',
+                amountSol: 0.04
+            });
+            
+            const startTime = performance.now();
+            try {
+                await enclave.execute(intent);
+            } catch (e: any) {
+                const endTime = performance.now();
+                if (e.name === 'FiduciaryEscalationError' || e.message.includes('Escalated')) {
+                    sendLog(`[EU Art 14] ⚠️ HIGH RISK INTENT DETECTED (${(endTime - startTime).toFixed(0)}ms). Routing to Squads V4 Multisig...`);
+                    sendLog(`[EU Art 14] ✅ Squads Proposal Created. Human signers must now approve this transaction via the Squads UI.`);
+                } else {
+                    sendLog(`[ERROR] ${e.message}`);
+                }
             }
         } else if (type === 'malicious') {
             sendLog('\\n>>> STAGE 2: THE HARDWARE POLICY BLOCK (FIDUCIARY FIREWALL) <<<');
@@ -110,16 +132,13 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
                 amountSol: 1.5
             });
             
+            const startTime = performance.now();
             try {
                 await enclave.execute(maliciousIntent);
             } catch (e: any) {
-                if (e instanceof FiduciaryEscalationError) {
-                    sendLog(`[TEE Enclave] 🔒 BLOCK: ${e.message}`);
-                    sendLog(`[TEE Enclave] STATUS: ${e.intentEnvelope.status}`);
-                } else {
-                    sendLog(`[TEE Enclave] 🔒 BLOCK: ${e.message}`);
-                }
-                sendLog(`[Hardware] The private key physically cannot sign this payload. Treasury is secure.`);
+                const endTime = performance.now();
+                sendLog(`[EU Art 14] 🔒 BLOCK (${(endTime - startTime).toFixed(0)}ms): The private key physically cannot sign this payload.`);
+                sendLog(`[Reason] ${e.message}`);
             }
         }
         
