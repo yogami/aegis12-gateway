@@ -14,66 +14,97 @@ test.describe('Aegis-12 Demo Console UI Verification', () => {
     test.use({ baseURL: getBaseUrl() });
     test.setTimeout(120000);
 
-    test('should execute a valid trade and verify SSE log stream', async ({ page }) => {
-        // Go to the demo console
+    test('should render the institutional dashboard with all security badges', async ({ page }) => {
         await page.goto('/');
         
-        // Ensure the UI loaded correctly
-        await expect(page.locator('h1')).toHaveText('Aegis-12 Gateway');
-        await expect(page.locator('.status-badge')).toContainText('PHALA dSTACK SECURE ENCLAVE ACTIVE');
+        // Verify core UI elements
+        await expect(page.locator('h1')).toHaveText('Aegis-12');
+        
+        // Verify both security status badges are present
+        await expect(page.locator('.status-badge').first()).toContainText('PHALA TDX ENCLAVE ACTIVE');
+        await expect(page.locator('.status-badge.zk')).toContainText('RISCZERO ZK-ATTESTATION READY');
+        
+        // Verify all three action buttons exist and are enabled
+        await expect(page.locator('#btn-valid')).toBeEnabled();
+        await expect(page.locator('#btn-escalate')).toBeEnabled();
+        await expect(page.locator('#btn-malicious')).toBeEnabled();
+        
+        // Verify the terminal is initialized
+        await expect(page.locator('#terminal')).toContainText('WAITING FOR INTENT');
+    });
 
+    test('should execute a valid trade with pre-flight simulation and ZK attestation', async ({ page }) => {
+        await page.goto('/');
+        
         // Click the Valid Trade button
         const btnValid = page.locator('#btn-valid');
         await btnValid.click();
 
-        // The terminal should immediately acknowledge the intent
         const terminal = page.locator('#terminal');
-        await expect(terminal).toContainText('STARTING DEMO: VALID', { timeout: 5000 });
-
-        // The UI should stream Server-Sent Events (SSE). We wait for the final success message.
-        // On devnet, transactions can take up to 30 seconds.
-        await expect(terminal).toContainText('✅ Total Execution Time', { timeout: 45000 });
         
-        // Assert that the execute button re-enables after completion
+        // Verify the boot sequence runs (ZK attestation + hardware verification)
+        await expect(terminal).toContainText('INITIATING AEGIS-12 HANDSHAKE', { timeout: 5000 });
+        await expect(terminal).toContainText('Booting isolated hardware environment', { timeout: 10000 });
+        
+        // Verify ZK Proof generation
+        await expect(terminal).toContainText('ZK Proof', { timeout: 15000 });
+        
+        // Verify multi-oracle verification
+        await expect(terminal).toContainText('Hardware verified', { timeout: 20000 });
+        
+        // Verify pre-flight simulation
+        await expect(terminal).toContainText('Pre-flight simulation', { timeout: 30000 });
+        
+        // Verify successful execution (on devnet this can take up to 30s)
+        await expect(terminal).toContainText('Transaction signed inside hardware', { timeout: 45000 });
+        
+        // Verify the Fiduciary Registry log
+        await expect(terminal).toContainText('Decision logged', { timeout: 5000 });
+        
+        // Verify the Solana Explorer link is present
+        await expect(terminal).toContainText('Solana Explorer', { timeout: 5000 });
+        
+        // Assert that buttons re-enable after completion
+        await expect(terminal).toContainText('HANDSHAKE COMPLETE', { timeout: 5000 });
         await expect(btnValid).not.toBeDisabled({ timeout: 5000 });
     });
 
-    test('should simulate prompt injection and verify Fiduciary Firewall blocks it', async ({ page }) => {
-        // Go to the demo console
+    test('should block prompt injection via Fiduciary Firewall', async ({ page }) => {
         await page.goto('/');
 
-        // Click the Malicious intent button
         const btnMalicious = page.locator('#btn-malicious');
         await btnMalicious.click();
 
         const terminal = page.locator('#terminal');
-        await expect(terminal).toContainText('STARTING DEMO: MALICIOUS', { timeout: 5000 });
-        await expect(terminal).toContainText('Attempting to drain 1.5 SOL', { timeout: 5000 });
+        await expect(terminal).toContainText('INITIATING AEGIS-12 HANDSHAKE', { timeout: 5000 });
+        await expect(terminal).toContainText('Attempting to drain 1.5 SOL', { timeout: 10000 });
 
-        // The Fiduciary Firewall (TEE) should block it because the limit is 0.05 SOL
-        await expect(terminal).toContainText('🔒 BLOCK', { timeout: 10000 });
-        await expect(terminal).toContainText('The private key physically cannot sign this payload.', { timeout: 10000 });
+        // The Fiduciary Firewall must block it
+        await expect(terminal).toContainText('BLOCK', { timeout: 15000 });
+        await expect(terminal).toContainText('physically cannot sign', { timeout: 15000 });
+        
+        // Verify the decision was logged to the audit registry
+        await expect(terminal).toContainText('Malicious attempt logged', { timeout: 5000 });
 
-        // Assert that the execute button re-enables
         await expect(btnMalicious).not.toBeDisabled({ timeout: 5000 });
     });
 
-    test('should simulate an escalated intent and verify Squads V4 Multisig fallback', async ({ page }) => {
-        // Go to the demo console
+    test('should escalate high-risk intent to Squads V4 Multisig', async ({ page }) => {
         await page.goto('/');
 
-        // Click the Escalate intent button
         const btnEscalate = page.locator('#btn-escalate');
         await btnEscalate.click();
 
         const terminal = page.locator('#terminal');
-        await expect(terminal).toContainText('STARTING DEMO: ESCALATE', { timeout: 5000 });
+        await expect(terminal).toContainText('INITIATING AEGIS-12 HANDSHAKE', { timeout: 5000 });
 
         // The Fiduciary Firewall should escalate it
-        await expect(terminal).toContainText('Routing to Squads V4 Multisig', { timeout: 15000 });
-        await expect(terminal).toContainText('Squads Proposal Created', { timeout: 10000 });
+        await expect(terminal).toContainText('HIGH RISK INTENT DETECTED', { timeout: 15000 });
+        await expect(terminal).toContainText('Squads Proposal Created', { timeout: 15000 });
+        
+        // Verify escalation was logged
+        await expect(terminal).toContainText('Escalation logged', { timeout: 5000 });
 
-        // Assert that the execute button re-enables
         await expect(btnEscalate).not.toBeDisabled({ timeout: 5000 });
     });
 });

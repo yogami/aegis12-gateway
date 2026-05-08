@@ -46,3 +46,6 @@ jobs:
           
           echo "Running Hardware Cryptographic Substance tests..."
           npx playwright test e2e/evidence_substance.spec.ts
+          
+          echo "Running Institutional Feature Verification tests..."
+          npx playwright test e2e/institutional_features.spec.ts

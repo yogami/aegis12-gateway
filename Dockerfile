@@ -25,6 +25,11 @@ RUN npm ci --omit=dev --legacy-peer-deps
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
 
+# Copy the pre-built RiscZero prover binary (if it exists in the repo)
+# This is a statically-linked Rust binary, built locally via `cargo build`.
+# If not present, the MultiOracleRouter will gracefully fall back to Phala/Mock.
+COPY --from=builder /app/aegis-zk-prover/target/debug/host ./aegis-zk-prover/target/debug/host
+
 # Expose the Demo UI port
 EXPOSE 8000
 
