@@ -1,0 +1,31 @@
+name: Railway Control Plane E2E
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-dashboard:
+    name: Dashboard UI Playwright Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: ./apps/dashboard
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: ./apps/dashboard
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright Tests
+        working-directory: ./apps/dashboard
+        run: npx playwright test e2e/control_plane.spec.ts
