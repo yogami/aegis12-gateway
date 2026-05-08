@@ -1,271 +1,48 @@
-name: Phala CVM Deployment
+name: Phala TEE Deployment (GHCR)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'aegis-zk-prover/**'
-      - 'packages/**'
-      - 'policy-evaluator/**'
-      - '.github/workflows/phala-deploy.yml'
-      - 'Dockerfile*'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - 'e2e/**'
-      - 'scripts/**'
-      - '!scripts/aegis12_venture_demo.ts'
-      - '!apps/dashboard/**'
-      - '!tests/**'
-      - '!**/*.md'
-  workflow_dispatch: # Allows manual trigger from the GitHub UI
+  workflow_run:
+    workflows: ["Colosseum Quality Gate"]
+    types:
+      - completed
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  build-and-push-image:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
         with:
-          node-version: '20'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Node Dependencies
-        run: npm ci --legacy-peer-deps
-
-      - name: Security Audit Gate
-        run: npm audit --audit-level=critical
-
-      - name: Code Linting Gate
-        run: npm run check-types && npx eslint src tests
-
-      - name: Vitest Quality Gate
-        env:
-          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
-          SOLANA_RPC_URL: 'https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29'
-        run: npx vitest run
-
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha
 
-      - name: Restore ZK Artifacts Cache
-        id: zk-cache
-        uses: actions/cache@v3
-        with:
-          path: zk-artifacts/
-          key: ${{ runner.os }}-zk-artifacts-v2-bookworm-${{ hashFiles('aegis-zk-prover/**') }}
-          restore-keys: |
-            ${{ runner.os }}-zk-artifacts-v2-bookworm-
-
-      - name: Cache Cargo and Target (for ZK Prover)
-        if: steps.zk-cache.outputs.cache-hit != 'true'
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "aegis-zk-prover -> target"
-          cache-on-failure: "true"
-
-      - name: Build ZK Prover (If Not Cached)
-        if: steps.zk-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p zk-artifacts
-          docker run --rm \
-            -v "${{ github.workspace }}/aegis-zk-prover:/build" \
-            -v "${{ github.workspace }}/zk-artifacts:/output" \
-            debian:bookworm bash -c '
-              set -e
-              apt-get update && apt-get install -y curl build-essential pkg-config libssl-dev git
-              
-              # Install Rust first (required by rzup)
-              curl --proto =https --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-              export PATH="/root/.cargo/bin:$PATH"
-              
-              # Install RISC Zero toolchain
-              curl -L https://risczero.com/install | bash
-              export PATH="/root/.risc0/bin:$PATH"
-              rzup install rust
-              rzup install cargo-risczero
-              
-              # Build the prover
-              cd /build
-              cargo build --release
-              
-              # Copy artifacts
-              cp /build/target/release/host /output/aegis-zk-prover
-              cp -r /root/.risc0 /output/.risc0
-              echo "✅ ZK Prover built successfully inside debian:bookworm (glibc matched)"
-            '
-
-      - name: Playwright E2E Quality Gate
-        env:
-          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
-          ENABLE_ONCHAIN_REGISTRY: 'false'
-          SOLANA_RPC_URL: 'https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29'
-        run: |
-          mkdir -p aegis-zk-prover/target/release/
-          cp zk-artifacts/aegis-zk-prover aegis-zk-prover/target/release/host
-          export AEGIS_ZK_PROVER_HASH=$(sha256sum aegis-zk-prover/target/release/host | awk '{print $1}')
-          echo "Dynamic Prover Hash for CI: $AEGIS_ZK_PROVER_HASH"
-          npx playwright install --with-deps chromium
-          npx playwright test
-      - name: Build and Push Phala CVM Image
-        id: docker_build
-        uses: docker/build-push-action@v4
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.phala_cvm
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm:latest
-          build-args: |
-            GIT_COMMIT_SHA=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
-
-      - name: Trigger Phala Cloud Hardware Update (Provision & Submit)
-        run: |
-          CVM_ID="1eec23f9-fcb2-4490-93cc-991306332246"
-          IMAGE_DIGEST="${{ steps.docker_build.outputs.digest }}"
-          IMAGE_NAME="${{ secrets.DOCKERHUB_USERNAME }}/aegis-phala-cvm"
-          
-          echo "Step 1: Provisioning new configuration for CVM $CVM_ID with digest $IMAGE_DIGEST..."
-          
-          COMPOSE_WITH_DIGEST=$(cat <<EOF
-          version: '3.8'
-          services:
-            aegis12-tee:
-              image: $IMAGE_NAME@$IMAGE_DIGEST
-              ports:
-                - "8000:8000"
-              environment:
-                - TEE_ENV=phala
-                - NODE_ENV=production
-                - LEDGER_TYPE=${{ vars.LEDGER_TYPE || 'solana' }}
-                - MANTLE_RPC_URL=${{ vars.MANTLE_RPC_URL || '' }}
-                - AUTHORIZED_TENANTS='{"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-council":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-e2e":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}'
-                - SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
-                - ENABLE_ONCHAIN_REGISTRY=false
-                - SOLANA_RPC_URL=https://devnet.helius-rpc.com/?api-key=e3f686d4-1710-4a8e-a2f4-4f147052af29
-                - AEGIS_ONCHAIN_PROGRAM_ID=FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS
-              volumes:
-                - /var/run/dstack.sock:/var/run/dstack.sock
-          EOF
-          )
-          
-          PROVISION_PAYLOAD=$(jq -n \
-            --arg name "aegis12-gateway" \
-            --arg compose "$COMPOSE_WITH_DIGEST" \
-            '{
-              name: $name,
-              docker_compose_file: $compose,
-              runner: "docker-compose",
-              manifest_version: 2,
-              kms_enabled: true,
-              gateway_enabled: true,
-              public_logs: true,
-              public_sysinfo: true,
-              public_tcbinfo: true
-            }')
-          
-          PROVISION_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/compose_file/provision" \
-               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-               -H "Content-Type: application/json" \
-               -d "$PROVISION_PAYLOAD")
-          
-          COMPOSE_HASH=$(echo $PROVISION_RES | jq -r '.compose_hash')
-          
-          if [ "$COMPOSE_HASH" == "null" ] || [ -z "$COMPOSE_HASH" ]; then
-            echo "❌ Error: Provision failed. Response: $PROVISION_RES"
-            exit 1
-          fi
-          
-          echo "Step 2: Submitting update with NEW Compose Hash $COMPOSE_HASH..."
-          SUBMIT_RES=$(curl -s -X PATCH "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/compose_file" \
-               -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-               -H "Content-Type: application/json" \
-               -d "{\"compose_hash\": \"$COMPOSE_HASH\"}")
-          
-          echo "Submit Response: $SUBMIT_RES"
-
-          echo "Step 3: Triggering Force Restart with Retry Logic..."
-          for i in {1..5}; do
-            echo "Attempt $i: Requesting Force Restart..."
-            RESTART_RES=$(curl -s -X POST "https://cloud-api.phala.com/api/v1/cvms/$CVM_ID/restart" \
-                 -H "X-API-Key: ${{ secrets.PHALA_CLOUD_API_KEY }}" \
-                 -H "Content-Type: application/json" \
-                 -d "{\"force\": true}")
-            
-            echo "Restart Response: $RESTART_RES"
-            
-            if [[ "$RESTART_RES" == *"Another operation is already in progress"* ]]; then
-              echo "⚠️ CVM is busy. Waiting 30s before retry..."
-              sleep 30
-            elif [[ "$RESTART_RES" == *"null"* ]] || [[ -z "$RESTART_RES" ]]; then
-              echo "✅ Restart command accepted (received null/empty success)."
-              break
-            else
-              echo "✅ Restart initiated successfully."
-              break
-            fi
-          done
-
-      - name: Install verification dependencies
-        if: "!contains(github.event.head_commit.message, '[skip-audit]')"
-        run: npm install ethers tsx @solana/web3.js --legacy-peer-deps
-
-      - name: Verify Live Deployment (Substance Audit)
-        if: "!contains(github.event.head_commit.message, '[skip-audit]')"
-        run: |
-          ENCLAVE_URL="https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network"
-          
-          echo "Waiting for old container to terminate (expecting non-200)..."
-          for i in {1..30}; do
-            RESPONSE_CODE=$(curl -s --connect-timeout 3 --max-time 5 -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
-            if [ "$RESPONSE_CODE" != "200" ]; then
-              echo "Old container is down (HTTP $RESPONSE_CODE)."
-              break
-            fi
-            echo "Old container still responding (HTTP $RESPONSE_CODE). Sleeping 5s..."
-            sleep 5
-          done
-          
-          echo "Waiting for new hardware enclave to boot and deploy Target SHA: ${{ github.sha }}..."
-          MAX_RETRIES=90
-          RETRY_COUNT=0
-          TARGET_SHA="${{ github.sha }}"
-          
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            HEALTH_JSON=$(curl -s --connect-timeout 3 --max-time 5 "$ENCLAVE_URL/health" || echo "{}")
-            COMMIT_HASH=$(echo "$HEALTH_JSON" | jq -r '.commit_hash // "unknown"')
-            
-            if [ "$COMMIT_HASH" == "$TARGET_SHA" ]; then
-              echo "✅ Enclave Gateway is LIVE running Target SHA: $TARGET_SHA."
-              break
-            fi
-
-            
-            RETRY_COUNT=$((RETRY_COUNT+1))
-            echo "Attempt $RETRY_COUNT/$MAX_RETRIES: Enclave not ready (HTTP $RESPONSE_CODE). Sleeping 10s..."
-            sleep 10
-          done
-
-          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-            echo "❌ Error: Enclave failed to boot within 5 minutes."
-            exit 1
-          fi
-
-          echo "Running Deep Substance Audit (Solana + ZK + TEE)..."
-          npx tsx scripts/verify_substance.ts "$ENCLAVE_URL"
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

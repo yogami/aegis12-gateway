@@ -16,6 +16,23 @@ import { TradeIntent } from '../domain/TradeIntent';
 import type { AttestationOracle } from '../ports/AttestationOracle';
 import type { TransactionExecutor } from '../ports/TransactionExecutor';
 
+export class FiduciaryEscalationError extends Error {
+    public readonly intentEnvelope: any;
+    
+    constructor(message: string, intent: TradeIntent) {
+        super(message);
+        this.name = 'FiduciaryEscalationError';
+        this.intentEnvelope = {
+            domain_separator: 'AEGIS12_ESCALATE_V1',
+            intent_details: {
+                destination: intent.destination,
+                amountSol: intent.amountSol
+            },
+            status: 'WAITING_FOR_CO_SIGNER'
+        };
+    }
+}
+
 export class EnclaveService {
     private sessionKey: SessionKey | null = null;
     private quote: AttestationQuote | null = null;
@@ -31,7 +48,7 @@ export class EnclaveService {
     }
 
     async boot(): Promise<void> {
-        this.sessionKey = SessionKey.generate();
+        this.sessionKey = SessionKey.loadOrGenerate();
         const policyHash = this.evaluator.policyHash();
         this.quote = AttestationQuote.create(this.sessionKey, policyHash);
         this.attested = await this.oracle.submitQuote(this.quote);
@@ -61,6 +78,9 @@ export class EnclaveService {
 
     private assertPolicyApproved(intent: TradeIntent): void {
         const result = this.evaluator.evaluate(intent);
+        if (result.escalated) {
+            throw new FiduciaryEscalationError(`POLICY ESCALATED: ${result.reason}`, intent);
+        }
         if (!result.approved) {
             throw new Error(`POLICY DENIED: ${result.reason}`);
         }

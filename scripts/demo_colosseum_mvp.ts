@@ -1,5 +1,9 @@
-import { Connection, Keypair } from '@solana/web3.js';
-import { PolicyEnclave, EnclaveConfig, TradeIntent } from '../src/tee/PolicyEnclave';
+import { Connection } from '@solana/web3.js';
+import { EnclaveService } from '../src/application/EnclaveService';
+import { TradeIntent } from '../src/domain/TradeIntent';
+import { PolicyRuleset } from '../src/domain/PolicyEvaluator';
+import { MockAttestationOracle } from '../src/infrastructure/MockAttestationOracle';
+import { SolanaTransactionExecutor } from '../src/infrastructure/SolanaTransactionExecutor';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -8,7 +12,8 @@ dotenv.config();
  * demo_colosseum_mvp.ts
  * 
  * The Master Demo Script for the Colosseum Hackathon Submission.
- * Demonstrates the full Aegis-12 Local TEE + Session Key architecture.
+ * Demonstrates the full Aegis-12 Local TEE + Session Key architecture
+ * utilizing the Asynchronous Attestation + Atomic Execution pattern.
  */
 async function runDemo() {
     console.log("==========================================================");
@@ -18,46 +23,51 @@ async function runDemo() {
     const rpcUrl = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
     const connection = new Connection(rpcUrl, 'confirmed');
 
-    // 1. Boot the TEE & Asynchronous Attestation
-    console.log(">>> [0:20] STAGE 1: TEE BOOT & ASYNCHRONOUS ATTESTATION <<<");
-    console.log("[TEE Enclave] Booting local Phala TDX environment...");
+    // Setup the Hexagonal Architecture
+    const oracle = new MockAttestationOracle();
+    const executor = new SolanaTransactionExecutor(connection);
     
     // We set up a strict hardware policy.
-    const policy: EnclaveConfig = {
+    const policy: PolicyRuleset = {
         maxTradeSol: 0.05,
         allowedDestinations: ["4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k"]
     };
 
-    const enclave = new PolicyEnclave(policy);
-    console.log(`[Switchboard Oracle] Received 4.5KB Intel DCAP Quote from Enclave.`);
-    console.log(`[Switchboard Oracle] ✅ DCAP Verified. Session Key ${enclave.getPublicKey().toBase58().substring(0, 8)}... is now ON-CHAIN WHITELISTED.\n`);
+    const service = new EnclaveService(policy, oracle, executor);
+
+    // 1. Boot the TEE & Asynchronous Attestation
+    console.log(">>> [0:20] STAGE 1: TEE BOOT & ASYNCHRONOUS ATTESTATION <<<");
+    console.log("[TEE Enclave] Booting local Phala TDX environment...");
+    await service.boot();
 
     // 2. The Valid Trade (Zero Latency Atomic Execution)
     console.log(">>> [0:45] STAGE 2: ATOMIC ZERO-LATENCY EXECUTION <<<");
-    const validIntent: TradeIntent = {
+    const validIntent = TradeIntent.create({
         destination: "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k",
-        amountSol: 0.01 // Within the 0.05 budget limit
-    };
+        amountSol: 0.001 // Within the 0.05 budget limit
+    });
 
     let successfulTxSig = "";
 
     try {
         console.log(`[Agent] Sending intent to Local TEE: Trade ${validIntent.amountSol} SOL`);
-        successfulTxSig = await enclave.evaluateAndExecute(validIntent, connection);
+        successfulTxSig = await service.execute(validIntent);
     } catch (e: any) {
         console.error(`[Agent] Execution failed: ${e.message}`);
     }
 
-    // 3. The Hardware Block
-    console.log("\n>>> [1:30] STAGE 3: THE HARDWARE POLICY BLOCK <<<");
-    const maliciousIntent: TradeIntent = {
+    // 3. The Malicious Trade (Hardware Policy Block)
+    console.log("\n>>> [1:30] STAGE 3: THE HARDWARE POLICY BLOCK (FIDUCIARY FIREWALL) <<<");
+    console.log("[Agent] WARNING: LLM Hallucination/Prompt Injection Detected. Attempting to drain 1.5 SOL...");
+    
+    const maliciousIntent = TradeIntent.create({
         destination: "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k",
-        amountSol: 1.5 // Massively exceeds budget!
-    };
+        amountSol: 1.5 // Exceeds the 0.05 budget limit
+    });
 
     try {
         console.log(`[Agent] Sending malicious intent to Local TEE: Drain ${maliciousIntent.amountSol} SOL`);
-        await enclave.evaluateAndExecute(maliciousIntent, connection);
+        await service.execute(maliciousIntent);
     } catch (e: any) {
         console.log(`[Agent] 🛑 BLOCKED BY TEE: ${e.message}`);
     }

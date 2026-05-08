@@ -1,43 +1,25 @@
-name: Chaos Stress Tests (Post-Deployment)
+name: SDK Chaos Resilience Testing
 
 on:
-  workflow_dispatch:
-    inputs:
-      enclave_url:
-        description: 'Enclave URL to test against'
-        required: false
-        default: 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network'
-  workflow_run:
-    workflows: ["Phala CVM Deployment"]
-    types:
-      - completed
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *' # Run nightly at midnight
 
 jobs:
-  chaos-tests:
+  chaos-engineering:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Install dependencies
-        run: npm install ethers tsx @solana/web3.js --legacy-peer-deps
-      - name: Wait for API Warmup
-        env:
-          ENCLAVE_URL: "${{ github.event.inputs.enclave_url || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network' }}"
-        run: |
-          echo "Waiting for Phala CVM Deployment to propagate before Chaos testing..."
-          MAX_RETRIES=60
-          RETRY_COUNT=0
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$ENCLAVE_URL/health" || echo "000")
-            if [ "$HTTP_STATUS" == "200" ] || [ "$HTTP_STATUS" == "404" ] || [ "$HTTP_STATUS" == "402" ]; then
-              echo "Phala CVM is online (Status: $HTTP_STATUS)!"
-              break
-            fi
-            echo "Attempt $RETRY_COUNT failed. Retrying in 10s..."
-            sleep 10
-            RETRY_COUNT=$((RETRY_COUNT+1))
-          done
+        run: npm ci
 
-      - name: Run Chaos OOM Bomb
-        run: npx tsx scripts/chaos_oom_bomb.ts "${{ github.event.inputs.enclave_url || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network' }}"
+      - name: Run Chaos Tests
+        run: npx vitest run tests/e2e/chaos_resilience.spec.ts

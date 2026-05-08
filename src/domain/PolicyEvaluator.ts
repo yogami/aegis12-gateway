@@ -11,11 +11,13 @@ import { TradeIntent } from './TradeIntent';
 
 export interface PolicyRuleset {
     maxTradeSol: number;
+    escalationThresholdSol?: number;
     allowedDestinations: string[];
 }
 
 export interface PolicyDecisionResult {
     approved: boolean;
+    escalated?: boolean;
     reason: string;
 }
 
@@ -27,6 +29,13 @@ export class PolicyEvaluator {
             return this.deny(
                 `Amount ${intent.amountSol} SOL exceeds max ${this.ruleset.maxTradeSol} SOL`,
             );
+        }
+        if (this.ruleset.escalationThresholdSol && intent.amountSol > this.ruleset.escalationThresholdSol) {
+            return {
+                approved: false,
+                escalated: true,
+                reason: `Amount ${intent.amountSol} SOL requires human co-signer (exceeds ${this.ruleset.escalationThresholdSol} SOL)`,
+            };
         }
         if (!this.isAllowedDestination(intent.destination)) {
             return this.deny(

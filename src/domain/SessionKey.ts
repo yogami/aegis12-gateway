@@ -32,6 +32,26 @@ export class SessionKey {
         return new SessionKey(nacl.sign.keyPair());
     }
 
+    static loadOrGenerate(filepath = '.tee_session.json'): SessionKey {
+        import('fs').then(fs => {
+            // Cannot be synchronous without changing API, so we'll do a simple
+            // synchronous read since this is a local utility.
+        });
+        
+        // Actually, we can use fs.readFileSync safely here
+        const fs = require('fs');
+        try {
+            if (fs.existsSync(filepath)) {
+                const secret = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+                const keypair = nacl.sign.keyPair.fromSecretKey(new Uint8Array(secret));
+                return new SessionKey(keypair);
+            }
+        } catch (e) {
+            // Fallthrough to generate
+        }
+        return SessionKey.generate();
+    }
+
     static fromSeed(seed: Uint8Array): SessionKey {
         return new SessionKey(nacl.sign.keyPair.fromSeed(seed));
     }

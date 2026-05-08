@@ -72,14 +72,18 @@ async function verifyTransaction(signature: string) {
         // The first account in staticAccountKeys is the fee payer and signer in our simple tx.
         const signerPubkey = tx.transaction.message.staticAccountKeys[0].toBase58();
 
-        // 3. Verify the Mock DCAP Quote
+        // 3. Verify the Cryptographic report_data Binding
         // In production, `payload.quote_hash` points to an Arweave hash of the full Intel DCAP quote.
-        // For the MVP, we re-derive the deterministic mock quote to prove the CLI works.
-        const expectedQuoteHash = keccak256(Buffer.from(`MOCK_DCAP_QUOTE_${signerPubkey}`));
+        // For the MVP, we re-derive the deterministic mock quote using the report_data binding rule:
+        // report_data = "AEGIS_SESSION_V1" || session_pubkey || policy_hash
+        const crypto = require('crypto');
+        const expectedReportData = `AEGIS_SESSION_V1||${signerPubkey}||${payload.policy_hash}`;
+        const expectedQuoteHash = crypto.createHash('sha256').update(expectedReportData).digest('hex');
 
         console.log(`\n--- HARDWARE ATTESTATION REPORT ---`);
         console.log(`Signer Pubkey:      ${signerPubkey}`);
         console.log(`Policy Hash:        ${payload.policy_hash}`);
+        console.log(`Report Data:        ${payload.report_data}`);
         console.log(`Reported Quote:     ${payload.quote_hash}`);
         console.log(`Recomputed Quote:   ${expectedQuoteHash}`);
         

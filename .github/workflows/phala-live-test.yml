@@ -1,0 +1,33 @@
+name: Phala Live Deployment Verification
+
+on:
+  workflow_run:
+    workflows: ["Phala TEE Deployment (GHCR)"]
+    types:
+      - completed
+
+jobs:
+  smoke-test-live-hardware:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Phala TEE to pull image and boot (30s)
+        run: sleep 30
+        
+      - name: Run Live Verification Trade
+        # This hits the live endpoint. We use curl and grep the SSE stream for the success text.
+        # Timeout after 60s. We expect the stream to naturally terminate when "done: true" is sent.
+        run: |
+          echo "Hitting the live Phala Demo Console endpoint..."
+          # Note: Replace PHALA_IP with actual IP/domain in production via GitHub Secrets
+          # For now, we simulate the curl logic.
+          curl -s --max-time 60 http://${{ secrets.PHALA_IP_ADDRESS }}:8000/api/demo?type=valid > output.log || true
+          
+          if grep -q "✅ Execution successful!" output.log; then
+            echo "Success! Live hardware execution verified on Solana Devnet."
+            exit 0
+          else
+            echo "Failed! Could not verify successful execution in the live TEE."
+            cat output.log
+            exit 1
+          fi

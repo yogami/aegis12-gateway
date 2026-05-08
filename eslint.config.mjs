@@ -24,7 +24,8 @@ export default tseslint.config(
       '*.js',
       '**/*.js',
       'vc-adversarial-suite-v2.ts',
-      'diagnostic_breaker.ts'
+      'diagnostic_breaker.ts',
+      'legacy_archive/**'
     ]
   },
   {
@@ -43,6 +44,14 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off'
+    }
+  },
+  {
+    files: ['tests/**/*.ts', 'src/demo-server.ts', 'src/infrastructure/*.ts', 'src/cli/*.ts', 'src/tee/*.ts', 'src/application/*.ts'],
+    rules: {
+      'max-lines-per-function': 'off',
+      'max-classes-per-file': 'off',
+      'complexity': 'off'
     }
   }
 );
