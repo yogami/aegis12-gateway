@@ -12,6 +12,10 @@ COPY . .
 # Build the TypeScript project
 RUN npm run build
 
+# Ensure the ZK prover binary path exists so the later COPY doesn't fail.
+# If the real binary wasn't built (e.g. in CI), this creates a harmless empty file.
+RUN mkdir -p /app/aegis-zk-prover/target/debug && touch /app/aegis-zk-prover/target/debug/host && chmod +x /app/aegis-zk-prover/target/debug/host
+
 # --- Runtime Stage ---
 FROM node:20-alpine
 
