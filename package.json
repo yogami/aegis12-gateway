@@ -12,7 +12,7 @@
     "build": "tsc && cp -r src/infrastructure/idl dist/infrastructure/idl",
     "start": "tsx src/server.ts",
     "start:cvm": "tsx src/phala_cvm_server.ts",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "lint": "eslint .",
     "pre-commit": "(npm audit --audit-level=high || echo 'Known transitive vulns in upstream crypto deps - non-blocking') && lint-staged"
   },
