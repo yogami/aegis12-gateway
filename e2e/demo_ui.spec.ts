@@ -33,12 +33,33 @@ test.describe('Aegis-12 Demo Console UI Verification', () => {
         await expect(page.locator('#terminal')).toContainText('WAITING FOR INTENT');
     });
 
+    test('should provide a valid link to the Fiduciary Audit Registry hosted on Railway', async ({ page }) => {
+        await page.goto('/');
+        
+        const registryLink = page.locator('#registry-link');
+        
+        // Verify the link is visible and contains the correct text
+        await expect(registryLink).toBeVisible();
+        await expect(registryLink).toHaveText('View Registry');
+        
+        // Verify the href points to the Railway project
+        await expect(registryLink).toHaveAttribute('href', 'https://railway.app/project/aegis12');
+        
+        // Verify it opens in a new tab (target="_blank")
+        await expect(registryLink).toHaveAttribute('target', '_blank');
+    });
+
     test('should execute a valid trade with pre-flight simulation and ZK attestation', async ({ page }) => {
         await page.goto('/');
         
         // Click the Valid Trade button
         const btnValid = page.locator('#btn-valid');
         await btnValid.click();
+
+        // Edge Case: Ensure all buttons are disabled during execution to prevent double-spending
+        await expect(page.locator('#btn-valid')).toBeDisabled();
+        await expect(page.locator('#btn-escalate')).toBeDisabled();
+        await expect(page.locator('#btn-malicious')).toBeDisabled();
 
         const terminal = page.locator('#terminal');
         
@@ -106,5 +127,22 @@ test.describe('Aegis-12 Demo Console UI Verification', () => {
         await expect(terminal).toContainText('Escalation logged', { timeout: 5000 });
 
         await expect(btnEscalate).not.toBeDisabled({ timeout: 5000 });
+    });
+
+    test('should reset the terminal DOM when Reset Console is clicked', async ({ page }) => {
+        await page.goto('/');
+
+        // Trigger some logs
+        await page.locator('#btn-malicious').click();
+        
+        const terminal = page.locator('#terminal');
+        await expect(terminal).toContainText('INITIATING AEGIS-12 HANDSHAKE', { timeout: 5000 });
+
+        // Click Reset Console
+        await page.locator('#btn-clear').click();
+
+        // Verify the terminal is cleared and reset to initial state
+        await expect(terminal).not.toContainText('INITIATING AEGIS-12 HANDSHAKE');
+        await expect(terminal).toContainText('WAITING FOR INTENT');
     });
 });
