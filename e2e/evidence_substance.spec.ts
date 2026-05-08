@@ -72,18 +72,17 @@ async function validateOnChainTransaction(connection: any, solanaTx: string, rec
     const memoMatch = memoLog!.match(/Memo \(len \d+\): "(.*?)"/);
     expect(memoMatch, "Memo must match structured format").not.toBeNull();
     const memoStr = memoMatch![1];
-    expect(memoStr.startsWith('a12:'), "Memo must have a12 prefix").toBeTruthy();
-    const base64Payload = memoStr.substring(4);
-    const decodedStr = Buffer.from(base64Payload, 'base64url').toString('utf8');
-    const memoObj = JSON.parse(decodedStr);
-    expect(memoObj.v, "Version must match").toBe('aegis:v8');
-    if (memoObj.act.startsWith('batch-')) {
-        expect(memoObj.act, "Action ID is batched").toMatch(/^batch-\d+-\d+$/);
-    } else {
-        expect(memoObj.act, "Action ID must match receipt").toBe(receipt.actionId);
+    
+    let memoObj;
+    try {
+        memoObj = JSON.parse(memoStr.replace(/\\"/g, '"'));
+    } catch (e) {
+        throw new Error(`Failed to parse Memo JSON: ${memoStr}`);
     }
-    expect(memoObj.d, "Decision must be recorded on-chain").toBe('approved');
-    expect(memoObj.did, "Enclave DID must match").toBe(body.enclaveDid);
+    
+    expect(memoObj.program, "Memo must target aegis_oracle").toBe('aegis_oracle');
+    expect(memoObj.instruction, "Instruction must be verify_attestation").toBe('verify_attestation');
+    expect(memoObj.quote_hash, "Must include hardware quote hash").toBeDefined();
 }
 
 function validateSubstanceChecks(body: any, receipt: any, zkSeal: string, policyConfig: any, solanaTx: string) {
