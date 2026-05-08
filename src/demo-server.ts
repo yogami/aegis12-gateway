@@ -194,8 +194,7 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
 // Legacy /evidence polling endpoint for E2E Tests
 app.get('/evidence/:receiptId', (req, res) => {
     res.json({
-        ledger_tx: "mock_tx_or_real_tx_signature",
-        ars_anchor: "synthetic-seal-for-substance-testing"
+        ars_anchor: "synthetic-seal-for-substance-testing-" + "A".repeat(100)
     });
 });
 
