@@ -52,9 +52,19 @@ const oracle = new MultiOracleRouter(oracleList);
 const executor = new SolanaTransactionExecutor(rpcConnection);
 
 const ruleset = {
+    policyId: "treasury-default-v1",
+    tenantId: "dao-squads-main",
     maxTradeSol: 0.05,
     escalationThresholdSol: 0.03,
-    allowedDestinations: ['4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k'] // Demo treasury vault
+    dailyVaRLimitSol: 5.0, // Institutional VaR limit
+    allowedDestinations: ['4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k'], // Demo treasury vault
+    allowedProtocols: ['Jupiter', 'Kamino'],
+    blockedTokens: ['BONK', 'WIF'], // Meme coins blocked by default
+    requireHumanApprovalIf: {
+        newRecipient: true,
+        amountGreaterThanSol: 0.03,
+        riskScoreGreaterThan: 70
+    }
 };
 
 const enclave = new EnclaveService(ruleset, oracle, executor);

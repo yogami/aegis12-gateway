@@ -24,9 +24,14 @@ export class SwitchboardLiveOracle implements AttestationOracle {
         if (!this.switchboardProgram) {
             // In a real environment, we load the payer from environment variables
             // so we can pay the Switchboard oracle fees
-            const payer = process.env.SOLANA_PAYER_SECRET 
-                ? Keypair.fromSecretKey(Buffer.from(JSON.parse(process.env.SOLANA_PAYER_SECRET)))
-                : Keypair.generate();
+            let payer = Keypair.generate();
+            if (process.env.SOLANA_PAYER_SECRET) {
+                try {
+                    payer = Keypair.fromSecretKey(Buffer.from(JSON.parse(process.env.SOLANA_PAYER_SECRET)));
+                } catch {
+                    payer = Keypair.fromSecretKey(Buffer.from(process.env.SOLANA_PAYER_SECRET, 'base64'));
+                }
+            }
                 
             this.switchboardProgram = await sbv3.SwitchboardProgram.load(
                 this.connection, 

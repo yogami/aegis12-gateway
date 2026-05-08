@@ -23,9 +23,9 @@ export const evaluateIntentAction: any = {
             // In a real plugin, we would use an LLM extraction template here.
             const text = typeof message.content === 'string' ? message.content : message.content?.text || '';
             
-            // Basic mock parsing: "transfer 50000 USDC to Target"
-            const amountMatch = text.match(/(\d+)\s*(USDC|SOL)/i);
-            const amount = amountMatch ? parseInt(amountMatch[1]) * 1000000 : 1000000;
+            // Basic mock parsing: "transfer 0.01 SOL to Target"
+            const amountMatch = text.match(/([\d.]+)\s*(USDC|SOL)/i);
+            const amount = amountMatch ? parseFloat(amountMatch[1]) : 0.01;
             
             const payload = {
                 agent: { 
@@ -37,7 +37,7 @@ export const evaluateIntentAction: any = {
                     toolId: "solana_transfer", 
                     actionType: "transfer", 
                     parameters: { 
-                        to: "TargetAddress", 
+                        to: "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k", 
                         amount: amount, 
                         token: "USDC" 
                     } 
@@ -79,7 +79,7 @@ export const evaluateIntentAction: any = {
                  });
             }
 
-            const response = await fetch(`${aegisUrl}/enforce`, {
+            const response = await fetch(`${aegisUrl}/sign_and_execute`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
