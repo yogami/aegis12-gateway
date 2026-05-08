@@ -179,6 +179,7 @@ describe('EnclaveService', () => {
         };
         mockExecutor = {
             execute: vi.fn().mockResolvedValue('mock-tx-signature-abc123'),
+            simulate: vi.fn().mockResolvedValue({ success: true, logs: [] }),
         };
         service = new EnclaveService(ruleset, mockOracle, mockExecutor);
     });

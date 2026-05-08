@@ -3,18 +3,17 @@
  *
  * Orchestrates the "Asynchronous Attestation + Atomic Execution" flow:
  *   1. boot()   → Generate SessionKey → Create AttestationQuote → Submit to Oracle
- *   2. execute() → Evaluate Policy → Check Whitelist → Execute Atomically
+ *   2. execute() → Evaluate Policy → Check Whitelist → Simulate → Execute Atomically
  *
  * Follows OCP: new oracle/executor implementations require zero changes here.
  * Follows DIP: depends on port interfaces, not concrete infrastructure.
- * Cyclomatic complexity per method ≤ 3.
  */
 import { SessionKey } from '../domain/SessionKey';
 import { AttestationQuote } from '../domain/AttestationQuote';
 import { PolicyEvaluator, PolicyRuleset } from '../domain/PolicyEvaluator';
 import { TradeIntent } from '../domain/TradeIntent';
 import type { AttestationOracle } from '../ports/AttestationOracle';
-import type { TransactionExecutor } from '../ports/TransactionExecutor';
+import type { TransactionExecutor, AuditRegistry } from '../ports/TransactionExecutor';
 
 export class FiduciaryEscalationError extends Error {
     public readonly intentEnvelope: any;
@@ -43,6 +42,7 @@ export class EnclaveService {
         ruleset: PolicyRuleset,
         private readonly oracle: AttestationOracle,
         private readonly executor: TransactionExecutor,
+        private readonly registry?: AuditRegistry
     ) {
         this.evaluator = new PolicyEvaluator(ruleset);
     }
@@ -64,10 +64,33 @@ export class EnclaveService {
 
     async execute(intent: TradeIntent): Promise<string> {
         this.assertAttested();
-        this.assertPolicyApproved(intent);
-        await this.assertWhitelisted();
+        
+        try {
+            this.assertPolicyApproved(intent);
+            await this.assertWhitelisted();
+            
+            // ITEM 3.2: SEMANTIC VALIDATION (Simulation)
+            // Before signing, we simulate the transaction to ensure it doesn't 
+            // produce unexpected state changes (e.g. permission escapes).
+            console.log(`[Enclave] Pre-flight simulation for intent: ${intent.amountSol} SOL`);
+            const sim = await this.executor.simulate(this.sessionKey!, intent, this.quote!);
+            if (!sim.success) {
+                const reason = `Simulation failed: ${sim.error}`;
+                this.logAudit(intent, { approved: false, escalated: false, reason });
+                throw new Error(`POLICY DENIED: ${reason}`);
+            }
 
-        return this.executor.execute(this.sessionKey!, intent, this.quote!);
+            const txSig = await this.executor.execute(this.sessionKey!, intent, this.quote!);
+            this.logAudit(intent, { approved: true, escalated: false, reason: 'Execution successful' });
+            return txSig;
+        } catch (error: any) {
+            if (error instanceof FiduciaryEscalationError) {
+                this.logAudit(intent, { approved: false, escalated: true, reason: error.message });
+            } else {
+                this.logAudit(intent, { approved: false, escalated: false, reason: error.message });
+            }
+            throw error;
+        }
     }
 
     private assertAttested(): void {
@@ -91,6 +114,14 @@ export class EnclaveService {
         const whitelisted = await this.oracle.isWhitelisted(pubkey);
         if (!whitelisted) {
             throw new Error('Session key has been revoked by the oracle.');
+        }
+    }
+
+    private logAudit(intent: TradeIntent, decision: { approved: boolean; escalated: boolean; reason: string }) {
+        if (this.registry) {
+            this.registry.logDecision(intent, decision).catch(err => {
+                console.warn(`[Enclave] ⚠️ Failed to log audit: ${err.message}`);
+            });
         }
     }
 }
