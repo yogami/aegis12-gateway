@@ -33,12 +33,18 @@ export class SessionKey {
     }
 
     static loadOrGenerate(filepath = '.tee_session.json'): SessionKey {
-        import('fs').then(fs => {
-            // Cannot be synchronous without changing API, so we'll do a simple
-            // synchronous read since this is a local utility.
-        });
-        
-        // Actually, we can use fs.readFileSync safely here
+        // Priority 1: Use SOLANA_PAYER_SECRET if available (production TEE + CI)
+        if (process.env.SOLANA_PAYER_SECRET) {
+            try {
+                const secret = Buffer.from(process.env.SOLANA_PAYER_SECRET, 'base64');
+                const keypair = nacl.sign.keyPair.fromSecretKey(new Uint8Array(secret));
+                return new SessionKey(keypair);
+            } catch (e) {
+                // Fallthrough to file-based loading
+            }
+        }
+
+        // Priority 2: Load from persisted session file
         const fs = require('fs');
         try {
             if (fs.existsSync(filepath)) {
