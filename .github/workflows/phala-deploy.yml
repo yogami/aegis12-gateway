@@ -2,7 +2,7 @@ name: Phala TEE Deployment (GHCR)
 
 on:
   workflow_run:
-    workflows: ["Colosseum Quality Gate"]
+    workflows: ["Master Security Gate"]
     types:
       - completed
     branches: [main]
