@@ -11,9 +11,18 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Phala TEE to pull image and boot (30s)
-        run: sleep 30
-        
+      - name: Wait for Phala TEE to pull image and boot
+        run: |
+          echo "Waiting for Phala instance to become responsive..."
+          for i in {1..30}; do
+            if curl -s -f "http://${{ secrets.PHALA_IP_ADDRESS }}:8000" > /dev/null; then
+              echo "✅ Phala server is up!"
+              exit 0
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 5
+          done
+          echo "⚠️ Server did not respond in time, proceeding anyway..."
       - name: Checkout repository
         uses: actions/checkout@v4
 
