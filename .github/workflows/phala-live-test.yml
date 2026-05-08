@@ -38,5 +38,6 @@ jobs:
           fi
           
           # Pass the IP address to the test via environment variable
-          export PHALA_IP_ADDRESS=${{ secrets.PHALA_IP_ADDRESS }}
-          npx playwright test e2e/demo_ui.spec.ts
+          export TEST_API_URL=${{ secrets.PHALA_IP_ADDRESS }}
+          export SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
+          npx playwright test e2e/evidence_substance.spec.ts
