@@ -60,6 +60,19 @@ app.get('/api/demo', demoLimiter, async (req, res) => {
         await enclave.boot();
         
         const pubkey = enclave.sessionPublicKey();
+        sendLog(`[Switchboard Oracle] Requesting hardware attestation from Intel SGX/TDX...`);
+        
+        let attestationString = "<mocked_for_local_testing>";
+        if (oracle instanceof PhalaAttestationOracle) {
+            try {
+                attestationString = await oracle.getRawQuote("aegis12-ui-demo");
+                sendLog(`[Hardware] RAW INTEL DCAP QUOTE ACQUIRED:`);
+                sendLog(`[Hardware] ${attestationString.substring(0, 128)}...`);
+            } catch (err) {
+                sendLog(`[Hardware] Warning: Failed to fetch hardware quote.`);
+            }
+        }
+        
         sendLog(`[Switchboard Oracle] Received 4.5KB Intel DCAP Quote from Enclave.`);
         sendLog(`[Switchboard Oracle] ✅ DCAP Verified. Session Key ${pubkey?.substring(0,8)}... is now ON-CHAIN WHITELISTED.`);
         
