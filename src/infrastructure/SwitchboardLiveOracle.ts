@@ -77,15 +77,11 @@ export class SwitchboardLiveOracle implements AttestationOracle {
             const functionAccount = new sbv3.FunctionAccount(program, this.functionPubkey);
             const state = await functionAccount.loadData();
             
-            // Hackathon Override: Since we don't have a reproducible build pipeline yet, 
-            // the Switchboard Rust contract will correctly refuse to verify our generic MRENCLAVE hash.
-            // We forcefully override this to true so the Demo UI doesn't crash on camera.
             const isVerified = (state.status as any) === 1 || state.status.kind === 'Active';
             
             if (!isVerified) {
-                console.warn(`[SwitchboardLiveOracle] ⚠️ HACKATHON OVERRIDE: Enclave is technically UNVERIFIED on-chain due to MRENCLAVE mismatch.`);
-                console.warn(`[SwitchboardLiveOracle] ⚠️ Forcing whitelist = true for Demo Recording purposes.`);
-                return true;
+                console.warn(`[SwitchboardLiveOracle] ⚠️ Enclave is UNVERIFIED on-chain.`);
+                return false;
             }
 
             console.log(`[SwitchboardLiveOracle] Checked Function Status: VERIFIED`);

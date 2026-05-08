@@ -8,6 +8,7 @@ import { EnclaveService, FiduciaryEscalationError } from './application/EnclaveS
 import { MockAttestationOracle } from './infrastructure/MockAttestationOracle';
 import { SwitchboardLiveOracle } from './infrastructure/SwitchboardLiveOracle';
 import { PhalaAttestationOracle } from './infrastructure/PhalaAttestationOracle';
+import { MultiOracleRouter } from './infrastructure/MultiOracleRouter';
 import { SolanaTransactionExecutor } from './infrastructure/SolanaTransactionExecutor';
 import { TradeIntent } from './domain/TradeIntent';
 
@@ -34,13 +35,19 @@ const rpcConnection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.
 const USE_LIVE_SWITCHBOARD = process.env.USE_LIVE_SWITCHBOARD === 'true';
 
 // Toggle between the Phala Mock and the Live Switchboard Network
-const oracle = USE_LIVE_SWITCHBOARD && process.env.SWITCHBOARD_QUEUE && process.env.SWITCHBOARD_FUNCTION
+const primaryOracle = USE_LIVE_SWITCHBOARD && process.env.SWITCHBOARD_QUEUE && process.env.SWITCHBOARD_FUNCTION
     ? new SwitchboardLiveOracle(
         process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
         process.env.SWITCHBOARD_QUEUE,
         process.env.SWITCHBOARD_FUNCTION
       )
-    : (isPhala ? new PhalaAttestationOracle() : new MockAttestationOracle());
+    : null;
+
+const secondaryOracle = isPhala ? new PhalaAttestationOracle() : new MockAttestationOracle();
+
+// The "Squad of Oracles"
+const oracleList = primaryOracle ? [primaryOracle, secondaryOracle] : [secondaryOracle];
+const oracle = new MultiOracleRouter(oracleList);
 
 const executor = new SolanaTransactionExecutor(rpcConnection);
 
