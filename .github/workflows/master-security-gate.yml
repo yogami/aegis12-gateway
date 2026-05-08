@@ -37,6 +37,9 @@ jobs:
         SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
         SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
 
+    - name: Run Institutional Policy Engine + Multi-Oracle + Bypass Attack Tests
+      run: npx vitest run tests/e2e/institutional_policy.e2e.spec.ts
+
   dast-pentest:
     name: DAST Pentest (Demo Console)
     runs-on: ubuntu-latest
