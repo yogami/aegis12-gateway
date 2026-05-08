@@ -44,7 +44,7 @@ async function runDemo() {
     console.log(">>> [0:45] STAGE 2: ATOMIC ZERO-LATENCY EXECUTION <<<");
     const validIntent = TradeIntent.create({
         destination: "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k",
-        amountSol: 0.001 // Within the 0.05 budget limit
+        amountSol: 0.000001 // Within the 0.05 budget limit
     });
 
     let successfulTxSig = "";

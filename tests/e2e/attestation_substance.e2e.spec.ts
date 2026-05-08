@@ -29,7 +29,7 @@ describe('Attestation Substance Verification (Article 12)', () => {
             allowedDestinations: ['4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k']
         };
 
-        rpcConnection = new Connection(process.env.SOLANA_RPC_URL!, 'confirmed');
+        rpcConnection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com', 'confirmed');
 
         const oracle = new MockAttestationOracle();
         const executor = new SolanaTransactionExecutor(rpcConnection);
@@ -45,7 +45,7 @@ describe('Attestation Substance Verification (Article 12)', () => {
         // AC-1: Execute the live transaction
         const intent = TradeIntent.create({
             destination: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k',
-            amountSol: 0.001
+            amountSol: 0.000001
         });
 
         console.log(`[Substance Test] Executing intent: ${intent.amountSol} SOL`);

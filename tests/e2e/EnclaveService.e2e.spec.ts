@@ -39,7 +39,7 @@ describe('EnclaveService E2E (Asynchronous Attestation)', () => {
         // Execute valid trade
         const validIntent = TradeIntent.create({
             destination: "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k",
-            amountSol: 0.001
+            amountSol: 0.000001
         });
 
         const txSig = await service.execute(validIntent);
