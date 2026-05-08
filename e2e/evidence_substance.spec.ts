@@ -120,7 +120,7 @@ function validateSubstanceChecks(body: any, receipt: any, zkSeal: string, policy
 }
 
 const getPayload = (nonce: string, policyConfig: any, e2eWallet: any, signature: string) => ({
-    action: { toolId: 'solana_transfer', parameters: { to: '11111111111111111111111111111111', amount: 1, token: 'SOL' }, estimatedValue: 0 },
+    action: { toolId: 'solana_transfer', parameters: { to: '11111111111111111111111111111111', amount: 0.01, token: 'SOL' }, estimatedValue: 0 },
     agent: { did: 'did:aegis:substance-test', purpose: 'financial_operations', currentTier: 'T1' },
     context: { sessionId: 'substance', actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
     agentContext: { prompt: "Substance test prompt validation", modelVersion: "GPT-Substance", jurisdiction: "GLOBAL" },
