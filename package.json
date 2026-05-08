@@ -10,7 +10,7 @@
     "test:e2e": "npx playwright test --config playwright.config.ts",
     "test:e2e:prod": "TEST_API_URL=$TEST_API_URL npx playwright test --config playwright.config.ts",
     "build": "tsc && cp -r src/infrastructure/idl dist/infrastructure/idl",
-    "start": "tsx src/server.ts",
+    "start": "node dist/demo-server.js",
     "start:cvm": "tsx src/phala_cvm_server.ts",
     "prepare": "husky || true",
     "lint": "eslint .",
