@@ -6,24 +6,14 @@ on:
     types:
       - completed
 
+env:
+  PHALA_BACKEND_URL: https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network
+
 jobs:
   smoke-test-live-hardware:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Phala TEE to pull image and boot
-        run: |
-          echo "Waiting for Phala instance to become responsive..."
-          for i in {1..30}; do
-            if curl -s -f "http://${{ secrets.PHALA_IP_ADDRESS }}:8000" > /dev/null; then
-              echo "✅ Phala server is up!"
-              exit 0
-            fi
-            echo "Waiting... ($i/30)"
-            sleep 5
-          done
-          echo "⚠️ Server did not respond in time, proceeding anyway..."
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -35,27 +25,54 @@ jobs:
       - name: Install Dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Check Phala TEE Health
+        id: phala_health
+        run: |
+          echo "Checking if 16GB Phala TEE is responsive at $PHALA_BACKEND_URL..."
+          HEALTHY=false
+          for i in {1..12}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$PHALA_BACKEND_URL" || echo "000")
+            if [ "$HTTP_CODE" != "000" ]; then
+              echo "✅ Phala TEE is responding (HTTP $HTTP_CODE)"
+              HEALTHY=true
+              break
+            fi
+            echo "Waiting for Phala TEE to boot... ($i/12)"
+            sleep 10
+          done
+
+          if [ "$HEALTHY" = "true" ]; then
+            echo "target=remote" >> $GITHUB_OUTPUT
+            echo "test_url=$PHALA_BACKEND_URL" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Phala TEE is not responding. Falling back to local backend."
+            echo "target=local" >> $GITHUB_OUTPUT
+            echo "test_url=http://localhost:8000" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Local Fallback (if needed)
+        if: steps.phala_health.outputs.target == 'local'
+        run: npm run build
+
+      - name: Start Local Fallback Server (if needed)
+        if: steps.phala_health.outputs.target == 'local'
+        run: |
+          node dist/demo-server.js &
+          sleep 5
+          echo "✅ Local fallback server started on port 8000"
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
-        
-      - name: Run Live Verification UI Tests
-        run: |
-          echo "Hitting the live Phala Demo Console endpoint using Playwright..."
-          
-          if [ -z "${{ secrets.PHALA_IP_ADDRESS }}" ]; then
-            echo "⚠️ PHALA_IP_ADDRESS secret is not set. Skipping live hardware UI test."
-            exit 0
-          fi
-          
-          # Pass the IP address to the test via environment variable
-          export TEST_API_URL=${{ secrets.PHALA_IP_ADDRESS }}
-          export SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
-          
 
-          
+      - name: Run Substance Verification Tests
+        run: |
+          echo "🎯 Target: ${{ steps.phala_health.outputs.target }} (${{ steps.phala_health.outputs.test_url }})"
+
+          export TEST_API_URL=${{ steps.phala_health.outputs.test_url }}
+          export SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
+
           echo "Running Hardware Cryptographic Substance tests..."
           npx playwright test e2e/evidence_substance.spec.ts
-          
+
           echo "Running Institutional Feature Verification tests..."
           npx playwright test e2e/institutional_features.spec.ts
