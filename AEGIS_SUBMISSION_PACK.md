@@ -24,7 +24,7 @@ To keep the hardware-rooted custodian alive in high-stress, adversarial environm
 5. **Jito ShredStream Integration**: Packages compliant transactions into Jito Bundles to transmit directly to the block leader, protecting against MEV extraction.
 
 ## 4. Colosseum Rubric Mapping
-- **Technical Complexity**: Aegis-12 is not a Web2 wrapper. It operates at the silicon level (Intel TDX / Phala CVM) and the cryptographic math level (RISC Zero ZK-Seals), running a custom low-memory Micro-Server to survive stringent 2GB enclave limits.
+- **Technical Complexity**: Aegis-12 is not a Web2 wrapper. It operates at the silicon level (Intel TDX / Phala CVM) and the cryptographic math level (RISC Zero ZK-Seals), running a custom low-memory Micro-Server inside a 16GB Policy Engine enclave.
 - **Solana Ecosystem Integration**: Deeply embedded with Solana primitives: Jito Bundles, Squads V4 multisigs for governance, and base58 Ed25519 cryptography.
 - **Real-World Utility**: Solves the biggest bottleneck in the AI x Crypto space (the Liability Void), opening the floodgates for institutional capital to legally deploy autonomous trading agents.
 

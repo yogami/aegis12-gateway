@@ -42,7 +42,7 @@ Client Request → HTTP Server → PhalaEntrypoint.processRequest()
 
 | Decision | Rationale |
 |---|---|
-| Raw `http` module, no Fastify | Minimizes memory footprint for 2GB TEE enclaves |
+| Raw `http` module, no Fastify | Maximizes performance for the 16GB TEE Policy Engine |
 | All responses HTTP 200 | Denial info is in the JSON body (`status: "denied"`) |
 | Async anchoring | Solana TX anchoring happens in background to avoid blocking |
 | Synthetic ZK fallback | RISC Zero requires specific hardware; CVM uses synthetic seals |
