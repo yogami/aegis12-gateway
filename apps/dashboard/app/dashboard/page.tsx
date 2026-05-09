@@ -1,7 +1,25 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Navbar } from '@/components/ui/Navbar';
 
+interface AuditRecord {
+  timestamp: string;
+  intentHash: string;
+  status: string;
+  latency: string;
+  proofLink: string;
+}
+
 export default function Dashboard() {
+  const [audits, setAudits] = useState<AuditRecord[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('fiduciary_audits');
+    if (stored) {
+      setAudits(JSON.parse(stored));
+    }
+  }, []);
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <Navbar />
@@ -44,42 +62,35 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                <tr className="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 14:52:11</td>
-                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x732e6f893573e119f...</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
-                  </td>
-                  <td className="px-6 py-4 text-center font-mono text-xs">0.8ms</td>
-                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
-                </tr>
-                <tr className="bg-red-50/50 border-b dark:bg-red-900/10 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20">
-                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 14:46:10</td>
-                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px] text-red-500">0x8a9b2c3d4e5f6g7h8...</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">❌ INTERCEPTED (CIRCUIT BREAKER)</span>
-                  </td>
-                  <td className="px-6 py-4 text-center font-mono text-xs text-red-500 font-bold">2.1ms</td>
-                  <td className="px-6 py-4 text-right font-mono text-xs text-slate-500">N/A</td>
-                </tr>
-                <tr className="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 13:12:04</td>
-                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x11223344556677889...</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
-                  </td>
-                  <td className="px-6 py-4 text-center font-mono text-xs">0.7ms</td>
-                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
-                </tr>
-                <tr className="bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700/50">
-                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 10:45:22</td>
-                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x99887766554433221...</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
-                  </td>
-                  <td className="px-6 py-4 text-center font-mono text-xs">0.9ms</td>
-                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
-                </tr>
+                {audits.length === 0 ? (
+                  <tr className="bg-white border-b dark:bg-slate-800 dark:border-slate-700">
+                    <td colSpan={5} className="px-6 py-8 text-center text-slate-500 font-mono text-sm">
+                      Waiting for first hardware attestation...
+                      <br />
+                      <span className="text-xs text-slate-600 mt-2 block">Trigger an Intent Stream or Lockdown on the Control Plane to generate cryptographic receipts.</span>
+                    </td>
+                  </tr>
+                ) : (
+                  audits.map((audit, i) => (
+                    <tr key={i} className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-50/50 dark:bg-red-900/10 hover:bg-red-50 dark:hover:bg-red-900/20' : 'bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700/50'} border-b dark:border-slate-700`}>
+                      <td className="px-6 py-4 font-mono text-xs">{audit.timestamp}</td>
+                      <td className={`px-6 py-4 font-mono text-xs truncate max-w-[150px] ${audit.status.includes('INTERCEPTED') ? 'text-red-500' : ''}`}>{audit.intentHash}</td>
+                      <td className="px-6 py-4">
+                        <span className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'} text-xs font-medium px-2.5 py-0.5 rounded`}>
+                          {audit.status}
+                        </span>
+                      </td>
+                      <td className={`px-6 py-4 text-center font-mono text-xs ${audit.status.includes('INTERCEPTED') ? 'text-red-500 font-bold' : ''}`}>{audit.latency}</td>
+                      <td className="px-6 py-4 text-right font-mono text-xs">
+                        {audit.proofLink !== "N/A" ? (
+                          <a href={audit.proofLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline cursor-pointer">View</a>
+                        ) : (
+                          <span className="text-slate-500">N/A</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

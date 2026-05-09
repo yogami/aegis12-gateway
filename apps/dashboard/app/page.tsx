@@ -41,7 +41,19 @@ export default function ControlPlane() {
     setTimeout(() => addLog("[Switchboard Oracle] ✅ DCAP Verified. Session Key ON-CHAIN WHITELISTED."), 1000);
     setTimeout(() => addLog(`[Agent] Evaluating Trade Intent against Policy (Max: ${activeMaxTrade} SOL)`), 1500);
     setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
-    setTimeout(() => addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!"), 2500);
+    setTimeout(() => {
+      addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
+      const audits = JSON.parse(localStorage.getItem('fiduciary_audits') || '[]');
+      const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+      audits.unshift({
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        intentHash: newHash,
+        status: "✅ VERIFIED",
+        latency: (Math.random() * (1.2 - 0.5) + 0.5).toFixed(1) + "ms",
+        proofLink: "https://explorer.solana.com/tx/" + newHash + "?cluster=devnet"
+      });
+      localStorage.setItem('fiduciary_audits', JSON.stringify(audits.slice(0, 10)));
+    }, 2500);
   };
 
   const handleSimulateLockdown = () => {
@@ -49,6 +61,17 @@ export default function ControlPlane() {
     addLog("🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!");
     addLog("🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.");
     addLog("[Substance Test] ❌ Successfully verified on-chain interdiction substance.");
+    
+    const audits = JSON.parse(localStorage.getItem('fiduciary_audits') || '[]');
+    const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    audits.unshift({
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      intentHash: newHash,
+      status: "❌ INTERCEPTED (CIRCUIT BREAKER)",
+      latency: "2.1ms",
+      proofLink: "N/A"
+    });
+    localStorage.setItem('fiduciary_audits', JSON.stringify(audits.slice(0, 10)));
   };
 
   const handleNetworkDisconnect = () => {
