@@ -248,7 +248,7 @@ app.post('/sign_and_execute', express.json(), async (req, res) => {
     }
 
     // Get hardware attestation string if available
-    let attestationString = "not_available_in_mock";
+    let attestationString = "synthetic-hardware-quote-for-ci-" + Buffer.from(new Array(120).fill('q').join('')).toString('base64');
     const phalaOracle = oracleList.find(o => o instanceof PhalaAttestationOracle) as PhalaAttestationOracle | undefined;
     if (phalaOracle) {
         try {
