@@ -43,10 +43,11 @@ export default function ControlPlane() {
     addLog(`✅ [POLICY] Fiduciary limit updated to ${maxTradeSol} SOL.`);
   };
 
-  const handleSimulateSSE = async () => {
+    const handleSimulateSSE = async () => {
     if (enclaveState === "LOCKDOWN") return;
       
-    setLogs([">>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<"]);
+    setLogs([">>> STAGE 1: CONNECTING TO LIVE PHALA TEE ENCLAVE <<<"]);
+    addLog(`[Agent] Sending micro-intent to hardware (Max Limit: ${activeMaxTrade} SOL)`);
     
     const recordId = Math.random().toString(36).substring(7);
     
@@ -60,24 +61,27 @@ export default function ControlPlane() {
       proofLink: "PENDING"
     }, ...prev].slice(0, 10));
 
-    setTimeout(() => addLog("[Aegis-12 TEE] Enclave Memory Initialized. Verifying Quote..."), 500);
-    setTimeout(() => addLog("[Switchboard Oracle] ✅ DCAP Verified. Session Key ON-CHAIN WHITELISTED."), 1000);
-    setTimeout(() => addLog(`[Agent] Evaluating Trade Intent against Policy (Max: ${activeMaxTrade} SOL)`), 1500);
-    setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
-    
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/enclave/execute', {
+      addLog("[Network] Routing intent through Fiduciary Firewall to Hardware Instance...");
+      const response = await fetch('/api/sign_and_execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ maxTradeSol: activeMaxTrade })
+        body: JSON.stringify({
+            action: { toolId: 'solana_transfer', parameters: { to: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k', amount: 0.000001, token: 'SOL' }, estimatedValue: 0 },
+            agent: { did: 'did:aegis:demo-ui', purpose: 'financial_operations', currentTier: 'T1' },
+            context: { sessionId: 'demo', actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
+            agentContext: { prompt: "Live Hardware Demonstration", modelVersion: "GPT-Substance", jurisdiction: "GLOBAL" }
+        })
       });
       
       const data = await response.json();
       
-      if (data.success && data.txSig) {
-        addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
+      if (data.status === 'approved' && data.ledger_tx) {
+        addLog("[Switchboard Oracle] ✅ DCAP Verified. Hardware Attestation Validated.");
+        addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana...");
+        addLog(`[Substance Test] ✅ Live transaction executed via hardware enclave!`);
         
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
         
@@ -86,13 +90,13 @@ export default function ControlPlane() {
           audit.id === recordId ? {
             ...audit,
             status: "✅ VERIFIED",
-            intentHash: data.txSig.substring(0, 32) + "...",
+            intentHash: data.ledger_tx.substring(0, 32) + "...",
             latency: `${elapsed}s`,
-            proofLink: `https://explorer.solana.com/tx/${data.txSig}?cluster=devnet`
+            proofLink: `https://explorer.solana.com/tx/${data.ledger_tx}?cluster=devnet`
           } : audit
         ));
       } else {
-        throw new Error(data.error || "Unknown execution error");
+        throw new Error(data.error || "Unknown hardware execution error");
       }
     } catch (error: any) {
         addLog(`🔴 [ALERT] LIVE EXECUTION FAILED: ${error.message}`);

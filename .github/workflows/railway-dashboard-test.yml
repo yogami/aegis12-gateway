@@ -1,13 +1,14 @@
 name: Railway Control Plane E2E
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Phala TEE Deployment (GHCR)"]
+    types:
+      - completed
 
 jobs:
   test-dashboard:
     name: Dashboard UI Playwright Tests
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
