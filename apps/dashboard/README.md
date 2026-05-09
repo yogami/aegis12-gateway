@@ -75,7 +75,7 @@ npm run test:e2e
 
 | Service | Purpose | Production URL |
 | :--- | :--- | :--- |
-| Aegis-12 Enclave | Cryptographic gating & verification | `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network` |
+| Aegis-12 Enclave | Cryptographic gating & verification | `https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network` |
 | Supabase | PostgreSQL database | Shared instance (table prefix: `atp_`) |
 
 ## 📊 Status

@@ -80,7 +80,7 @@ You will see the agent complete a safe 500 USDC swap, followed by a simulated pr
 
 If you are building an autonomous agent for the Colosseum Hackathon, you can protect your liquidity and satisfy EU AI Act logging requirements by routing your intents through the Aegis-12 Remote Signer.
 
-**Endpoint:** `https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/sign_and_execute`
+**Endpoint:** `https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network/sign_and_execute`
 
 ### Minimal Example (TypeScript)
 ```typescript
@@ -92,7 +92,7 @@ const decision = await AegisSDK.signAndExecute({
 }, {
     agentId: "my_bot",
     tenantId: "tenant-1",
-    gatewayUrl: "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network"
+    gatewayUrl: "https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network"
 });
 
 if (decision.decision === "ALLOW") {

@@ -50,7 +50,7 @@ export async function POST(request: Request) {
             }
         };
 
-        const targetUrl = process.env.PHALA_ENFORCE_URL || 'https://c2fa9527475ea371388de812f47be1676bc59712-8000.dstack-pha-prod9.phala.network/sign_and_execute';
+        const targetUrl = process.env.PHALA_ENFORCE_URL || 'https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network/sign_and_execute';
 
         // Forward to actual Phala Backend
         const response = await fetch(targetUrl, {

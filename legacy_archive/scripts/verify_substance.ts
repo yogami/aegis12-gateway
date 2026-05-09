@@ -12,7 +12,7 @@ import { ethers } from 'ethers';
  */
 
 async function verify() {
-    const url = process.argv[2] || "https://c27b0861a2bf2891f43f3556d3aa9526d704f7bc-8000.dstack-pha-prod5.phala.network/";
+    const url = process.argv[2] || "https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network/";
     const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
     console.log(`[Auditor] 🔍 Auditing Substance at ${baseUrl}...`);
 
