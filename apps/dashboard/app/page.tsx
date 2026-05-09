@@ -152,6 +152,58 @@ export default function ControlPlane() {
               )}
             </div>
           </section>
+          {/* Hardware Topology */}
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
+            <h3 className="text-md font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-widest text-xs">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+              Hardware Topology
+            </h3>
+            <div className="flex flex-col items-center gap-3 w-full">
+              <div className="bg-[#0f172a] border-2 border-slate-600 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
+                🤖 Agent Intent (RPC Call)
+              </div>
+              <div className="w-0.5 h-4 bg-slate-600"></div>
+              <div className="bg-[#0f172a] border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
+                🛡️ Phala TDX Enclave <br/>
+                <span className="text-xs font-normal text-slate-400">Active Policy Engine</span>
+              </div>
+              <div className="w-0.5 h-4 bg-slate-600"></div>
+              <div className="bg-[#0f172a] border-2 border-purple-500 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
+                🌐 15-Node Oracle Network <br/>
+                <span className="text-xs font-normal text-slate-400">Attestation Verification</span>
+              </div>
+              <div className="w-0.5 h-4 bg-red-500"></div>
+              <div className="bg-red-900/20 border-2 border-red-500 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
+                🔴 CONNECTION SEVERED
+              </div>
+            </div>
+          </section>
+
+          {/* Sovereign Hardware Latency */}
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
+            <h3 className="text-md font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-widest text-xs">
+              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Sovereign Hardware Latency
+            </h3>
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <span className="text-sm text-slate-100">Enclave Boot Sequence</span>
+                <span className="text-lg font-bold font-mono text-cyan-400">140ms</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <span className="text-sm text-slate-100">Oracle Quote Generation</span>
+                <span className="text-lg font-bold font-mono text-cyan-400">450ms</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                <span className="text-sm text-slate-100">Policy Evaluation Time</span>
+                <span className="text-lg font-bold font-mono text-cyan-400">0.8ms</span>
+              </div>
+              <div className="flex justify-between items-center bg-red-900/10 border border-red-500/30 rounded-xl p-4 mt-2">
+                <span className="text-xs font-bold text-slate-100 leading-tight tracking-wider">CIRCUIT BREAKER<br/>INTERCEPTION LATENCY</span>
+                <span className="text-2xl font-bold font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">2.1ms</span>
+              </div>
+            </div>
+          </section>
 
           {/* Pitch Text: Council Recommended */}
           <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
