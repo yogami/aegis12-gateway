@@ -164,6 +164,113 @@
         .log-highlight { color: var(--primary); font-weight: 600; }
         .log-zk { color: var(--zk); font-weight: 600; }
         
+        .panel {
+            background-color: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #334155;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        /* Latency Metrics */
+        .metric-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155;
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #f1f5f9;
+        }
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        .value-normal { color: #38bdf8; }
+        .value-critical { 
+            color: #ef4444; 
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            font-size: 28px;
+        }
+        
+        /* Architecture Flow */
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        .node {
+            background-color: #0f172a;
+            border: 2px solid #475569;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f8fafc;
+            width: 80%;
+            text-align: center;
+            position: relative;
+        }
+        .node-enclave {
+            border-color: #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        .node-oracle {
+            border-color: #8b5cf6;
+        }
+        .node-reject {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        .arrow {
+            width: 4px;
+            height: 20px;
+            background-color: #475569;
+            position: relative;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: -8px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #475569;
+        }
+        .arrow-fast {
+            background-color: #ef4444;
+            box-shadow: 0 0 15px #ef4444;
+        }
+        .arrow-fast::after {
+            border-top-color: #ef4444;
+        }
+
         .status-header {
             display: flex;
             gap: 10px;
@@ -199,18 +306,45 @@
             <h1>Aegis-12</h1>
             <p class="subtitle">Institutional-Grade Fiduciary Firewall for Autonomous AI Agents.</p>
 
-            <div class="pitch-section">
-                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> The Problem: Hidden Drain</h3>
-                <p>AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleare.</p>
+            <div class="panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Hardware Topology
+                </div>
+                <div class="flow-diagram">
+                    <div class="node">🤖 Agent Intent (RPC Call)</div>
+                    <div class="arrow"></div>
+                    <div class="node node-enclave">🛡️ Phala TDX Enclave <br><span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Active Policy Engine</span></div>
+                    <div class="arrow"></div>
+                    <div class="node node-oracle">🌐 15-Node Oracle Network <br><span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Attestation Verification</span></div>
+                    <div class="arrow arrow-fast"></div>
+                    <div class="node node-reject">🔴 CONNECTION SEVERED</div>
+                </div>
             </div>
 
-            <div class="pitch-section">
-                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--zk)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> The "Mathematical Cage"</h3>
-                <ul class="checklist">
-                    <li><span>✅</span> <div><strong>ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
-                    <li><span>✅</span> <div><strong>Semantic Validation:</strong> Real-time transaction simulation to detect permission escapes before signing.</div></li>
-                    <li><span>✅</span> <div><strong>Fiduciary Registry:</strong> Every decision is logged to a public, immutable audit feed on Railway.</div></li>
-                </ul>
+            <div class="panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Sovereign Hardware Latency
+                </div>
+                <div class="metric-group">
+                    <div class="metric">
+                        <div class="metric-label">Enclave Boot Sequence</div>
+                        <div class="metric-value value-normal">140ms</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Oracle Quote Generation</div>
+                        <div class="metric-value value-normal">450ms</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Policy Evaluation Time</div>
+                        <div class="metric-value value-normal">0.8ms</div>
+                    </div>
+                    <div class="metric" style="border:none; margin-top: 20px; background-color: rgba(239, 68, 68, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <div class="metric-label" style="font-weight: 700;">CIRCUIT BREAKER<br>INTERCEPTION LATENCY</div>
+                        <div class="metric-value value-critical">2.1ms</div>
+                    </div>
+                </div>
             </div>
 
             <div class="controls">
