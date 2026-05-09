@@ -6,6 +6,15 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
     await page.goto('/');
     // Verify the UI loads correctly
     await expect(page.locator('h1')).toHaveText('AEGIS-12 FIDUCIARY DASHBOARD');
+
+    // Council Required UI Elements
+    await expect(page.locator('text=The Problem: Hidden Drain')).toBeVisible();
+    await expect(page.locator('text=The "Mathematical Cage"')).toBeVisible();
+    
+    // Fiduciary Registry Link
+    const registryLink = page.locator('#registry-link');
+    await expect(registryLink).toBeVisible();
+    await expect(registryLink).toHaveAttribute('href', 'https://railway.app/project/aegis12');
   });
 
   test.describe('1. Policy Configuration (Fiduciary Firewall)', () => {
@@ -63,7 +72,7 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
 
       await expect(terminal).toContainText('>>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<');
       await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 5000 });
-      await expect(terminal).toContainText('✅ Execution successful!', { timeout: 5000 });
+      await expect(terminal).toContainText('[Substance Test] ✅ Successfully verified on-chain cryptographic substance!', { timeout: 5000 });
     });
 
     test('Edge Case: Should display reconnection warnings gracefully', async ({ page }) => {
@@ -89,7 +98,8 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
 
       // UI should reflect lockdown
       await expect(terminal).toContainText('🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!');
-      await expect(terminal).toContainText('🔒 [CIRCUIT BREAKER] LOCKDOWN INITIATED. ENCLAVE HALTED.');
+      await expect(terminal).toContainText('🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.');
+      await expect(terminal).toContainText('[Substance Test] ❌ Successfully verified on-chain interdiction substance.');
       await expect(badge).toContainText('🔴 LOCKDOWN INITIATED');
       await expect(badge).toHaveClass(/animate-pulse/);
 

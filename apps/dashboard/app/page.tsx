@@ -41,13 +41,14 @@ export default function ControlPlane() {
     setTimeout(() => addLog("[Switchboard Oracle] ✅ DCAP Verified. Session Key ON-CHAIN WHITELISTED."), 1000);
     setTimeout(() => addLog(`[Agent] Evaluating Trade Intent against Policy (Max: ${activeMaxTrade} SOL)`), 1500);
     setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
-    setTimeout(() => addLog("✅ Execution successful!"), 2500);
+    setTimeout(() => addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!"), 2500);
   };
 
   const handleSimulateLockdown = () => {
     setEnclaveState("LOCKDOWN");
     addLog("🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!");
-    addLog("🔒 [CIRCUIT BREAKER] LOCKDOWN INITIATED. ENCLAVE HALTED.");
+    addLog("🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.");
+    addLog("[Substance Test] ❌ Successfully verified on-chain interdiction substance.");
   };
 
   const handleNetworkDisconnect = () => {
@@ -149,6 +150,33 @@ export default function ControlPlane() {
                   🔓 Override Multisig Lockdown
                 </button>
               )}
+            </div>
+          </section>
+
+          {/* Pitch Text: Council Recommended */}
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
+            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              The Problem: Hidden Drain
+            </h3>
+            <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+              AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleware.
+            </p>
+
+            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              The "Mathematical Cage"
+            </h3>
+            <ul className="text-sm text-slate-400 space-y-3 mb-6">
+              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
+              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Semantic Validation:</strong> Real-time transaction simulation to detect permission escapes before signing.</div></li>
+              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Fiduciary Registry:</strong> Every decision is logged to a public, immutable audit feed on Railway.</div></li>
+            </ul>
+
+            <div className="pt-4 border-t border-slate-800 text-center">
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+                Institutional Audit Feed: <br className="mb-2"/> <a id="registry-link" href="https://railway.app/project/aegis12" target="_blank" className="text-cyan-500 hover:text-cyan-400 underline lowercase normal-case tracking-normal text-sm mt-1 inline-block">View Registry ↗</a>
+              </p>
             </div>
           </section>
 
