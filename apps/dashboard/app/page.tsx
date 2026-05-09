@@ -60,7 +60,7 @@ export default function ControlPlane() {
       {/* Header */}
       <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">RAILWAY CONTROL PLANE</h1>
+          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">AEGIS-12 FIDUCIARY DASHBOARD</h1>
           <p className="text-slate-400 mt-2 text-sm">Aegis-12 Fiduciary Firewall // Hardware Telemetry</p>
         </div>
         

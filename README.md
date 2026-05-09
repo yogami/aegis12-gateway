@@ -2,6 +2,12 @@
 
 **Let AI agents operate safely without handing them the private keys.**
 
+> [!NOTE]
+> **[NEW] Post-Submission Architecture Deep Dive**
+> *While our official 3-minute demo covers the live gateway, we've released this 4-minute addendum detailing our 2.1ms hardware interception latency, the EU AI Act compliance moat, and our pivot to Fiduciary Firewalls.*
+> 
+> 🎥 **[Watch the Aegis-12 Master Presentation (4 min)](https://res.cloudinary.com/djol0rpn5/video/upload/v1778325693/colosseum_hackathon/aegis12_master_ultimate_1778325690976.mp4)**
+
 As the Solana ecosystem rapidly adopts autonomous AI agents (e.g., Eliza, SendAI, Griffain), developers and DAOs face a catastrophic vulnerability: **Agent Prompt Injections and Hallucinations.** If an agent holds the private keys to a treasury, a single prompt-injection or algorithmic drift can drain the entire protocol. 
 
 Agent developers cannot simply trust agents with raw private keys. They need a zero-custody hardware root of trust.
