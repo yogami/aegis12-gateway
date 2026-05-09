@@ -50,7 +50,8 @@ export async function POST(request: Request) {
             }
         };
 
-        const targetUrl = process.env.PHALA_ENFORCE_URL || 'http://localhost:8000/sign_and_execute';
+        const baseUrl = process.env.PHALA_BACKEND_URL || process.env.NEXT_PUBLIC_PHALA_BACKEND_URL || 'http://localhost:8000';
+        const targetUrl = `${baseUrl}/sign_and_execute`;
 
         // Forward to actual Phala Backend
         const response = await fetch(targetUrl, {
