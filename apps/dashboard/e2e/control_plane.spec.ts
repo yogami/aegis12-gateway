@@ -10,22 +10,6 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
     // Council Required UI Elements
     await expect(page.locator('text=The Problem: Hidden Drain')).toBeVisible();
     await expect(page.locator('text=The "Mathematical Cage"')).toBeVisible();
-    
-    // Fiduciary Registry Link
-    const registryLink = page.locator('#registry-link');
-    await expect(registryLink).toBeVisible();
-    await expect(registryLink).toHaveAttribute('href', '/dashboard');
-  });
-
-  test.describe('1. Navigation & Routing', () => {
-    test('Standard Path: Should navigate to the Fiduciary Registry without 404', async ({ page }) => {
-      const registryLink = page.locator('#registry-link');
-      await registryLink.click();
-      
-      // Wait for navigation and verify the page loaded the Registry heading
-      await expect(page).toHaveURL(/.*\/dashboard/);
-      await expect(page.getByRole('heading', { name: 'Aegis On-Chain Verifier Registry' })).toBeVisible();
-    });
   });
 
   test.describe('2. Policy Configuration (Fiduciary Firewall)', () => {
@@ -75,7 +59,7 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
   });
 
   test.describe('2. Telemetry & Log Stream Resilience', () => {
-    test('Standard Path: Should stream mock hardware SSE logs', async ({ page }) => {
+    test('Standard Path: Should stream mock hardware SSE logs and update Registry Feed', async ({ page }) => {
       const btn = page.getByRole('button', { name: '▶ Trigger Intent Stream' });
       const terminal = page.locator('#telemetry-terminal');
 
@@ -84,6 +68,9 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
       await expect(terminal).toContainText('>>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<');
       await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 5000 });
       await expect(terminal).toContainText('[Substance Test] ✅ Successfully verified on-chain cryptographic substance!', { timeout: 5000 });
+      
+      // Verify Fiduciary Registry updates dynamically
+      await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 5000 });
     });
 
     test('Edge Case: Should display reconnection warnings gracefully', async ({ page }) => {
@@ -113,6 +100,9 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
       await expect(terminal).toContainText('[Substance Test] ❌ Successfully verified on-chain interdiction substance.');
       await expect(badge).toContainText('🔴 LOCKDOWN INITIATED');
       await expect(badge).toHaveClass(/animate-pulse/);
+
+      // Verify Fiduciary Registry catches anomaly
+      await expect(page.locator('table')).toContainText('❌ INTERCEPTED (CIRCUIT BREAKER)', { timeout: 5000 });
 
       // Edge Case: Should explicitly disable policy configuration
       await expect(input).toBeDisabled();

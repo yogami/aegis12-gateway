@@ -13,9 +13,13 @@ export function Navbar() {
                     </span>
                 </Link>
                 <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse items-center gap-4">
-                    <Link href="/dashboard" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 transition-all hover:scale-105">
-                        Institutional Registry
-                    </Link>
+                    <span className="text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 font-mono font-medium rounded text-xs px-3 py-1.5 flex items-center gap-2">
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        Telemetry Active
+                    </span>
                 </div>
             </div>
         </nav>

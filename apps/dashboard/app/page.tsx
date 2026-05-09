@@ -2,7 +2,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 
+interface AuditRecord {
+  timestamp: string;
+  intentHash: string;
+  status: string;
+  latency: string;
+  proofLink: string;
+}
+
 export default function ControlPlane() {
+  const [audits, setAudits] = useState<AuditRecord[]>([]);
   const [maxTradeSol, setMaxTradeSol] = useState<string>("0.05");
   const [activeMaxTrade, setActiveMaxTrade] = useState<string>("0.05");
   const [enclaveState, setEnclaveState] = useState<"ACTIVE" | "LOCKDOWN" | "FAILED">("ACTIVE");
@@ -43,16 +52,14 @@ export default function ControlPlane() {
     setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
     setTimeout(() => {
       addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
-      const audits = JSON.parse(localStorage.getItem('fiduciary_audits') || '[]');
       const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
-      audits.unshift({
+      setAudits(prev => [{
         timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
         intentHash: newHash,
         status: "✅ VERIFIED",
         latency: (Math.random() * (1.2 - 0.5) + 0.5).toFixed(1) + "ms",
         proofLink: "https://explorer.solana.com/tx/" + newHash + "?cluster=devnet"
-      });
-      localStorage.setItem('fiduciary_audits', JSON.stringify(audits.slice(0, 10)));
+      }, ...prev].slice(0, 10));
     }, 2500);
   };
 
@@ -62,16 +69,14 @@ export default function ControlPlane() {
     addLog("🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.");
     addLog("[Substance Test] ❌ Successfully verified on-chain interdiction substance.");
     
-    const audits = JSON.parse(localStorage.getItem('fiduciary_audits') || '[]');
     const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
-    audits.unshift({
+    setAudits(prev => [{
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
       intentHash: newHash,
       status: "❌ INTERCEPTED (CIRCUIT BREAKER)",
       latency: "2.1ms",
       proofLink: "N/A"
-    });
-    localStorage.setItem('fiduciary_audits', JSON.stringify(audits.slice(0, 10)));
+    }, ...prev].slice(0, 10));
   };
 
   const handleNetworkDisconnect = () => {
@@ -250,7 +255,7 @@ export default function ControlPlane() {
 
             <div className="pt-4 border-t border-slate-800 text-center">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                Institutional Audit Feed: <br className="mb-2"/> <a id="registry-link" href="/dashboard" className="text-cyan-500 hover:text-cyan-400 underline lowercase normal-case tracking-normal text-sm mt-1 inline-block">View Registry ↗</a>
+                Institutional Audit Feed Below ↓
               </p>
             </div>
           </section>
@@ -299,7 +304,59 @@ export default function ControlPlane() {
             )}
           </div>
         </div>
+      </div>
 
+      {/* Fiduciary Registry Section */}
+      <div className="mt-12 bg-[#111111] border border-slate-800 rounded-xl p-6">
+        <h2 className="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
+          <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+          Aegis On-Chain Verifier Registry (Fiduciary Audits)
+        </h2>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-slate-400">
+            <thead className="text-xs text-slate-500 uppercase bg-black/50">
+              <tr>
+                <th scope="col" className="px-6 py-3">Timestamp</th>
+                <th scope="col" className="px-6 py-3">Intent Hash</th>
+                <th scope="col" className="px-6 py-3">Verification Status</th>
+                <th scope="col" className="px-6 py-3 text-center">Latency</th>
+                <th scope="col" className="px-6 py-3 text-right">RiscZero Proof</th>
+              </tr>
+            </thead>
+            <tbody>
+              {audits.length === 0 ? (
+                <tr className="bg-[#111111] border-b border-slate-800">
+                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500 font-mono text-sm">
+                    Waiting for first hardware attestation...
+                    <br />
+                    <span className="text-xs text-slate-600 mt-2 block">Trigger an Intent Stream or Lockdown above to generate cryptographic receipts.</span>
+                  </td>
+                </tr>
+              ) : (
+                audits.map((audit, i) => (
+                  <tr key={i} className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-950/20 hover:bg-red-900/30' : 'bg-[#111111] hover:bg-slate-800/50'} border-b border-slate-800`}>
+                    <td className="px-6 py-4 font-mono text-xs">{audit.timestamp}</td>
+                    <td className={`px-6 py-4 font-mono text-xs truncate max-w-[150px] ${audit.status.includes('INTERCEPTED') ? 'text-red-500' : 'text-slate-300'}`}>{audit.intentHash}</td>
+                    <td className="px-6 py-4">
+                      <span className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-900/40 text-red-400 border border-red-800/50' : 'bg-green-900/40 text-green-400 border border-green-800/50'} text-xs font-bold px-2.5 py-0.5 rounded`}>
+                        {audit.status}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 text-center font-mono text-xs ${audit.status.includes('INTERCEPTED') ? 'text-red-500 font-bold' : 'text-slate-300'}`}>{audit.latency}</td>
+                    <td className="px-6 py-4 text-right font-mono text-xs">
+                      {audit.proofLink !== "N/A" ? (
+                        <a href={audit.proofLink} target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline cursor-pointer">View On-Chain</a>
+                      ) : (
+                        <span className="text-slate-600">N/A</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
