@@ -227,7 +227,7 @@ export default function ControlPlane() {
 
             <div className="pt-4 border-t border-slate-800 text-center">
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                Institutional Audit Feed: <br className="mb-2"/> <a id="registry-link" href="https://railway.app/project/aegis12" target="_blank" className="text-cyan-500 hover:text-cyan-400 underline lowercase normal-case tracking-normal text-sm mt-1 inline-block">View Registry ↗</a>
+                Institutional Audit Feed: <br className="mb-2"/> <a id="registry-link" href="/dashboard" className="text-cyan-500 hover:text-cyan-400 underline lowercase normal-case tracking-normal text-sm mt-1 inline-block">View Registry ↗</a>
               </p>
             </div>
           </section>

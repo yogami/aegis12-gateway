@@ -14,10 +14,21 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
     // Fiduciary Registry Link
     const registryLink = page.locator('#registry-link');
     await expect(registryLink).toBeVisible();
-    await expect(registryLink).toHaveAttribute('href', 'https://railway.app/project/aegis12');
+    await expect(registryLink).toHaveAttribute('href', '/dashboard');
   });
 
-  test.describe('1. Policy Configuration (Fiduciary Firewall)', () => {
+  test.describe('1. Navigation & Routing', () => {
+    test('Standard Path: Should navigate to the Fiduciary Registry without 404', async ({ page }) => {
+      const registryLink = page.locator('#registry-link');
+      await registryLink.click();
+      
+      // Wait for navigation and verify the page loaded the Registry heading
+      await expect(page).toHaveURL(/.*\/dashboard/);
+      await expect(page.getByRole('heading', { name: 'Aegis On-Chain Verifier Registry' })).toBeVisible();
+    });
+  });
+
+  test.describe('2. Policy Configuration (Fiduciary Firewall)', () => {
     test('Standard Path: Should update the maxTradeSol limit successfully', async ({ page }) => {
       const input = page.locator('#policy-max-trade');
       const submitBtn = page.locator('#btn-update-policy');
