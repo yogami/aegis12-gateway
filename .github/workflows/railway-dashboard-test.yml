@@ -29,3 +29,6 @@ jobs:
       - name: Run Playwright Tests
         working-directory: ./apps/dashboard
         run: npx playwright test e2e/control_plane.spec.ts
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+
