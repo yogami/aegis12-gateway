@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface AuditRecord {
+  id: string;
   timestamp: string;
   intentHash: string;
   status: string;
@@ -44,39 +45,72 @@ export default function ControlPlane() {
 
   const handleSimulateSSE = () => {
     if (enclaveState === "LOCKDOWN") return;
+      
+    setLogs([">>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<"]);
     
-    addLog(">>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<");
-    setTimeout(() => addLog("[Switchboard Oracle] Received 4.5KB Intel DCAP Quote from Enclave."), 500);
+    const recordId = Math.random().toString(36).substring(7);
+    const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    
+    // Inject pending state immediately
+    setAudits(prev => [{
+      id: recordId,
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      intentHash: newHash,
+      status: "⏳ ZK SEALING...",
+      latency: "PENDING",
+      proofLink: "PENDING"
+    }, ...prev].slice(0, 10));
+
+    setTimeout(() => addLog("[Aegis-12 TEE] Enclave Memory Initialized. Verifying Quote..."), 500);
     setTimeout(() => addLog("[Switchboard Oracle] ✅ DCAP Verified. Session Key ON-CHAIN WHITELISTED."), 1000);
     setTimeout(() => addLog(`[Agent] Evaluating Trade Intent against Policy (Max: ${activeMaxTrade} SOL)`), 1500);
     setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
     setTimeout(() => {
       addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
-      const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
-      setAudits(prev => [{
-        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        intentHash: newHash,
-        status: "✅ VERIFIED",
-        latency: (Math.random() * (1.2 - 0.5) + 0.5).toFixed(1) + "ms",
-        proofLink: "https://explorer.solana.com/tx/" + newHash + "?cluster=devnet"
-      }, ...prev].slice(0, 10));
+      
+      // Resolve the pending state
+      setAudits(prev => prev.map(audit => 
+        audit.id === recordId ? {
+          ...audit,
+          status: "✅ VERIFIED",
+          latency: (Math.random() * (1.2 - 0.5) + 0.5).toFixed(1) + "ms",
+          proofLink: "https://explorer.solana.com/tx/" + newHash + "?cluster=devnet"
+        } : audit
+      ));
     }, 2500);
   };
 
   const handleSimulateLockdown = () => {
     setEnclaveState("LOCKDOWN");
-    addLog("🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!");
-    addLog("🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.");
-    addLog("[Substance Test] ❌ Successfully verified on-chain interdiction substance.");
     
+    const recordId = Math.random().toString(36).substring(7);
     const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    
+    // Inject pending state immediately
     setAudits(prev => [{
+      id: recordId,
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
       intentHash: newHash,
-      status: "❌ INTERCEPTED (CIRCUIT BREAKER)",
-      latency: "2.1ms",
-      proofLink: "N/A"
+      status: "⏳ ZK SEALING...",
+      latency: "PENDING",
+      proofLink: "PENDING"
     }, ...prev].slice(0, 10));
+
+    addLog("🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!");
+    addLog("🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.");
+    
+    setTimeout(() => {
+        addLog("[Substance Test] ❌ Successfully verified on-chain interdiction substance.");
+        // Resolve the pending state
+        setAudits(prev => prev.map(audit => 
+          audit.id === recordId ? {
+            ...audit,
+            status: "❌ INTERCEPTED (CIRCUIT BREAKER)",
+            latency: "2.1ms",
+            proofLink: "N/A"
+          } : audit
+        ));
+    }, 1500);
   };
 
   const handleNetworkDisconnect = () => {
@@ -334,18 +368,23 @@ export default function ControlPlane() {
                   </td>
                 </tr>
               ) : (
-                audits.map((audit, i) => (
-                  <tr key={i} className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-950/20 hover:bg-red-900/30' : 'bg-[#111111] hover:bg-slate-800/50'} border-b border-slate-800`}>
+                audits.map((audit) => (
+                  <tr key={audit.id} className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-950/20 hover:bg-red-900/30' : audit.status.includes('SEALING') ? 'bg-amber-950/20 hover:bg-amber-900/30' : 'bg-[#111111] hover:bg-slate-800/50'} border-b border-slate-800 transition-colors duration-500`}>
                     <td className="px-6 py-4 font-mono text-xs">{audit.timestamp}</td>
-                    <td className={`px-6 py-4 font-mono text-xs truncate max-w-[150px] ${audit.status.includes('INTERCEPTED') ? 'text-red-500' : 'text-slate-300'}`}>{audit.intentHash}</td>
+                    <td className={`px-6 py-4 font-mono text-xs truncate max-w-[150px] ${audit.status.includes('INTERCEPTED') ? 'text-red-500' : audit.status.includes('SEALING') ? 'text-amber-500' : 'text-slate-300'}`}>{audit.intentHash}</td>
                     <td className="px-6 py-4">
-                      <span className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-900/40 text-red-400 border border-red-800/50' : 'bg-green-900/40 text-green-400 border border-green-800/50'} text-xs font-bold px-2.5 py-0.5 rounded`}>
+                      <span className={`${audit.status.includes('INTERCEPTED') ? 'bg-red-900/40 text-red-400 border border-red-800/50' : audit.status.includes('SEALING') ? 'bg-amber-900/40 text-amber-400 border border-amber-800/50 animate-pulse' : 'bg-green-900/40 text-green-400 border border-green-800/50'} text-xs font-bold px-2.5 py-0.5 rounded`}>
                         {audit.status}
                       </span>
                     </td>
-                    <td className={`px-6 py-4 text-center font-mono text-xs ${audit.status.includes('INTERCEPTED') ? 'text-red-500 font-bold' : 'text-slate-300'}`}>{audit.latency}</td>
+                    <td className={`px-6 py-4 text-center font-mono text-xs ${audit.status.includes('INTERCEPTED') ? 'text-red-500 font-bold' : audit.status.includes('SEALING') ? 'text-amber-500 opacity-50' : 'text-slate-300'}`}>{audit.latency}</td>
                     <td className="px-6 py-4 text-right font-mono text-xs">
-                      {audit.proofLink !== "N/A" ? (
+                      {audit.proofLink === "PENDING" ? (
+                        <div className="flex items-center justify-end gap-2 text-amber-500 animate-pulse">
+                            <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            Generating Proof...
+                        </div>
+                      ) : audit.proofLink !== "N/A" ? (
                         <a href={audit.proofLink} target="_blank" rel="noopener noreferrer" className="text-cyan-500 hover:underline cursor-pointer">View On-Chain</a>
                       ) : (
                         <span className="text-slate-600">N/A</span>

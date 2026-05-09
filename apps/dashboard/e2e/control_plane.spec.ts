@@ -66,11 +66,16 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
       await btn.click();
 
       await expect(terminal).toContainText('>>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<');
+      
+      // Verify pending state appears immediately
+      await expect(page.locator('table')).toContainText('⏳ ZK SEALING...');
+      await expect(page.locator('table')).toContainText('Generating Proof...');
+
       await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 5000 });
       await expect(terminal).toContainText('[Substance Test] ✅ Successfully verified on-chain cryptographic substance!', { timeout: 5000 });
       
-      // Verify Fiduciary Registry updates dynamically
-      await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 5000 });
+      // Verify pending state resolves dynamically
+      await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 8000 });
     });
 
     test('Edge Case: Should display reconnection warnings gracefully', async ({ page }) => {
@@ -93,16 +98,18 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
 
       // Trigger lockdown
       await btnLockdown.click();
+      
+      // Verify pending state appears immediately
+      await expect(page.locator('table')).toContainText('⏳ ZK SEALING...');
 
-      // UI should reflect lockdown
       await expect(terminal).toContainText('🔴 [ALERT] MULTIPLE ANOMALOUS INTENTS DETECTED!');
       await expect(terminal).toContainText('🔒 [CIRCUIT Breaker] LOCKDOWN INITIATED. ENCLAVE HALTED.');
-      await expect(terminal).toContainText('[Substance Test] ❌ Successfully verified on-chain interdiction substance.');
+      await expect(terminal).toContainText('[Substance Test] ❌ Successfully verified on-chain interdiction substance.', { timeout: 5000 });
       await expect(badge).toContainText('🔴 LOCKDOWN INITIATED');
       await expect(badge).toHaveClass(/animate-pulse/);
 
-      // Verify Fiduciary Registry catches anomaly
-      await expect(page.locator('table')).toContainText('❌ INTERCEPTED (CIRCUIT BREAKER)', { timeout: 5000 });
+      // Verify pending state resolves to intercepted
+      await expect(page.locator('table')).toContainText('❌ INTERCEPTED (CIRCUIT BREAKER)', { timeout: 8000 });
 
       // Edge Case: Should explicitly disable policy configuration
       await expect(input).toBeDisabled();
