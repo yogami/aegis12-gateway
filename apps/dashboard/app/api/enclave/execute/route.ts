@@ -39,7 +39,7 @@ export async function POST(req: Request) {
         const lamports = Math.floor(0.000001 * LAMPORTS_PER_SOL);
         const transferIx = SystemProgram.transfer({
             fromPubkey: keypair.publicKey,
-            toPubkey: destPubkey,
+            toPubkey: keypair.publicKey,
             lamports
         });
 
