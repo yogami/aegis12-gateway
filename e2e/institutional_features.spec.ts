@@ -25,7 +25,7 @@ test.describe('Institutional Feature Verification (Simulation + ZK + Registry)',
             data: {
                 action: {
                     toolId: 'solana_transfer',
-                    parameters: { to: '11111111111111111111111111111111', amount: 0.001, token: 'SOL' },
+                    parameters: { to: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k', amount: 0.001, token: 'SOL' },
                     estimatedValue: 0.001
                 },
                 agent: { did: 'did:aegis:pw-test', purpose: 'financial_operations', currentTier: 'T1' },
@@ -64,7 +64,7 @@ test.describe('Institutional Feature Verification (Simulation + ZK + Registry)',
             data: {
                 action: {
                     toolId: 'solana_transfer',
-                    parameters: { to: '11111111111111111111111111111111', amount: 50, token: 'SOL' },
+                    parameters: { to: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k', amount: 50, token: 'SOL' },
                     estimatedValue: 50
                 },
                 agent: { did: 'did:aegis:pw-escalate', purpose: 'financial_operations', currentTier: 'T1' },
@@ -91,7 +91,7 @@ test.describe('Institutional Feature Verification (Simulation + ZK + Registry)',
             data: {
                 action: {
                     toolId: 'solana_transfer',
-                    parameters: { to: '11111111111111111111111111111111', amount: 1, token: 'SOL' },
+                    parameters: { to: '4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k', amount: 1, token: 'SOL' },
                 },
                 agent: { did: 'did:aegis:attacker', purpose: 'financial_operations', currentTier: 'T1' },
                 context: { sessionId: 'inject', actionsThisSession: 1, actionsThisHour: 1, currentAnomalyScore: 0.1, recentIncidents: 0 },
