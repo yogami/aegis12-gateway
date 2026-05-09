@@ -28,6 +28,62 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <div className="mt-8 bg-white dark:bg-slate-800 rounded-xl shadow border border-gray-200 dark:border-slate-700 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Fiduciary Audits</h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+              <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-slate-900 dark:text-gray-400">
+                <tr>
+                  <th scope="col" className="px-6 py-3">Timestamp</th>
+                  <th scope="col" className="px-6 py-3">Intent Hash</th>
+                  <th scope="col" className="px-6 py-3">Verification Status</th>
+                  <th scope="col" className="px-6 py-3 text-center">Latency</th>
+                  <th scope="col" className="px-6 py-3 text-right">RiscZero Proof</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 14:52:11</td>
+                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x732e6f893573e119f...</td>
+                  <td className="px-6 py-4">
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono text-xs">0.8ms</td>
+                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
+                </tr>
+                <tr className="bg-red-50/50 border-b dark:bg-red-900/10 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20">
+                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 14:46:10</td>
+                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px] text-red-500">0x8a9b2c3d4e5f6g7h8...</td>
+                  <td className="px-6 py-4">
+                    <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-red-900 dark:text-red-300">❌ INTERCEPTED (CIRCUIT BREAKER)</span>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono text-xs text-red-500 font-bold">2.1ms</td>
+                  <td className="px-6 py-4 text-right font-mono text-xs text-slate-500">N/A</td>
+                </tr>
+                <tr className="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 13:12:04</td>
+                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x11223344556677889...</td>
+                  <td className="px-6 py-4">
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono text-xs">0.7ms</td>
+                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
+                </tr>
+                <tr className="bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                  <td className="px-6 py-4 font-mono text-xs">2026-05-09 10:45:22</td>
+                  <td className="px-6 py-4 font-mono text-xs truncate max-w-[150px]">0x99887766554433221...</td>
+                  <td className="px-6 py-4">
+                    <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-green-900 dark:text-green-300">✅ VERIFIED</span>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono text-xs">0.9ms</td>
+                  <td className="px-6 py-4 text-right font-mono text-xs text-blue-500 hover:underline cursor-pointer">View</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
