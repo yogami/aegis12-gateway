@@ -71,11 +71,11 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
       await expect(page.locator('table')).toContainText('⏳ ZK SEALING...');
       await expect(page.locator('table')).toContainText('Generating Proof...');
 
-      await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 5000 });
-      await expect(terminal).toContainText('[Substance Test] ✅ Live transaction executed via hardware enclave!', { timeout: 15000 });
+      await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 25000 });
+      await expect(terminal).toContainText('[Substance Test] ✅ Live transaction executed via hardware enclave!', { timeout: 25000 });
       
       // Verify pending state resolves dynamically
-      await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 8000 });
+      await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 25000 });
     });
 
     test('Edge Case: Should display reconnection warnings gracefully', async ({ page }) => {

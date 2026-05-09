@@ -32,4 +32,5 @@ jobs:
         run: npx playwright test e2e/control_plane.spec.ts
         env:
           SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+          PHALA_BACKEND_URL: "https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network"
 
