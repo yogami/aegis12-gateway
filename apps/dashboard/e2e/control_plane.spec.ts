@@ -65,14 +65,14 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
 
       await btn.click();
 
-      await expect(terminal).toContainText('>>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<');
+      await expect(terminal).toContainText('>>> STAGE 1: CONNECTING TO LIVE PHALA TEE ENCLAVE <<<');
       
       // Verify pending state appears immediately
       await expect(page.locator('table')).toContainText('⏳ ZK SEALING...');
       await expect(page.locator('table')).toContainText('Generating Proof...');
 
       await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 5000 });
-      await expect(terminal).toContainText('[Substance Test] ✅ Successfully verified on-chain cryptographic substance!', { timeout: 5000 });
+      await expect(terminal).toContainText('[Substance Test] ✅ Live transaction executed via hardware enclave!', { timeout: 15000 });
       
       // Verify pending state resolves dynamically
       await expect(page.locator('table')).toContainText('✅ VERIFIED', { timeout: 8000 });

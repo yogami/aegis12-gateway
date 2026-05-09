@@ -20,35 +20,36 @@ export async function POST(request: Request) {
             { name: 'squadsMultisig', type: 'string' }, { name: 'allowedProgramIds', type: 'string[]' }
         ]};
 
-        // Extract the frontend's policy config request and re-sign it mathematically
-        const policyConfig = body.dynamicPolicy.policyConfig;
-        
-        // Ethers v5 requires _signTypedData for typed data
-        // Ethers v6 requires signTypedData
-        // Let's check which one works by trying v6 first, then falling back to v5
-        let signature;
-        type EthersSigner = { 
-            signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
-            _signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
-        };
-        const w = wallet as unknown as EthersSigner;
-        if (typeof w.signTypedData === 'function') {
-            signature = await w.signTypedData(domain, types, policyConfig);
-        } else if (typeof w._signTypedData === 'function') {
-            signature = await w._signTypedData(domain, types, policyConfig);
-        } else {
-            throw new Error("Ethers wallet does not support typed data signing");
-        }
+        let signedPayload = body;
 
-        // Reconstruct the payload with the dynamically generated valid signature
-        const signedPayload = {
-            ...body,
-            dynamicPolicy: {
-                policyConfig,
-                ownerPublicKey: wallet.address,
-                signature
+        // If dynamicPolicy is provided (legacy feature), sign it mathematically.
+        if (body.dynamicPolicy && body.dynamicPolicy.policyConfig) {
+            const policyConfig = body.dynamicPolicy.policyConfig;
+            
+            let signature;
+            type EthersSigner = { 
+                signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
+                _signTypedData?: (d: unknown, t: unknown, v: unknown) => Promise<string>;
+            };
+            const w = wallet as unknown as EthersSigner;
+            if (typeof w.signTypedData === 'function') {
+                signature = await w.signTypedData(domain, types, policyConfig);
+            } else if (typeof w._signTypedData === 'function') {
+                signature = await w._signTypedData(domain, types, policyConfig);
+            } else {
+                throw new Error("Ethers wallet does not support typed data signing");
             }
-        };
+
+            // Reconstruct the payload with the dynamically generated valid signature
+            signedPayload = {
+                ...body,
+                dynamicPolicy: {
+                    policyConfig,
+                    ownerPublicKey: wallet.address,
+                    signature
+                }
+            };
+        }
 
         const baseUrl = process.env.PHALA_BACKEND_URL || process.env.NEXT_PUBLIC_PHALA_BACKEND_URL || 'http://localhost:8000';
         const targetUrl = `${baseUrl}/sign_and_execute`;
