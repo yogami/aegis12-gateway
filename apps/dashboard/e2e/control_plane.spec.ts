@@ -5,7 +5,7 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Verify the UI loads correctly
-    await expect(page.locator('h1')).toHaveText('RAILWAY CONTROL PLANE');
+    await expect(page.locator('h1')).toHaveText('AEGIS-12 FIDUCIARY DASHBOARD');
   });
 
   test.describe('1. Policy Configuration (Fiduciary Firewall)', () => {
