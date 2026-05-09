@@ -4,7 +4,7 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        const enforceUrl = process.env.PHALA_ENFORCE_URL || 'https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network/sign_and_execute';
+        const enforceUrl = process.env.PHALA_ENFORCE_URL || 'http://localhost:8000/sign_and_execute';
         const targetUrl = enforceUrl.replace('/sign_and_execute', '/vault/policy');
 
         // Forward to actual Phala Backend
