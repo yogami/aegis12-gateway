@@ -43,19 +43,18 @@ export default function ControlPlane() {
     addLog(`✅ [POLICY] Fiduciary limit updated to ${maxTradeSol} SOL.`);
   };
 
-  const handleSimulateSSE = () => {
+  const handleSimulateSSE = async () => {
     if (enclaveState === "LOCKDOWN") return;
       
     setLogs([">>> STAGE 1: BOOTING TEE ENCLAVE & ATTESTATION <<<"]);
     
     const recordId = Math.random().toString(36).substring(7);
-    const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
     
     // Inject pending state immediately
     setAudits(prev => [{
       id: recordId,
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-      intentHash: newHash,
+      intentHash: "GENERATING_ZK_PROOF...",
       status: "⏳ ZK SEALING...",
       latency: "PENDING",
       proofLink: "PENDING"
@@ -65,19 +64,47 @@ export default function ControlPlane() {
     setTimeout(() => addLog("[Switchboard Oracle] ✅ DCAP Verified. Session Key ON-CHAIN WHITELISTED."), 1000);
     setTimeout(() => addLog(`[Agent] Evaluating Trade Intent against Policy (Max: ${activeMaxTrade} SOL)`), 1500);
     setTimeout(() => addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana..."), 2000);
-    setTimeout(() => {
-      addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
+    
+    const startTime = Date.now();
+
+    try {
+      const response = await fetch('/api/enclave/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maxTradeSol: activeMaxTrade })
+      });
       
-      // Resolve the pending state
-      setAudits(prev => prev.map(audit => 
-        audit.id === recordId ? {
-          ...audit,
-          status: "✅ VERIFIED",
-          latency: (Math.random() * (1.2 - 0.5) + 0.5).toFixed(1) + "ms",
-          proofLink: "https://explorer.solana.com/tx/" + newHash + "?cluster=devnet"
-        } : audit
-      ));
-    }, 2500);
+      const data = await response.json();
+      
+      if (data.success && data.txSig) {
+        addLog("[Substance Test] ✅ Successfully verified on-chain cryptographic substance!");
+        
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+        
+        // Resolve the pending state
+        setAudits(prev => prev.map(audit => 
+          audit.id === recordId ? {
+            ...audit,
+            status: "✅ VERIFIED",
+            intentHash: data.txSig.substring(0, 32) + "...",
+            latency: `${elapsed}s`,
+            proofLink: `https://explorer.solana.com/tx/${data.txSig}?cluster=devnet`
+          } : audit
+        ));
+      } else {
+        throw new Error(data.error || "Unknown execution error");
+      }
+    } catch (error: any) {
+        addLog(`🔴 [ALERT] LIVE EXECUTION FAILED: ${error.message}`);
+        setAudits(prev => prev.map(audit => 
+          audit.id === recordId ? {
+            ...audit,
+            status: "❌ FAILED (NETWORK ERROR)",
+            latency: "ERR",
+            proofLink: "N/A"
+          } : audit
+        ));
+    }
   };
 
   const handleSimulateLockdown = () => {
