@@ -21,7 +21,7 @@ export default function ControlPlane() {
 
   // Auto-scroll terminal
   useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    terminalEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [logs]);
 
   const addLog = (msg: string) => setLogs((prev) => [...prev, `[${new Date().toISOString().split('T')[1].substring(0,12)}] ${msg}`]);
@@ -197,14 +197,37 @@ export default function ControlPlane() {
         </div>
       </header>
 
+      {/* Pitch Text Banner */}
+      <div className="mb-6 bg-[#111111] border border-slate-800 rounded-xl p-6 flex flex-col md:flex-row gap-8">
+        <div className="flex-1">
+          <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            The Problem: Hidden Drain
+          </h3>
+          <p className="text-sm text-slate-400 leading-relaxed">
+            AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleware.
+          </p>
+        </div>
+        <div className="flex-1">
+          <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            The "Mathematical Cage"
+          </h3>
+          <ul className="text-sm text-slate-400 space-y-2">
+            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
+            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Semantic Validation:</strong> Real-time simulation detects permission escapes before signing.</div></li>
+          </ul>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 xl:grid-cols-3 lg:grid-cols-2 gap-6 items-start">
         
         {/* Left Column: Controls */}
-        <div className="space-y-6 col-span-1">
+        <div className="space-y-4 col-span-1">
           
           {/* Policy Configuration Module */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4">
+            <h2 className="text-md font-bold text-slate-200 mb-3 flex items-center gap-2">
               <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
               Fiduciary Policy Rules
             </h2>
@@ -233,9 +256,9 @@ export default function ControlPlane() {
           </section>
 
           {/* Developer Tools */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
-            <h2 className="text-lg font-bold text-slate-200 mb-4">Diagnostic Tools</h2>
-            <div className="space-y-3">
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4">
+            <h2 className="text-md font-bold text-slate-200 mb-3">Diagnostic Tools</h2>
+            <div className="space-y-2">
               <button 
                 onClick={handleSimulateSSE}
                 disabled={enclaveState === "LOCKDOWN"}
@@ -269,12 +292,12 @@ export default function ControlPlane() {
             </div>
           </section>
           {/* Hardware Topology */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
-            <h3 className="text-md font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-widest text-xs">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 uppercase tracking-widest">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
               Hardware Topology
             </h3>
-            <div className="flex flex-col items-center gap-3 w-full">
+            <div className="flex flex-col items-center gap-2 w-full">
               <div className="bg-[#0f172a] border-2 border-slate-600 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
                 🤖 Agent Intent (RPC Call)
               </div>
@@ -296,55 +319,28 @@ export default function ControlPlane() {
           </section>
 
           {/* Sovereign Hardware Latency */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
-            <h3 className="text-md font-bold text-slate-200 mb-4 flex items-center gap-2 uppercase tracking-widest text-xs">
-              <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 uppercase tracking-widest">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
               Sovereign Hardware Latency
             </h3>
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <span className="text-sm text-slate-100">Enclave Boot Sequence</span>
-                <span className="text-lg font-bold font-mono text-cyan-400">140ms</span>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Enclave Boot Sequence</span>
+                <span className="text-md font-bold font-mono text-cyan-400">140ms</span>
               </div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <span className="text-sm text-slate-100">Oracle Quote Generation</span>
-                <span className="text-lg font-bold font-mono text-cyan-400">450ms</span>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Oracle Quote</span>
+                <span className="text-md font-bold font-mono text-cyan-400">450ms</span>
               </div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                <span className="text-sm text-slate-100">Policy Evaluation Time</span>
-                <span className="text-lg font-bold font-mono text-cyan-400">0.8ms</span>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Policy Evaluation Time</span>
+                <span className="text-md font-bold font-mono text-cyan-400">0.8ms</span>
               </div>
-              <div className="flex justify-between items-center bg-red-900/10 border border-red-500/30 rounded-xl p-4 mt-2">
-                <span className="text-xs font-bold text-slate-100 leading-tight tracking-wider">CIRCUIT BREAKER<br/>INTERCEPTION LATENCY</span>
-                <span className="text-2xl font-bold font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">2.1ms</span>
+              <div className="flex justify-between items-center bg-red-900/10 border border-red-500/30 rounded-xl p-3 mt-1">
+                <span className="text-[10px] font-bold text-slate-100 leading-tight tracking-wider">CIRCUIT BREAKER<br/>INTERCEPTION</span>
+                <span className="text-xl font-bold font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">2.1ms</span>
               </div>
-            </div>
-          </section>
-
-          {/* Pitch Text: Council Recommended */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-6">
-            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-              The Problem: Hidden Drain
-            </h3>
-            <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-              AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleware.
-            </p>
-
-            <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-              The "Mathematical Cage"
-            </h3>
-            <ul className="text-sm text-slate-400 space-y-3 mb-6">
-              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
-              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Semantic Validation:</strong> Real-time transaction simulation to detect permission escapes before signing.</div></li>
-              <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Fiduciary Registry:</strong> Every decision is logged to a public, immutable audit feed on Railway.</div></li>
-            </ul>
-
-            <div className="pt-4 border-t border-slate-800 text-center">
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">
-                Institutional Audit Feed Below ↓
-              </p>
             </div>
           </section>
 
