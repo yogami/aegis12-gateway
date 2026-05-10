@@ -392,7 +392,6 @@ export default function ControlPlane() {
             )}
           </div>
         </div>
-        </div>
 
         {/* Right Column: Fiduciary Registry Section */}
         <div className="col-span-1 bg-[#111111] border border-slate-800 rounded-xl p-4 flex flex-col h-[650px]">

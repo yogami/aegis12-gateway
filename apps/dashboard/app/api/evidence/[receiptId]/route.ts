@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 
-export async function GET(request: Request, { params }: { params: { receiptId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ receiptId: string }> }) {
     try {
+        const { receiptId } = await params;
         const baseUrl = process.env.PHALA_BACKEND_URL || process.env.NEXT_PUBLIC_PHALA_BACKEND_URL || 'http://localhost:8000';
-        const targetUrl = `${baseUrl}/evidence/${params.receiptId}`;
+        const targetUrl = `${baseUrl}/evidence/${receiptId}`;
 
         // Forward to actual Phala Backend
         const response = await fetch(targetUrl, {
