@@ -17,15 +17,17 @@ export default function VaultBotSimulator() {
       const malPolicy = {"policyConfig":{"policyId":"POL_MAL_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":1000}","expiresAt":1893456000,"nonce":`nonce-mal-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0xe777b5292a0266d4c3968206431666d686e1a64d7e84c1653cb82c8c5c0dce8e616df4444b13739a6284fe5bc26f5f47893390189dd3315c95204d14e12712bf1b"};
       const vaultPolicy = {"policyConfig":{"policyId":"POL_VAULT_01","tenantId":"tenant-council","version":"1.0.0","chainId":1399811149,"crossChainTarget":"solana:devnet","maxAnomalyScore":50,"financialLimitsString":"{\"T4\":10}","expiresAt":1893456000,"nonce":`nonce-vault-${Date.now()}`,"vaultPda":"CouncilVault_Default","squadsMultisig":"CouncilSquads_Default","allowedProgramIds":["11111111111111111111111111111111"]},"signature":"0x629ad17451168076b5f3e28f43d0eaa68bb479b41f6c4747783ac5d0f7699ae57814402e94922c401b7078f8b034ce9e64e699abd4f4b7f0463654e6daf2fbec1d"};
       
-      if (scenario === 'vault') {
-        setLogs(prev => [...prev, 'Uploading Highly Permissive Limits to Confidential TEE Vault...']);
+      if (scenario === 'vault' || scenario === 'safe') {
+        const policyId = scenario === 'vault' ? "POL_VAULT_01" : "POL_SAFE_01";
+        const limitStr = scenario === 'vault' ? "{\"T4\":5000000}" : "{\"T4\":1000}";
+        setLogs(prev => [...prev, `Uploading Limits for ${policyId} to Confidential TEE Vault...`]);
         await fetch('/api/vault_policy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             tenantId: "tenant-council",
-            policyId: "POL_VAULT_01",
-            sensitiveData: { financialLimitsString: "{\"T4\":5000000}" } // $5M secret limit
+            policyId: policyId,
+            sensitiveData: { financialLimitsString: limitStr }
           })
         });
         setLogs(prev => [...prev, '✅ Vault synchronized. Secret rules secured in hardware memory.']);
