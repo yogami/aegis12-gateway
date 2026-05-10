@@ -5,11 +5,11 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Verify the UI loads correctly
-    await expect(page.locator('h1')).toHaveText('AEGIS-12 FIDUCIARY DASHBOARD');
+    await expect(page.locator('h1')).toHaveText('AEGIS-12 FIDUCIARY CONTROL PLANE');
 
     // Council Required UI Elements
-    await expect(page.locator('text=The Problem: Hidden Drain')).toBeVisible();
-    await expect(page.locator('text=The "Mathematical Cage"')).toBeVisible();
+    await expect(page.locator('text=OBSERVABILITY SURFACE ONLY')).toBeVisible();
+    await expect(page.locator('text=Squads V4 Vault Boundary')).toBeVisible();
   });
 
   test.describe('2. Policy Configuration (Fiduciary Firewall)', () => {
