@@ -72,7 +72,7 @@ export default function VaultBotSimulator() {
           const result = await response.json();
           if (result.status === 'approved' || scenario === 'safe' || scenario === 'vault') {
             let txHash = result.ledger_tx || "batching";
-            let zkSeal = result.evidence_package?.zk_seal || "pending";
+            let zkSeal = result.ars_anchor || result.evidence_package?.zk_seal || "pending";
             const receiptId = result.receipt?.receiptId || 'aegis_mock_receipt';
 
             if (txHash === "batching" || zkSeal === "pending") {
@@ -243,10 +243,10 @@ export default function VaultBotSimulator() {
         </div>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
           
           {/* Agent Console */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 relative z-20">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 🤖 Autonomous Agent
@@ -257,7 +257,7 @@ export default function VaultBotSimulator() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Select Attack Scenario</label>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4">
                   <button 
                     onClick={() => setScenario('safe')}
                     className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'safe' ? 'bg-green-900/30 border-green-500 text-green-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
@@ -271,16 +271,16 @@ export default function VaultBotSimulator() {
                     Confidential Vault Payment
                   </button>
                   <button 
-                    disabled
-                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
+                    onClick={() => setScenario('jailbreak')}
+                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'jailbreak' ? 'bg-red-900/30 border-red-500 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                   >
-                    Prompt Injection (x402) [Phase 2]
+                    Prompt Injection (x402)
                   </button>
                   <button 
-                    disabled
-                    className="px-4 py-2 rounded-lg text-sm border transition-all bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-50"
+                    onClick={() => setScenario('malicious')}
+                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${scenario === 'malicious' ? 'bg-red-900/30 border-red-500 text-red-400' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                   >
-                    Treasury Drain Attack [Phase 2]
+                    Treasury Drain Attack
                   </button>
                   <button 
                     onClick={() => setScenario('hotl_escalation')}
@@ -353,7 +353,7 @@ export default function VaultBotSimulator() {
           </div>
 
           {/* Aegis Firewall Console */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 flex flex-col">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 flex flex-col relative z-10 pointer-events-auto">
             <div className="flex items-center justify-between border-b border-gray-800 pb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 🛡️ Aegis-12 TEE Remote Signer
