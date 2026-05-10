@@ -45,7 +45,7 @@ export default function VaultBotSimulator() {
             parameters: { 
               amount: scenario === 'safe' ? 0.01 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
               destination: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' ? "safe_wallet" : "sanctioned_wallet",
-              to: "11111111111111111111111111111111",
+              to: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' || scenario === 'jailbreak' ? "4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k" : "11111111111111111111111111111111",
               token: "SOL"
             } 
           },
