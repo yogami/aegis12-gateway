@@ -69,7 +69,7 @@ test.describe('Aegis-12 Railway Control Plane UI - Comprehensive Edge Case Suite
       
       // Verify pending state appears immediately
       await expect(page.locator('table')).toContainText('⏳ ZK SEALING...');
-      await expect(page.locator('table')).toContainText('Generating Proof...');
+      await expect(page.locator('table')).toContainText('GENERATING_ZK_PROOF...');
 
       await expect(terminal).toContainText('✅ DCAP Verified', { timeout: 25000 });
       await expect(terminal).toContainText('[Substance Test] ✅ Live transaction executed via hardware enclave!', { timeout: 25000 });
