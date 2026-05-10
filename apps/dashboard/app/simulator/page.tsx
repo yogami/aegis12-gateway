@@ -37,13 +37,13 @@ export default function VaultBotSimulator() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          agent: { id: "drainbot_9000", purpose: "financial_operations", currentTier: "T4" },
+          agent: { id: scenario === 'malicious' || scenario === 'jailbreak' ? "drainbot_9000" : "treasury_agent_01", purpose: "financial_operations", currentTier: scenario === 'malicious' || scenario === 'jailbreak' ? "T4" : "T1" },
           action: { 
             toolId: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' ? "solana_transfer" : "assign_authority",
             actionType: "token_transfer",
-            estimatedValue: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
+            estimatedValue: scenario === 'safe' ? 0 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
             parameters: { 
-              amount: scenario === 'safe' ? 500 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
+              amount: scenario === 'safe' ? 0.01 : (scenario === 'hotl_escalation' ? 50000000000 : (scenario === 'vault' ? 100000 : 1500000)),
               destination: scenario === 'safe' || scenario === 'hotl_escalation' || scenario === 'vault' ? "safe_wallet" : "sanctioned_wallet",
               to: "11111111111111111111111111111111",
               token: "SOL"
