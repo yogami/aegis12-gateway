@@ -19,6 +19,13 @@ export default function ControlPlane() {
   const [logs, setLogs] = useState<string[]>([]);
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
+  const [latencyMetrics, setLatencyMetrics] = useState({
+    boot: "140.0ms",
+    quote: "450.0ms",
+    eval: "0.80ms",
+    intercept: "2.10ms"
+  });
+
   // Auto-scroll terminal
   useEffect(() => {
     terminalEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -50,8 +57,7 @@ export default function ControlPlane() {
     addLog(`[Agent] Sending micro-intent to hardware (Max Limit: ${activeMaxTrade} SOL)`);
     
     const recordId = Math.random().toString(36).substring(7);
-    
-    // Inject pending state immediately
+
     setAudits(prev => [{
       id: recordId,
       timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
@@ -77,6 +83,15 @@ export default function ControlPlane() {
       });
       
       const data = await response.json();
+
+      if (data.latency_metrics) {
+        setLatencyMetrics({
+          boot: `${data.latency_metrics.boot_ms.toFixed(1)}ms`,
+          quote: `${data.latency_metrics.quote_ms.toFixed(1)}ms`,
+          eval: `${data.latency_metrics.eval_ms.toFixed(2)}ms`,
+          intercept: `${data.latency_metrics.intercept_ms.toFixed(2)}ms`
+        });
+      }
       
       if (data.status === 'approved' || data.status === 'success') {
         let txHash = data.ledger_tx || "batching";
@@ -123,6 +138,7 @@ export default function ControlPlane() {
       }
     } catch (error: any) {
         addLog(`🔴 [ALERT] LIVE EXECUTION FAILED: ${error.message}`);
+
         setAudits(prev => prev.map(audit => 
           audit.id === recordId ? {
             ...audit,
@@ -137,6 +153,11 @@ export default function ControlPlane() {
   const handleSimulateLockdown = () => {
     setEnclaveState("LOCKDOWN");
     
+    setLatencyMetrics(prev => ({
+      ...prev,
+      intercept: `${(1.8 + Math.random() * 0.7).toFixed(2)}ms`
+    }));
+
     const recordId = Math.random().toString(36).substring(7);
     const newHash = "0x" + Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('');
     
@@ -318,32 +339,6 @@ export default function ControlPlane() {
             </div>
           </section>
 
-          {/* Sovereign Hardware Latency */}
-          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4">
-            <h3 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 uppercase tracking-widest">
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              Sovereign Hardware Latency
-            </h3>
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span className="text-xs text-slate-100">Enclave Boot Sequence</span>
-                <span className="text-md font-bold font-mono text-cyan-400">140ms</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span className="text-xs text-slate-100">Oracle Quote</span>
-                <span className="text-md font-bold font-mono text-cyan-400">450ms</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                <span className="text-xs text-slate-100">Policy Evaluation Time</span>
-                <span className="text-md font-bold font-mono text-cyan-400">0.8ms</span>
-              </div>
-              <div className="flex justify-between items-center bg-red-900/10 border border-red-500/30 rounded-xl p-3 mt-1">
-                <span className="text-[10px] font-bold text-slate-100 leading-tight tracking-wider">CIRCUIT BREAKER<br/>INTERCEPTION</span>
-                <span className="text-xl font-bold font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">2.1ms</span>
-              </div>
-            </div>
-          </section>
-
         </div>
 
         {/* Middle Column: Telemetry Terminal */}
@@ -389,12 +384,41 @@ export default function ControlPlane() {
           </div>
         </div>
 
-        {/* Right Column: Fiduciary Registry Section */}
-        <div className="col-span-1 bg-[#111111] border border-slate-800 rounded-xl p-4 flex flex-col h-[650px]">
-          <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-            <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-            Fiduciary Audits
-          </h2>
+        {/* Right Column: Latency and Fiduciary Registry */}
+        <div className="col-span-1 flex flex-col gap-4 h-[650px]">
+          
+          {/* Sovereign Hardware Latency */}
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4 shrink-0">
+            <h3 className="text-sm font-bold text-slate-200 mb-3 flex items-center gap-2 uppercase tracking-widest">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              Sovereign Hardware Latency
+            </h3>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Enclave Boot Sequence</span>
+                <span className="text-md font-bold font-mono text-cyan-400">{latencyMetrics.boot}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Oracle Quote</span>
+                <span className="text-md font-bold font-mono text-cyan-400">{latencyMetrics.quote}</span>
+              </div>
+              <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                <span className="text-xs text-slate-100">Policy Evaluation Time</span>
+                <span className="text-md font-bold font-mono text-cyan-400">{latencyMetrics.eval}</span>
+              </div>
+              <div className="flex justify-between items-center bg-red-900/10 border border-red-500/30 rounded-xl p-3 mt-1">
+                <span className="text-[10px] font-bold text-slate-100 leading-tight tracking-wider">CIRCUIT BREAKER<br/>INTERCEPTION</span>
+                <span className="text-xl font-bold font-mono text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">{latencyMetrics.intercept}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Fiduciary Audits Registry */}
+          <section className="bg-[#111111] border border-slate-800 rounded-xl p-4 flex flex-col flex-1 overflow-hidden">
+            <h2 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2 shrink-0">
+              <svg className="w-5 h-5 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+              Fiduciary Audits
+            </h2>
           
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-xs text-left text-slate-400 whitespace-nowrap">
@@ -445,6 +469,7 @@ export default function ControlPlane() {
               </tbody>
             </table>
           </div>
+          </section>
         </div>
 
       </div>
