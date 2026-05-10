@@ -263,7 +263,7 @@ app.post('/sign_and_execute', express.json(), async (req, res) => {
             return res.status(403).json({ 
                 status: 'denied', 
                 error: e.message,
-                latency_metrics: { boot_ms: bootMs, quote_ms: 0, eval_ms: evalMs, intercept_ms: interceptMs }
+                latency_metrics: { boot_ms: bootMs, quote_ms: quoteMs, eval_ms: evalMs, intercept_ms: interceptMs }
             });
         }
     }
