@@ -1,6 +1,15 @@
-# Aegis-12: Hardware-Enforced Active Policy Engine for Solana AI Agents
+# AEGIS-12: SOLANA ACTIVE POLICY SDK
+
+> [!WARNING]
+> **Colosseum Submission Note:** The locked pitch video is ARCHIVED. We killed passive logging—it's useless. 
+> **THE REAL PRODUCT:** A Node.js SDK + Phala TEE Gateway that mathematically REFUSES TO SIGN malicious transactions.
+> 
+> 🎥 **[Watch the Final 2-Minute Architecture Demo & Refusal Walkthrough](TODO: Insert YouTube Link)**
 
 **Let AI agents operate safely without handing them the private keys.**
+
+## Hackathon Evolution: From Passive Logging to Hardware Enforcement
+Our initial registration described a passive Python logger tracking intents via SHA-256 to the Solana SPL Memo program. Mid-hackathon, red-teaming proved this was useless: if an agent goes rogue or is prompt-injected, a passive log will not stop a treasury drain. We aggressively pivoted. We rebuilt Aegis-12 into an **Active Policy Engine** that sits at the Squads V4 vault boundary.
 
 As the Solana ecosystem rapidly adopts autonomous AI agents (e.g., Eliza, SendAI), protocols face a critical security vulnerability: **Agent Hallucinations and Prompt Injections.** If an agent holds the private keys to a treasury, a single prompt-injection or algorithmic drift can drain the entire protocol. 
 

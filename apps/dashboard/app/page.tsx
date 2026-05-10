@@ -198,8 +198,8 @@ export default function ControlPlane() {
       {/* Header */}
       <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">AEGIS-12 FIDUCIARY DASHBOARD</h1>
-          <p className="text-slate-400 mt-2 text-sm">Aegis-12 Fiduciary Firewall // Hardware Telemetry</p>
+          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">AEGIS-12 FIDUCIARY CONTROL PLANE</h1>
+          <p className="text-slate-400 mt-2 text-sm">LIVE TEE TELEMETRY & SQUADS V4 ROUTING // BACKEND: PHALA TDX + NODE.JS</p>
         </div>
         
         {/* Hardware Status Badge */}
@@ -219,24 +219,25 @@ export default function ControlPlane() {
       </header>
 
       {/* Pitch Text Banner */}
-      <div className="mb-6 bg-[#111111] border border-slate-800 rounded-xl p-6 flex flex-col md:flex-row gap-8">
+      <div className="mb-6 bg-cyan-950/20 border border-cyan-900/50 rounded-xl p-6 flex flex-col md:flex-row gap-8">
         <div className="flex-1">
-          <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            The Problem: Hidden Drain
+          <h3 className="text-md font-bold text-cyan-400 mb-2 flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+            OBSERVABILITY SURFACE ONLY
           </h3>
-          <p className="text-sm text-slate-400 leading-relaxed">
-            AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleware.
+          <p className="text-sm text-slate-300 leading-relaxed">
+            <strong>YOU ARE VIEWING THE AEGIS-12 POLICY ENGINE CONTROL PLANE.</strong><br/>
+            This console visualizes real-time security decisions made by our SDK in Phala TEE hardware enclaves. The actual product is the underlying hardware-enforced SDK.
           </p>
         </div>
         <div className="flex-1">
-          <h3 className="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            The "Mathematical Cage"
+          <h3 className="text-md font-bold text-cyan-400 mb-2 flex items-center gap-2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Squads V4 Vault Boundary
           </h3>
-          <ul className="text-sm text-slate-400 space-y-2">
-            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
-            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-slate-300">Semantic Validation:</strong> Real-time simulation detects permission escapes before signing.</div></li>
+          <ul className="text-sm text-slate-300 space-y-2">
+            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-white">Active Interception:</strong> Mathematically refuses malicious txs at signing.</div></li>
+            <li className="flex items-start gap-2"><span>✅</span> <div><strong className="text-white">Human-on-the-Loop:</strong> Escalates policy violations to Squads V4 multisig proposals.</div></li>
           </ul>
         </div>
       </div>
