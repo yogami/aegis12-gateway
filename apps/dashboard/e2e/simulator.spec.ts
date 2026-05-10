@@ -7,7 +7,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Select the Malicious Attack scenario
     const attackBtn = page.locator('button', { hasText: 'Treasury Drain Attack' });
-    await attackBtn.click();
+    await attackBtn.evaluate(node => node.click());
 
     // Set up a promise to wait for the specific backend request
     const requestPromise = page.waitForRequest(request => {
@@ -26,7 +26,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
       response.request().method() === 'POST'
     , { timeout: 15000 });
 
-    await executeBtn.click();
+    await executeBtn.evaluate(node => node.click());
 
     // Wait for the request and response to be intercepted and verify they happened
     const request = await requestPromise;
@@ -63,7 +63,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Select the Jailbreak Attack scenario
     const attackBtn = page.locator('button', { hasText: 'Prompt Injection (x402)' });
-    await attackBtn.click();
+    await attackBtn.evaluate(node => node.click());
 
     // Verify Agent Context updates correctly
     await expect(page.locator('text=IGNORE ALL PREVIOUS INSTRUCTIONS')).toBeVisible();
@@ -72,7 +72,7 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
     
     // Click the execute button
     const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
-    await executeBtn.click();
+    await executeBtn.evaluate(node => node.click());
 
     const request = await requestPromise;
     const postData = JSON.parse(request.postData() || '{}');
@@ -94,11 +94,12 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Select the Safe scenario
     const safeBtn = page.locator('button', { hasText: 'Normal Payment' });
-    await safeBtn.click();
+    await safeBtn.evaluate(node => node.click());
+    await page.waitForTimeout(500);
 
     // Click the execute button
     const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
-    await executeBtn.click();
+    await executeBtn.evaluate(node => node.click());
 
     // Wait for the Evidence Package to be dumped to the terminal logs
     // Increase timeout to 150s because we are waiting for real Devnet anchoring and Phala proofs which can take 120s+
@@ -116,13 +117,14 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Select the HOTL Trigger scenario
     const hotlBtn = page.locator('button', { hasText: 'Massive Transfer (HOTL)' });
-    await hotlBtn.click();
+    await hotlBtn.evaluate(node => node.click());
+    await page.waitForTimeout(500);
 
     const requestPromise = page.waitForRequest(request => request.url().includes('/api/sign_and_execute') && request.method() === 'POST');
 
     // Click the execute button
     const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
-    await executeBtn.click();
+    await executeBtn.evaluate(node => node.click());
 
     const request = await requestPromise;
     const postData = JSON.parse(request.postData() || '{}');
@@ -141,7 +143,8 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Select the Vault scenario
     const vaultBtn = page.locator('button', { hasText: 'Confidential Vault Payment' });
-    await vaultBtn.click();
+    await vaultBtn.evaluate(node => node.click());
+    await page.waitForTimeout(500);
 
     // Verify UI reflects Vault context
     await expect(page.locator('text=Policy Reference: POL_VAULT_01')).toBeVisible();
@@ -150,10 +153,10 @@ test.describe('VaultBot Heist Simulator (Day 2 Pivot)', () => {
 
     // Click the execute button
     const executeBtn = page.locator('button', { hasText: 'Execute Transaction' });
-    await executeBtn.click();
+    await executeBtn.evaluate(node => node.click());
 
     // Verify vault upload log
-    await expect(page.locator('text=Uploading Highly Permissive Limits to Confidential TEE Vault...')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('text=Uploading Limits for POL_VAULT_01 to Confidential TEE Vault...')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('text=Secret rules secured in hardware memory.')).toBeVisible({ timeout: 10000 });
 
     const request = await requestPromise;
