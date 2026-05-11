@@ -25,8 +25,11 @@ jobs:
     - name: Run Security Audit
       run: npm audit || true
 
-    - name: Run Linter
-      run: npx eslint .
+    - name: Run Linter (zero warnings)
+      run: npx eslint . --max-warnings 0
+
+    - name: TypeScript Strict Check
+      run: npx tsc --noEmit --strict || echo "⚠️ TypeScript strict check found issues (non-blocking for now)"
 
     - name: Run Unit Tests (Logic Verification)
       run: npx vitest run tests/unit
