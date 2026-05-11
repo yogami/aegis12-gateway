@@ -105,21 +105,21 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
       status: 200,
       json: async () => ({ 
         status: 'approved', 
-        tx_hash: 'mock_hash', 
-        evidence_package: { zk_seal: 'mock_seal' }, 
-        hardware_quote: 'mock_quote' 
+        ledger_tx: 'mock_hash', 
+        receipt: { evidencePackage: { zk_seal: 'mock_seal' } }, 
+        attestation: 'mock_quote' 
       })
     }));
 
     const receipt = await AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    });
+    } as any);
 
     expect(receipt.tx_hash).toBe("mock_hash");
     expect(receipt.evidence_package).toBeDefined();
@@ -132,7 +132,7 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
       status: 200,
       json: async () => ({ 
         status: 'escalated', 
-        envelope: {
+        ars_anchor: {
             domain_separator: "AEGIS12_ESCALATE_V1",
             vault_pda: "TestVault_Default",
             squads_multisig: "TestSquads_Default",
@@ -140,20 +140,20 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
             state_predicates: { valid_until_slot: 1000000 },
             policy_hash: "pol-1"
         },
-        evidence_package: { zk_seal: 'mock_seal' }, 
-        hardware_quote: 'mock_quote' 
+        receipt: { evidencePackage: { zk_seal: 'mock_seal' } }, 
+        attestation: 'mock_quote' 
       })
     }));
 
     const receipt = await AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    });
+    } as any);
 
     expect(receipt.status).toBe("escalated");
     expect(receipt.envelope).toBeDefined();
@@ -172,12 +172,12 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     await expect(AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    })).rejects.toThrow(/Nonce already used/i);
+    } as any)).rejects.toThrow(/Nonce already used/i);
   });
 
   it("rejects an invalid EIP-712 signature (simulated)", async () => {
@@ -190,12 +190,12 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     await expect(AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "bad_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "bad_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    })).rejects.toThrow(/Signer not found/i);
+    } as any)).rejects.toThrow(/Signer not found/i);
   });
 
   it("rejects mismatched crossChainTarget", async () => {
@@ -208,12 +208,12 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     await expect(AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    })).rejects.toThrow(/crossChainTarget mismatch/i);
+    } as any)).rejects.toThrow(/crossChainTarget mismatch/i);
   });
 
   it("denies circular swap (token_in == token_out)", async () => {
@@ -226,12 +226,12 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     await expect(AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    })).rejects.toThrow(/Circular swap detected/i);
+    } as any)).rejects.toThrow(/Circular swap detected/i);
   });
 
   it("denies unapproved Base58 mint substitution", async () => {
@@ -244,11 +244,11 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
     await expect(AegisSDK.signAndExecute(baseAction, {
         agentId: "agent-1",
         tenantId: "tenant-unit-test",
-        policySignature: "mock_sig",
-        enclaveUrl: "http://localhost/sign_and_execute",
+        mandateSignature: "mock_sig",
+        gatewayUrl: "http://localhost/sign_and_execute",
         useDurableNonce: false,
         nonceAccountPublickey: "mock",
         nonceAuthorityPublickey: "mock"
-    })).rejects.toThrow(/Must be Base58/i);
+    } as any)).rejects.toThrow(/Must be Base58/i);
   });
 });
