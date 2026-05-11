@@ -1,5 +1,6 @@
 import { AegisSDK } from './src/AegisSDK';
 
+/* eslint-disable max-lines-per-function */
 async function testSDK() {
     console.log("🚀 Testing Aegis-12 SDK Integration...");
 

@@ -5,7 +5,6 @@ describe('Eliza Plugin evaluateIntentAction Tests', () => {
     it('should extract valid Solana address and amount from message', async () => {
         const message = { content: 'Transfer 1500 USDC to 4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k immediately' };
         let callbackCalled = false;
-        let actionResult = false;
 
         // Mock runtime and callback
         const mockRuntime = { 
