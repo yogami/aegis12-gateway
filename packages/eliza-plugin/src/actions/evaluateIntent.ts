@@ -1,118 +1,176 @@
 import { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core";
 import { AegisSDK } from "../../../aegis12-sdk/src/AegisSDK";
+import type { AegisIntent } from "../../../aegis12-sdk/src/AegisSDK";
+
+/**
+ * Strict regex: requires "transfer" or "send" as a whole word,
+ * followed by a numeric amount and a token symbol (USDC or SOL).
+ * This prevents false positives on words like "console", "solution", etc.
+ */
+const FINANCIAL_INTENT_PATTERN = /\b(?:transfer|send)\b.*?\d+\.?\d*\s*(?:USDC|SOL)\b/i;
+
+/**
+ * Strict amount regex: matches a valid decimal number (not "1.2.3.4")
+ * followed by whitespace and token symbol.
+ */
+const AMOUNT_PATTERN = /(\d+(?:\.\d+)?)\s+(USDC|SOL)\b/i;
+
+/**
+ * Address extraction: requires the word "to" followed by a valid
+ * Base58 Solana address (32-44 chars). Uses a capture group on
+ * the address only, so source addresses mentioned before "to"
+ * are never captured.
+ */
+const DESTINATION_PATTERN = /\bto\s+([1-9A-HJ-NP-Za-km-z]{32,44})\b/;
+
+/** Sanitize a string for safe inclusion in agent messages. */
+function sanitize(input: string, maxLength = 200): string {
+    return input
+        .replace(/[<>]/g, '') // strip HTML-like tags
+        .slice(0, maxLength);  // truncate
+}
 
 export const evaluateIntentAction: Action = {
     name: "EVALUATE_INTENT",
     similes: ["EXECUTE_COMPLIANT_TRANSFER", "AEGIS_TRANSFER", "SEND_FUNDS_SECURELY"],
     description: "Intercepts a financial transaction and routes it through the Aegis-12 TEE Fiduciary Firewall.",
-    
-    validate: async (runtime: IAgentRuntime, message: Memory, state?: State) => {
-        const content = typeof message.content === 'string' ? message.content : message.content?.text || '';
-        const text = content.toLowerCase();
-        return (text.includes("transfer") || text.includes("send")) && 
-               (text.includes("usdc") || text.includes("sol") || text.includes("funds"));
+
+    validate: async (_runtime: IAgentRuntime, message: Memory, _state?: State): Promise<boolean> => {
+        const content = typeof message.content === 'string'
+            ? message.content
+            : message.content?.text ?? '';
+        return FINANCIAL_INTENT_PATTERN.test(content);
     },
-    
+
     handler: async (
         runtime: IAgentRuntime,
         message: Memory,
-        state?: State,
-        options?: any,
-        callback?: HandlerCallback
-    ) => {
+        _state?: State,
+        _options?: Record<string, unknown>,
+        callback?: HandlerCallback,
+    ): Promise<boolean> => {
+        const text = typeof message.content === 'string'
+            ? message.content
+            : message.content?.text ?? '';
+
+        // --- 1. Parse amount ---
+        const amountMatch = text.match(AMOUNT_PATTERN);
+        if (!amountMatch) {
+            callback?.({
+                text: "❌ ACTION HALTED: Could not extract a valid amount and token from the intent.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+        const amount = parseFloat(amountMatch[1]);
+        const token = amountMatch[2].toUpperCase();
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            callback?.({
+                text: "❌ ACTION HALTED: Invalid transfer amount.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+
+        // --- 2. Parse destination address (must appear after "to") ---
+        const addressMatch = text.match(DESTINATION_PATTERN);
+        if (!addressMatch) {
+            callback?.({
+                text: "❌ ACTION HALTED: Could not extract a valid destination address. Expected format: 'to <Base58Address>'.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+        const toAddress = addressMatch[1];
+
+        // --- 3. Validate configuration (fail-fast, no silent defaults) ---
+        const aegisUrl = runtime.getSetting?.("AEGIS_GATEWAY_URL") ?? process.env.AEGIS_GATEWAY_URL;
+        if (!aegisUrl) {
+            callback?.({
+                text: "❌ ACTION HALTED: AEGIS_GATEWAY_URL is not configured. Cannot route intent.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+
+        const mandateSignature = runtime.getSetting?.("AEGIS_MANDATE_SIGNATURE") ?? process.env.AEGIS_MANDATE_SIGNATURE;
+        if (!mandateSignature) {
+            callback?.({
+                text: "❌ ACTION HALTED: AEGIS_MANDATE_SIGNATURE is not configured. Fiduciary Escrow cannot operate.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+
+        const tenantId = runtime.getSetting?.("AEGIS_TENANT_ID") ?? process.env.AEGIS_TENANT_ID;
+        if (!tenantId) {
+            callback?.({
+                text: "❌ ACTION HALTED: AEGIS_TENANT_ID is not configured. Multi-tenant policy isolation requires an explicit tenant.",
+                action: "EVALUATE_INTENT",
+            });
+            return false;
+        }
+
+        // --- 4. Build typed intent ---
+        const unsignedIntent: AegisIntent = {
+            toolId: "solana_transfer",
+            parameters: {
+                to: toAddress,
+                amount,
+                token,
+            },
+        };
+
+        // --- 5. Execute via TEE gateway ---
         try {
-            // Extract parameters dynamically instead of hardcoding
-            const text = typeof message.content === 'string' ? message.content : message.content?.text || '';
-            const amountMatch = text.match(/([\d.]+)\s*(USDC|SOL)/i);
-            const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
-            
-            // Extract Solana address strictly after "to "
-            const addressMatch = text.match(/(?:to\s+)([1-9A-HJ-NP-Za-km-z]{32,44})/i);
-            const toAddress = addressMatch ? addressMatch[1] : null;
-
-            if (!toAddress || amount <= 0) {
-                if (callback) {
-                    callback({
-                        text: "❌ ACTION HALTED: Could not extract a valid destination address or amount from the intent.",
-                        action: "EVALUATE_INTENT"
-                    });
-                }
-                return false;
-            }
-            
-            const unsignedIntent = {
-                toolId: "solana_transfer", 
-                parameters: { 
-                    to: toAddress, 
-                    amount: amount, 
-                    token: amountMatch ? amountMatch[2].toUpperCase() : "USDC" 
-                } 
-            };
-
-            const aegisUrl = process.env.AEGIS_GATEWAY_URL || "http://localhost:8000";
-            const mandateSignature = process.env.AEGIS_MANDATE_SIGNATURE;
-            
-            if (!mandateSignature || mandateSignature === "MockSignature") {
-                if (callback) {
-                    callback({
-                        text: "❌ ACTION HALTED: Fiduciary Escrow is not configured. AEGIS_MANDATE_SIGNATURE is missing.",
-                        action: "EVALUATE_INTENT"
-                    });
-                }
-                return false;
-            }
-
-            // Using the Fiduciary Firewall SDK
+            const anomalyScore = parseFloat(runtime.getSetting?.("AEGIS_ANOMALY_SCORE") ?? '0.1');
             const result = await AegisSDK.signAndExecute(unsignedIntent, {
-                agentId: runtime.agentId || "did:aegis:eliza-agent",
-                tenantId: runtime.getSetting("AEGIS_TENANT_ID") || "default-tenant",
-                mandateSignature: mandateSignature,
-                gatewayUrl: aegisUrl
+                agentId: sanitize(runtime.agentId ?? "unknown-agent", 64),
+                tenantId,
+                mandateSignature,
+                gatewayUrl: aegisUrl,
+                currentAnomalyScore: Number.isFinite(anomalyScore) ? anomalyScore : 1.0,
             });
 
             if (result.status === 'escalated') {
-                const envelope = result.envelope;
-                if (callback) {
-                    callback({
-                        text: `⚠️ ACTION HALTED: Article 14 Human-On-The-Loop triggered. Amount (${amount} USDC) exceeds autonomous threshold. 
-Cryptographic Intent Envelope Generated.
-Waiting for Squads V4 Multisig Threshold...`,
-                        action: "EVALUATE_INTENT",
-                        content: result
-                    });
-                }
+                callback?.({
+                    text: `⚠️ ACTION HALTED: Human-On-The-Loop triggered. Amount (${amount} ${token}) exceeds autonomous threshold. Waiting for Squads V4 Multisig approval.`,
+                    action: "EVALUATE_INTENT",
+                    content: result,
+                });
                 return true;
             }
 
-            if (callback) {
-                callback({
-                    text: `✅ ACTION APPROVED. Proof of Intent (PoI) Verified. Transaction executed with Ledger Anchor: ${result.tx_hash} and Hardware Attestation: ${result.hardware_attestation}`,
-                    action: "EVALUATE_INTENT",
-                    content: result
-                });
-            }
-
+            callback?.({
+                text: `✅ ACTION APPROVED. Proof of Intent verified. Tx: ${result.tx_hash ?? 'pending'}`,
+                action: "EVALUATE_INTENT",
+                content: result,
+            });
             return true;
-        } catch (error: any) {
-            if (callback) {
-                callback({
-                    text: `❌ ACTION DENIED: Aegis Fiduciary Escrow rejected the transaction. Reason: ${error.message}`,
-                    action: "EVALUATE_INTENT"
-                });
-            }
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            callback?.({
+                text: `❌ ACTION DENIED: Fiduciary Escrow rejected the transaction. Reason: ${sanitize(message)}`,
+                action: "EVALUATE_INTENT",
+            });
             return false;
         }
     },
+
     examples: [
         [
             {
                 user: "{{user1}}",
-                content: { text: "Transfer 50000 USDC to the operational wallet." }
+                content: { text: "Transfer 500 USDC to 4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k" },
             },
             {
                 user: "{{agentName}}",
-                content: { text: "I am routing your 50000 USDC transfer through the Aegis Fiduciary Firewall.", action: "EVALUATE_INTENT" }
-            }
-        ]
-    ]
+                content: {
+                    text: "✅ ACTION APPROVED. Proof of Intent verified. Tx: pending",
+                    action: "EVALUATE_INTENT",
+                },
+            },
+        ],
+    ],
 };
