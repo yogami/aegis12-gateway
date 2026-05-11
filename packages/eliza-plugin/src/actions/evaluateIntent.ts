@@ -1,7 +1,7 @@
 import { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core";
 import { AegisSDK } from "../../../aegis12-sdk/src/AegisSDK";
 
-export const evaluateIntentAction: any = {
+export const evaluateIntentAction: Action = {
     name: "EVALUATE_INTENT",
     similes: ["EXECUTE_COMPLIANT_TRANSFER", "AEGIS_TRANSFER", "SEND_FUNDS_SECURELY"],
     description: "Intercepts a financial transaction and routes it through the Aegis-12 TEE Fiduciary Firewall.",
@@ -26,9 +26,9 @@ export const evaluateIntentAction: any = {
             const amountMatch = text.match(/([\d.]+)\s*(USDC|SOL)/i);
             const amount = amountMatch ? parseFloat(amountMatch[1]) : 0;
             
-            // Extract Solana address
-            const addressMatch = text.match(/[1-9A-HJ-NP-Za-km-z]{32,44}/);
-            const toAddress = addressMatch ? addressMatch[0] : null;
+            // Extract Solana address strictly after "to "
+            const addressMatch = text.match(/(?:to\s+)([1-9A-HJ-NP-Za-km-z]{32,44})/i);
+            const toAddress = addressMatch ? addressMatch[1] : null;
 
             if (!toAddress || amount <= 0) {
                 if (callback) {
@@ -50,19 +50,23 @@ export const evaluateIntentAction: any = {
             };
 
             const aegisUrl = process.env.AEGIS_GATEWAY_URL || "http://localhost:8000";
+            const mandateSignature = process.env.AEGIS_MANDATE_SIGNATURE;
             
-            if (callback) {
-                 callback({
-                     text: `Routing intent through the Aegis Fiduciary Firewall at ${aegisUrl}...`,
-                     action: "EVALUATE_INTENT"
-                 });
+            if (!mandateSignature || mandateSignature === "MockSignature") {
+                if (callback) {
+                    callback({
+                        text: "❌ ACTION HALTED: Fiduciary Escrow is not configured. AEGIS_MANDATE_SIGNATURE is missing.",
+                        action: "EVALUATE_INTENT"
+                    });
+                }
+                return false;
             }
 
             // Using the Fiduciary Firewall SDK
             const result = await AegisSDK.signAndExecute(unsignedIntent, {
                 agentId: runtime.agentId || "did:aegis:eliza-agent",
                 tenantId: runtime.getSetting("AEGIS_TENANT_ID") || "default-tenant",
-                mandateSignature: process.env.AEGIS_MANDATE_SIGNATURE || "MockSignature",
+                mandateSignature: mandateSignature,
                 gatewayUrl: aegisUrl
             });
 
