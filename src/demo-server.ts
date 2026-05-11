@@ -300,6 +300,7 @@ app.post('/sign_and_execute', express.json(), async (req, res) => {
         attestation: attestationString,
         pcr0: "verified_via_quote",
         ledger_tx: txSig,
+        tx_hash: txSig,
         ars_anchor: "synthetic-seal-" + Buffer.from(new Array(120).fill('a').join('')).toString('base64'), // Provide a valid long synthetic string
         latency_metrics: {
             boot_ms: bootMs,

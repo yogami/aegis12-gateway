@@ -1,0 +1,95 @@
+openapi: 3.0.0
+info:
+  title: Aegis-12 Gateway API
+  version: 1.0.0
+paths:
+  /sign_and_execute:
+    post:
+      summary: Evaluate and sign an intent via Fiduciary Escrow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agent, action, context, mandateSignature]
+              properties:
+                agent:
+                  type: object
+                  required: [id, tenantId]
+                  properties:
+                    id:
+                      type: string
+                    tenantId:
+                      type: string
+                    currentTier:
+                      type: string
+                action:
+                  type: object
+                  required: [toolId, parameters]
+                  properties:
+                    toolId:
+                      type: string
+                    parameters:
+                      type: object
+                      required: [to, amount, token]
+                      properties:
+                        to:
+                          type: string
+                        amount:
+                          type: number
+                        token:
+                          type: string
+                context:
+                  type: object
+                  required: [timestamp, currentAnomalyScore]
+                  properties:
+                    timestamp:
+                      type: string
+                    currentAnomalyScore:
+                      type: number
+                mandateSignature:
+                  type: string
+      responses:
+        '200':
+          description: Intent Approved or Escalated
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, tx_hash, receipt]
+                properties:
+                  status:
+                    type: string
+                    enum: [approved, escalated]
+                  tx_hash:
+                    type: string
+                    description: Explicitly required to prevent SDK mapping bugs
+                  ledger_tx:
+                    type: string
+                    description: Legacy fallback field
+                  attestation:
+                    type: string
+                  pcr0:
+                    type: string
+                  ars_anchor:
+                    type: string
+                  receipt:
+                    type: object
+                  latency_metrics:
+                    type: object
+        '403':
+          description: Intent Denied
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, error]
+                properties:
+                  status:
+                    type: string
+                    enum: [denied]
+                  error:
+                    type: string
+                  latency_metrics:
+                    type: object

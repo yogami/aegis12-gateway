@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "provider": "git",
+      "repository": "https://github.com/yogami/aegis12-gateway.git",
+      "testSpecs": ["spec/openapi.yaml"],
+      "stubSpecs": ["spec/openapi.yaml"]
+    }
+  ]
+}
