@@ -7,7 +7,7 @@ import type { AegisIntent } from "../../../aegis12-sdk/src/AegisSDK";
  * followed by a numeric amount and a token symbol (USDC or SOL).
  * This prevents false positives on words like "console", "solution", etc.
  */
-const FINANCIAL_INTENT_PATTERN = /\b(?:transfer|send)\b.*?\d+\.?\d*\s*(?:USDC|SOL)\b/i;
+const FINANCIAL_INTENT_PATTERN = /\b(?:transfer|send)\b.*?\d+(?:\.\d+)?\s*(?:USDC|SOL)\b/i;
 
 /**
  * Strict amount regex: matches a valid decimal number (not "1.2.3.4")
@@ -21,7 +21,7 @@ const AMOUNT_PATTERN = /(\d+(?:\.\d+)?)\s+(USDC|SOL)\b/i;
  * the address only, so source addresses mentioned before "to"
  * are never captured.
  */
-const DESTINATION_PATTERN = /\bto\s+([1-9A-HJ-NP-Za-km-z]{32,44})\b/;
+const DESTINATION_PATTERN = /\bto\s+([1-9A-HJ-NP-Za-km-z]{32,44})\b/i;
 
 /** Sanitize a string for safe inclusion in agent messages. */
 function sanitize(input: string, maxLength = 200): string {
@@ -124,13 +124,14 @@ export const evaluateIntentAction: Action = {
 
         // --- 5. Execute via TEE gateway ---
         try {
-            const anomalyScore = parseFloat(runtime.getSetting?.("AEGIS_ANOMALY_SCORE") ?? '0.1');
+            const rawScore = parseFloat(runtime.getSetting?.("AEGIS_ANOMALY_SCORE") ?? '0.1');
+            const anomalyScore = Number.isFinite(rawScore) ? Math.max(0, Math.min(1, rawScore)) : 1.0;
             const result = await AegisSDK.signAndExecute(unsignedIntent, {
                 agentId: sanitize(runtime.agentId ?? "unknown-agent", 64),
                 tenantId,
                 mandateSignature,
                 gatewayUrl: aegisUrl,
-                currentAnomalyScore: Number.isFinite(anomalyScore) ? anomalyScore : 1.0,
+                currentAnomalyScore: anomalyScore,
             });
 
             if (result.status === 'escalated') {
@@ -148,10 +149,10 @@ export const evaluateIntentAction: Action = {
                 content: result,
             });
             return true;
-        } catch (error: unknown) {
-            const message = error instanceof Error ? error.message : 'Unknown error';
+        } catch (err: unknown) {
+            const errMsg = err instanceof Error ? err.message : 'Unknown error';
             callback?.({
-                text: `❌ ACTION DENIED: Fiduciary Escrow rejected the transaction. Reason: ${sanitize(message)}`,
+                text: `❌ ACTION DENIED: Fiduciary Escrow rejected the transaction. Reason: ${sanitize(errMsg)}`,
                 action: "EVALUATE_INTENT",
             });
             return false;

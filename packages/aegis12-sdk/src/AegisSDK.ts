@@ -112,7 +112,10 @@ export class AegisSDK {
             let errorMessage = response.statusText;
             try {
                 const errorData = (await response.json()) as { error?: string };
-                errorMessage = errorData.error ?? errorMessage;
+                if (errorData.error) {
+                    // Sanitize: strip tags and limit length to prevent injection/log-poisoning
+                    errorMessage = errorData.error.replace(/[<>]/g, '').slice(0, 200);
+                }
             } catch {
                 // If body isn't JSON, use statusText
             }
@@ -126,8 +129,9 @@ export class AegisSDK {
         const status = decision.status as string | undefined;
 
         if (status !== 'approved' && status !== 'escalated') {
-            const errorMsg = (decision.error as string) ?? 'Intent Mandate Violation';
-            throw new Error(`Aegis Fiduciary Escrow Denied: ${errorMsg}`);
+            const rawError = (decision.error as string) ?? 'Intent Mandate Violation';
+            const safeError = rawError.replace(/[<>]/g, '').slice(0, 200);
+            throw new Error(`Aegis Fiduciary Escrow Denied: ${safeError}`);
         }
 
         return {
