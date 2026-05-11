@@ -137,7 +137,7 @@ export class AegisSDK {
         return {
             status: status as 'approved' | 'escalated',
             decision: status === 'approved' ? 'ALLOW' : 'ESCALATED',
-            tx_hash: decision.ledger_tx as string | undefined,
+            tx_hash: (decision.tx_hash ?? decision.ledger_tx) as string | undefined,
             evidence_package: decision.receipt
                 ? ((decision.receipt as Record<string, unknown>).evidencePackage as Record<string, unknown>)
                 : undefined,
