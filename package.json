@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "High-Veracity Sovereign Compliance Gateway for Autonomous AI Agents on Solana. Hardware-attested policy enforcement with Post-Quantum (ML-DSA) resilience.",
   "main": "dist/index.js",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "demo:agent": "tsx scripts/demo_agent.ts",
     "check-types": "tsc --noEmit",

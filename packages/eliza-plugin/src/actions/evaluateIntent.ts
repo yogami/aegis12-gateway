@@ -1,6 +1,6 @@
 import { Action, HandlerCallback, IAgentRuntime, Memory, State } from "@elizaos/core";
-import { AegisSDK } from "../../../aegis12-sdk/src/AegisSDK";
-import type { AegisIntent } from "../../../aegis12-sdk/src/AegisSDK";
+import { AegisSDK } from "@aegis12/sdk";
+import type { AegisIntent } from "@aegis12/sdk";
 
 /**
  * Strict regex: requires "transfer" or "send" as a whole word,
@@ -48,7 +48,7 @@ export const evaluateIntentAction: Action = {
         _state?: State,
         _options?: Record<string, unknown>,
         callback?: HandlerCallback,
-    ): Promise<boolean> => {
+    ): Promise<any> => {
         const text = typeof message.content === 'string'
             ? message.content
             : message.content?.text ?? '';
@@ -56,7 +56,7 @@ export const evaluateIntentAction: Action = {
         // --- 1. Parse amount ---
         const amountMatch = text.match(AMOUNT_PATTERN);
         if (!amountMatch) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: Could not extract a valid amount and token from the intent.",
                 action: "EVALUATE_INTENT",
             });
@@ -66,7 +66,7 @@ export const evaluateIntentAction: Action = {
         const token = amountMatch[2].toUpperCase();
 
         if (!Number.isFinite(amount) || amount <= 0) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: Invalid transfer amount.",
                 action: "EVALUATE_INTENT",
             });
@@ -76,7 +76,7 @@ export const evaluateIntentAction: Action = {
         // --- 2. Parse destination address (must appear after "to") ---
         const addressMatch = text.match(DESTINATION_PATTERN);
         if (!addressMatch) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: Could not extract a valid destination address. Expected format: 'to <Base58Address>'.",
                 action: "EVALUATE_INTENT",
             });
@@ -87,7 +87,7 @@ export const evaluateIntentAction: Action = {
         // --- 3. Validate configuration (fail-fast, no silent defaults) ---
         const aegisUrl = runtime.getSetting?.("AEGIS_GATEWAY_URL") ?? process.env.AEGIS_GATEWAY_URL;
         if (!aegisUrl) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: AEGIS_GATEWAY_URL is not configured. Cannot route intent.",
                 action: "EVALUATE_INTENT",
             });
@@ -96,7 +96,7 @@ export const evaluateIntentAction: Action = {
 
         const mandateSignature = runtime.getSetting?.("AEGIS_MANDATE_SIGNATURE") ?? process.env.AEGIS_MANDATE_SIGNATURE;
         if (!mandateSignature) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: AEGIS_MANDATE_SIGNATURE is not configured. Fiduciary Escrow cannot operate.",
                 action: "EVALUATE_INTENT",
             });
@@ -105,7 +105,7 @@ export const evaluateIntentAction: Action = {
 
         const tenantId = runtime.getSetting?.("AEGIS_TENANT_ID") ?? process.env.AEGIS_TENANT_ID;
         if (!tenantId) {
-            callback?.({
+            await callback?.({
                 text: "❌ ACTION HALTED: AEGIS_TENANT_ID is not configured. Multi-tenant policy isolation requires an explicit tenant.",
                 action: "EVALUATE_INTENT",
             });
@@ -124,34 +124,35 @@ export const evaluateIntentAction: Action = {
 
         // --- 5. Execute via TEE gateway ---
         try {
-            const rawScore = parseFloat(runtime.getSetting?.("AEGIS_ANOMALY_SCORE") ?? '0.1');
+            const rawScoreStr = runtime.getSetting?.("AEGIS_ANOMALY_SCORE")?.toString() ?? '0.1';
+            const rawScore = parseFloat(rawScoreStr);
             const anomalyScore = Number.isFinite(rawScore) ? Math.max(0, Math.min(1, rawScore)) : 1.0;
             const result = await AegisSDK.signAndExecute(unsignedIntent, {
                 agentId: sanitize(runtime.agentId ?? "unknown-agent", 64),
-                tenantId,
-                mandateSignature,
-                gatewayUrl: aegisUrl,
+                tenantId: tenantId.toString(),
+                mandateSignature: mandateSignature.toString(),
+                gatewayUrl: aegisUrl.toString(),
                 currentAnomalyScore: anomalyScore,
             });
 
             if (result.status === 'escalated') {
-                callback?.({
+                await callback?.({
                     text: `⚠️ ACTION HALTED: Human-On-The-Loop triggered. Amount (${amount} ${token}) exceeds autonomous threshold. Waiting for Squads V4 Multisig approval.`,
                     action: "EVALUATE_INTENT",
-                    content: result,
+                    content: result as any,
                 });
                 return true;
             }
 
-            callback?.({
+            await callback?.({
                 text: `✅ ACTION APPROVED. Proof of Intent verified. Tx: ${result.tx_hash ?? 'pending'}`,
                 action: "EVALUATE_INTENT",
-                content: result,
+                content: result as any,
             });
             return true;
         } catch (err: unknown) {
             const errMsg = err instanceof Error ? err.message : 'Unknown error';
-            callback?.({
+            await callback?.({
                 text: `❌ ACTION DENIED: Fiduciary Escrow rejected the transaction. Reason: ${sanitize(errMsg)}`,
                 action: "EVALUATE_INTENT",
             });
@@ -162,11 +163,11 @@ export const evaluateIntentAction: Action = {
     examples: [
         [
             {
-                user: "{{user1}}",
+                name: "{{user1}}",
                 content: { text: "Transfer 500 USDC to 4jKwb8h2vWjZkLzM6pBxk7tUqVbWv8W4u1gL7tFk5g6k" },
             },
             {
-                user: "{{agentName}}",
+                name: "{{agentName}}",
                 content: {
                     text: "✅ ACTION APPROVED. Proof of Intent verified. Tx: pending",
                     action: "EVALUATE_INTENT",

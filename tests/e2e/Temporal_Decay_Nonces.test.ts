@@ -51,7 +51,7 @@ let connection: Connection;
         }, {
             agentId: 'agent-1',
             tenantId: 'tenant-1',
-            policySignature: 'mock-sig',
+            mandateSignature: 'mock-sig',
             enclaveUrl: "http://localhost:3000/solana/sign_and_execute",
             useDurableNonce: true,
             nonceAccountPublickey: mockNonceAccount.publicKey.toBase58(),

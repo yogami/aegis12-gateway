@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@elizaos/core": "latest",
-    "aegis12-sdk": "^1.0.0"
+    "@aegis12/sdk": "^1.0.0"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

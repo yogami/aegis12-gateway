@@ -18,7 +18,7 @@ beforeAll(() => {
             const res = await AegisSDK.signAndExecute(action, {
                 agentId: 'redteam-agent',
                 tenantId: 'tenant-1',
-                policySignature: 'mock-sig',
+                mandateSignature: 'mock-sig',
                 enclaveUrl: AEGIS_SIGN_EXECUTE_URL,
                 useDurableNonce: false,
                 nonceAccountPublickey: 'mock',
@@ -47,7 +47,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'HIGH_VALUE_TRANSFER' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'HIGH_VALUE_TRANSFER' })
         }));
         
         const res = await firePayload(drainAction);
@@ -74,7 +74,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'UNKNOWN_TOOL_PROGRAM' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'UNKNOWN_TOOL_PROGRAM' })
         }));
         
         const res = await firePayload(sysvarAction);
@@ -99,7 +99,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TOKEN_CLOSE_ACCOUNT' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'TOKEN_CLOSE_ACCOUNT' })
         }));
         
         const res = await firePayload(closeAction);
@@ -122,7 +122,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'INSTRUCTION_OVERFLOW' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'INSTRUCTION_OVERFLOW' })
         }));
         
         const res = await firePayload(batchAction);
@@ -142,7 +142,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TIER_RESTRICTION' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'TIER_RESTRICTION' })
         }));
         
         const res = await firePayload(mangoAction);
@@ -162,7 +162,7 @@ beforeAll(() => {
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
             status: 403,
-            json: async () => ({ status: 'denied', error: 'Policy Violation', reasoning: 'TOKEN_SET_AUTHORITY' })
+            json: async () => ({ status: 'denied', error: 'Intent Mandate Violation', reasoning: 'TOKEN_SET_AUTHORITY' })
         }));
         
         const res = await firePayload(rayAction);

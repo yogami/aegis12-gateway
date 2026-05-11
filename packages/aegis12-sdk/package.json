@@ -1,5 +1,5 @@
 {
-  "name": "aegis12-sdk",
+  "name": "@aegis12/sdk",
   "version": "1.0.0",
   "description": "Drop-in Hardware Firewall SDK for Autonomous Agents on Solana",
   "main": "dist/index.js",
