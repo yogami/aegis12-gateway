@@ -1,34 +1,36 @@
-# @aegis12/sdk
+# aegis12-sdk
 
-**Aegis-12 is a Drop-in Hardware Firewall for Autonomous Agents on Solana.**
+**Aegis-12 is the Verifiable Agentic Escrow & Fiduciary Firewall for Autonomous Agents.**
 
-If you are building an AI Agent for the Colosseum hackathon, you probably have a problem: Your agent has direct access to a private key, and if it hallucinates or gets prompt-injected, it can drain its own treasury.
+If you are building an AI Agent framework (like ElizaOS) or deploying enterprise agents, you have a problem: Your agent has direct access to a private key. If it hallucinates or gets prompt-injected and drains the treasury, there is an **Institutional Liability Gap**. You cannot cryptographically prove what the agent actually intended.
 
-**Aegis-12 solves this.** We provide a strict cryptographic policy enforcement layer powered by a Phala TEE (Trusted Execution Environment). By wrapping your agent with our SDK, every transaction it attempts is cryptographically verified against your pre-defined policy inside physical hardware before it hits the blockchain.
+**Aegis-12 solves this.** We provide a strict cryptographic escrow layer powered by a Phala TEE (Trusted Execution Environment). By routing your agent's intents through our SDK, every transaction is evaluated inside physical hardware against an AP2 Intent Mandate.
 
-**Instantly make your hackathon project "Enterprise Ready" to the judges.**
+If the intent is malicious, it is blocked and escalated to a Squads V4 Multisig. If approved, the hardware generates a **Proof of Intent (PoI)** and securely signs the transaction. 
+
+**Zero software bypass. Mathematically enforced escrow.**
 
 ## Installation
 
 ```bash
-npm install @aegis12/sdk ethers
+npm install aegis12-sdk ethers
 ```
 
-## Quick Start (Under 10 Lines of Code)
+## Quick Start 
 
-First, generate a Policy Signature using your Wallet. This proves to the Hardware Enclave that you authorized these constraints for your agent.
+First, generate an Intent Mandate Signature using your Enterprise Wallet. This proves to the Hardware Enclave that you authorized these constraints for your agent.
 
 ```typescript
-import { AegisSDK } from '@aegis12/sdk';
+import { AegisSDK } from 'aegis12-sdk';
 
-// 1. Define your policy constraints
-const policyConfig = {
-    policyId: `my-team-policy`,
+// 1. Define your Intent Mandate
+const mandateConfig = {
+    mandateId: `my-team-mandate`,
     tenantId: "my-team",
     version: "1",
     chainId: 1, 
     crossChainTarget: "solana:devnet",
-    maxAnomalyScore: 100, // Customize your behavioral limits
+    maxAnomalyScore: 100,
     financialLimitsString: "{}",
     expiresAt: Math.floor(Date.now() / 1000) + 3600, // Valid for 1 hour
     nonce: Date.now().toString(),
@@ -37,39 +39,38 @@ const policyConfig = {
     allowedProgramIds: []
 };
 
-// 2. Sign the policy (keep your private key safe!)
-const signature = await AegisSDK.createPolicySignature(
+// 2. Sign the mandate (keep your private key safe!)
+const signature = await AegisSDK.createMandateSignature(
     "YOUR_PRIVATE_KEY", 
-    policyConfig
+    mandateConfig
 );
 ```
 
-Next, wrap your Agent's transaction execution logic with the Aegis Firewall:
+Next, use the Drop-in TEE Remote Signer. Your agent never holds the private key.
 
 ```typescript
-// 3. Define your agent's execution function
-const executeDeFiSwap = async (amount, destination) => {
-    return { toolId: 'swap', parameters: { amount, destination } };
+// 3. Define the agent's unsigned intent
+const unsignedIntent = {
+    toolId: 'solana_transfer', 
+    parameters: { to: '4jKwb8h2vWjZkLzM...', amount: 0.01 }
 };
 
-// 4. Wrap it with Aegis
-const secureExecuteDeFiSwap = AegisSDK.withAegis(executeDeFiSwap, {
-    agentId: 'my-trading-bot',
-    tenantId: 'my-team',
-    policySignature: signature // Pass the signature generated above!
-});
-
-// 5. Run your agent. If it attempts a VaultBot heist, Aegis will block it!
+// 4. Pass the intent to the Fiduciary Escrow
 try {
-    const result = await secureExecuteDeFiSwap(100, "suspicious_wallet");
-    console.log("Transaction Approved by Hardware Enclave:", result.receipt);
+    const result = await AegisSDK.signAndExecute(unsignedIntent, {
+        agentId: 'my-trading-bot',
+        tenantId: 'my-team',
+        mandateSignature: signature // Pass the signature generated above!
+    });
+    
+    console.log("✅ Proof of Intent Generated! Tx Hash:", result.tx_hash);
+    console.log("🔒 Hardware Attestation:", result.hardware_attestation);
 } catch (error) {
-    console.error("HARDWARE PANIC! Transaction Blocked:", error.message);
+    console.error("🛑 Fiduciary Escrow Rejected:", error.message);
 }
 ```
 
 ## Security Guarantees
-- **Fail-Closed by Design**: If the TEE is unreachable or the policy is violated, the transaction throws an error. There is no software bypass.
-- **Solana Anchoring**: All blocked intents are logged directly to Solana for transparent auditing.
-
-Happy building! Let's win this hackathon. 🚀
+- **Zero-Custody Agent**: The agent never holds a hot wallet key.
+- **Fail-Closed by Design**: If the TEE is unreachable or the mandate is violated, the transaction is rejected or escalated to a human-on-the-loop multisig.
+- **Cryptographic Evidence**: All actions generate a verifiable Proof of Intent (PoI) anchored to Solana for institutional auditing.
