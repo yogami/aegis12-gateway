@@ -81,14 +81,14 @@ describe("Aegis-12 Compliance Gateway – adversarial suite v2", () => {
 
   const baseAction = {
     toolId: "swap",
-    actionType: "swap",
     parameters: {
+      to: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      amount: 1000,
+      token: "USDC",
       fromMint: "So11111111111111111111111111111111111111112",
       toMint: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      amount: 1000,
       slippageBps: 50,
     },
-    estimatedValue: 1000,
   };
 
   const baseContext = {
