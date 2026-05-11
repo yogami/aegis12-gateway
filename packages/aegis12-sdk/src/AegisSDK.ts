@@ -96,9 +96,10 @@ export class AegisSDK {
         payload: GatewayPayload,
         controller: AbortController,
     ): Promise<Record<string, unknown>> {
-        const url = gatewayUrl.endsWith('/sign_and_execute')
-            ? gatewayUrl
-            : `${gatewayUrl}/sign_and_execute`;
+        const base = gatewayUrl.replace(/\/+$/, '');
+        const url = base.endsWith('/sign_and_execute')
+            ? base
+            : `${base}/sign_and_execute`;
 
         const response = await fetch(url, {
             method: 'POST',
