@@ -54,7 +54,7 @@ export default function ControlPlane() {
     if (enclaveState === "LOCKDOWN") return;
       
     setLogs([">>> STAGE 1: CONNECTING TO LIVE PHALA TEE ENCLAVE <<<"]);
-    addLog(`[Agent] Sending micro-intent to hardware (Max Limit: ${activeMaxTrade} SOL)`);
+    addLog(`[Agent] Transmitting AP2 Intent Mandate to Escrow (Max Limit: ${activeMaxTrade} SOL)`);
     
     const recordId = Math.random().toString(36).substring(7);
 
@@ -118,7 +118,7 @@ export default function ControlPlane() {
         }
 
         addLog("[Switchboard Oracle] ✅ DCAP Verified. Hardware Attestation Validated.");
-        addLog("[TEE Enclave] ⚡ Atomically verifying Whitelisted Session Key + Trade on Solana...");
+        addLog("[TEE Enclave] ⚡ Generating Proof of Intent (PoI) and Co-signing Escrow Release...");
         addLog(`[Substance Test] ✅ Live transaction executed via hardware enclave!`);
         
         const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -198,7 +198,7 @@ export default function ControlPlane() {
       {/* Header */}
       <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">AEGIS-12 FIDUCIARY CONTROL PLANE</h1>
+          <h1 className="text-3xl font-bold text-cyan-400 tracking-tight">AEGIS-12 FIDUCIARY FIREWALL</h1>
           <p className="text-slate-400 mt-2 text-sm">LIVE TEE TELEMETRY & SQUADS V4 ROUTING // BACKEND: PHALA TDX + NODE.JS</p>
         </div>
         
@@ -226,8 +226,8 @@ export default function ControlPlane() {
             OBSERVABILITY SURFACE ONLY
           </h3>
           <p className="text-sm text-slate-300 leading-relaxed">
-            <strong>YOU ARE VIEWING THE AEGIS-12 POLICY ENGINE CONTROL PLANE.</strong><br/>
-            This console visualizes real-time security decisions made by our SDK in Phala TEE hardware enclaves. The actual product is the underlying hardware-enforced SDK.
+            <strong>YOU ARE VIEWING THE VERIFIABLE AGENTIC ESCROW DASHBOARD.</strong><br/>
+            This console visualizes real-time security decisions made by our SDK in Phala TEE hardware enclaves. The actual product is the underlying hardware-attested Fiduciary Firewall.
           </p>
         </div>
         <div className="flex-1">
@@ -321,12 +321,12 @@ export default function ControlPlane() {
             </h3>
             <div className="flex flex-col items-center gap-2 w-full">
               <div className="bg-[#0f172a] border-2 border-slate-600 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
-                🤖 Agent Intent (RPC Call)
+                🤖 Unsigned Intent (AP2 Mandate)
               </div>
               <div className="w-0.5 h-4 bg-slate-600"></div>
               <div className="bg-[#0f172a] border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
                 🛡️ Phala TDX Enclave <br/>
-                <span className="text-xs font-normal text-slate-400">Active Policy Engine</span>
+                <span className="text-xs font-normal text-slate-400">Verifiable Escrow & PoI Oracle</span>
               </div>
               <div className="w-0.5 h-4 bg-slate-600"></div>
               <div className="bg-[#0f172a] border-2 border-purple-500 rounded-lg py-2 px-4 text-sm font-bold text-slate-100 w-[85%] text-center">
@@ -436,7 +436,7 @@ export default function ControlPlane() {
                 {audits.length === 0 ? (
                   <tr className="bg-[#111111] border-b border-slate-800">
                     <td colSpan={5} className="px-3 py-8 text-center text-slate-500 font-mono text-[10px]">
-                      Waiting for attestation...
+                      Waiting for AP2 Intent Mandate...
                       <br />
                       <span className="text-[9px] text-slate-600 mt-1 block">Trigger Intent Stream above.</span>
                     </td>
