@@ -1,0 +1,42 @@
+[
+  {
+    "id": 0,
+    "startSec": 1.0,
+    "text": "This is the Aegis-12 Fiduciary Dashboard. On the left, policy rules enforce hard limits on agents."
+  },
+  {
+    "id": 1,
+    "startSec": 8.0,
+    "text": "Triggering a live intent stream sends a micro-transaction to real hardware inside a Phala TDX enclave."
+  },
+  {
+    "id": 2,
+    "startSec": 15.0,
+    "text": "The request routes through our Fiduciary Firewall. DCAP verified. The transaction is submitted to Solana Devnet."
+  },
+  {
+    "id": 3,
+    "startSec": 22.0,
+    "text": "Here in the Verifier Registry, you can see the real transaction hash anchoring the proof."
+  },
+  {
+    "id": 4,
+    "startSec": 26.0,
+    "text": "Now, the circuit breaker. We simulate a malicious agent attempting an unauthorized drain."
+  },
+  {
+    "id": 5,
+    "startSec": 32.0,
+    "text": "Lockdown initiated. The enclave is sealed. The private key physically cannot sign any more transactions."
+  },
+  {
+    "id": 6,
+    "startSec": 41.0,
+    "text": "We recover with a multisig override and trigger another transaction to prove system resilience."
+  },
+  {
+    "id": 7,
+    "startSec": 48.0,
+    "text": "Every action is cryptographically anchored. This is the mathematical cage."
+  }
+]

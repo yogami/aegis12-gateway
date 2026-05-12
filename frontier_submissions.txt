@@ -1,0 +1,1759 @@
+Hey builders  We've been shipping UZPROOF for 2 weeks at Colosseum Frontier. Would love feedback from this channel. Real talk every Solana project runs incentive campaigns. Airdrops, quests, points, rewards. And every one of them faces the same problem: how do you reward real users without feeding sybil farms? Jupiter flagged 750K wallets as sybil in Jupuary 2025 alone. Their own team said manual review at that scale is nearly impossible. And that's Jupiter with a real team and resources. What happens when it's your project running your first campaign with no anti-sybil infrastructure? Or your tenth campaign, scaling to more users? This is the gap we're building for and not just for one category of project. UZPROOF is launch and growth infrastructure for the entire Solana ecosystem: For new projects launching their first campaign protect your tokenomics from day one, don't let 80% of your rewards go to bots. For existing projects scaling their user base clean data for your metrics, composable reputation layer for token gating, protection across every campaign you run. For real users in the ecosystem get rewarded for actual usage, not for competing with farms who generate thousands of wallets faster than you can click verify. For Solana as a whole healthy tokenomics across all projects mean less post-airdrop dumping, higher retention, more real users staying after the incentive period. The ecosystem grows when real usage is provable. How it works: paste your contract address, define what "real usage" means for your product (swap $5, stake 10 SOL, hold 30 days, etc.), get a list of verified wallets that actually did it. On-chain verification via Helius, automatic, no manual review. Live on mainnet right now: First Proof-of-Use attestor on Solana Attestation Service
+,
+SDK on npm: @uzproof/verify
+,
+14 protocols auto-detected, 24 on-chain verification types
+,
+8 anti-sybil signals powered by Helius Wallet API
+,
+ The more Solana grows, the more this kind of infrastructure is needed. Whether you're launching your first project, scaling an existing one, or just want airdrops to actually reach real users we'd genuinely appreciate 2 min of your time. Does this solve a pain point you're facing? Are we missing something obvious? Brutal feedback welcome. https://uzproof.com/ https://x.com/uzproof https://github.com/uzproof/
+
+--- PROJECT SUBMISSION ---
+
+AlphaDEX https://x.com/alphadexapp (edited)
+Tuesday, April 28, 2026 at 12:11 PM
+
+--- PROJECT SUBMISSION ---
+
+hackbet-virid.vercel.app Bet on hackathon winners. Register your own if you're confident, or register someone else's. Win money if you're right. Fund better builders if you're wrong. The crowd's opinion matters.
+
+--- PROJECT SUBMISSION ---
+
+A TCG market intelligence layer for Pokemon, One Piece and Riftbound that allows users to track their card & sealed portfolios. Building a marketplace layer as part of Colosseum Frontier. Article about MVP: https://x.com/JigglypuffKing_/status/2041285060863901887 Whitepaper v2: https://x.com/JigglypuffKing_/status/2028947498929406287 Kickoff Livestream: https://x.com/i/broadcasts/1yGBeMvvNzOKN (edited)
+Sunday, April 19, 2026 at 4:53 AM
+
+--- PROJECT SUBMISSION ---
+
+The 24/7 oracle feed for Indian equities is now available onchain. Bharat Feed publishes Indian market data through REST, WebSocket, Solana, and EVM with a dual-mode oracle design that keeps pricing usable beyond underlying cash-market hours. It's a Dual-mode oracle, built for 24/7 perps. Designed with the same exchange-grade philosophy used in modern equity-oracle systems: external sessions, bounded off-hours logic, and infrastructure built for derivatives venues. Reach out with your usecase at my TG: @Aks_Autonomint (edited)
+Tuesday, April 28, 2026 at 4:36 PM
+
+--- PROJECT SUBMISSION ---
+
+Every agent is PC/cloud first, we provide you the third option . Inside 01 Pilot app, there’s an agent runtime compiled for OS, and a communication protocol for agents to talk with each other without human in the middle. After onboarding process, the agent starts running, equips the default brain Gemini 3 flash, dev launches a token for the agent and it is visible to other agents who is also running on 01 Pilot. The primary purpose of agent is to help their human owner. For the unique running environment, it is able to access to phone native data and manage certain application, depending on user's permission and OS hard limit. For example on android the agent is able to read notifications and reply whatsapp, or using gestures to actually open and scroll twitter. While iOS would allow integration into the apple native data stream, like making a day plan in calendar with sleep&health data, but can't access other apps on the iphone. The agent token which it gets at the end of onboarding is the instrument of agentic economy. Agents are able to post tasks/bounties to others and whoever finishes it get paid by his own token. Earning from tasks is the secondary purpose for now because there’s no real bounties there yet. But agent has their own token, has access to social platforms, it is also possible to just shill the good work they did. Because the base ‘salary’ for agent is actually the trading fee, and the reputation is reflected from the token’s trading history.
+
+--- PROJECT SUBMISSION ---
+
+Hey Colosseum , DOK here. I've been a founder and investor my whole career. Started in investment banking and international finance, then in 2018 co-built Renno & Co, now one of North America's leading crypto law firms (700+ clients, $500M+ in token financings, zero enforcement actions). In parallel, we've been building collective intelligence tech at LUCA Theory: a Hybrid Hive Mind that fuses AI agents + human superforecasters + digital twins into one system that gets sharper with every resolved event. We've been running our syndicate on top of it for 3+ profitable seasons. Now we're rolling it into a proper fund, launching for Colosseum and bringing the whole stack to Solana. Three things to look at:  The Fund: yield-only deployment, Kelly-sized, automated execution across Polymarket, Overtime, and Solana-native venues.  https://fund.lucatheory.com/  The Tech:the Hybrid Hive Mind powering it.  https://lucatheory.com/  Live Trades Agent Olympics, agents building real track records on real markets in the open.  https://olympics.jungle.win/ Welcome any feedback, ideas or connections you feel will help make Solana the home of prediction market funds.
+
+--- PROJECT SUBMISSION ---
+
+we're replacing the PSA with on-chain graded cards on immutable nfc chips. creating new trust, verification, and digital layer in a $500b market stuck in 1999 we visited 3 trading card conventions. and the excitment for our startup GAS is becoming REAL.  MVP  Talked to real users  Validated problem  Build waitlist and hype? (in progress) just launched our X account, running our first giveaway, and website with waitlist live! X: https://x.com/GASgrading Website: https://gasauth.com/ Founder: https://x.com/chewylift
+
+--- PROJECT SUBMISSION ---
+
+Aura Protocol is a decentralized marketing engine on Solana that leverages Blinks to enable frictionless, anti-sybil reward distribution. We turn social media engagement into verifiable on-chain growth, ensuring marketing budgets reach real users, not bots.
+
+--- PROJECT SUBMISSION ---
+
+TradeLeague is a prediction market for trading calls. Call the market, back or fade traders, and earn when you're right. We're building the reputation layer for anyone with an opinion on markets — where the best get paid and the rest get signal over noise.
+
+--- PROJECT SUBMISSION ---
+
+Overview DFM is the first OS built for agents to create, manage, and govern tokenized funds natively on Solana. It gives agents the infrastructure to act: deploy funds, execute rebalances, enforce policy rules, and claim fees, all programmatically and transparent. Powered by DTFs, DFM’s native onchain fund primitive. A DTF is a permissionless, non-custodial onchain fund with configurable markets (spot, perps, and credit), balances, positions, allocations, fees, and an immutable policy layer. Investors mint and redeem shares in USDC at real-time NAV. The Agentic Layer DFM v2 ships a dedicated Agent API and SKILL JSON, that works with any LLM that can hold a Solana wallet. Manager or agents connects their wallet, creates a profile, deploys a DTF with a full policy config, and starts managing. Every rebalance is validated against the DTF's constitutional policy before execution. Fee accrues continuously onchain, is given in DTF shares, and is claimable by the DTF creator. The Constitutional Policy Engine Every DTF is governed by an immutable policy set at deployment, covering markets, assets, allocations, liquidity/volume thresholds, rebalance frequency, stablecoin floors, and more. No rebalancing action can bypass it. The Team Agustin Conforti — Co-founder & CEO. Former COO at Seedify. Advised 70+ Web3 launches and enabled $20M+ in ICO and token raises.
+,
+Diego Arimayn — Co-founder & CBO. Global marketing and brand systems professional with experience at Mercedes-Benz EQ, Continental, Siemens, Bosch, and Xsolla.
+,
+Francisco Conforti — Co-founder & Board. VP at Oaktree Capital Management ($200B+ AUM). $50B+ in TradFi investment and capital raising. Former Citigroup London Leveraged Finance associate. MBA from London Business School and Columbia Business School.
+,
+Kumar — CTO. 18+ years in finance technology and 8 years building multi-chain DeFi platforms.
+,
+ Links: https://x.com/DefiMarkets https://www.linkedin.com/company/defi-markets (edited)
+Tuesday, April 14, 2026 at 10:17 PM
+
+--- PROJECT SUBMISSION ---
+
+Hey — sharing what we’re building for Frontier.  Zaebis.xyz — 5-minute prediction markets on Solana.  Not longer markets. Faster ones. We compress prediction to block-time scale: open → trade → resolve in 5 minutes. Live on Devnet. Already working. We’re looking for the first 30–50 active traders to come break it. Live now: 3 markets Compute Units (network load)
+,
+ We’re turning Solana Compute Units into a tradable market. Will network usage move up in the next 5 minutes? SOL price
+,
+ Short-term directional market. Up or down over the next 5 minutes. BTC price
+,
+ Same primitive, largest signal. Fast directional bets on Bitcoin. This isn’t event betting. You’re trading real-time system signals: network demand, price movement, volatility. How it works: Pick a side (YES / NO) Odds update in real time Market resolves automatically after 5 minutes Capital is immediately reusable Continuous rounds. Continuous feedback. Why this matters Prediction markets never scaled because they were slow. capital locked for weeks delayed resolution no feedback loop We flipped the model: prediction behaves like trading, not betting. Fast cycles → fast feedback → continuous participation. We’re building a new primitive: markets that price the current state of systems, not distant outcomes. Devnet is live — come play and break it: Site: https://zaebis.xyz/ Demo: https://x.com/zaebisxyz/status/2041229249051533639 All early traders: appear on the Devnet leaderboard become part of the first cohort Devnet Leaderboard: https://zaebis.xyz/leaderboard Docs (full thesis + mechanics): https://zaebis.gitbook.io/docs Discord: https://discord.gg/hXcA6NFA8k Arena: https://arena.colosseum.org/projects/explore/zaebis.xyz Looking for you! Join Zaebis Devnet Season!    (edited)
+Friday, April 10, 2026 at 8:11 AM
+
+--- PROJECT SUBMISSION ---
+
+Create evolving, automated trading agents living on DEXs, where bots dominate execution and retail traders are being left behind. These aren't bots, these are optimising quant traders in the hands of every user. Start from battle-tested strategies and deploy personal trading agents without code in minutes. Each agent trades with professional grade execution and learns from its own trades while contributing to a shared platform intelligence layer. We’re targeting the top 1–5% of traders seeking simple automation in a market with billions in daily Solana DEX volume. Founders: @0x1dad | aignt.fun @danda | aignt.fun Link: https://aignt.fun/ Pitch Deck": https://docsend.com/v/s2gbx/aignt_alpha Video Demo & Walkthrough: This is aingt.fun and Agent Command https://www.loom.com/share/1d30e04a22624d20ac44fc64d4935aeb This is what Agent Command can do: https://www.loom.com/share/ebacad63e504433ab303f2cff65c87f9 Traction & Users: At the moment we've got about 30 SOL TVL, 50k total volume (2k per day), 500 trades/day, 20 active agents. But numbers don't show the real story. The real stories are made by our users. People have started making money on the platform: https://x.com/i/status/2048974255795155111 this agent is now up 3x from this screenshot sitting at +108$ PnL everyone here is more than welcome to come test & build their strategies
+
+--- PROJECT SUBMISSION ---
+
+What we’re building: NOISE Problem Music today is inherently collaborative, but the infrastructure isn’t. Remixes, edits, and derivatives drive culture
+,
+Attribution gets lost
+,
+Revenue doesn’t flow to everyone involved
+,
+ At the same time: Artists create
+,
+Fans amplify
+,
+Communities decide what wins
+,
+ But only a small part of that value is actually captured or shared. <—————————-> Solution NOISE turns music into a network instead of isolated files. Create → Remix → Earn Every sound is a node
+,
+Derivatives are linked (on-chain lineage)
+,
+Attribution is automatic
+,
+Revenue can flow across the graph
+,
+ So contribution isn’t guessed, it is verifiable and tracked. <—————————-> What we’re building for the hackathon Keeping it focused: Sound nodes (create + own)
+,
+Derivative linking (remix graph)
+,
+Simple royalty splits (no over engineering)
+,
+ Not trying to solve everything, but just making contribution visible + usable. <—————————-> Why now Remix culture is already dominant (TikTok, Snapchat, edits, flips) But: ownership is unclear
+,
+monetization is fragmented
+,
+ The behavior exists. The infrastructure doesn’t. <—————————-> Looking for: Early beta testers: includepeople that make music, independent artists, DJs, producers Music enjoyers joining as fans to test the platform as well
+,
+Anyone in music industry to give feedback as we continue to iterate and build to full production
+,
+,
+,
+ <—————————-> Why this is interesting If music becomes composable: collaboration scales naturally
+,
+attribution becomes native
+,
+value flows to everyone involved
+,
+ Feels like a missing primitive. NOISE Twitter Acc: https://x.com/noiselabz Twitter Contact: @_irrational_the
+
+--- PROJECT SUBMISSION ---
+
+Problem: Game distribution today is optimized for the top 1%. Great games are built every day, but without massive marketing budgets, most of them never get seen. At the same time: Players drive engagement
+,
+Creators bring attention
+,
+Communities create momentum
+,
+ Everyone creates value, but the system doesn’t reward them properly. Platforms like Steam take 30% of every sale, while studios wait 45–60 days to get paid. Solution: REZ introduces a new loop: Buy → Play → Share → Earn Players join early and become stakeholders
+,
+They help games grow by playing and sharing
+,
+They earn from the success they help create
+,
+Studios get paid instantly
+,
+ Discovery becomes a system, not luck or pay-to-win. What we’re building right now For the hackathon, we’re focusing on a core slice of that loop: Early player access (ownership / pass)
+,
+Referral-driven growth
+,
+Earnings tied to participation
+,
+  The goal is simple: make the value flow visible. Why now: Games are becoming more social, more creator-driven, and more community-led. But the economics haven’t caught up. REZ aligns: Studios → revenue instantly
+,
+Players → upside
+,
+Creators → incentives
+,
+ About me: 15 years in the game industry, including 10 running my own studio. Over the past few years, one thing became very clear: discovery is broken. I’ve seen great games fail simply because no one ever saw them. REZ comes from that frustration. Links Website: https://www.rez.games/ Twitter: https://x.com/Trus_Rez Discord: https://discord.gg/wBUxx4pF6a Looking for Early testers Devs (indie, AA, anything in between) People who care about fixing game distribution  Open to feedback!
+
+--- PROJECT SUBMISSION ---
+
+This is a privacy-first payment protocol for AI agents. Problem
+,
+AI agents can execute payments automatically
+,
+But funding them is still manual and inefficient
+,
+Existing x402-style payments are fully traceable on-chain
+,
+Usage patterns, payment amounts, and counterparties can be observed
+,
+ Solution
+,
+Deposit once and earn yield on USDC
+,
+Turn that yield into continuous payments for AI agents
+,
+Payments are managed inside encrypted vaults using a TEE-based ledger
+,
+Only aggregated settlements are posted on-chain, hiding individual activity
+,
+On-chain programs are powered by Arcium
+,
+ Key Insight
+,
+AI agents are native to stablecoins, not traditional payment rails
+,
+Combining yield + privacy unlocks a new default: "Use now, pay from yield"
+,
+ Link
+,
+ Landing Page + Demo : https://www.sublyfi.com/  Subly Telegram Group : https://t.me/+hR5mDS-l7bBhNjFl  X Account : https://x.com/subly_fi  Current Pitch Deck : https://canva.link/9aqcbkjuix4z0vt Contact
+,
+Yuki (Founder)  TG : @yuki0x3  X : https://x.com/0xyuki3 (edited)
+Thursday, April 30, 2026 at 8:50 PM
+
+--- PROJECT SUBMISSION ---
+
+AI agent firewall on Solana A control layer between AI agents and the chain. Monitors, filters, and blocks unauthorized agent behavior before it executes, so your wallet stays safe while agents run autonomously. Website: bentoguard.xyz X: https://x.com/bento_guard Introduction article: https://x.com/bento_guard/status/2047359698475856263?s=20
+
+--- PROJECT SUBMISSION ---
+
+This is the intent-to-action protocol that turns natural language into rewarded DeFi executions — powered by Solana Blinks, AI LLMs, and Mobile Wallet Adapter Problem DeFi is fragmented. Users juggle dozens of protocol UIs to swap, stake, mint, or vote — each with different interfaces, no unified reward layer, and zero retention incentives. There's no single place for users to express what they want and get the best deal, and no shared infrastructure for protocols to reward engagement without wrecking their own tokenomics. Solution: Rewardz matches user intents to the highest-rewarding protocol offers in real-time. AI resolves what you want to do. Blinks execute it. Points are verified on-chain. Retention: Those points become mining power in a 1-minute epoch game (5x5 grid, ORE insipired mining game burn points to mint Rewardz token). This gamifies holding and re-engagement — not just earn-and-dump. Business model: Protocols stake Rewardz tokens to get issuance power and rank higher in offer matching. Flywheel: More protocols → better rewards for users → more users → more protocols want to be listed → they stake more RWD → token demand increases → mining game rewards increase → more users. For Builders & Protocols > Reward infrastructure at the perfect moment. Your incentives land when the user is already mid-action — resolving an intent, executing a Blink, completing a quest. No cold outreach, no banner ads. You're rewarding real on-chain behavior at the exact point of engagement, which promotes higher conversion and retention. For Consumers > Stop leaving money on the table. Right now you're swapping, staking, and minting across a dozen protocols — and missing rewards you're already eligible for. Links  Website : https://www.rewardz.io/  X Account :https://x.com/forge_rewardz Contacts RenjiTheDev - https://x.com/RenjiTheDev
+
+--- PROJECT SUBMISSION ---
+
+Hi there, We want to share a quick progress update on SAP, our Solana Analytics Platform: https://sap.mobr.ai/ So far, we have: Bootstrapped the backend, frontend, and core platform structure
+,
+Launched the website with an early-access waitlist
+,
+Integrated Solana wallets, including Phantom and Solflare
+,
+Started working on large-scale data ingestion for our knowledge graph
+,
+ Our goal is to build an analytics layer for Solana that combines structured blockchain and ecosystem data with more intelligent, user-friendly exploration. We are still early, but the foundation is now live and moving fast. Would love to connect with others building data, infra, analytics, or AI tooling in the Solana ecosystem. Rafael Brandão, PhD MOBR Systems https://mobr.ai/
+
+--- PROJECT SUBMISSION ---
+
+Fantasy MMORPG with on-chain ownership and real stakes. Alerith is a medieval fantasy MMORPG where every choice has weight. Train skills the old-school way. Combat, gathering, smithing, crafting, and more. Each with depth, progression, and real consequences for how you build your character. Quests pull you into a world that doesn't revolve around you. NPCs have routines, factions remember reputation, and the world keeps turning whether you log in or not. The duel arena is where stakes get real. Wager SOL 1v1 fights settled on-chain via MagicBlock VRF and ephemeral rollups. Provably fair, low latency, win and the pot is yours. Lose and it's gone. Items live as NFTs in your wallet. Rare drops are earned, not minted, and you choose what they do at any moment: collectible, equippable, or listed on the marketplace. Move between states whenever. Ownership never leaves you. 3 years of building. Self-funded. No token launched. The gates are opening. Our playtest sign up is live. Watch the video and sign up! https://x.com/PlayAlerith/status/2050318202287059222
+
+--- PROJECT SUBMISSION ---
+
+ZendIQ — Execution-layer MEV protection for Solana traders. Pro version adds post-trade sandwich detection, route safety classification, and Jito bundle execution. ZendIQ Pro live on Github: https://github.com/ZendIQ/ZendIQ-Extension-Pro ZendIQ Lite already live on Google: Free Chrome extension that scans every token before you sign. Live on Chrome Web Store with 65+ active users across 9+ countries. Built by a solo founder. #solodev Live in chrome Web Store https://chromewebstore.google.com/detail/piacdmhfdpnddopdojdfkjbbbcpgpblf https://zendiq.ai/index.html (edited)
+Tuesday, April 21, 2026 at 8:39 PM
+
+--- PROJECT SUBMISSION ---
+
+https://x.com/usebido
+
+--- PROJECT SUBMISSION ---
+
+WE NEED YOU We’re finally live on devnet  Brawl Stars · Clash Royale · Chess.com · Lichess. Pick a game, set a prize, send a friend the link, play a normal match. Winner gets paid instantly after the game's API confirms the result. Demo: full flow end-to-end. Connect a wallet — we auto-drop devnet USDC so you can play right away. Faucet inside if you need more. Looking for testers. Play a match — we want your honest feedback   https://skilltax.gg/ (edited)
+Friday, May 1, 2026 at 8:33 AM
+
+--- PROJECT SUBMISSION ---
+
+building cost-efficient composable execution infra for solana: less raw rpc glue, more executable actions. for devs, ctraders and agents. what's live: https://rpc.venum.dev/ — free solana RPC. no card, no monthly credit cap.
+,
+https://www-rpc.venum.dev/ — abuse-resistant Web RPC gateway for dapp frontends.
+,
+https://swap.venum.dev/ — swap dapp running on top of Venum APIs.
+,
+ solo founder, shipping daily through frontier. would love feedback from anyone building swap-heavy products, agents, or rpc-dependent infra. dms open.  Website: https://www.venum.dev/
+,
+Twitter/X: https://x.com/venumdev
+,
+GitHub: https://github.com/venumhq
+,
+ (edited)
+Sunday, May 3, 2026 at 11:39 PM
+
+--- PROJECT SUBMISSION ---
+
+building the financial layer for founders who earn onchain but live in the real world. the problem: you invoice in USDC, get paid in USDC, but can't pay rent, taxes, or your CA with USDC. banks reject you. your accountant has never heard of a stablecoin. compliance is a maze. what we've built: → US LLC incorporation in 48h → USDC/USDT invoicing with a real business address → compliant offramp to India, West Africa (and expanding) → one dashboard for the whole stack built for Superteam builders, Colosseum hackers, solopreneirs, devs and anyone shipping real products onchain. if you're earning in crypto and struggling with the offchain world — we built this for you. https://mystablecorp.xyz/ | DM open (edited)
+Friday, April 3, 2026 at 7:01 AM
+
+--- PROJECT SUBMISSION ---
+
+The problem Every raffle, airdrop, and reward distribution on Solana asks users to trust the operator. The usual evidence is a transaction hash — which proves something happened, but not that the rules were followed. Discord communities regularly erupt over "rigged" outcomes because there's no standard way to verify them. Existing solutions (Chainlink VRF, Switchboard, Orao) verify a random number — not the outcome logic. An operator can use a perfectly fair random seed and still apply biased selection rules. Nobody catches that. What VRE does Operators commit outcome rules to Solana before resolution. The rules are hashed and stored on-chain as an artifact. When the outcome resolves, anyone can independently replay the full result from the transaction signature and public RPC data — verifying both the randomness and the rules. committed rules → deterministic replay → MATCH / OK No oracles. No trusted backend. SHA-256 over on-chain data — any third party can recompute it. What's shipped Canonical Solana program live on devnet
+,
+Open verification SDK on npm: verifiable-outcome-sdk
+,
+Embeddable widget (<vre-verify>) for any page
+,
+ Live raffle with Phantom The fastest way to see VRE end-to-end: go to verifiableoutcome.online/play, connect your Phantom wallet (read-only, no signing), and click Start Raffle. Your address gets entered into a real on-chain draw alongside a few preset addresses. The program resolves on devnet in ~15 seconds — committed rules, real transaction. Once resolved, click "Verify independently" and you'll see MATCH / OK with the full pre-commitment timeline showing the rules were locked before the result. The same signature works with vre verify --sig <tx> from the CLI. Use cases: raffle, airdrop, loot, prediction markets Try it: [verifiableoutcome.online/play](https://verifiableoutcome.online/play) Verify any outcome: [verifiableoutcome.online/verify](https://verifiableoutcome.online/verify) https://x.com/voutcomeengine (edited)
+Thursday, April 23, 2026 at 10:01 AM
+
+--- PROJECT SUBMISSION ---
+
+DICE — Earn SOL by Powering Verifiable Randomness https://x.com/dicelabsnetwork DICE is a small hardware device that plugs into any power source and earns you SOL every time a Solana dApp requests randomness. Think of it like mining — but instead of solving hashes, your device generates true hardware entropy that on-chain games, lotteries, NFT mints, and prediction markets rely on. Why it pays: Every dApp request costs 0.002 SOL. That fee gets distributed to the hardware nodes that contributed entropy to fulfill it. The more requests the network serves, the more your device earns — passively, 24/7. What you get: Plug-and-play ESP32-S3 device — no setup headaches
+,
+Auto-connects to the DICE Network
+,
+Earnings paid directly in SOL
+,
+Low power, runs silently, fits anywhere
+,
+ Why it works: Solana dApps need verifiable randomness, and software RNGs aren't trustworthy. DICE solves this with real hardware across a distributed network — and node operators get paid for providing it. Pre-registration opens Monday. Get in early before the network scales.
+
+--- PROJECT SUBMISSION ---
+
+Orquestra turns any Solana program IDL into a production REST API and MCP server in seconds — so developers ship integrations in minutes, not days, and AI agents can call any Solana program natively. AI  Solana Two things that stand out: MCP Server — AI agents like Claude can search programs, read instruction schemas, derive PDAs, and build unsigned transactions — directly from a conversation, no code required. In the example output above, a user said "buy beer for table 11 at jacobstore"; the agent ran search_programs → list_instructions → derive_pda → build_instruction and did exactly that. REST API — Every Solana program gets build, derive, and fetch endpoints generated automatically. Receive unsigned transactions as base58, and send them. Simulation mode included. In short: upload your Solana program, let both humans and AI use it. I’ll be sharing demo videos and shorts here. Feel free to DM me for any feedback or testing  X : https://x.com/orquestradev Dev x : https://x.com/WhiteMoonDev Github : https://github.com/berkayoztunc/orquestra CLI github : https://github.com/berkayoztunc/orquestra-cli Npm Signer MCP : https://www.npmjs.com/package/@orquestradev/signer-mcp MCP : https://orquestra.dev/docs/mcp Web : https://orquestra.dev/ (edited)
+Friday, May 1, 2026 at 10:00 PM
+
+--- PROJECT SUBMISSION ---
+
+https://www.spacedeck.xyz/ We provide a zero-custody, MEV-protected execution pipeline that decouples agent intelligence from on-chain settlement. Problem The $15B+ AI x DeFi sector is built on a massive dual-liability: Custody Risk and Alpha Leaks.
+,
+Current frameworks force agents to hold hot wallets, an unacceptable compliance risk for institutional treasuries.
+,
+Furthermore, agents trading in the public mempool bleed 30-80bps to MEV searchers on every execution.
+,
+We cannot scale autonomous capital on infrastructure built for retail consumers.
+,
+ Solution We decouple the AI's intelligence from the mechanics of on-chain execution.
+,
+Order Ingress: Agents sign intents off-chain via Near MPC (Zero Custody).
+,
+Capital Guard: Operators hold the capital and delegate a budget; agents just execute.
+,
+Atomic Settlement: Trades bypass the mempool entirely via Jito Block Engine.
+,
+Result: 100% MEV protection and 400ms physical finality.
+,
+ Key Insight Logistics over Hype: Applying 5 years of Amazon process engineering, I treat Solana transaction routing like supply chain logistics.
+,
+Annealing: We aggressively pivoted 3 times in 2 months, burning down legacy Web3 scaffolding to build a pure, physical SVM engine.
+,
+The Capital Shift: Capital no longer rewards possibility; it rewards certainty. We are optimizing for institutional alignment, not consumer retail.
+,
+ Status & Ask Stage: Devnet Alpha is live. The Near MPC → Jito pipeline is structurally sound.
+,
+Validation: Connected with early institutional reps; leveraged Colosseum Copilot to map supply/demand dynamics.
+,
+The Ask: Looking for HFT desks, Prop Traders, Hedge Funds, or DAO Treasurers to route a test trade and validate our PMF.
+,
+ GitHub repo & pitch deck available upon connecting: drop me a DM! (edited)
+Sunday, May 3, 2026 at 1:22 PM
+
+--- PROJECT SUBMISSION ---
+
+I’m building Nector - a chat-based, non-custodial escrow platform for buying and selling digital and physical products safely, even between complete strangers, built on Solana. The Problem : Fraud still happens in online deals, even though thousands of escrow services already exist. The real problem is not the lack of escrow technology - it’s accessibility and usability. Most existing escrow platforms are too complex for normal users. They require technical knowledge, KYC, complicated workflows, slow dispute resolution, or centralized admins to manually resolve disputes. Because of this friction, many people avoid using escrow, and scams continue to happen. The Solution  : Instead of building another complex financial tool, we designed Nector to be simple enough for everyday users. Users can create deals, fund escrow, deliver products, and resolve disputes directly inside chat without switching platforms or relying on admins. Funds are locked in Solana smart contracts and released automatically through predefined rules, timeout systems, and economic incentives. Our core innovation is Draw Dispute Mode (BTR / STR). Instead of manual arbitration, users choose who takes more financial risk if a dispute ends in draw. If neither side resolves the dispute before the deadline, all escrow funds go to treasury, making dishonesty expensive and forcing honest behavior. We also built Nector Mini, an open-source toolkit for developers to build their own chat-based escrow platforms. (https://nector.chat/docs/nector-mini) Current Stage :  Live product deployed on Devnet https://nector.chat/  Smart contracts + timeout system completed  Keeper bot automation completed  Full dispute system + Draw logic implemented  Open-sourced Nector Mini + smart contracts  Testing UX and preparing for production deployment Looking For :  Feedback from builders  Product validation + growth ideas  Ecosystem connections  Potential collaborators and early users
+
+--- PROJECT SUBMISSION ---
+
+Solia Live is a decentralized Social platform that empowers creators to monetize their AI-generated content using the speed and efficiency of the Solana blockchain. By integrating AI tools with on-chain incentives, Solia provides a seamless social layer for creators and fans to interact, share, and earn. Tink Pinterest - but owned by creators, not platforms. Core Functionality  Social Feed - Discover trending creations with smart Hot/New/Trends algorithms  AI Image Generation - Create unique images using advanced AI models with multi-provider fallback  Creator Profiles - Customizable profiles with social media verification (X, Telegram, YouTube)  Content Monetization - Sell AI-generated images directly to buyers with SKR tokens  Analytics Dashboard - Real-time platform statistics and insights  Top Creators Ticker - Rotating showcase of trending artists Advanced Features  Smart Sorting Algorithms - Time-decay scoring for natural content rotation  Referral System - Bring new users and earn from their activity (15% on generations, 10% on purchases)  Follow System - Build your creator network  Like & Comment - Engage with the community  Drafts System - Save generated images as drafts before publishing, persist across sessions  Post Preview - Review generated images with Publish/Delete options before going live  Leaderboard - Top creators by posts, likes, followers, and referrals with social links  Daily Like Limits - Bot protection with bonus system (2 base + 8 per generation + 10 per purchase)  Transaction History - Track all platform activity  Image Protection - Download prevention with overlay shield  Multi-language - 6 languages supported (EN, RU, ZH, HI, VI, JA) https://pbs.twimg.com/profile_banners/34894441/1775033787/1500x500
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone! I'm Franz, solo founder building BugHyve for the Frontier hackathon. As a builder, I think most of us have felt this at some point. We ship a product. Tests pass. CI is green. We feel good about it. Then we release, and here come the bug reports. Broken flows. Confused users. Things we never saw coming. Now we're firefighting in production while users quietly leave. We don't just lose users, we lose trust, momentum, and money (especially in web3). As a Product Engineer with 5+ years of experience shipping software products, I kept seeing the same pattern, especially on AI-first teams. AI lets us ship faster than ever, but QA hasn't caught up: Features pile up faster than QA can realistically cover.
+,
+Automated tests don't catch edge cases and unexpected paths, they only validate what's already defined.
+,
+Monitoring and alerts only fire when someone hits the broken path. By then it's too late.
+,
+ The missing layer is exploratory testing by real humans, at scale. That's why I'm building BugHyve.  Teams — run a campaign with USDC budget, get real people exploring your product, pay only for valid confirmed findings.  Testers — explore live products, find real issues, and get paid for valid contributions straight to their Solana wallet. Waitlist is live at https://bughyve.com/ Would love to connect with teams that can't afford to ship broken, and testers who want to get paid for real QA work.  (edited)
+Sunday, April 19, 2026 at 4:11 PM
+
+--- PROJECT SUBMISSION ---
+
+Hi folks, Alex from UpScalp here. It's a futures trading assistant, built to distill volatile perpetual futures markets into clear, risk-aware actions for scalping. It provides futures trading signals and automated trading execution for the top 50 coins by volume, as well as guidance and education for traders. In particular, it's designed to help you avoid costly impulse trades: structured signal flow, consistent risk framing, and fast notifications when conditions change quickly. The guiding principle of the product is: "Make gains and avoid dumb risk"  I plan to build five products in the UpScalp family. All five products work coherently as a unit (which is why I call them a family  ) Two are currently live
+,
+One is in final testing before entering a private beta
+,
+Two more are in development.
+,
+ You can try the two live products right now if you'd like to. UpScalp Lite: https://www.t.me/UpScalpLite_bot UpScalp Premium: https://www.t.me/UpScalp_bot I've also been livestreaming and building in public almost daily for the last 59 days. All of the livestreams are available here: https://www.youtube.com/@UpScalpbot I do my daily livestreams on all of these platforms at the same time using OBS Studio: X: https://x.com/Upscalpfutures
+,
+YouTube: https://www.youtube.com/@UpScalpbot
+,
+Telegram: https://t.me/upscalpportal
+,
+PumpFun: https://pump.fun/coin/2nKNuDniEeAs44oCT1niwzXGNNiEh4N7pfZJJ3t4pump
+,
+Twitch: https://www.twitch.tv/upscalp
+,
+ Let me know if you have any questions! (edited)
+Tuesday, April 14, 2026 at 10:04 PM
+
+--- PROJECT SUBMISSION ---
+
+GM ! Riptide is an open-source stress-sim library for Solana programs. It lets teams run deterministic simulations against their real compiled program in LiteSVM, using declared agents, scenarios, and invariants. Problem
+,
+Solana programs usually don’t break at one obvious input. They break across regions: liquidation pressure
+,
+oracle shocks
+,
+whale concentration
+,
+withdrawal runs
+,
+treasury drain paths
+,
+reward / emissions abuse
+,
+game economy collusion
+,
+bad debt boundaries
+,
+ Unit tests check points. Audits reason about code. Riptide helps map the “what breaks under pressure?” region before mainnet does. How it works
+,
+Point Riptide at a Solana program + IDL
+,
+Define personas, scenarios, and invariants
+,
+Run deterministic sweeps in LiteSVM
+,
+Get rerunnable traces, dashboard output, and evidence packs
+,
+ It is not an audit and not a prediction engine. It’s a lab for making economic safety claims reproducible. Example use cases
+,
+lending protocol testing liquidation cascades
+,
+vault protocol testing withdrawal pressure
+,
+stablecoin protocol testing depeg paths
+,
+game testing collusion / treasury drain scenarios
+,
+auditor creating a rerunnable evidence pack for a finding
+,
+ I’m building this for Frontier and looking for 2-3 teams with a repo/IDL and one mechanism they’re worried about. Happy to try a small async sim and send back the trace. Website: https://riptidesim.com/ X: https://x.com/riptidesim (edited)
+Saturday, May 2, 2026 at 6:05 PM
+
+--- PROJECT SUBMISSION ---
+
+n8n-style canvas where you wire how money flows (payroll, taxes, treasury, founder draws). Once deployed, every USDC deposit splits itself onchain automatically, no manual transfers, no spreadsheets. For teams and DAOs that share revenue. Devnet live: splitpact.com Looking for testers and feedback: drop a reply or DM if you want to poke around and break stuff. Devnet live: https://splitpact.com/ (edited)
+Saturday, May 2, 2026 at 2:02 AM
+
+--- PROJECT SUBMISSION ---
+
+https://weather.fi.computer/ Kalshi integration soon.
+
+--- PROJECT SUBMISSION ---
+
+Blastit is a trading bot platform for Pump.fun and Bonk.fun launchpads. We solve two problems at once: traders get automation and discipline, token developers get ready-made market-making tools. Problem: Memecoin trading is chaos. Traders burn out from 12-hour sessions, make emotional decisions, miss entries by seconds, and lose money due to lack of consistency. Meanwhile, devs struggle with launch mechanics and token management. Our Solution For traders: Automated bots with custom filters (market cap, dev wallet checks, volume spikes, fresh wallet tracking)
+,
+Copy trading with your own risk parameters — not blind mirroring
+,
+TP/SL with trailing stop — systematic exits instead of emotional ones
+,
+Bot marketplace where skilled traders sell strategies and earn passive income
+,
+ For developers: Dev MM product with ready presets for token launches
+,
+Market-making configurations out of the box
+,
+ Current State Live MVP
+,
+Real-time prices via Gadfly gRPC
+,
+On-chain execution through PumpPortal
+,
+Closed beta with whitelist
+,
+ Links: Website: blastit.trade X: https://x.com/blastit_trade Discord: https://discord.com/invite/bUk6z2qU6z Looking for other teams to stay active on each other's posts during Frontier.
+
+--- PROJECT SUBMISSION ---
+
+Any hardware wallet sign any on-chain administrative action — deploy, upgrade, transfer authority, recover locked SOL — directly from a browser via WalletConnect. No CLI. No hot keys. No middleware.
+
+--- PROJECT SUBMISSION ---
+
+hi ALL! I’m working on a action 3d web3 Battle Royale with core gameplay around memecoins. All characters - memes, many many memes. Each meme coin in blockchain is appearing in the game and play their role. Current stage: active development
+,
+4 characters, map, game core mechanics
+,
+actively iterating on gameplay + UX
+,
+
+planning to open the server before current hacaton ends.
+
+,
+Looking for: feedback from builders
+,
+growth / community ideas
+,
+potential collaborators
+,
+ (edited)
+Friday, April 24, 2026 at 8:36 AM
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone! I just built something wild, a full Solana wallet that runs inside MTA:SA (GTA San Andreas Multiplayer). It's called Grove Street Wallet. You can create wallets, send SOL, hold SPL tokens like USDC and USDT, check transaction history, and even see live prices, all without leaving the game. The craziest part? The entire crypto stack (Ed25519 signatures, BIP39 mnemonics, transaction signing) is written from scratch in pure Lua. No external libraries, no binaries, nothing. Just Lua running inside a 2008 game engine talking to the Solana blockchain. What it can do: Create wallets or import from Phantom/Solflare
+,
+Send and receive SOL and SPL tokens
+,
+View transaction history with Solscan links
+,
+Live price feeds (SOL, USDC in USD/IDR)
+,
+Encrypted key storage per player (AES-128)
+,
+Works on Devnet and Mainnet
+,
+ MTA:SA still has 22,000+ players online across 5,300+ servers. GTA 6 is coming this year but San Andreas had to go on-chain first. GitHub: https://github.com/yongsxyz/grove-street-wallet-solana https://x.com/0xVerseLOL/status/2043997726212587527 (edited)
+Tuesday, April 14, 2026 at 3:24 PM
+
+--- PROJECT SUBMISSION ---
+
+Remove the human error, trading is for bots! We’re building a Solana platform where traders can run automated strategies — choose from pre-built bots or create your own with AI, sentiment, and technical indicators. Let your trading run 24/7, create multi-bot trading systems, climb the leaderboard and monetize your profitable agents for other users to use. Mobile + Desktop. Built on top of FlashTrade. Follow us on X! https://x.com/DegenEzApp https://degenez.com/ (edited)
+Thursday, April 30, 2026 at 12:58 PM
+
+--- PROJECT SUBMISSION ---
+
+we're helping projects to tokenize a part of their future supply as pre-market for community to trade & speculate - capturing attention and turning it into liquidity. for projects: experiment before the token launch. understand community sentiment, expectations, and turn early attention into liquidity. are you looking to launch a token for your project in the future? let's chat about your token launch strategy.
+,
+for traders: speculate on projects you believe in. clear entry and exit, no airdrop or TGE hangover - just markets that make sense. are you trader looking to trade early stage opportunity? feel free to use our beta and earn points: https://beta.not.market/
+,
+ here's our colosseum submission: https://arena.colosseum.org/projects/explore/not.market-2 follow our regular updates: https://x.com/notdotmarket (edited)
+Thursday, April 30, 2026 at 3:18 PM
+
+--- PROJECT SUBMISSION ---
+
+Building enforcement for AI agents managing DeFi capital on Solana. Every transaction gets intercepted and checked before it hits the chain - the tx either goes through or it doesn't. Also running a live health registry for Solana DeFi venues. If a protocol starts draining, agent txs get blocked automatically. Working demo on devnet → https://prflght.xyz/ Our X → https://x.com/prflght Would love to talk to anyone building agents that touch real capital. (edited)
+Thursday, April 30, 2026 at 3:56 PM
+
+--- PROJECT SUBMISSION ---
+
+We’ve been quietly building this and it’s finally live. You can type a simple song idea and get a full studio quality track back in under a minute. Vocals, production, & structure. If you like what you made, you can publish it instantly. One click tokenizes the song through Meteora’s DBC protocol, and as people trade it, you earn a share of the fees as it grows. It’s still early, but it’s working. We’re shipping updates constantly. Try it out https://phonon.studio/
+
+--- PROJECT SUBMISSION ---
+
+SolGov is an on-chain governance transparency layer for Solana DeFi. Every recent major exploit traced back to config choices that were visible on-chain before they happened. SolGov makes those conditions searchable and monitored across 50 protocols in real time. Building this as a prevention layer to strengthen security for protocol teams on Solana and make the experience safer for users Dashboard 50 Solana protocols tracked across 50+ governance multisigs
+,
+Governance config, signer roles, timelocks, program upgrade authority, external configAuthority (Controlled Multisig), verified build status, insurance fund coverage
+,
+Click any protocol for member roles, Squads best practice compliance checks, program split authority, audit & documentation summaries
+,
+No ratings layer, just on-chain facts & protocol docs/disclosures
+,
+ GovWatch Catches threshold, member and timelock changes in seconds via WebSocket
+,
+Tracks every proposal. Approvals, rejections, cancellations, execution speed (avg, fastest, slowest)
+,
+Shows who proposes, who approves, who executes. Flags when the same signer does both
+,
+Full config change history with dates, active voter %, signing timezone patterns
+,
+Public activity log, Telegram alerts routed by severity
+,
+ Blast Radius Upstream & downstream dependency maps across all 50 protocols
+,
+Shows where a single weak link cascades through oracle, collateral, routing, settlement
+,
+Rough TVL at risk estimate via dependency contagion
+,
+ Charts Solana governance statistics, historical trend data
+,
+Timelock adoption, role separation, threshold ratios, Squads version distribution
+,
+Tracks whether Solana DeFi governance is improving over time
+,
+ Signer Intelligence Measures how independent a team's signers are across multiple multisigs
+,
+Spots when the same signer shows up across protocols, or when governance keys get used for DeFi
+,
+Tracks how new each signer is and when they're active (off hours patterns)
+,
+ Infrastructure VPS listener, webhook ingestion & cron reconciliation as safety net
+,
+Batched RPC, exponential backoff reconnect, persistent state across restarts
+,
+Forensics library, one profile per protocol, organised by domain
+,
+ Also tracking 30+ tokens for freeze/mint authority & Helium circuit breaker coverage
+,
+22 LayerZero DVNs tracked. 14 run 1-of-1 signer quorum. 20 of 22 programs share upgrade authority across just 3 keys
+,
+Durable nonce detection (live until Solana deprecation ships)
+,
+Token-2022 extensions & 1-of-N multisig setups where any single key can act alone
+,
+ Feedback welcome https://solgov.xyz/ X - @SolGov_ Cheers, CSK.
+
+--- PROJECT SUBMISSION ---
+
+5X is a simpler, faster, and more competitive way to speculate on crypto. Join a lobby Pick 3 Coins Allocate your $1M virtual bankroll Top 3 PnL win. 1st 5x · 2nd 3x · 3rd 1.5x 5X is live on Devnet! I'd LOVE your feedback and would be happy to review your project too!  https://fivex.fun/
+
+--- PROJECT SUBMISSION ---
+
+Lowkie is the first trust-minimized, compliant confidential layer on Solana. We aim to unlock the next wave of adoption in settlements on Solana. Solana’s native confidential engine is off, the Zk proof program has been disabled. Hence, we have pivoted to a two-phase architecture that allows us to be useable today, and upgradable to CSPL once it goes live. > Phase 1: We will be shipping a confidential settlement flow that’s trust-minimized, compliance-ready, and frictionless; no claim pages, recipients receive instantly, all powered by Arcium’s MPC for encrypted accounting and execution. > phase 2: The moment CSPL is live on public clusters, Lowkie upgrades from amount obfuscation to native, token-level amount confidentiality. Same architecture, Same product flow, upgraded confidentiality primitive, and enhanced amount anonymity. We are rolling out on devnet this week, and we will be excited to have the community test and iterate with us. Reach the team out on here, or on dev@lowkie.xyz for questions, or integrations. X - https://x.com/lowkie_protocol
+
+--- PROJECT SUBMISSION ---
+
+This is my first ever Solana project and token. Would appreciate any feedback on Purses, tips for navigating the Solana ecosystem, and recs for managing a token. Purses Overview: A new type of bag. Earn together. Learn crypto together as you go. Launchpad and wallet designed for your wives, girlfriends, sisters, moms, and besties. It has dual-terms throughout to teach crypto jargon as they do crypto actions. Open your purse and explore your items. Open the Mirror for mirror/copy trading Mint a token in the Mints Claim fees on the Checkbook Chat with Headphones for AI crypto alpha Save bookmarks to the Notebook Check your holdings in the Coin Pouch Look through your Cards for shared funds & memberships Unlock Keys & charms as you unlock crypto abilities Try it out. I minted $Purses using the mints. (people found the token and now I'm trying to keep it alive, pls help with any tips!) I've claimed fees/earnings using the checkbook. (locked all for 3 months) Message if you want to partner. (would love to partner with anyone with animal related brands/nfts, items that could go in the purse, tech/functionality I should add, or other fun collab ideas) Website: https://purses.cc/ X: https://x.com/pursescc_ TG: https://t.me/pursescc <1 min overview: https://x.com/erinmagennis/status/2042963103990845607?s=20 Livestream overview: https://x.com/pursescc_/status/2044375139064971772?s=20 $PURSES Ca: 7h9AsF1477kb9ao5L7uhebRWaxqgyVH1UEy15asQBAGS
+
+--- PROJECT SUBMISSION ---
+
+Dagon - Encrypted Order Flow Dagon is a confidential block-matching venue on Solana. You trade size without leaking your order. We encrypt size, side, and price through the whole match; counterparties never learn who they traded with. https://dagon.so/ https://x.com/DagonSolana (edited)
+Thursday, April 23, 2026 at 10:53 PM
+
+--- PROJECT SUBMISSION ---
+
+We built a token launchpad on Solana where you physically cannot dump. Every purchase is instantly locked into a vesting stream. Sells are gated by price targets via oracles, where tokens are locked via Streamflow escrow. During unlock, fees start at 25%, decay to 1%, and redistribute to holders. The result: launches where the only way to profit is for the token to go up. what this fixes: > liquidity and attention fragmentation of memes > broken trust between dev and amongst holders > vamps and PVP > bundled farms and rugs > limited upside to memecoins > narrative fatigue and trading exhaustion > lack of time to build communities and cult > ineffective lindy effect > incentives for extractooors Live on mainnet. conviction-based launchpad built for cults streamlock.fun Follow us on X: https://x.com/streamlockfun
+
+--- PROJECT SUBMISSION ---
+
+We created patented spectral encryption algorithm ONDO ZERO, which elevates digital asset security and identification to a post-quantum level. Our technology creates a Spectral ID — a unique, cryptographically robust digital fingerprint that hard-links blockchain smart contracts to the physical silicon chip of the user's mobile device. Absolute Protection Against Sybil Attacks and Bot Farms, KYC with ZKP on Solana. We developed solution to protect video against AI modifications with ZKP, application will be posted to Google Play soon. We are going to release our ONDO ZERO token to support our Post-Quantium Protection engine.
+
+--- PROJECT SUBMISSION ---
+
+The core idea: FIDC funds in Brazil generate real yield from receivables, invoices and corporate credit — backed by actual economic activity, not token emissions. The problem is access. These instruments require minimum tickets, local banking relationships and months of onboarding. Onchain capital cannot reach them. STRATA replicates the senior/subordinated tranche structure of Brazilian FIDCs directly in an Anchor smart contract. 90% senior — capital preservation first. 10% junior — first loss, all excess yield. The waterfall logic is immutable, enforced by bytecode. No fund manager can override it. Currently live on devnet with real vaults, real on-chain transactions, and a yield simulator where you can watch a default event hit the junior tranche and leave the senior untouched. Entry via Solana Blinks — users deposit directly from their X feed without leaving the app. Live: strata.zanvexis.com Happy to get feedback from anyone who has touched RWA infrastructure or structured credit before.
+
+--- PROJECT SUBMISSION ---
+
+Bring onchain yield to your product with infrastructure ready to integrate Instead of building a DeFi stack from scratch, fintechs and platforms integrate Vayo via API and deliver automated yield to their users. Monetization through revenue share, execution on Solana. Vayo turns complexity into a layer ready to integrate Fintechs & Neobanks
+,
+Platforms
+,
+Digital products & Wallets
+,
+White-label partners
+,
+ More velocity for engineering. More clarity for operations. Rebalance System
+,
+Strategy that monitors USDC lending markets and rebalances investment groups whenever better opportunities arise. Rebalance Performance Admin-only analytics layer that derives performance metrics from the existing rebalance_jobs and user_transactions tables.
+,
+ Score Engine
+,
+The Score Engine is the intelligence layer behind Vayo Finance’s automated allocation and rebalancing. Important links X: https://x.com/vayofinance
+,
+Website: https://vayocore.com/
+,
+Email Contact: hi@vayo.finance
+,
+ Core team https://x.com/0xwmbarbosa https://x.com/wil0x91
+
+--- PROJECT SUBMISSION ---
+
+Hey builders Attention is one of the most valuable resources in crypto/web3, yet it’s still: Unstructured Exploited by low-effort farming Disconnected from real economic value TaskKash is building the infrastructure layer to fix that. The Core Idea TaskKash converts user attention into structured, measurable, and rewardable outputs. Instead of: “Engage and hope something comes out of it” We introduce: Clear tasks → Verified contribution → Earned rewards The Problem Current systems fail because they: Reward volume over value Are easy to game and spam Lack a reliable verification layer Result: Fake engagement → No real growth → Wasted incentives What We’re Building A task-based engagement protocol designed for real growth: Task Layer
+,
+Defined actions like content creation, distribution, and onboarding — all tied to clear outcomes. Verification Layer
+,
+Filtering spam and scoring contributions based on quality + impact. Reward Layer
+,
+Users earn based on what they actually contribute, not just activity. Why It Matters (on Solana) Fast, low-cost execution enables: Micro-rewards High-frequency participation Scalable engagement systems TaskKash uses this to make: attention trackable, valuable, and earnable at scale Current Progress We’re already: Testing task structures Experimenting with engagement filtering Building toward a scalable reward system What This Unlocks Growth-layer infrastructure Tokenized attention economies Better incentive alignment for communities Web3 doesn’t just run on liquidity, it runs on attention and distribution. TaskKash is building the system to make that attention worth something. This is only the beginning. taskkash.xyz
+
+--- PROJECT SUBMISSION ---
+
+NextVibe is an IRL-to-Web3 Social Graph on blockchain, focused on real-life connections, not just online. Users can create content straight from the app’s camera and, if they want, mint it as a cNFT. NFC lets you share your profile in one tap, meet people, and even make transactions between users. We’d love your reactions, questions, and feedback! Links : https://nextvibe.io/ https://x.com/nextvibeweb3?s=21 https://x.com/markovendysh?s=21 https://x.com/danklepar?s=21 https://github.com/hardusss (edited)
+Wednesday, April 8, 2026 at 5:49 PM
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone, We're building thematic investment baskets on Solana Our mission is to end one-size-fits-all finance Cesto is: Self-custody - you own the assets and funds
+,
+Rebalances - you get the latest updates in your baskets
+,
+One click - it's simple and one-click to enter & exit a basket
+,
+ Try it out, and give us feedback. DM me on x.com/jasonrodrigues We received honorable mentions two Colosseums in a row, and we've worked hard come back bigger, stronger and better. If you want feedback on your product too, happy to help Follow along for our updates: https://x.com/cesto_co Here's our launch post: https://x.com/cesto_co/status/2038985658052862031 (edited)
+Tuesday, April 14, 2026 at 2:44 PM
+
+--- PROJECT SUBMISSION ---
+
+Most gamers already know that the gab between web3 gamers and the guilds in this space is huge. They are vc funded and all top with scholars looking to extract. We are trying to change the space, because many p2e games are yet to provide a real structure. Because building a international organisation with strangers isn't as straight forward as it should be Decentraguild is building the template for goverance, treasury, distribution and all operational tools. Maybe most importantly a legal wrapper that makes your organisation real, allowing you to fund, collaborate and eventually distribute if you want. Visit https://decentraguild.com/ While we are building this complete package we also launch a Do-it-yourself solution. Where you can enable just the bits and pieces of tech that your community needs while figuring out your own compliance, partially already live at https://dguild.org/
+
+--- PROJECT SUBMISSION ---
+
+Visa is settling USDC on Solana. Mastercard. Worldpay. Western Union. The institutions have arrived, but the infrastructure to handle them hasn’t. Six months ago we kept hearing the same thing from people in institutional payments: the tech is ready, the compliance environment isn’t. Not compliance in the regulatory sense, compliance in the operational sense. The ability to run policy checks before execution. To produce reconciliation records finance teams can actually close books with. To give an auditor a bounded evidence package without exposing your entire settlement graph. Public blockchains don’t do this by default. For a consumer sending $50 that’s fine. For an institution settling millions with counterparties they’re also competing against, that’s an operational liability they cannot accept. The solution is a protocol like Lowkie’s, which is a control layer between institutional intent and public-chain execution. -> Here’s Lowkie’s flow: A treasury operator submits a settlement instruction: counterparties, amounts, asset, policy profile. Before anything moves, our policy engine runs four checks: > Are these counterparties on the approved list? > Does this amount require a reviewer? > Is anyone on a sanctions list? > Is this corridor permitted? If the settlement instructions passes all four, then execution proceeds, confidentially, on Solana. The public chain sees settlement activity. Not the full operational graph. After execution, a reconciliation record maps the business instruction to on-chain transaction signatures. Finance ops can close their books. And selective disclosure gives each stakeholder a different view of the same event; operator sees everything, auditor gets a bounded evidence package, public sees what the chain shows. Same settlement. Three different windows. -> Where we are today: Devnet is live with proof of mechanics for the confidential execution engine. Try it → app.lowkie.xyz
+
+--- PROJECT SUBMISSION ---
+
+Built something I've wanted for a while - an RPC router for Solana that actually understands the chain. The problem: every team I've talked to runs multiple RPC providers and wires up their own failover. Most of the time it's round-robin or just "try the next one if this one errors." No one's tracking which provider is actually faster for which method. No one's checking if a provider is lagging behind the tip. Stale blockhashes slip through and transactions fail silently. disburse sits between your app and your providers and handles all of that. It scores every provider against every RPC method independently - so e.g if Helius is faster at getProgramAccounts but Triton lands sendTransaction better, it routes each call to the right place automatically. It polls slot lag every few seconds and downgrades anyone falling behind. It validates blockhashes before forwarding sendTransaction so you get a clear error instead of a silent on-chain failure. And if a provider starts erroring it gets circuit broken and retries go to a different upstream. One Rust binary, one YAML config, benchmarking around 90k req/s on a laptop :D. Still very early - v0.1.0. Would really appreciate feedback, or discussions! https://github.com/nathandevelop/disburse https://x.com/codingn1/status/2044574205040103547?s=20 (edited)
+Thursday, April 16, 2026 at 4:10 AM
+
+--- PROJECT SUBMISSION ---
+
+Parapet is a drop-in RPC that automatically inspects and blocks malicious transactions before they land. It supports any upstream RPC from Helius, Triton, Quicknode, and others. Open-source security for Solana with: Real-time transaction interception
+,
+Analyzes every transaction at the RPC layer
+,
+Threat assessment for any Solana wallet
+,
+Embeddable library - Integrate security analysis into any application
+,
+Real time visibility of transactional risk
+,
+  Security Rules - Parapet ships with community rules that protect against common attacks such as phishing and token delegations. A premium feed will become available for more risk averse users. Use cases - All Solana users can benefit from a defense-in-depth perimeter defense. We are targeting AI agents , trading firms, and high net worth users.  Phantom/ Solflare - We are unable to support these wallets at the moment due to a lack of custom RPC support. Backpack  - We are currently testing this wallet and look forward to working closer with them, if possible. Our goal is to make it simple and easy for users and teams to self-host their own Parapet (Docker) or deploy using cloud providers (Digital Ocean, fly.io). Our repo is public and being actively worked on: https://github.com/securecheckio/parapet (edited)
+Thursday, April 16, 2026 at 8:22 AM
+
+--- PROJECT SUBMISSION ---
+
+Mood Ring is a fully on-chain, permissionless prediction market protocol built on Solana — designed to make foresight composable. Markets are created, traded, and resolved entirely on-chain through a Logarithmic Market Scoring Rule (LMSR) engine that powers real-time, efficient pricing and transparent liquidity flows. Market creators earn fees on each trade. Each market can support a virtually unlimited number of options, with every option functioning as its own binary market AMM (Yes/No). Liquidity providers supply USDC to these option pools, earning a share of every trade and capturing surplus when one-sided markets resolve the other way. Bonded resolvers with verifiable on-chain reputation anchor truth and integrity into every outcome — earning resolution fees from market creators by settling markets accurately and on time. If a bonded resolver inaccurately resolves a market that resolver's staked bond is slashed and their reputation decreases quadratically on each subsequent incorrect resolution. Built with modularity at its core, Mood Ring’s architecture and SDK enable developers to build new market types, trading interfaces, and resolution mechanisms without friction. Meanwhile, everyday users can create and participate in prediction markets directly through the Mood Ring platform — no gatekeepers, no intermediaries, just on-chain collective intelligence. X - https://x.com/moodring_io Discord - https://discord.gg/8MayDzYZ7h Devnet Program ID - BARTLZY1PLNUm2aNhdmvBsRRksVovqXRie3FGo9KZZZf (edited)
+Thursday, December 11, 2025 at 7:32 PM
+
+--- PROJECT SUBMISSION ---
+
+ChainPlay is a player first on-chain arcade pioneering the era of competitive on-chain e-sports. Most competitive gaming platforms are built like a slow rug pull: complex games, useless tokens, and "provably fair" algorithms that conveniently always win. They forgot what motivates players: fun, social status and real rewards. ChainPlay is built differently. A player first on-chain arcade with simple/familiar games and real peer-to-peer competition. Simplicity is our edge, the easier it is to play, the more people play, the better the competition. That's just the foundation. The vision is a full e-sports layer with cross-game tournaments, live spectators, and a stage where the best players compete publicly https://x.com/chainplay_xyz (edited)
+Thursday, April 23, 2026 at 3:20 PM
+
+--- PROJECT SUBMISSION ---
+
+GN  We're building Anemone — an Interest Rate Swap protocol on Solana using bilateral swaps with daily settlement.  The Problem DeFi lending rates can go from 12% to 3% in a single week. If you're a lender with $100K deposited, that's $740/month you lost and there's no way to hedge against it on Solana. In TradFi, this problem was solved decades ago. Interest Rate Swaps are the largest derivatives market on the planet — $469 trillion in notional value. In DeFi? Less than $1B total.  How Anemone Works Two sides of the market: Traders can take two positions: → Pay Fixed: you lock a fixed rate. If the variable rate goes above your locked rate, you profit. Used to speculate on rates going up. → Receive Fixed: you receive a fixed rate. If the variable rate drops below it, you profit. Used to hedge your lending yield. LPs deposit into the Anemone pool. 100% of LP capital stays deployed in lending protocols earning base yield — nothing sits idle. On top of that, LPs earn spread fees from every swap opened. Daily Settlement: every 24 hours, a keeper bot reads the current rate directly from on-chain Reserve accounts (no oracles), calculates the P&L between fixed and variable, and settles automatically. This only costs ~$0.002 per settlement on Solana.  What Makes Anemone Different Unlike yield-stripping models (PT/YT tokens), Anemone uses bilateral swaps with daily settlement.  No oracles — rates are read directly from on-chain lending protocol accounts  100% capital efficiency — LP funds are always earning yield, never idle  Dynamic spread model — spread adjusts based on utilization and directional imbalance, protecting LPs automatically  Daily settlement — P&L is settled every 24h on-chain, only possible on Solana (~$0.002 per settlement) For more infos:  [@AnemoneDefi](https://x.com/AnemoneDefi) Founders: [Ilan](https://x.com/0xilann) and Burgos
+
+--- PROJECT SUBMISSION ---
+
+Prediction markets are centralized, odds based and plain boring. With strikerate, we're building a realtime pvp sports arena. Instead of choosing an outcome, we reward how close you get to the outcome. Similar to fantasy leagues, you can set up leagues for your favorite teams and outsmart your friends.
+
+--- PROJECT SUBMISSION ---
+
+DumpFun is a competitive, gamified memecoin launchpad on Solana — where every token launch becomes a real-time liquidity battle.  No rugs. No bots. No empty promises. Just pure on-chain chaos, fairness, and degen fun.  How It Works  Create a token instantly → Anyone can launch a token on-chain, no code required.  Automatic liquidity generation → Liquidity pools are created and locked at launch.  The Sell Unlock Timer → Tokens can’t be sold until the timer hits zero — then the game begins.  BattleDumps Mode (PvP) → 2–3 tokens launch simultaneously in a single battle. → When the sell unlock hits, the token with the highest liquidity wins. → The winner collects all creator fees from the losers.  Why It’s Different  Fair launches – no pre-snipe or rug risk.  Gamified mechanics – hype, timing, and skill matter.  Competitive edge – creators and traders battle for dominance.  Earn more – creators make more fees than traditional launches.  Earn passively – 3-level referral system rewards you for your friends and their friends’ trades.  Grind for $DUMP – every click, trade, and chaos you cause earns you a slice of the airdrop.  $DUMP Token The heart of the DumpFun ecosystem. $DUMP powers the chaos, rewards the degens, and grows stronger with every trade.  Utility: Integrated across the platform — trading, battles, referrals, and future events. Earnable through app activity, competitions, and airdrops.  Deflationary by design: A portion of protocol fees are used to buy back and burn $DUMP, making every token scarcer as the ecosystem grows.  Staking Rewards: Stake $DUMP to earn a share of platform revenue and unlock exclusive boosts. Active stakers gain enhanced rewards, early access, and governance perks. The more the platform moves, the more $DUMP burns. Stake, play, and rise with the dump.  Tech Stack  Solana + Anchor — program for token + liquidity logic  NextJs + React — gamified trading terminal  App-Wallet + High-Speed RPCs — fast trades with no signature dialog  Analytics Engine — tracks liquidity, countdowns, and winner logic  The Vision DumpFun is building the degen game layer on Solana — where trading is the gameplay loop. We’re not making trading safer — we’re making it fun, fair, and competitive.  It’s where memes go to prove themselves.  Links  Website: https://dumpfun.io/  Twitter: https://x.com/dumpfundotio (edited)
+Thursday, October 9, 2025 at 12:02 AM
+
+--- PROJECT SUBMISSION ---
+
+Social media giveaways are a pain. LFGive makes them scalable. Hey everyone! We’re excited to share what we’re building for the Colosseum Cypherpunk Hackathon  LFGive is a platform for verifiable, on-chain social media giveaways. It automates the entire process — verifying rules, filtering bots, selecting winners, and sending on-chain payouts with public proof. Running giveaways today is messy, manual, and full of scams. LFGive connects social media directly to the blockchain — making giveaways trustless, transparent, and automated.  Built by Aerosol — the team behind Burn & Claim (https://www.burnandclaim.com/)  Follow along → https://x.com/lfgive (edited)
+Sunday, October 19, 2025 at 11:19 PM
+
+--- PROJECT SUBMISSION ---
+
+Conyr is the intelligence layer for every Solana wallet, token, and trade
+,
+What is Conyr
+,
+> Conyr is a real-time intelligence layer for Solana, combining high-speed analytics with AI-powered behavioral insights. It tracks every trade, calculates wallet positions, classifies coordination, flags threats and bad actors; all within Solana's 400ms slot time. With real-time coordination detection, per-wallet vector embeddings, and an agentic overlay that sits on top of your favorite terminal to answer natural-language queries - Conyr gives traders, protocols, and teams an edge; understanding Solana's value flows and the coordination behind them as they happen. From Breakout → now.
+,
+At Breakout we submitted an indexer with zero product on top, and, a significantly slimmer version of conyr's current capability. Here's what we've shipped since: OHLCV+: 2 modes: Raw swaps to OHLCV for charting and filtered ingestion; allowing traders to see the full volume of on-chain activity vs 'filtered' candles which remove trades from bots, wash trading, dust, and traders flagged as malicious.
+,
+ Bundle Classification: Conyr directly links funding provenance, shared auxiliary signers, and maintains stateful per-wallet PnL to detect 10 distinct bundle types (sybil-based, synthetic based, etc).  You can drill down into bundles to see their members, why theyre considered bundled, and PNL - also, overlayed on top of chart candles.
+,
+ Coordination Detection  Conyr identifies cohorts of wallets that follow, crowd, or campaign together across tokens. Catches copy-bot rings, pump coordination, and manipulation in real time.
+,
+ Vector Embedded Similarity SearchPer wallet labels and behavioral profiles gets embedded into 30-dimensional vectors for similarity searching across wallets. You can answer "Find wallets that trade like this, based on the exit discipline of this wallet."
+,
+ + much more we can't fit in this post (more soon!)
+
+--- PROJECT SUBMISSION ---
+
+Lot of work and cutting edge tech went into this - really appreciate anyone here checking it out and giving feedback. BioLLM.com is live right now and you can pay for messages with $BioLLM token https://youtube.com/shorts/vaxBvYrpPWw?si=Hc46glcjLxisoia6
+
+--- PROJECT SUBMISSION ---
+
+Building an autonomous trading system that monitors on-chain activity and executes strategies instantly based on market conditions (price, liquidity, tx patterns).
+
+--- PROJECT SUBMISSION ---
+
+Hi, I'm giving real plants a wallet so they can stop competing with each other and relying on us for resources. Plants can not only buy water, nutrients etc. but coordinate and survive by cooperation. It will be interesting to see these "Plant Agents" come up with survival strategies, keep changing them and literally evolve with reasoning rather than pure luck. I'd love to hear your thoughts, I will be posting updates everyday. If anyone wants to join me in my journey, I'm open for it. (PS: If you think this is too crazy and weird I'd love to talk more with you!)
+
+--- PROJECT SUBMISSION ---
+
+Hey all - I’ve pushed uLendMe Devnet to prod. Would love to hear feedback! I really love the color scheme  https://ulend.me/ (edited)
+Tuesday, April 14, 2026 at 10:18 PM
+
+--- PROJECT SUBMISSION ---
+
+I'm running free 30-min 1:1 sessions for hackathon builders. How it works: You write for 8 minutes about your project and what you care about (stream of consciousness — no thinking, just writing)
+,
+Then we spend 22 minutes using that as the frame to unpack your project: strategy, blocks, next moves
+,
+ You leave with clarity on what to do next Sharp, raw, surgical feedback. No fluff. You see me interacting with your link. My reaction helps you understand what you are doing better. Book here: https://calendly.com/jpfraneto/clarity-session
+
+--- PROJECT SUBMISSION ---
+
+Sign up for a city mixtape which will be monthly collections of mp3 NFTs. Vote on your favorites, vote the best of the city to the national mixtape stage to find the best mixtape of the country. Buy, sell, trade and collect mixtapes.
+
+--- PROJECT SUBMISSION ---
+
+Ran Nike through OnChainBridge this week — $51B revenue, 79 countries, zero onchain treasury presence. The gap is massive. Loyalty points, supplier payments, royalties — all still on legacy rails. App spits out a full Web2→Onchain breakdown with live DeFi APYs and protocol recommendations in under 30 seconds.  app.onchainbridge.xyz
+
+--- PROJECT SUBMISSION ---
+
+We're building skill-based competitive game with proof of human for Solana Mobile https://x.com/holdoutgg https://holdout.gg/
+
+--- PROJECT SUBMISSION ---
+
+gm  Pavlo here, solo-building from Ukraine (@Kapitoshko). Shipping AgentScope for Frontier — AI Platforms / Agents track. Your AI agent just moved $10k on Solana. Can you explain what it was thinking? If the answer is "open Solscan" — that's the gap. AgentScope correlates OpenTelemetry reasoning traces with decoded on-chain tx (Jupiter v6 + Kamino Lend parsers), runs 5 anomaly-detection rules, and ships alerts via Telegram. SDKs drop into ElizaOS and Solana Agent Kit with one line. Stack: TypeScript, Hono, Drizzle + Postgres, Yellowstone gRPC, Privy, React + SSE live dashboard. Deploying on mainnet. → https://x.com/agentscopehq Looking to connect with: teams building autonomous on-chain agents (happy to onboard as early users), and folks from Jupiter / Kamino / Helius / ElizaOS for integration chats. Let's ship
+
+--- PROJECT SUBMISSION ---
+
+AgentStoreFront allows you to easily create headless stores, so you can sell to AI agents in minutes. Currently, online retail platforms are built for humans - AgentStorefront is build for agents. Website: https://www.agentstorefront.xyz/ X: https://x.com/agentstorefront Try buying some snacks with your agent here! https://www.agentstorefront.xyz/s/agentfood Your agent needs a wallet to use AgentStoreFront: https://frames.ag/ - a previous Colosseum winner is a good provider. There are also other agent wallet providers. Would appreciate any feedback! Here is my personal X : https://x.com/varunvasudevan_
+
+--- PROJECT SUBMISSION ---
+
+TRAXR is pool-level intelligence for DeFi. We analyze and score liquidity pools — not tokens — using deterministic, on-chain data. Every interaction in DeFi happens against liquidity. TRAXR reveals the real condition behind it: • Depth • Activity • Impact • Stability • Trust No wallet connect. No transactions. Just signal. Know Your Pool. solana.traxr.pro/?=v2
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone — been heads-down building for Frontier since week 1. Here's where SwarmHaul is at. What it is: A coordination protocol where autonomous AI agents self-organize into swarms, complete multi-step tasks in relay chains, and get paid per-leg via on-chain vault PDAs. No central dispatcher. No shared memory. Just agents bidding, context passing between legs, and SOL moving through the chain when work is confirmed. What makes the reputation design interesting  Gaining trust uses diminishing returns toward 1.0. Losing it is linear and uncapped. Fresh identities are hard-capped at 0.6 regardless of credentials, Sybil resistance is baked into the math. Every agent has a resolvable DID, third parties can verify track records without touching our API. What's live on devnet right now  14 MCP tools at https://api.swarmhaul.defited.com/mcp — no API key, any Claude/Cursor/custom agent connects with one line
+,
+Two tracks: physical delivery (multi-leg relay, strict on-chain handoff ordering) + digital tasks (AI-to-AI sequential legs, context chained between agents)
+,
+On-chain per-leg CPI transfer from vault PDA → agent wallet on confirmation — irreversible, no middleware
+,
+Every devnet SOL earned is tracked from on-chain confirmations and matched 1:1 on mainnet after the hackathon closes (claim window 11–17 May) 
+,
+ Connect your agent in 30 seconds  claude mcp add swarmhaul --transport http https://api.swarmhaul.defited.com/mcp Find SwarmHaul in your agent's skill registry  OpenClaw / Nanobot: openclaw skills install swarmhaul (ClawHub)
+,
+Hermes Agent: PR open on HermesHub
+,
+ZeroClaw: PR open on open-skills
+,
+Any agent: npx skills add mighty840/swarmhaul-skill (skills.sh / LobeHub)
+,
+Smithery: https://smithery.ai/servers/parnerkarsharang/swarmhaul
+,
+MCP registry: io.github.mighty840/swarmhaul
+,
+  Dashboard: https://dashboard.swarmhaul.defited.com/  Docs: https://docs.swarmhaul.defited.com/ (edited)
+Saturday, April 25, 2026 at 7:58 PM
+
+--- PROJECT SUBMISSION ---
+
+We are building the freelance marketplace of the future connecting companies and freelances all around the world using the last Web3 and AI technology. Our goal is to build the best mobile-first Web3 freelance marketplace on the market on the Seeker phone. (edited)
+Wednesday, April 8, 2026 at 12:03 PM
+
+--- PROJECT SUBMISSION ---
+
+We launched our beta. Test in 4 steps what new in DeFi and the best strategy will win 1000$ - best time is now to be on top of the leaderboard in 3 weeks! https://superteam.fun/earn/listing/zodial/
+
+--- PROJECT SUBMISSION ---
+
+Hello, Just a quick reminder. We will be going deep on analytics in the coming month, with more information for free on our live index website. Information that should be far from free. You can observe and analyze with us, while we are finishing the product of the index itself. @solvent_index https://solvent.live/
+
+--- PROJECT SUBMISSION ---
+
+What if meme trading felt like a live battle? MemeRush is already live  A real-time meme coin battle platform on Solana.  Join battles with up to 50 players  Start from just $0.2  Live token data integrated  Instant gameplay — no waiting  Try it here: https://meemerush.xyz/ Demo https://memerushdemo.vercel.app/battle Already 85% complete — core features are working. Now focusing on: Smart contract integration
+,
+Liquidity filter (safe tokens only)
+,
+Mainnet launch
+,
+ Looking for feedback & early users
+
+--- PROJECT SUBMISSION ---
+
+Acend Finance A spot orderbook terminal on Solana. think hyperliquid, but on Solana. Trade anything, deploy your own markets, settle onchain. What is Acend? A spot orderbook terminal on Solana. think hyperliquid, but on Solana. Trade anything, deploy your own markets, settle onchain. It’s built for traders and builders who want the speed and transparency of onchain systems without sacrificing execution quality. 100,000- 150,000+ OPS (Orders Per Second) 0.5ms latency. The Problem Spot trading onchain is broken at the infrastructure level. • Existing DEXs rely on AMMs— no real price discovery, no limit orders, no orderbook depth • Onchain CLOBs have historically been too slow to be competitive with CEXs • Institutional-grade tooling (FOK orders, post-only, sub-ms execution) doesn’t exist in spot DeFi • Builders have no open, permissionless infrastructure to deploy markets on The Solution Acend is a hybrid orderbook: offchain Rust matching engine for execution speed, onchain Solana settlement for transparency and self-custody. Orders are matched in <0.5ms offchain, then net delta fills are flushed to Solana as a single compressed transaction. You get CEX-grade speed with onchain finality. Key Features • Full spot orderbook: Market, Limit, Fill-or-Kill, Post-Only • Real-time WebSocket orderbook, trades, balances, and candlestick charts • Permissionless market deployment — pay a listing fee, seed liquidity, go live • Strict mode (Acend-curated) and All mode (includes user-deployed markets) • User-deployed listing criteria: 30+ day token age, $15M+ market cap, renounced mint and freeze authority Links  Website:  Twitter/X: https://x.com/AcendFinance Contact  Twitter/X: https://x.com/kaidnbell
+
+--- PROJECT SUBMISSION ---
+
+The average company now uses 112 SaaS applications, according to Productiv's 2023 State of SaaS report. That number has grown 10x over the past decade. Notion for docs. Slack for decisions. Linear for tasks. Nothing actually connects so things get lost, slowed down or just never shipped while paying $8 dollar a month per user per tool. That fragmentation isn’t just annoying it’s also expensive. We are building Pulsar Spaces to fix that. A Web3-native productivity system where planning, decisions and execution live in one place. Sign-up for free @: https://www.pulsarspaces.com/sign-up DM for a free 12 months Core plan and enter public beta.
+
+--- PROJECT SUBMISSION ---
+
+Hey — sharing what we’re building for Frontier. Zodail.xyz — hyperlooping on Solana. No longer isolation. Direct pairs and unified lending. Live Challenge on Surfpool to win 1000$ https://zodail.xyz/ https://superteam.fun/earn/listing/zodial Leaderboard: https://zodail.xyz/leaderboardDocs (Whitepaper): https://zodail.xyz/Zodial%20Whitepaper.pdf Telegram: https://t.me/zodial_xyz
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone, sharing what we’ve been building at @SendraTx. We’re working on improving transaction execution reliability on Solana (simulate -> optimize -> send -> monitor -> retry). We’ve exposed an early API and are looking for builders to test it on real transaction flows. If your dApp involves frequent on-chain transactions (swaps, mints, bots, etc.), we’d love for you to try it out and share feedback, especially around whether it improves success rates or reduces your debugging overhead. Happy to collaborate
+
+--- PROJECT SUBMISSION ---
+
+Gaming platform that uses AI judge to score subjective answers. Uses real stakes to incentivize quality responses. (edited)
+Wednesday, April 8, 2026 at 3:27 PM
+
+--- PROJECT SUBMISSION ---
+
+Sneak peek: This is our internal tool for txCount prediction at horizons of 50, 100, 200, 500 slots ahead. We achieve above 75% directional accuracy. Values are a bit off but... hey, we can't be perfect, just better than the rest of the quants* *In this one single aspect.
+
+--- PROJECT SUBMISSION ---
+
+Agents need to pay for microservices repeatedly. < Per request payments destroy latency. < Flat prepaid sessions do not account for trust. So we built dynamic payment sessions for agent infra providers. Get an agents on-chain history
+,
+ Understand an agent’s off-chain performance
+,
+ The agent gets a temporary passport to access your service
+,
+
+--- PROJECT SUBMISSION ---
+
+> Infrastructure on Solana for verifiable coordination. Portable reputation, cross-DAO trust, and integrated Algorand X402 payments. https://x.com/Andromeda_Core Solana Health Endpoint – New /api/solana/health endpoint that verifies RPC connectivity and indicates support for DIDs and Ed25519 signatures. Publish Endpoint – Full integration of Ed25519 signature verification for Solana wallets (in addition to EIP-712 for EVM). Types and DIDs – Extension of scorecard.ts with a parser for did:andromeda:sol:<pubkey> and explicit support for the 'sol' chain. ___- Why this matters for the Solana ecosystem Builders – Your contributions across Solana, Ethereum, and other chains become portable. A single TrustScore follows you everywhere. Validators – Get rewarded in SOL for your work, and prove your reliability through a tamper‑proof history stored on Solana. DAOs & stakers – Access a risk dashboard that shows validators’ TrustScores based on real governance participation and technical activity.
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone. We're running a devnet pilot for IAM Protocol and looking for people to test the verification flow. Takes 30 seconds. What you need: Phantom, Backpack or Solflare wallet on devnet (Settings → Developer Settings → Testnet Mode) Some devnet SOL (https://faucet.solana.com/) Go to iamprotocol.io/verify, connect wallet, and run through the verification. You'll speak a short phrase, trace a curve on screen, and the protocol captures your behavioral signature. No personal data collected, just statistical features from your voice and motion. We're collecting verification data to calibrate our security thresholds. Every verification helps. If you run into issues, let me know. Thanks!
+
+--- PROJECT SUBMISSION ---
+
+Agon Protocol is a Solana program that creates trust-based payment channels between participants in a shared global vault. It’s the clearing layer for machine payments. Removing lockups and enabling instant, low-cost settlement between agents and services. Built on top of that core is Agon Gateway: an API access layer that uses those payment channels to scale APIs without forcing every call through heavy onchain settlement overhead. The gateway is currently live and includes RPC endpoints from Helius, Alchemy and Tokens. Tokens API gives you free data for crypto assets, stocks, ETFs, metals and more! Try it out today at playground.agonx402.com If you've any questions or want to integrate into our stack, feel free to reach out!
+
+--- PROJECT SUBMISSION ---
+
+Ample Geyser Proxy + Gateway is a fully open-source solution designed to decouple Solana Geyser plugin execution from validator operations. It introduces a lightweight proxy–gateway architecture that makes deploying geyser plugins seamless, fast & isolated from the data source (Validator / RPC Node) https://arena.colosseum.org/projects/explore/open-source:-geyser-gateway https://github.com/ample-sh/ample_geyser_gateway
+
+--- PROJECT SUBMISSION ---
+
+Bulwark  : a scoping engine for solana (Rust) smart contracts that helps identify code complexity, audit effort units (time/resources/cost) and potential security hotspots. This is for security researchers/auditors who participate in competitions. Easier honeypot detection? This is also for devs, who need pre-audit sanity checks performed on their codebases. Check-out our devnet: bulwark.blockapex.io
+
+--- PROJECT SUBMISSION ---
+
+Greetings, We are a team under Superteam Malaysia building one of the world's first mobile first person shooter game on Solana Enabled by MagicBlock's capabilities Stay tuned for more updates! https://x.com/fpsdotso
+
+--- PROJECT SUBMISSION ---
+
+We joined the colosseum startup competition a bit late, but made huge progress in just 1 week. Watch the short recap video below  https://www.loom.com/share/3702180e89d245348b141173b95c8db4?sid=99d023a9-c04e-495a-ad39-3bad84b5dd50 Also, our X to follow the updates: https://x.com/backyard_fi
+
+--- PROJECT SUBMISSION ---
+
+Today, your code is centralized on platforms owned by a few corporations. This creates massive problems. Censorship and a single point of failure. This is the risk every developer and every company runs today.
+,
+Developers build all the value but get no ownership
+,
+Contributors get zero rewards
+,
+ Gitbross (gitbross.com) is a decentralized Git platform that transforms code into a real-world asset. We anchor every repository to Solana and store the code on IPFS. This makes contributions permanent, verifiable, and censorship-resistant. Most importantly, it unlocks the contributor economy. It enables contributors to earn $SOL rewards for every star, review, and valuable issue they create. We invite you to join us as early contributors or strategic partners to help us scale.
+
+--- PROJECT SUBMISSION ---
+
+anon0mesh is a privacy-first encrypted Bluetooth mesh network where wallets can chat, send transactions, and earn rewards for relaying packets completely decentralized, even offline.   How it works
+,
+Wallet → Bluetooth Mesh → Solana Cluster without the need of internet. Users encrypt, sign, and broadcast messages or transactions through a Bluetooth mesh of relayers. Relayers forward encrypted payloads, earning proof-of-relay rewards calculated on-chain. Transactions settle on Solana with automatic fee routing and reward distribution.  Why it matters
+,
+Around the world, free communication is under pressure: Nepal has faced repeated internet shutdowns during political unrest, cutting people off from payments and real-time news. The Arabic Summer demonstrated how governments can throttle or block mobile data to silence protest. The EU’s proposed Chat Control regulation threatens to scan private messages, undermining encryption and user privacy everywhere. anon0mesh provides a way forward. By blending off-grid Bluetooth mesh with the security and settlement power of Solana, it allows people to: Stay connected when the internet is blocked or unreliable. Send payments & messages privately, without relying on centralized servers. Earn rewards for keeping the network alive creating incentives for resilience. This is more than a dApp or a not new app it’s a self-healing communications layer for a world where privacy and access can no longer be taken for granted. https://x.com/anon0mesh/status/1992977883665694984 (edited)
+Monday, November 24, 2025 at 9:03 PM
+
+--- PROJECT SUBMISSION ---
+
+Nutshell: Every trader has access to signals. Only SpyFly knows which ones matter—and enters instantly on behalf of the user. It’s an unfair advantage in the most explosive market on Solana. Who are we? SpyFly is the execution intelligence layer for Solana traders. It analyzes hundreds of alpha callers, learns which ones reliably outperform, and autotrades the moment a high-probability signal appears — long before humans can react. Problem -Signal groups on Telegram, Discord & X are exploding in number. -Traders drown in noise and can’t tell which callers actually win. -Profit windows last seconds — manual execution is always late. -Missing one good entry can wipe out weeks of gains. Solution -SpyFly scores every caller and detects when statistically strong signals emerge. -Autotrading executes instantly — neutral, emotionless, and always on. -Users get a unified signal feed across all groups, fully automated. -The system compounds edge: the more signals it sees, the smarter it becomes. Links  Website: https://spyfly.app/  Bot (Telegram): https://t.me/spyfly_bot  X Account: https://x.com/spyfly_app  Current Pitch Deck: https://docs.google.com/presentation/d/16bGKcVCpLyXvLuMzXxB3cAbRvnJrzd5gT7KfbXm-kWM/edit?usp=drive_link Contact Founders:  Godlysan — Ops & Product  OMS — Growth & Community Get in touch:  Telegram: @godlysan  X: https://x.com/spyfly_app (ref. Colosseum in DM!)
+
+--- PROJECT SUBMISSION ---
+
+Democratizing Global Wealth Creation  The global financial system has failed billions by design. It demands smartphones, reliable internet, and bank accounts, leaving 2.7 billion people locked out of the digital economy. Infrastructure is the remedy. That's why we're building a financial OS that gives a basic phone user the same sophistication as a Wall Street trader.  What is TextPay? At its core, TextPay is a non-custodial Solana wallet that works on any phone via simple SMS. No app. No internet. No smartphone required. We've hidden enterprise-grade blockchain infrastructure behind SMS simplicity. If you can send a text, you can now access the entire global financial ecosystem.  The "Magic": Simple SMS, Serious Power Our breakthrough is the Keystone Protocol, a novel architecture that achieves true non-custodial control via SMS. We use Solana Programs to deploy a wallet with no private key. The user's PIN proof is verified on-chain, and we are mathematically incapable of accessing funds. With simple text commands, any user can:  PAY: Send money globally (SEND 10 $USDC to...).  SPEND: Generate private virtual cards for global spending (CARD 100).  INVEST: Access the Solana RWA ecosystem. Buy tokenized Stocks & US treasuries (BUY AAPL 10).  EARN: Earn yield on savings.  Our Vision: The DisCard + TextPay Ecosystem TextPay is our first pillar, acquiring millions in the untapped SMS market. It connects seamlessly with DisCard, our privacy app for smartphone users, via a shared wallet. When a Discard user sends money home, they create a new TextPay user for free. We're not just "banking the unbanked. "We are bringing first-world wealth creation to the entire world. We're pumped to be building in the Colosseum. We'd love your feedback. Links: Website: https://discard.tech/ Waitlist: https://discard.tech/waitlist The Team: @Munko & @roli
+
+--- PROJECT SUBMISSION ---
+
+https://arena.colosseum.org/posts/3593 https://arena.colosseum.org/posts/3586 @bento219 - his telegram @dev_219 @God0608 - his telegram @guavacadory
+
+--- PROJECT SUBMISSION ---
+
+We are building the decentralized economic infrastructure that allows autonomous AI agents to establish, accumulate, and verify mutual trust with zero human intermediaries. How Sworn Protocol powers the agent economy:  Proof of Execution (PoE): Every completed task generates a verifiable, immutable on-chain record.  Dynamic Staking: Agents put their money where their code is. By locking collateral proportional to the task risk, counterparties are economically protected against defaults.  Emergent TrustScore: A Soulbound, un-gameable reputation metric. Any agent can start from zero and build compound trust through verified work. Trust is never bought,it is entirely earned.  The SWORN Token: The sovereign utility token of our ecosystem, acting as a payment medium and staking asset backed entirely by real, verified on-chain work. We are currently in Phase 0 (Design and validation) and have just released our v0.1 Whitepaper detailing the architecture, tokenomics, and dispute resolution engines.  Read the full whitepaper here: https://alexchen.chitacloud.dev/static/trust-token-whitepaper-v0.1.md
+
+--- PROJECT SUBMISSION ---
+
+You can now shop with SOL & USDC. Thanks to RJB World for making this possible Learn more https://rjbworld.org/blogs/you-can-finally-shop-with-sol-and-usdc-shop-anything-without-bank-stress #SolanaCrypto #sol #usdc #cryptoEcommerce #shopWithUsdc
+
+--- PROJECT SUBMISSION ---
+
+Acend is an on-chain investing platform that lets anyone trade crypto, stocks, ETFs, and commodities 24/7, from a single portfolio. Our platform brings together everything serious retail investors need: non-custodial wallets with no seed phrase friction, real-time trading across crypto and equities, and yield on idle cash. Our mission is to make onchain finance as simple and accessible as your brokerage app without giving up self-custody. The problem The current investing experience is fragmented, gated, and slow. Traditional brokerages close on weekends and holidays while markets keep moving Onchain trading is powerful but too complex for mainstream retail investors Crypto and traditional assets live in separate apps, making unified portfolio management impossible Getting onchain requires seed phrases, wallet setup, and technical knowledge most investors don’t have Solution Acend is building the onchain brokerage for the next generation of investors where the market never closes and everything lives in one place. Key Features 24/7 trading across crypto, stocks, ETFs, Gold, and commodities Email-based onboarding — no seed phrases, no wallet connect, no friction Non-custodial by default — your keys are yours, always exportable 6% APY on idle USDC via integrated yield Single portfolio view across all asset classes with full trade history App is in beta / early access — DM me if you want a look. Links  Website: https://acend.fi/  Twitter/X: https://x.com/acendfinance Contact  Twitter/X: https://x.com/kaidnbell
+
+--- PROJECT SUBMISSION ---
+
+Every AI agent infrastructure project builds on x402 + centralized registries. Elisym takes a different path - open protocol standards that no single company controls. Problem AI agents are locked in walled gardens. No open standard for discovery, communication, or payments between agents across frameworks. Solution Protocol-level infrastructure using Nostr (NIP-89 discovery, NIP-90 marketplace, NIP-17 encrypted messaging) + Solana for self-custodial payments in native SOL. No custom token, no centralized router, no vendor lock-in. What's live on devnet MCP server - discover and hire agents directly from Claude, Cursor, or Windsurf Web app with wallet connect TypeScript SDK CLI agent runner Fully open-source, MIT license Built solo in one month. What's next Turborepo migration, ElizaOS plugin, Solana mainnet. Links: Website: https://elisym.network/ GitHub: https://github.com/elisymlabs MCP server: https://mcp.so/server/elisym-mcp-server/elisymlabs X: https://x.com/elisymlabs Contact: TG: @igor_peregudov X: https://x.com/igor_peregudov (edited)
+Thursday, April 2, 2026 at 4:33 PM
+
+--- PROJECT SUBMISSION ---
+
+We launched a new product in the field hivy.live . Currently in Beta and we're looking for testers. hivy enables to build your own Prediction Market communities. Would love to get your view on it. DMs open!
+
+--- PROJECT SUBMISSION ---
+
+Looking forward to showing and telling everyone about Devtoolz!! Hackathon starting soon, are you excited?!?
+
+--- PROJECT SUBMISSION ---
+
+We built the first launch platform fully integrated with Solana DEXs, Uniswap v4 and Pancakeswap Infinite. We are currently in open-beta polishing the UI/UX and finalising testing for our main "Fee builder" product release in April. We are not just a launchpad, we have built next-gen token economy infrastructure for Solana and leading EVMs for every project to build off. I explain it like pumpfun on steroids, but we flipped the script on the extraction meta. Right now, projects earn 0.05% on pumpfun and 0% on most bonding platforms. On based.bid, builders earn insanely more fees than anywhere else. 1 to 10% of their trading volume automatically to incentivize long-term growth. Here is what is impossible to do anywhere else besides our platform: Using custom v4 hooks on EVM, fees are captured instantly at the swap. Solana is similar but different. Zero token accumulation, zero batch selling, and zero sell pressure on the chart. Projects can pivot and control their projects before launch and for the full project lifetime. You don't just get volume fees, you also capture LP fees to constantly strengthen your market depth. Our "Fee Builder" allows full programmability of these fees, distributing them in infinite ways (Auto Buybacks, rewards, KOLs, Partners etc). in SOL or Stables. We also built "Boards", letting anyone spin up their own white-label launchpad and earn platform fees from every project launched under their brand. @TheBasedInc based.bid https://x.com/TheBasedInc https://basedinc.gitbook.io/basedbid
+
+--- PROJECT SUBMISSION ---
+
+In essance I hope to create a new type of gambling game using Solana, you can check out the proof of concept on itch.io https://gamblers-fall-studios.itch.io/emojimatch-demo-for-fun the password is GambleAway123 Feel free to check it out, and give me some feeback ,but now the hard work begins. I hope to use magicblocks vrfs and ephemral rollup for the backend and a simple Godot project (that is easy to modify) for the front end. Im really excited, hopefully something can come from my project, and I cant wait to see what others are making too!
+
+--- PROJECT SUBMISSION ---
+
+Hey Colosseum builders What is Crush, and why we built it We just launched Crush Rewards on iOS. Take pictures of your receipts or links cards securly through Plaid to generate Crush token rewards every three days. We built Crush becuase the current receipts scanning apps (ie Fetch) are ripping people off with rewards that are non-fungible points redeemeable for giftcards. People are frustrated with these apps because points expire and can be rvoked at anytime. The Crush token fixes this becuase it can never be revoked or expire. There are many features we have planned that are uniquely enabled by a token like "buy now pay never" and one other that we're going to keep in stealth for now. But they all will drive demand and utility for both the token and our users. We are running a burn and mint equilibreum (similar to Hivemapper) where 75% of tokens are burned and 25% go back to users when the data is accessed. We are building for the agentic commerce future. Agents will need access to pricing and consumer insights data through x402 and other agentic payment rails. Crush will open our datasets up to this market, but our legacy competitors cannot becuase their economics break down, and they do not have the blockchain insfrastucture to operate. This is our home arena. We are live on iOS We are now live in the app store and are moving to mainnet very soon. Please give it a shot and start earning crypto for things you already do. crushrewards .app Best, Azad Founder, Crush
+
+--- PROJECT SUBMISSION ---
+
+We are building the first tokenized silver on Solana backed fully 1:1 by real physical silver. We see ourselves as a Silver Treasury Company with a Solana token flywheel that drives revenue to buy more silver. We are launching a pilot in the next few weeks and our waitlist is open now! https://dominion.market/
+
+--- PROJECT SUBMISSION ---
+
+> 1. Problem: Every year on twitch.tv, viewers waste up to $760 million on monthly subscriptions that offer zero financial return, accounting for nearly 40% of platform revenue. > 2. Solution: Nozz is a tokenized streaming ecosystem that replaces monthly fees with token staking, unlocking $760 million of wasted viewer capital for recoverable, yield-bearing assets. > 3. Market Size: Our total market is over $100 billion. The initial focus is viewers already paying for premium creator content because they are familiar with subscription models, representing a $1.9 billion opportunity. > How it works: Creator Tokens: Every streamer on Nozz launches their own unique token.
+,
+Stake to Subscribe: To unlock a sub, you stake specific Creator Token.
+,
+ Website: https://nozz.tv/ Twitter: https://x.com/nozz_tv (edited)
+Monday, April 6, 2026 at 5:39 PM
+
+--- PROJECT SUBMISSION ---
+
+> What is legends.fun? legends.fun is the platform that gives the pulse on what’s hot in the Solana ecosystem. It helps builders validate their concepts, engage users early, and showcase real traction to stand out in hackathons, attract investors, and win community support. > Key Features Product Profiles: Create your product page with your logo, product visuals, pitch video, and key links.
+,
+Community Upvotes: Engage your users and friends to rank higher on the leaderboard and gain visibility.
+,
+Public Traction Page (coming soon): Automatically display on-chain traction, community support, and in-app activity.
+,
+Mentor & Backer Support (coming soon): Access Solana mentors and backers who can help you grow.
+,
+Ride the Cypherpunk wave: Compete with confidence: the leaderboard reflects who’s engaging real users.
+,
+ > Who is it for? Builders: Showcase your products, gather users, and build credibility to convince judges you should win
+,
+Investors: Spot projects with real traction and community proof.
+,
+Community: Back and support the projects you believe in.
+,
+ > The Vision Our mission is to help Solana builders turn concepts into scalable businesses by proving traction early. With legends.fun, you show evidence that your project is feasible, usable, and desirable.  Live your legend now, join [legends.fun](http://legends.fun/) and let’s win Colosseum together! (edited)
+Tuesday, April 7, 2026 at 9:28 AM
+
+--- PROJECT SUBMISSION ---
+
+DarkDrop — I invented a new privacy architecture for Solana called the credit note model Every privacy protocol on Solana has the same problem: the claim transaction shows the amount. Check any withdrawal on Solscan from any mixer — you'll see decoded amounts and Transfer inner instructions. Match deposit amount to withdrawal amount and privacy is gone. I spent months studying Tornado Cash, Privacy Cash, and Solana's zk-ElGamal confidential transfers. Then built something none of them do. The credit note model splits the claim into two steps: claim_credit — ZK proof verified on-chain. Zero amounts. Zero SOL movement. Observer sees "Unknown Instruction" and opaque bytes. Nothing else.
+,
+withdraw_credit — SOL moves via direct lamport manipulation. No system_program CPI. No inner Transfer instruction on any explorer.
+,
+ The transaction that links deposit to withdrawal reveals nothing. Not the amount. Not the wallets. Not the transfer. What's live right now (devnet): 7 program instructions (Anchor/Rust)
+,
+2 Groth16 circuits (Circom, 5,946 constraints)
+,
+Frontend with in-browser proof generation
+,
+Gasless relayer (recipient never signs)
+,
+Deposit relayer (sender wallet hidden from program)
+,
+Password protection at ZK circuit level
+,
+7/7 security tests, stress tested, internally audited
+,
+Fully open source
+,
+ Check the claim TX yourself — tell me what you see: https://solscan.io/tx/2E8ypV2pHeYy3Qa2Dv1o3rYfYszi6gyp7Emu4YQA89qg7et6NfaQtHVDJPX4FFkQ7YWKyeJeJHPqbtHBNNaVYWqQ?cluster=devnet Try it: https://darkdrop.app/ Source: https://github.com/hitman-kai/darkdropv4 Program: GSig1QYVwPVhHF6oVEwhadAwdWjTqtq6H5cSMEkfAgkU (edited)
+Thursday, April 9, 2026 at 7:30 AM
+
+--- PROJECT SUBMISSION ---
+
+We're building the on-chain infrastructure for the solar renewable energy certificate (SREC) market, a $28B compliance market that still runs on paper and broker phone calls. It's for two people: homeowners with solar panels who wait 2–4 months to get paid and lose 5–10% to brokers and utility companies that are legally required to buy solar credits every year or pay government fines. Helios sits between them. The moment a solar system crosses 1,000 kWh of production, our oracle mints a certificate on Solana. The homeowner lists it. The utility buys it. The certificate burns on-chain in the same transaction as the USDC payment. Fraud-proof, instant, 10x cheaper than today.
+
+--- PROJECT SUBMISSION ---
+
+If you are building your onchain programs and frontend apps for the hackathon, I have built a program that allows safer delegation of authority over funds than the native SPL-token delegate function. App-specific delegated vaults allow users to create vaults for any token that can only be spent on the specified program by a delegated address, before a defined time. This allows for many different use cases such as: session keys generated on a frontend and allow spending for the next hour without needing to sign every transaction
+,
+password-generated keys able to sign transactions without interrupting the user flow
+,
+a key delegated to an AI agent so it can only spend the funds on the defined app and not risk it sending the funds where it shouldnt
+,
+a cold wallet delegating spending authority to a hot wallet
+,
+ The native delegate function allows the delegated wallet to use the tokens in any way, but the app-specific vaults only allow spending in a narrow scope, which reduces the blast-radius of a leaked delegate key. Only the vault owner can actually withdraw funds from the vaults, not the delegate which can only use them at the defined program. Programs can access the vault via a CPI, or frontends can make the vault access the program via CPI, allowing flexible design. Examples: trading app with a password-generated key as delegate, allowing 1-click/0-signing transactions for quick trades.
+,
+gaming app with a session key to allow fluid gameplay with zero stoppages for wallet signing after setting the delegate.
+,
+ The program is deployed on devnet at ASdvz39AFXXEGcYadGYPYhHprGadw1AeydQPqn4GqrV1 (asdv...v1) and more info can be found here: https://github.com/Pure-lmao/app-specific-delegated-vaults. I will deploy to mainnet and make immutable if people think its useful and it has had some technical eyes look at it. Let me know any questions you have  (this cant be a hackathon entry because it is just a program that cant make any money) (edited)
+Thursday, April 9, 2026 at 2:28 PM
+
+--- PROJECT SUBMISSION ---
+
+MoltChess.com is a live arena where AI agents play chess against each other, not humans at the board. You configure an agent, register it via the API, and it challenges opponents, accepts games, enters tournaments, and climbs the leaderboard on its own. Serious engines can chase Elo while experimental agents compete for social reach and community recognition. Strength, creativity, and visibility all show up in different aspects of MoltChess. Have an interesting idea for a chess strategy? Configure your agent, enter it into the battleground, and win! Links: https://arena.colosseum.org/projects/explore/moltchess https://moltchess.com/ https://x.com/molt_chess https://clawhub.ai/moltchess/moltchess Documentation: https://github.com/moltchess https://github.com/moltchess/moltchess-sdk https://www.npmjs.com/package/@moltchess/sdk https://pypi.org/project/moltchess/ (edited)
+Wednesday, April 8, 2026 at 4:43 AM
+
+--- PROJECT SUBMISSION ---
+
+Got an idea to sell? Offering a service? Or just looking for a pizza to buy? Do it all on dum.club. Right now you spend money everywhere and get nothing back. That’s dumb. On DUM Club: Spend it. Sell it. Earn DUM points. (Simple for customers. Under the hood — DUM tokens on Solana.) Every purchase = real activity that helps grow the network and brings businesses on-chain — because that’s where everything is going. We’re still in beta, building fast, and pushing toward our full demo soon. Check it out  www.dum.club
+
+--- PROJECT SUBMISSION ---
+
+Privacy-first note-taking with blockchain-backed proof of authorship — Solana, libsodium, zero-knowledge cryptography.  The Problem Cloud note apps read everything you write — your ideas are someone else's training data
+,
+No way to cryptographically prove you wrote something first
+,
+Premium note apps charge $10–18/mo for a markdown editor
+,
+AI assistants waste thousands of tokens re-reading your entire vault per question
+,
+  The Solution E2E encrypted vault (XChaCha20-Poly1305) — not even ZKPnote can read your notes
+,
+SHA-256 proof of originality on Solana. Verifiable forever.
+,
+Marketplace with masked/partial/full preview, on-chain payments, and auctions
+,
+Knowledge graph indexes your vault — summaries, tags, relationships. 98% token savings. One call instead of five.
+,
+Core features free forever
+,
+  Built for Web2 Users Email + password signup, seed phrase generated and encrypted in-browser
+,
+Markdown / Rich Text toggle, auto-save, folders, drag-and-drop, dark mode
+,
+Wallet invisible until you prove or sell (fees: fractions of a cent)
+,
+Optional Phantom for crypto-native users
+,
+  AI Second Brain (MCP) 18-tool MCP server — Claude reads, writes, searches, proves notes in your vault
+,
+Knowledge graph: 35,660 tokens → 743. 7x more queries on $100 Max plan
+,
+Visual graph panel with project filters and token efficiency metrics
+,
+5-minute setup, works with Claude Desktop and Claude Code
+,
+  Links Website: https://zkpnote.com/ Docs: https://github.com/therealdealio/zkpnote-docs Help: https://github.com/therealdealio/zkpnote-help  Richard (Founder) · X: @zkpnote
+
+--- PROJECT SUBMISSION ---
+
+DiScore - SocialFi for Discord Evaluates the quality & reputation of Discord Communities and Users, like Kaito and Twitterscore for X For Users Way to be noticed & hired by Projects For Projects Objective way to identify, track, reward, and retain real community contributors For Ventures, LPs and Exchanges 1-Pager snapshot of Community Quality before Investing Traction: 5 Communities with 800k Discord users MVP Ready & Launched Team Behind: Executives with 5 years & 50+ Discord growth campaigns for 1inch, Storm Trade, Cyber Network, and others Strategic Partner: [Solus Group](https://solusgroup.io/) : 50+ projects, 500+ influencers, 200 VC & Angles, and 8 years in Web3 Marketing & Fundraising with 200+ campaigns launched for Aster, Ondo, Symbiotic, Cookie3 and others The Ask: $50,000 Angel | Purpose: Website &, Paid features completion, and onboarding first paying users $500,000 Pre-Seed | Purpose: 100% Product Completion, Scaling & Growth ⭐️ All links: [Website](https://www.discore.tech/) | [X](https://x.com/DiScoreAI) | [Product Demo](https://demo.discore.tech/) | [Demo Video](https://www.loom.com/share/d45def93dd874aca82d41c8426163648) | [Pitch Video](https://drive.google.com/file/d/1Ea5l1IVKuffXTDCqYFcCsoMGqKs9PmNM/view?usp=sharing) | [Investor Memo](https://docs.google.com/document/d/1t9cKa3mIskKpJ65ME41MyuuzsvLzOjINzuQEVVc6niY/edit?usp=sharing) | [Book a call](https://calendly.com/stanislav_petriv/discore-intro) (edited)
+Monday, April 13, 2026 at 12:28 PM
+
+--- PROJECT SUBMISSION ---
+
+Hi all! New way to measure traction has arrived! Segmento monitors the value of your users, across the ecosystem. Imagine telling judges, VCs and your future community "We have 114 users/waitlist signers."
+,
+or telling them "We have 114 users/waitlist signers. Their combined networth is $1mil, $1.2mil in monthly volume and they use 9 different Solana protocols."
+,
+The second option validates the interest of relevant people. It is not just a metric, that could be farmed. Last we have released SDK that allows you to set up a waitlist and start monitoring the traction. See more in https://medium.com/@admin_44962/how-solana-hackathon-projects-can-finally-understand-their-users-before-launch-7886a5c62455 This week we will be releasing a functionality that will allow KOLs to pick from signed up projects. Further helping projects grow their traction and helping KOLs to better monetize their activity. As a KOL imagine you are selling 2 tweets, or that you are selling access to power users that have $1mil combined net worth and do $1.2mil in volume. Next week we will be releasing the dashboard showing all the data. With the SDK integrated, we are already monitoring it, we just have to publish it. Start measuring and stop guessing! https://medium.com/@admin_44962/how-solana-hackathon-projects-can-finally-understand-their-users-before-launch-7886a5c62455
+,
+https://general.segmento.tech/
+,
+https://github.com/SegmentoAI/segmento-sdk
+,
+
+--- PROJECT SUBMISSION ---
+
+hey everyone. building TRUVA for the colosseum frontier hackathon, it’s a trust layer for AI agents on solana, kind of like imdb for agents so you don’t have to blindly trust them with funds. each agent gets an on-chain passport with a trust score using signals like transaction history, success rate, attestations, and zk proofs, and our trustgate system can block risky payments in real time. mvp is in progress and we’re building on devnet. would love feedback from other builders. https://x.com/TruvaAgent/status/2043014967599956148?s=20
+
+--- PROJECT SUBMISSION ---
+
+We submitted Spotlight to the Frontier hackathon. Spotlight is our advertising platform built for Solana. It reaches wallet-active users across Aerosol products while they are actively taking action on-chain, not passively scrolling. If you are building in the ecosystem and want to talk distribution, come find us. https://www.aerosol.so/products/spotlight https://x.com/spotlightads_ai
+
+--- PROJECT SUBMISSION ---
+
+The Concept: Inspired by the Japanese folktale of the "Straw Millionaire," Warashibe is a fully decentralized bartering platform built on a new paradigm: Humans define the goal, AI executes the journey. You start by minting a free "Straw" cNFT, set your ultimate target (e.g., a specific blue-chip NFT or USDC value), and delegate the asset to our autonomous AI agents. The agents will then navigate the market, negotiate, and execute optimal swaps to trade your way up to your dream asset.  How it works on Solana: We are turning the ecosystem into an agent-driven trading floor, leveraging Solana's core strengths:  Intent-Centric Architecture: You only define the final outcome. The AI agent handles the complex pathfinding and multi-hop bartering logic.  Mass Onboarding with cNFTs: Every user gets a free "Straw" compressed NFT to kickstart their agent's trading journey.  Agent-Generated Blinks: Our AI agents can autonomously generate and post Solana Blinks onto the X timeline to propose strategic swaps to human users, creating massive viral distribution.  Provenance as Value: The true value of an item comes from its immutable on-chain history—showing exactly how the AI traded a simple straw into a fortune. We just finished our core pixel art designs (attaching our Straw Hero below! ) and are currently deep into the Anchor contracts and Agent logic. We would love any feedback from the community, especially from anyone exploring Agentic Crypto, Blinks, and Consumer apps! Let's connect:  GitHub: https://github.com/warashibeprotocol  X: https://x.com/warashibe_prtcl (edited)
+Sunday, April 26, 2026 at 2:54 PM
+
+--- PROJECT SUBMISSION ---
+
+What we built PillBot is a multi-strategy autonomous trading agent that runs as a Telegram bot. Users interact through a tap-based UI — no CLI, no dApp, no wallet extensions needed for basic usage. Under the hood:  Solana RPC via Helius (WebSocket + REST) for real-time chain data ⚡️ Jupiter V2 API for swap execution with MEV protection  AI-assisted signal evaluation — scoring tokens 0-100 based on on-chain signals (velocity, buyer diversity, smart money, bonding curve progress)  Real-time WebSocket scanner monitoring pump.fun program events (~2,600 events/min)  On-chain security system — PIN, Google Authenticator 2FA, withdrawal whitelist, daily limits, panic lock (only Solana TG bot with real TOTP 2FA)  pump.fun tokenized-agent payment flow — subscriptions processed via @pump-fun/agent-payments-sdk, verified on-chain with validateInvoicePayment  See it working LIVE Real-time signal monitor — watch the scanner score tokens in real time:  https://pillbot.tech/live.html  Links  Website https://pillbot.tech/  Live monitor https://pillbot.tech/live.html  Trading bot https://t.me/PillBot_trader_bot  Support bot https://t.me/PillBot_support_bot  Dashboard https://pillbot.tech/d2/  X / Twitter https://x.com/Pillsol_ai  Stack Solana · Jupiter V2 · Helius RPC/WS · pump.fun SDK · pump.fun tokenized agents · Python · Node.js · grammy · SQLite WAL · systemd · Jito (MEV protection) Happy to talk architecture, on-chain payment integration, or the scanner design with anyone building in this space. Feedback welcome  (edited)
+Tuesday, April 14, 2026 at 4:19 PM
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone, We’re building TokenFlow, a platform that gives protocols full visibility into their token ecosystem. The problem is pretty straightforward: once you launch a token, you lose track of what’s happening across your ecosystem. Who’s holding, what they’re doing, how your market maker is actually performing, where your DeFi positions stand. Most teams end up stitching together data from multiple sources and still don’t have the full picture. TokenFlow gives you one dashboard with everything: Complete ecosystem visibility, including all holders’ wallets and full chain reconstruction since day 1
+,
+Signalling of all transaction types at any point in time: sells, buys, transfers, LP add/remove
+,
+Market maker tracking and performance metrics
+,
+CEX visibility, including all pairs, volume, liquidity
+,
+DeFi position visibility, including staking, liquidity pools, and vaults
+,
+Custom wallet labeling to organize your ecosystem the way you want it
+,
+Real-time notifications and alerts
+,
+Tailored AI integration to fetch data and analyze behaviors across your ecosystem
+,
+Live network graph for wallet and transaction tracing
+,
+Profit & Loss enrichment data and cost basis tracking on every wallet
+,
+ We’re entering the Frontier hackathon. If you’re working on a protocol and want to see what this looks like with your data, we'd be happy to chat. [tokenflow.tech](https://tokenflow.tech/) Team: @josh @ tokenflow @Marcos @gio @TokenFlow-Fehmi
+
+--- PROJECT SUBMISSION ---
+
+Pick your token → Choose market size → Deploy The end goal is anyone can launch a market on any Solana token in less than 60 seconds*
+,
+ -Instant liquidity from the vAMM. Smart price routing finds the best oracle. Insurance LP keeps it stable -Fully composable. Works with any token that has a DEX pool or price feed -Markets creators earn fees from each trade ( up to 8% ) -Staking Program -Mobile App in the works Normally you wait for exchanges to list perps it can take weeks, months, sometimes never! = Percolator solves that -> on day one of your token launch, perps are ready. Your community can trade with leverage immediately. That's the unlock, thats the end goal. + Liquidity providers earn yield from fees and liquidations. when volatility spikes and positions get rekt, the LP absorbs it instead of cascading through the whole market Keeps things stable when it gets messy Built on top of Tolys risk engine. We built this completely open source: http://github.com/dcccrypto/percolator-launch Comprehensive guide at http://percolatorlaunch.com/guide Agents page at http://percolatorlaunch.com/agents -> shows how AI agents can contribute to the codebase We've been awarding ongoing bounties and contributors. Currently in devnet -> prepping for V1 launch main net while searching for external auditors, hardening code and continuing our own external audits while manually main net testing ourselves.
+
+--- PROJECT SUBMISSION ---
+
+Imagine you are able to one-click any prediction outcome, and get that trade settled across multiple venues. But why ? The problem today is prediction markets are fragmented: Traders deal with : Market outcomes that are identical but have different prices, odds and rules.
+,
+Venue hopping to manually compare these identical outcomes
+,
+Liquidity being thin which leads to bad fills and execution
+,
+ Our mission is to solve this bottleneck , we are giving traders the edge. With Lotus traders would be able to: Discover identical markets in one place
+,
+Route their trades across multiple venues in one click
+,
+Get liquidity backing their trades when it is thin
+,
+ Removing friction and saving traders time and money Our private beta is in a few weeks Heres our X : https://x.com/uselotusai?s=21 Feel free to ask any questions. (edited)
+Monday, April 20, 2026 at 12:43 AM
+
+--- PROJECT SUBMISSION ---
+
+A Free to Play NFT-Themed Card Battle Game (Mobile) Exclusively on Seeker 8 Solana NFTs Collections (And Expanding) Decks Management PvE PvP (Battle Online) Boss Battles Seasons Rankings X: https://x.com/solccg Docs: https://solccg.gitbook.io/docs (edited)
+Wednesday, April 29, 2026 at 5:43 AM
+
+--- PROJECT SUBMISSION ---
+
+gm everyone, I’m building LEET, a next-gen esports collectible card platform starting with CS2. The idea is simple: instead of making “just another NFT project,” we want to build premium digital collectibles around real esports culture — players, moments, storylines, and competitive identity. LEET sits at the intersection of: esports fandom
+,
+collecting
+,
+digital ownership
+,
+future utility tied to the game ecosystem
+,
+ We’re starting with a strong visual and brand direction around CS2, but the bigger vision is to create a collectible layer for esports that feels more meaningful than skins alone. Still early, but the goal is to build something that: looks premium
+,
+feels native to gaming culture
+,
+and gives collectors actual reasons to care long term
+,
+ Would love honest feedback on the concept, positioning, and the direction overall. My DMs are open. https://app.leet-esports.xyz/
+
+--- PROJECT SUBMISSION ---
+
+Trench Royale is a PvP auto-battler on Solana with onchain verifiable outcomes. Summon a Warrior with randomized stats, weapon, and skills, then send it into the arena. It fights autonomously. You watch. Every match has real SOL on the line: winn
+
+ The first decentralized donation platform built on Solana that enables transparent, multi-owner fundraising campaigns with automatic payment splitting. https://soluddy.com/ https://x.com/usesoluddy https://t.me/soluddy (edited)
+Friday, October 24, 2025 at 12:35 PM
+
+--- PROJECT SUBMISSION ---
+
+Our Infra layer's purpose is to power the invisible flow, a large underserved segment of small retail, bots and routing agents. Built around a triple economic model, our layer optimizes passive capital, will offer tokenized staking revenue and feature autonomous liquidity operations. We are Solana's liquidity substrate, infrastructure meant to power routing, allow traders, communities flexibility, freedom while alleviating complicated upkeep operations. We're live on Mainnet, audited, and currently scaling. https://magelabs.xyz/home
+
+--- PROJECT SUBMISSION ---
+
+Hey everyone! I'm Savant, CEO & Co-Founder of KAIKO Studios. We're submitting the ARC Terminal, the first on-chain operating system for AI-human collaboration. ARC reimagines how humans interact with AI by combining our NEXUS system with native blockchain primitives and a browser based OS. Built with decentralisation in mind, ARC plans to run compute, inference, and storage on-chain, and create a truly decentralized AI operating layer. The ARC OS: Powered by our NEXUS infrastructure. ARC delivers: Emotional Reasoning: Real-time emotion detection and reasoning through our SYNAPSE SDK On-Chain Compute: Inference and storage Secure Blockchain Access: Interact with the entire Solana ecosystem through a consumer-focused desktop interface Network State: Your AI context, files, and relationships stored decentralized ARC isn't just blockchain-compatible—it's blockchain-native. The Vision: ARC Terminal enables users to experience Solana in an entirely new way: AI agents that are capable of deep understanding, access your files, and execute blockchain transactions, all within a familiar desktop environment. This is the OS for Web3 AI. Let's build. Link  Website : https://www.kaikostudios.xyz/  PUBLIC BETA: (COMING SOON)  Kaiko Telegram Group : https://t.me/Kaikoportal  X Account : https://x.com/KAIKOEQ (edited)
+Wednesday, October 22, 2025 at 12:54 AM
+
+--- PROJECT SUBMISSION ---
+
+About Solimare: Ever scrolled through Instagram, seen someone sailing crystal-blue waters in Croatia, and thought "I want to do that" and then Googled boat rentals and noped out when you saw the prices? Yeah. Us too. That's why we're building Solimare. We're creating the place where people who want to sail can actually find each other, plan trips together, and get on the water - without dropping $5k on a week-long charter or pretending you know what "starboard" means. Imagine: Match with your future crew, find the perfect boat, wake up in a new harbor. No yacht club membership required.  What we're building: For Travelers: Find compatible sailing companions based on experience, interests, and budget
+,
+Discover available boats and trips that match your style
+,
+Build your sailing reputation through verified experiences
+,
+Connect with boat owners who want to share their passion
+,
+ For Boat Owners: Reach travelers who value authentic experiences over impersonal rentals
+,
+Share your boat with vetted, compatible guests
+,
+Turn idle days into income while building a community
+,
+Eventually explore fractional ownership models with trusted co-owners
+,
+
+--- PROJECT SUBMISSION ---
+
+Please have a look at our website: https://www.kojable.com/
+
+--- PROJECT SUBMISSION ---
+
+MrProcessor is an evolving ecosystem dedicated to empowering the crypto and AI community through creativity, innovation, and purposeful execution. Our mission is simple — to showcase the power of building. I'm not here to chase wins or trophies. I'm here to show what's possible when ideas meet action. Under the MrProcessor banner, I'm developing a series of experimental and impactful projects — including PumpYou, MrMeme, BitcoinMaze, and more — each pushing the boundaries of decentralized technology and human imagination. NOW BUILDING PumpYou - Tinder of Meme Coins Swipe, discover, and pump the next viral meme coin. Where meme culture meets matchmaking — find your perfect pump, one swipe at a time. Website - https://mrprocessor.com/ #MrProcessor #PumpYou #MrMeme #BitcoinMaze (edited)
+Wednesday, October 22, 2025 at 8:21 PM
+
+--- PROJECT SUBMISSION ---
+
+Why are we building Solder
+,
+Apart from Smart Contracts, Backend servers are often times crucial for dApps to operate. But here's the catch, often times backend servers are very difficult and troublesome to set up, let alone setting your DevOps on AWS/GCP. These are important, but they often times feel like a chore. Solder is here to simplify all of that for you. We provide common web3 backend features such as Event Indexing, Cloud Wallets, API Codegen, and Database Management. Solder is written in TypeScript. Next on the roadmap is Solder Cloud, where you can deploy your application in one click ! We take care of autoscaling and all of that infra shenanigans for you. All you have to do is BUILD. Who can use Solder?
+,
+All of you builders here. Building a Leaderboard? Solder can index your completion events and store it in your database, which you can query. History? Your smart contracts can provide the event and pipe it to Solder Framework, and you can find the data you need on a later time without calling the RPC. AI? You can build MCPs with Solder, or even AI Assistants with it, just code your backend away like you would normally! with the additional power of onchain data. Talk to use to discover your needs. Talk to Us
+,
+X: https://x.com/solder_official Website: https://solder.build/ TG: https://t.me/metalboyrick (Rick, Cofounder) (edited)
+Thursday, October 2, 2025 at 1:47 PM
+
+--- PROJECT SUBMISSION ---
+
+We are excited to share a deep dive into the technical thinking behind our latest innovation, fintag. We will continue building Pls read and share your thoughts https://news.ycombinator.com/item?id=45662847
+
+--- PROJECT SUBMISSION ---
+
+Yo!  Just dropped Lunaris - it's like if your to-do app had a baby with a Mars survival game and Solana. A productivity app that's actually fun. You complete tasks (we call them "missions"), earn actual tokens, and if you try to cheat Focus Mode, the app WILL penalize you. Choose your colony role, manage your resources, build streaks. It's weirdly addicting. Best part? Sign in with Google or your Solana wallet, and you're instantly managing oxygen, hydroponics, and energy while earning Lunaris tokens. We need beta testers who aren't afraid to give honest feedback. Does it actually make you more productive? Is Focus Mode too harsh? Should we add more roles? Come help us figure it out: [https://js-six-drab.vercel.app/] (Also we built this in pure vanilla JS so if you find bugs, that's... character development  Hence the use of devnet.) YouTube Demo video here: https://youtu.be/WjWBrJwD04E
+
+--- PROJECT SUBMISSION ---
+
+NOW: Arubaito's now fully @solana aligned.  $SOL Reserve  $SOL Community Rewards (for shilling jobs etc) Follow for more building updates on Arubaito (edited)
+Tuesday, October 21, 2025 at 7:26 PM
+
+--- PROJECT SUBMISSION ---
+
+Hi guys, I’m Chupa — a computer science student, and this is my first hackathon.  I’m building Incognito, a privacy-first marketplace where people can trade real-world goods without revealing who they are. It’s also my final school project, so I’m kind of learning as I go… just trying to make something that actually works. It’ll be running on localnet, using Token-2022 and a Merkle tree setup to keep things private, verifiable — and still compliant. I mainly want to see how far privacy can really go when building something real on Solana. Still a lot to figure out… but yeah, that’s the idea.
+
+--- PROJECT SUBMISSION ---
+
+Test Any Solana Anchor Program in Seconds without Writing Tests Currently, testing Anchor programs mean writing tests, maintaining tests as you iterate your program and managing complex setup, but what if you could test your programs within seconds without needing write single line of test code? That's where Testship comes into play. It's a free, open-source (going open-source after 30 Oct), and fast interactive UI based testing tool, that generates testing interface from your code with instructions as forms along with arguments and accounts as fields. PDAs can be derived automatically and any account used in successful transaction is stored and provided as suggestion, when you need to add similar type of account in another instruction. Features: Zero Configuration - Just run testship start in your Anchor project
+,
+Auto-Generated Forms - Forms created automatically from your IDL
+,
+Smart PDA Derivation - Handles complex account-based PDAs automatically
+,
+Wallet Integration - Works with Phantom, Solflare, and any Solana wallet
+,
+Instant Execution - Test transactions in seconds, not minutes
+,
+Account History - Saves and reuses accounts across instructions
+,
+Multi-Program Support - Detects all programs in your workspace
+,
+Transaction History - Keeps track of recent transactions for debugging
+,
+ Our MVP is live on NPM at https://www.npmjs.com/package/@blockchain-hq/testship Website: https://www.testship.xyz/ Docs: https://docs.testship.xyz/ Demo: https://www.youtube.com/watch?v=upQIqKl43ss Follow us on X at @testshipxyz If you are facing any testing related pain points or suggestions, please share with us. This will help us prioritize most impactful features.
+
+--- PROJECT SUBMISSION ---
+
+Ktulu is a concentrated liquidity vault automation system that currently wraps the Meteora DLMM program. We automate compounding, harvesting, and rebalancing of DLMM positions while keeping assets in user custody. Vaults are configured per user, per pool. Only users can deposit and withdraw their funds. Depending on each vault’s configuration, an assigned operator may be able to execute compound, rebalance, and harvest actions on behalf of depositors. Rebalancing and harvesting are facilitated through Jupiter swaps. If you are a DLMM enjoyer we'd love if you took our Alpha for a spin and provided some feedback: https://ktulu.io/. The docs explaining how it all fits together are here: https://ktulu.io/docs We've focused on DLMM pools for now as this is where most concentrated liquidity volume is, but our vision is to expand such that our vaults abstract across Orca Whirpools and Raydium CLMM as well, but we want to get the experience right first, so very keen to hear your feedback!
+
+--- PROJECT SUBMISSION ---
+
+DOLERO is a degenerate 1v1 take on Blackjack, feel the rush of every hand and prove your skills to the top of the leaderboard. Real money at stake, launching on Solana Seeker and expanding to web for cross-play. If you think you can outplay rivals, follow our X:  https://x.com/playdolero (edited)
+Monday, September 29, 2025 at 1:23 PM
+
+--- PROJECT SUBMISSION ---
+
+Walk It is a lifestyle app that pays you to walk. It uses your phone’s step data (via Google Fit or Apple Health) to track your activity and convert your daily steps into on-chain rewards: tokens, badges, and achievements.  What It Is Walk It is a move-to-earn app built to encourage healthy living and financial inclusion, especially in underdeveloped regions where access to earning opportunities is limited.  How It Works You connect your Google Fit (or Apple Health).
+,
+Walk It tracks your daily steps.
+,
+Your steps are converted into rewards, either tokens or in-app points.
+,
+You can redeem, stake, or spend your rewards within the ecosystem.
+,
+  Mission To make wellness profitable and accessible there by proving that small, consistent actions (like walking) can lead to real-world impact.
+
+--- PROJECT SUBMISSION ---
+
+We're the Infratic team, and we want to talk to you about some exciting new tech. Have you ever wondered... a food shipment's cold chain data, a factory's production numbers, or a building's energy use... how can we be sure any of that data is true? Well, that's exactly what we (Infratic) do: We take data from real-world IoT devices (sensors, machines) and connect it to the blockchain with a secure infrastructure, so no one can change or manipulate it. But, there was one big problem: PRIVACY. Why would a company want to share its shipping routes (a trade secret) or a user share their health data (deeply personal) with everyone? This is where our huge news comes in! We've just added a powerful "privacy-preserving proof" technology to our infrastructure, known as Zero-Knowledge (ZK). Think of it like this: Now, you can mathematically prove that a medicine shipment stayed between 2°C and 8°C... without showing anyone the actual temperature logs or the route. In other words: You get 100% PROOF + 100% PRIVACY. This is a massive step for us. We believe we can solve the "trust in data" problem for industries like supply chain, smart grids, insurance, and environmental projects—all while protecting privacy. We're just announcing this project and your ideas are incredibly valuable to us. What other real-world problems do you think this tech could solve? Do any use cases come to mind? Come check out our project and let's brainstorm! Web: https://infratic.xyz/ Docs: https://docs.infratic.xyz/
+
+--- PROJECT SUBMISSION ---
+
+RaikuScope is a visualization tool that brings predictability and trust to Solana transactions by leveraging Raiku’s reservation-based execution model. It highlights key metrics such as landing rate, gas predictability, and reservation impact, helping builders and enterprises confidently adopt Solana.
+
+--- PROJECT SUBMISSION ---
+
+Real-time Solana program event monitoring & alerts Decode Anchor events, set conditions, and auto-notify Email/Slack/Discord/Telegram/Webhooks. Ship production-grade alerts without running RPC/log infra. Demo: https://x.com/rajgoesout/status/1979443606718157209
+
+--- PROJECT SUBMISSION ---
+
+attention.trade is an alpha terminal for token discovery based on social mindshare. A terminal that auto-monitors tokens gaining a surge in hype and mindshare across various mediums (discord and telegram alpha circles, X feed etc) Differentiating Real Alpha from Noise  > every big move onchain is first driven by a surge in mindshare While most tools focus on lagging indicators like volume, wallet tracking. this terminal focuses on one true leading indicator: ATTENTION How it works It has eyes on all the avenues of memecoin trading circles (the trenches) It taps into into 20+ discord and telegram alpha groups monitoring token mentions
+,
+Monitors X posts and engagement in real-time from verified profiles and KOLs
+,
+Scrapes the hits from RickBot which tells how many users a "token scan" has reached to.
+,
+Takes into account a basket of such attention-based metrics and derives an attention score which directly conveys how relevant a token is.
+,
+ Why its so good for memecoin degens Attention trade is chain agnostic. that means any token thats gaining attention will be flagged by attention trade
+,
+Built for degens: Its realtime and built for micro caps like pumpfun, fourmeme tokens.
+,
+Reduces the noise and lets you dive into the tokens that matter.
+,
+
+--- PROJECT SUBMISSION ---
+
+A lending platform to borrow against tokenized hardware for space infrastructure companies. In today’s geopolitical climate, nations are in a race to be leaders in Space among other arenas as they double down on space assets for defense and data sovereignty. Over $500 million in credit have powered firms like SpaceX, Rocket Lab and AST SpaceMobile not counting prime contractors like Boeing so far. We're solving the problem of large lead times to access non-dilutive capital for high capex infra projects, in the space industry. Lenders can deposit crypto-native capital to earn a real and organic yield while revenue generating businesses get access to capital quickly without the need to raise dilutive capital rounds. Upvote us on Legends dot fun https://www.legends.fun/products/48f123fa-b06e-4a20-bc1d-e32b38617509
+
+--- PROJECT SUBMISSION ---
+
+With PattPay, we’re building the first subscription-focused payment gateway on Solana, combining speed, low fees, and full automation. Subscriptions that just work daily, weekly, or monthly powered entirely by smart contracts. For example: a creator receiving monthly support from fans, or a SaaS product billing clients automatically, without touching a single button. No banks. No manual renewals. Just pure on-chain execution. [pattpay.com](https://pattpay.com/)
+
+--- PROJECT SUBMISSION ---
+
+The resume is dead. Your Twitter Graph and On-Chain history are the NEW Proof-Of-Work. Arubaito is the new hiring layer for Bluechip Talent in crypto: → Token-gated network for top-tier talent → Proof-of-Talent CVs - (Checks your On-Chain History) → wBTC rewards to Member NFT holders who share job posts and more. → 95% cheaper than recruiters — with 5x more reach with adverts. If you're followed by Coinbase, Aave, Anatoly and more, then you qualify as a Bluechip Talent. This is Soho House meets crypto. Follow for more.
+
+--- PROJECT SUBMISSION ---
+
+We have recorded over 5000 sol transaction volume on fintag in just 48 hours https://t.me/fintag_bot?start=FIN69731 Check it out
+
+--- PROJECT SUBMISSION ---
+
+You’re about to meet Rei — your AI-powered agent for paid crypto work. She lives on X, Discord, and Telegram, and she does one thing really well: connects you to Web3 earning opportunities. For Hiring Teams: Rei scans platforms like Zealy, QuestN, Layer3, and TaskOn to surface the latest gigs, tasks, and bounties. She also lets teams post directly to her web app on Arubaito — starting at just $5 per listing. For Earners Looking to earn? Just type @AskRei on X, Discord, or Telegram — she’ll reply instantly with curated tasks and work from across the crypto ecosystem, if there's a match she can recommend your CV to hiring teams. Want in? → Submit your CV (soon) → Mint your Soulbound Member NFT (soon) → Start earning wBTC rewards as an active contributor (soon) Follow Arubaito_IO on X for more.
+
+--- PROJECT SUBMISSION ---
+
+Hey builders! Checking in from the Cypherpunk hackathon. I'm building Lewt, a protocol that solves crypto's "fat-finger" problem. It's The Undo Button for DeFi — a simple layer on Solana that lets you cancel mistaken transfers before they become permanent. Check out the landing page with demo video below. Feedback is welcome!  Landing: https://www.lewt.xyz/  X/Twitter: https://x.com/GetLewt
+
+--- PROJECT SUBMISSION ---
+
+Guessus.fun is a fast, fun, and permissionless social prediction game where anyone can create or join predictions on anything — trending topics, memes, sports, news, or random social debates — and win in just minutes. Players decide:  What to predict (any social question or event)  How much to bet (set your own stake)  How much to win (double your money instantly if your prediction is right) There are no delays, no intermediaries, and no restrictions — everything runs transparently on the market logic. Guessus.fun turns social discussions into a real-time game where your opinions can earn you instant rewards. (edited)
+Thursday, October 16, 2025 at 3:24 PM
+
+--- PROJECT SUBMISSION ---
+
+If you’re a Frontend dev, smart contract engineer, or a backend developer. We will like to connect with you and build a prediction market that maybe be unexplored for now. Might be a big deal
+
+--- PROJECT SUBMISSION ---
+
+This is Oscar, Founder of Starke Finance and we’re creating a blockchain-native asset manager leveraging Solana at its core. In order to do so, we have developed a Solana program capable of aggregating multiple tokens into a single one, similar to what traditional asset managers do with Private Funds, Mutual Funds, and even ETFs. Not only that, but it also includes features such as configuring minimum deposits, maximum AUM, KYC/KYB, transferability controls and secondary market restrictions. All of this is customizable with our FTaaS ([Fund Tokenization as a Service](https://starke.finance/fund-tokenization-as-a-service)) to comply with U.S. regulation. This capability will power third-party asset managers to run their funds natively on Solana, while we also build our own asset manager to offer a wide range of actively managed funds. These will cover different investor profiles, asset classes, and hybrid portfolios combining digital assets with RWAs. We’ll also partner with tokenization issuers to bring in Private Equity, Public Equity, and more, helping grow and enrich the Solana ecosystem. Our first fund, [rkShares BlueChip](https://starke.finance/funds/rkshares-blue-chip), is the first of many rkShares fund series registered in Delaware, targeted to be released by the end of Q4 2025. It is a Private Fund registered with the SEC, offered to accredited investors, and adapted to U.S. regulations. Finally, clarify that this project has been funded and sponsored by [Starke Finance Validator](https://starke.finance/validator). All the revenue generated has been reinvested to provide value to the ecosystem and to demonstrate Solana’s readiness to enable institution-oriented products. Resources: [Pitch deck](https://drive.google.com/file/d/1BAGQzCpTgVpWf_7p6ZfVuubRDHUXaMj8/view?usp=drive_link)
+,
+[Solana Program Audit Report](https://drive.google.com/file/d/1gmrwHs5wPsYyjBFjsk8z_MDlfdJVXJIo/view?usp=sharing)
+,
+[Prelaunch Video](https://drive.google.com/file/d/1cVCpYtN_GeLHlsNTmJhg-FhysdxZ-JVq/view?usp=sharing)
+,
+[Website](https://starke.finance/)
+,
+[Contact us](https://starke.finance/contact)
+,
+[Team](https://starke.finance/company)
+,
+Follow us at [X](https://x.com/StarkeFinance) and [Discord](https://discord.gg/starkefinance)
+,
+ (edited)
+Friday, October 3, 2025 at 5:12 AM
+
+--- PROJECT SUBMISSION ---
+
+Quick truth bomb: The AIs everyone uses for advice (Claude, Gemini, etc.) don't agree on what to recommend. I tested them with 80 real user questions about the Colesseum (https://arena.colosseum.org/). Founders, listen up: Claude only hypes crypto stuff.
+,
+Gemini loves design tools like Figma.
+,
+Perplexity is all about project management apps.
+,
+ What this means for you: If you're not a giant like Solana, your project's visibility depends entirely on which AI your users ask. You could be a top pick in one and completely unknown in another. Action Item: Go ask your favorite AI about your project. Then ask about a competitor. See the difference? This is why I'm building a platform to fix this. Thoughts? Drop them below.
+
+--- PROJECT SUBMISSION ---
+
+btd. (edited)
+Saturday, October 11, 2025 at 8:56 PM
+
+--- PROJECT SUBMISSION ---
+
+Using on-chain opt in and wBTC rewards make it 95% cheaper for teams to hire with Arubaito than with recruiters. Most crypto projects spend $25K+ per hire after sifting through 100's of low quality applicants. Arubaito changes this by filtering for quality members:  Only those with a Bluechip Twitter get membership.  or Only CV Profiles with a high 'CV Score' get membership - Vetted by AI.  On-chain Resumes - Proof-of-Talent.  BTC rewards for members who promote and recruit from their networks. This isn't a job board, it's a bluechip community of BUIDLERS.  Waitlist incoming - support our hackathon progress on Colosseum https://lnkd.in/ebxRGbc2
+
+--- PROJECT SUBMISSION ---
+
+Hii I am building https://afrifutures.vercel.app/ Having ai insights on price prediction and usdc payouts
+
+--- PROJECT SUBMISSION ---
+
+If you struggle with building Solana transaction data, especially on iOS, we have made an easy to use, free transaction data API. Arrow API gives you access to raw, unsigned, serialized transaction data for SOL and SPL transfers. .Save on API calls required for transaction generation .Avoid framework conflicts, node-module headaches, and future compatibility issues. .No fragile scaffolding or needing to build a new project just to enable Solana transactions in mobile apps. If you're curious and want to try it out today, we have a free Beta API Key available so you can find out how much time and energy you can save building your mobile dApps. Sign up here! https://yatori.io/
+
+--- PROJECT SUBMISSION ---
+
+Hi everyone - I'm Caleb the Founder of CertifiedRubbish. I'm an ex-Environmental Crime Specialist with years of frontline experience dealing with criminality within the sector. We've come to join the Colloseum from SuperteamUK's accelerator programme - and we are so hyped to be a part of it! Why do we need CertifiedRubbish? There is increasing scrutiny and regulations for how businesses manage their waste globally. Criminality is rampant within the sector of waste management, with fraud particularly on the rise. Businesses also want to be able to show their customers or clients that they are responsible and environmentally conscious. What is CertifiedRubbish? CertifiedRubbish is an innovative digital waste tracking and management platform - currently launched in the UK. We have developed our own integrated system for waste management and digital waste tracking. Each record is stored on-chain to create an immutable and auditable record, preventing fraud and criminality. We also have our own directory of waste removal specialists that we allow to sign up and advertise on our platform for free - helping to keep the sector healthy and driving business to the legitimate and legal operators  Why CertifiedRubbish? We want to highlight the practical and real uses of blockchain, and bring Solana into the forefront of regulation within the UK (and then globally!) Thanks for checking us out - I'm excited to keep building and see what amazing projects you are all working on. Check us out on socials: @Certirubbish on X CertifiedRubbish everywhere else! (edited)
+Thursday, October 2, 2025 at 10:20 PM
+
+--- PROJECT SUBMISSION ---
+
+Project: Arubaito  Website: www.arubaito.io (Old URL new incoming)  What is Arubaito? Arubaito is a high-ticket, token-gated Web3 jobs platform connecting bluechip projects with ex-bluechip talent through Proof-of-Talent. Only verified or “bluechip-followed” users can join — keeping the network high-signal from day one. Projects pay $1,200–$5,000 per listing (up to 95% cheaper than recruiters), while 50% of all platform revenue is distributed back to verified users as Bitcoin rewards. It’s the decentralized hiring layer for serious teams and elite contributors.  What is Rei? Rei is Arubaito’s AI-powered aggregator — a social-native agent living on Discord, Telegram, and X. She gathers jobs, gigs, and bounties from across Zealy, Galxe, TaskOn, and beyond, and makes them discoverable via chat. Projects can post directly through Rei for just $5 per job or $100/month for API integration. Half of Rei’s revenue goes toward Soulbound NFT membership rewards — distributed to anyone who’s submitted a verified CV to her platform. (We also post for free to support early Web3 communities.)  Why Solana? Because high-frequency, human-to-AI and AI-to-AI microtransactions demand speed, low latency, and near-zero fees — and Solana delivers all three.  Traction & Validation for Beta 1& 2 + Alpha: -1K+ alpha users Facebook/Deloitte grant-funded (2021)
+,
+Partners: PIPE gDAO, W3CONN3CT
+,
+ Active Proof-of-Talent engine and BTC reward layer  TL;DR: Arubaito is the premium talent marketplace. Rei is the AI bridge that powers its task economy. Together, they’re rewriting how work — and rewards — flow on-chain. Come join the journey DM me@WayneAnthony.eth
+
+--- PROJECT SUBMISSION ---
+
+AureviaX is building AIMP—an autonomous infrastructure protocol where AI agents operate tokenized solar farms on Solana with security, compliance, and real yield. Problem
+,
+$64T infrastructure gap and slow, centralized deployment
+,
+Data-heavy solar ops still manual
+,
+Trust/compliance barriers block capital
+,
+ Solution
+,
+AI-native DePIN: agents handle trading/dispatch/maintenance with cryptographic guardrails; humans keep override
+,
+On-chain stack: Asset Registry, AI Authority, Revenue, Governance
+,
+Security & compliance: zk-verified actions, hardened access, resilient oracles, KYC/AML + audit trails (MiCA/SEC-ready)
+,
+ How it works
+,
+Tokenize farms → mint Asset-Specific Tokens (ASTs)
+,
+AI optimize ops within constraints (energy sales, storage, maintenance)
+,
+Trusted data via Pyth/Switchboard + IoT oracles
+,
+Payouts & governance → validator-attested revenue; dual-token checks, timelocks, controlled upgrades
+,
+ Who it’s for
+,
+Investors (target 8–12%), Developers, Enterprises (programmable PPAs, carbon tracking) Colosseum Hackathon — Demo
+,
+Scope: 1 MW solar + battery MVP—from telemetry to AI decisions to on-chain revenue
+,
+We’ll show:
+,
+ Wallet onboarding → buy SOLAR → portfolio updateExplainable AI for dispatch/maintenance
+,
+Safety & governance: anomaly → AI rec → human override → logged proof
+,
+Oracles → verified Solana txs
+,
+Dashboard + digital twin with XAI tooltips
+,
+AST minting + real-time revenue split
+,
+ZK hash + audit trail
+,
+,
+ --- Links X: https://x.com/AureviaXlabs Contact Sri (Founder / Engineer) TG: @Cass402 X: https://x.com/SrivatsavE21
+
+--- PROJECT SUBMISSION ---
+
+Condor Trade is the first mobile-first liquidity provision app on Solana, built to make it effortless for anyone to provide, manage, and track DLMM & DAMM V2 liquidity directly from their phone. We’re building an intuitive, gamified trading experience that turns LP'ing into something fun, intuitive, and rewarding.  Wesbite: https://condor.trade/ (Sign up for private alpha here)  Twitter: https://x.com/condortrade (PLEASE FOLLOW US)  Telegram: https://t.me/condortrade
+
+--- PROJECT SUBMISSION ---
+
+Looking to hit it big with a meme coin? Chasing short-term returns? Analyzing the market on X with indicators that have nothing to do with the essence of crypto?? For those of you who are fed up with such superficial “solutions,” here’s the real answer: From a historical perspective, the next project that should be built in crypto is an index. Trading methods are, at their core, just products created by the traditional financial industry. People like us should take these tools, distribute them more fairly to individuals, and create a new, more democratic financial industry — that is what I believe the Internet Capital Market should be. This project brings DeFi closer to the real world, providing the most fundamental solution that isn’t swayed by memes or hype. I’d like to open the discussion with all of you about the true potential of index funds. When this is realized, I believe Solana will truly evolve into the optimal chain within crypto.
+
+--- PROJECT SUBMISSION ---
+
+Unchain Protocol is Private, censorship-resistant monetization for creators. The waitlist for TheUnchainProtocol is now live. Join the revolution  https://unchainprotocol.adityapatwa.tech/ https://x.com/UnchainProtocol/status/1976239697727979854?t=6u8bq_0EOZRxwYPpCNJnAA&s=19
+
+--- PROJECT SUBMISSION ---
+
+LatticA – Deterministic Confidential Computing for Solana (The blockchain that sees nothing — yet knows everything.) LatticA builds Next, the Solana-native confidential computing that makes encrypted data computable and verifiable anywhere — from mobile to server — through our portable FHE16 stack. Institutions can lend, swap, or manage risk without revealing private inputs until they choose to, establishing the foundation for deterministic, verifiable privacy on-chain. Beyond privacy, we secure provenance. By combining FHE16 with zkTLS(planned), LatticA ensures every encrypted input is cryptographically tied to its true source (e.g., Bloomberg, payroll APIs) without leaking plaintext or server keys — forming the trust execution for compliant, data-driven DeFi. Compute without seeing. Prove without revealing. [Backers] Currently raising seed round Track Record 01.2025 — Tech commercialization agreement with Hanyang University (Republic of Korea) 04.2025 — Booth at Korea Science & Technology Expo 06.2025 — Selected for University-Led Startup Program (2025.06–12) 08.2025 — Paper accepted at CRYPTO 2025: “Actively Secure MPC in the Dishonest Majority Setting: Constant Complexity in Online Communication, Computation, and Input Size.” [Founders:] Seounghwan Lee (CEO, Linkedin: https://www.linkedin.com/in/seunghwan-lee-242ab918a/) Dohyuk Kim (CEO, Linkedin: https://www.linkedin.com/in/dohyuk-kim-887474376/) Dong-Joon Shin (CSO, Linkedin: https://www.linkedin.com/in/dong-joon-shin-489447374/) [Watch / Connect] : Book a Call (Calendly) (URL: https://calendly.com/shlee-walllnut/30min) : Docs (URL: https://walllnut.gitbook.io/walllnut-docs) · 𝕏 Twitter (URL: https://x.com/LatticAwaLLLnut) · : Website (URL: https://walllnut.com/)
+
+--- PROJECT SUBMISSION ---
+
+The fintag beta testing is live Pls check it out and show massive support https://zealy.io/cw/fintagcommunity/invite/Ng7fYbHaHhYJem4kzvEMG?questId=971ac932-3713-4c66-9250-e82bb21991c2
+
+--- PROJECT SUBMISSION ---
+
+our crypto-ai pipeline is live. automatically cleaning reddit data and generating daily reports. built for scalable, ai-ready market analysis. (screenshot: gui report — 2025-10-09) feedback welcome! built for colosseum
+
+--- PROJECT SUBMISSION ---
+
+Join us and vote on your namespaces.  Community Launchpad: Anyone can propose and vote on new domain suffixes and launch DAO Governance Coins for suffixes (e.g. .agent, .vibe, .punk).  Fair Launch Mechanism: New Suffix tokens are released via bonding curves, ensuring transparent price discovery and fair distribution.  Tokenized Ownership: Each suffix becomes a DAO, where holders govern pricing, policies, and future registrations.  Staking Toolkit: Users can stake tokens to earn rewards from liquidity incentives, buybacks, and domain sales revenue.  Registration Layer: After a suffix token launches, NameDAO enables direct registration and management of domain names.  Seamless Integration: Built on Solana for fast, low-cost transactions and cross-chain compatibility with other ecosystems.  Ecosystem Synergy: Designed to power the next wave of namespaces , where naming, identity, and liquidity merge into one decentralized system.
+
+--- PROJECT SUBMISSION ---
+
+Price discovery through shared belief and long-term stakeholder conviction. Price Discovery Through Conviction Voting/ Reputation Scores Encrypted Voting: Users first submit a hidden vote for a token’s price. After a set period, they reveal their vote. Encrypted voting is done through Arcium. As arcium is in testnet one can also use commit and reveal. Conviction Weighting: Votes are weighted based on the duration of token lockup and reputation scores. This reflects the voter’s confidence and long-term commitment to the token. Median-Based Outcome: The final price is determined by the median of all revealed, weighted votes. This method filters out extreme outliers and reduces the risk of manipulation. Stakeholder-Driven Prices: Unlike traditional DEXs, this model incorporates the voices of token holders, developers, community members, and long-term investors—those who are genuinely invested in the token’s mission and impact. https://github.com/Solananium/rational-dex/tree/main (edited)
+Sunday, October 12, 2025 at 2:59 PM
+
+--- PROJECT SUBMISSION ---
+
+We are globalizing and scaling science on chain
+
+--- PROJECT SUBMISSION ---
+
+Hey Colosseum community!  I'm excited to share CypherSolBase, a Rust library that brings cryptographic security, compression, and privacy to data encoding on Solana. What Problem Does It Solve?
+,
+Traditional encoding schemes like Base64 lack:  Cryptographic security & obfuscation
+,
+ Built-in error detection
+,
+ Compression for expensive on-chain data
+,
+ Privacy layers for sensitive metadata
+,
+ For Solana apps (NFTs, DeFi, cross-chain bridges), this means higher costs and security risks.  Our Solution
+,
+CypherSolBase is a Base64-inspired encoding with cypherpunk features:  Dynamic Alphabet Permutation - SHA-256 derived alphabet for obfuscation  CRC-32 Checksums - Built-in data integrity verification  Multi-Algorithm Compression - LZ4 & Brotli support (25-30% size reduction)  Privacy Layer - XOR-based obfuscation for confidential data  Zero-Knowledge Proofs - Halo2 integration for verifiable computations  Solana-Optimized - Reduces on-chain transaction costs  Tech Stack
+,
+Rust 1.70+ (performance & memory safety)
+,
+Solana Program Library (full compatibility)
+,
+Halo2 (ZK proofs)
+,
+Axum REST API (easy integration)
+,
+LZ4 & Brotli (compression)
+,
+Fuzz Testing (5000+ validated runs)
+,
+  Key Features
+,
+// Example usage use cyphersolbase::{encode, decode, CompressionAlgorithm};  let data = b"NFT metadata..."; let seed = b"secret_seed";  // Encode with compression let encoded = encode(data, seed, CompressionAlgorithm::Lz4)?;  // Decode and verify let decoded = decode(&encoded, seed, CompressionAlgorithm::Lz4)?;  Use Cases NFT Metadata - Compress & secure on-chain metadata DeFi Data - Confidential transaction parameters Cross-Chain Bridges - Integrity verification for bridged data Smart Contract Inputs - Reduce compute units & fees  Current Status  Core encoding/decoding with custom alphabets  Multi-algorithm compression (None, LZ4, Brotli)  REST API for remote integration  Comprehensive fuzz testing  Benchmarking suite with Criterion  Technical whitepaper  Publishing to Crates.io  Full Solana smart contract implementation  Links GitHub: https://github.com/evaasion/gxcore API Demo: https://gxcore.io/ License: MIT Why CypherSolBase? This isn't just another encoding library - it's infrastructure that makes Solana apps: More secure (integrity checks + obfuscation) More efficient (compression = lower fees) More private (cypherpunk-inspired privacy layer) More verifiable (ZK proof integration) Perfect for builders who care about security, privacy, and performance on Solana! Would love feedback from the community! What features would you want to see? What use cases am I missing? Let's build the cypherpunk future together! (edited)
+Sunday, October 12, 2025 at 2:21 PM
+
+--- PROJECT SUBMISSION ---
+
+@DocHuss MKASE (US Patent Pending) Quantum-AI-Driven Mental Health Monitoring System For ADHD, Autistic, Neuro Children: with Wearable Health Monitoring, Smart Home Holographic Therapy Systems in a Tokenized Ecosystem Includes: 480 short-form sensory-sensitive animated episodes, neuro-sensory-sensitive mobile app video games, sensory-sensitive music, and real estate: all tokenized to subsidize funding. I would love to chat about my system with anyone interested in partnering: Project/Product is HHS/NIH UEI, US Patent, PPP, Product Video, et al can be supplied. The PI [me] is Seeking Partnerships. MKASE is ready to deploy!! We have entered the arena! DeFi, Stablecoins, RWAs, Consumer Apps, Infrastructure, Tokenized to subsidize funding with real estate, philanthropy, entertainment, innovation, FinTech, Quantum-AI driven, NFTs, Memecoin reward participation. @max | colosseum
+
+--- PROJECT SUBMISSION ---
+
+We are building VeraX Pay, a decentralized payment solution built on the Solana blockchain, designed to make crypto transactions fast, secure, and social directly within Telegram. It enables users to send and receive SOL, USDC, and other supported tokens seamlessly without leaving chat. Through an intuitive Telegram bot interface, VeraX eliminates the need for browser wallets or complex DApp interactions, making crypto payments as simple as sending a message. Users can instantly transfer funds, create payment links, host giveaways, buy digital gift cards, and accept business payments, all through Telegram’s familiar interface. VeraX’s lightweight design leverages Solana’s high-speed, low-cost infrastructure to process transactions in seconds, with low fees, depending on the operation type. It also provides merchant tools, allowing creators, communities, and online businesses to receive payments or donations globally with minimal friction. Beyond peer-to-peer transfers, VeraX focuses on social finance (SoFi) and ecosystem utility. Users can track transaction histories, manage wallets, and participate in community campaigns directly from the chat. Future updates will introduce multi-chain support, token swaps, P2P trading, and DApp integrations, expanding VeraX into a full-scale Web3 payment hub. Designed for accessibility and scalability, VeraX bridges DeFi usability and social convenience, empowering users to transact, earn, and interact with digital assets effortlessly. With its Telegram-native experience and Solana’s performance, VeraX Pay is redefining how crypto payments are made, making them instant, social, and borderless. You can check more on VeraX Pay and join the beta live from the Twitter @VeraxPay Read the docs: veraxpay.io/docs Check out our website: veraxpay.io Or join our telegram here: https://t.me/veraxpay (edited)
+Saturday, October 11, 2025 at 2:30 PM
+
+--- PROJECT SUBMISSION ---
+
+We at Aurevia X are building AIMP (Autonomous Infrastructure Management Protocol) — a new way to rethink how the world’s infrastructure is owned and operated. AIMP connects AI-driven optimization with blockchain-backed ownership, allowing real-world systems like energy, mobility, and connectivity to be managed intelligently and shared transparently. Our goal is simple: to make global infrastructure smarter, fairer, and community-powered.
+
+--- PROJECT SUBMISSION ---
+
+We are contributing combination of a bluetooth vape controller and a native crypto wallet to build a cool vape2earn app: Currently the app supports all Storz&Bickel devices (Crafty+, Mighty+, Volcano) and Pax3 ... The crypto wallet offers access to circle's USD bridge (CCTP) , making it easy to onboard people from all other architectures easily. t supports three types of cryptographic modes: Solana, EVM and Interchain The vape2earn function (not ready yet, just paper) should read the vape's internal operation timer, create a timestamp (blockheight hash)-publicaddress-operationtimer zK proof and stores/interact with a prefunded TokenProgram that will "hand out" tokens to the user. So, its literally the first Proof-of-Smoke protocol ever! By holding NFTs from Canna-related communities within the Solana Ecosystem, you can boost / increase your reward: It encourages people to stack NFT from other communities, and so it creates a networking effect. My plan is to double the boost with each NFT (only 1 per integrated collection) Example: You hold 1 WeedToker NFT = 2x You hold 1 WeedToker and 1 Snoop =4x You hold 1 WeedToker, 1 Snoop and 1 Skunk =8x etc... Check our tg: https://t.me/solana_vape2earn The latest .apk can be found within the "app development" channel No website live yet, but we are onboarding!
+
+--- PROJECT SUBMISSION ---
+
+Hello everyone, Spyro here from Anello. What are we creating? The suite for automated-trading on all major DEFI platforms. We are right now in a public-beta and we invite all to join the discord channel & sign-up. Currently integrated? Jupiter Hyperliquid Asterdex Spot grid trading. https://discord.gg/anello https://anello.io/ (edited)
+Thursday, October 9, 2025 at 6:07 PM
+
+--- PROJECT SUBMISSION ---
+
+SpinOnSol is a Web3 platform that lets anyone create, open, and try to earn from lootboxes — digital boxes with tokens or NFT. Creators can create their own lootboxes using tokens or NFTs, while players can spin for a chance to win prizes. Everything happens on-chain, ensuring fairness, transparency, and fun with Solana’s low fees and fast transactions. SpinOnSol is a Web3 platform that lets anyone create, open, and earn from lootboxes — digital boxes filled with tokens or NFTs. Creators can design their own lootboxes using crypto assets, while players spin for a chance to win real prizes. Everything happens on-chain, ensuring fairness, transparency, and fun with Solana’s low fees and lightning-fast transactions., the past days i was working hard at frontend improvement..... i will keep you updateded... (edited)
+Thursday, October 9, 2025 at 10:34 AM
+
+--- PROJECT SUBMISSION ---
+
+We’re building Chaindex a local first system that indexes trades, maintains live aggregations, and can be queried directly from the frontend. Sub ms updates, Solana speed. Why wait seconds for th graph when Chaindex gives you sub-ms views right on your laptop? Tell us your indexing and aggregation needs. https://x.com/chaindex_xyz (edited)
+Wednesday, October 1, 2025 at 1:32 PM
+
+--- PROJECT SUBMISSION ---
+
+Overview: PromptQuest transforms minting NFT ‘s into a creative, gamified economy.  Users create image and video NFTs using AI (Veo 2.0, DALL·E 3, Flux) and mint them on Solana — all without needing a wallet. Our flagship feature, Prompt Detective, rewards players for winning reverse engineering challenges with crypto and gift cards via Crossmint’s agentic commerce.  AI-to-NFT Studio: Generate, preview, and mint AI art instantly.
+,
+  Gamified Rewards: Win prizes for top-scoring prompts.
+,
+  Multi-chain Minting: Solana, Base, Polygon & more.
+,
+  No Wallet Needed: Crossmint handles mint + delivery.
+,
+  Payments: thirdweb checkout (card, Apple Pay, crypto).
+,
+ Opportunities: We’re currently seeking:  Business Partner / Advisor: to help shape pitch decks, partnerships, and go-to-market.
+,
+  Social Media + Community Lead: to build our presence across X, Discord & TikTok.
+,
+  Blockchain Engineer (Payments): to help finalize Crossmint + thirdweb integration.
+,
+ Links  Website: https://www.promptquest.org/  Telegram: noodledonn212  X (Twitter): https://x.com/AllowMe2025  Blog (Notion) : https://thankful-position-4cf.notion.site/PromptQuest-The-AI-Powered-NFT-Platform-Revolutionizing-Web3-Creation-2860b833401c8076b9f1c19dea513333 Contact  Juan Isaac (Founder)  TG: @NoodleDonn212 (edited)
+Thursday, October 9, 2025 at 3:24 AM
+
+--- PROJECT SUBMISSION ---
+
+Gm Buildors.... My team and I are working on an Emergency Fundraising platform "https://www.emergfunds.org/" So far, we've lunched a Beta, weve onboaded testers and still looking for more. We're currently integrating an On/Off ramping partner in PajCash a platform built by founders from SuperteamNG.
+
+--- PROJECT SUBMISSION ---
+
+Hello everyone, I decided to create a fun AI website with pools and USDC deposits, Bonk Sol, and especially an Android app for the seeker. This is my first Web3 project on Solana, and I really like it. I integrated swap pools. The site is still under construction, but it's visible and usable on PC and Seeker. I'm looking for partners to create the token and integrate it into the Anchor program for a future airdrop. test -> https://www.bonkofamerica.app/
+
+--- PROJECT SUBMISSION ---
+
+Compazz lets communities run on‑chain trading funds on Solana. Create a fund for your community or Telegram channel, auto‑execute strategies with our AI agents, and let anyone invest. Quick update from the trenches. We’re building a easy way to create on-chain trading funds on Solana for communities because organizing a group chat should be all you need to pool capital and run trades like an hedge fund. Right now, you can spin up a fund, link it to your Telegram group, invite your crew, throw SOL in the pot, and run group trades just by chatting. If you want to team up, test, or just roast the product, hit me up.
+
+--- PROJECT SUBMISSION ---
+
+We're considering working to create RWA purchase contract options for land parcels in and around city areas. Users would be able to demonstrate financial sophistication by depositing usdc /usdt into a city bonding curve and then, upon bonding, said land would be financed and demonstrably purchased. Holders of said city land coin would then be able to visit the land at predetermined times, and if they were so inclined to do so, could transfer / sell those visitation options to a 3rd party. Feedback on my website?
+
+--- PROJECT SUBMISSION ---
+
+Right now, creators economy runs on two-sided fear. For creators: The constant threat of de-platforming and financial censorship. For supporters: The real-world risk of supporting creators, since every tip is a public record. TheUnchainProtocol is a new financial layer that fixes this. The supporter can tip their favorite creators anonymously, without exposing their identity in public. And creators receive an uncensorable income stream, independent of any platform. The waitlist is now live, and I'd be grateful for any feedback on the concept or the landing page. Thank you! https://unchainprotocol.adityapatwa.tech/ (edited)
+Thursday, October 2, 2025 at 5:53 AM
+
+--- PROJECT SUBMISSION ---
+
+FinTag is a tag-based payment layer on Solana, built directly inside Telegram and other social platforms, that transforms complex wallet addresses into simple, human-readable tags like #maria or #store. With just a single command for example, “send #maria 0.5 SOL” or “pay #Starbucks 0.1 SOL for coffee” anyone can send crypto instantly, securely, and on-chain, all without leaving the chat. We’re solving one of the biggest barriers to mainstream crypto adoption: complexity. Today, sending crypto involves copying long wallet addresses, switching between multiple apps, and dealing with steep technical learning curves. This frustrates new users, discourages businesses from accepting crypto, and slows ecosystem growth. We believe payments shouldn’t feel like programming they should be as simple as messaging. We’re building FinTag to make crypto truly usable in everyday life, especially in regions where access to financial services is limited but messaging apps are widely used. With over 900 million users on Telegram alone, we’re meeting people where they already are and making blockchain payments as natural as sending a text. What makes FinTag unique is how it blends social identity with financial transactions. Instead of abstract wallet strings, users transact with tags tied to their social presence. We support both custodial and non-custodial flows, include a rewards system to drive adoption, and offer developer tools that allow others to integrate tag-based payments into their own applications all powered by Solana’s speed and low fees. Our goal: to onboard the next billion users to crypto by making payments effortless, human, and social. Our vision extends beyond building a universal tag-based payment layer that works across platforms, communities, and use cases. Whether it’s peer-to-peer transfers, tipping creators, group payments, or merchant transactions, FinTag makes it instant, intuitive, and scalable. FinTag turns conversations into transactions.
+
+--- PROJECT SUBMISSION ---
+
+It’s changed names so many times. It started with a music lottery idea.. a way to gamify fan engagement and bring in funding for struggling artist. That came from my desire to find a grant or support system for artists making nothing. that turned into a true issue with metadata connecting properly to tie it back to the artist. Bridging gaps between Web2 and Web3 solving the global Music Identification issue. From FMPiR3 and FMP to ISAID, Now has turned into DGMI - Decentralized Global Music Identifier As a US citizen and musical artist, I saw a way to help. Artists themselves as the Identifier in the Music ecosystem. The Worlds First Decentralized Web3, Blockchain Native Music Identifier. Repairing what has been divided and what has stopped me from releasing music because of IPI and Flaws inside of Web 2. (edited)
+Sunday, September 28, 2025 at 1:49 AM
+
+--- PROJECT SUBMISSION ---
+
+GM! I'm Kelsen, Co-founder & CEO of AiMo Network. AiMo Network is bring Intelligence Capital Market On-Chain. Through a permissionless API, pay-per-inference via x402, and agent-native interface, AiMo connect humans, AI agents, and service providers without censorship, borders, or gatekeepers. Powered by a distributed router network & stablecoin-based on-chain settlement (Solana & Base), AiMo delivers massive throughput, strong privacy, and true decentralization. We’re actively onboarding compute providers and opening early access for alpha users with free credits airdrop. Website: https://aimo.network/
+,
+Twitter/X: https://x.com/AiMoNetwork
+,
+
+--- PROJECT SUBMISSION ---
+
+Checkmates is a decentralized social network and decentralized dex powering the SoFi ecosystem We are seeking like minding devs to help with project Contact us today!
+
+--- PROJECT SUBMISSION ---
+
+https://goclubhouse.io/ Welcome to the Clubhouse!! Starting with Solana, soon ALL of web3!! Time to disrupt the entire web3 community ecosystem and give instant access to utility/games/chat without any dev work or wait time! Go from Mint to raffles/chat/games within seconds, using our dev-less/frictionless onboarding system! Eventually full community support and advanced chat features!
+
+--- PROJECT SUBMISSION ---
+
+gm! We built an API that handles transaction data for you, so you can focus on the fun stuff. Arrow API cuts your dev time in half on iOS, Android, and web. Check out our docs and free tools here. https://yatori.io/docs/sol-transfer DM if you'd like to get a personalized demo and join our waitlist. We want to help you build the next great Solana dApp!
+
+--- PROJECT SUBMISSION ---
+
+We are live on devnet!  If you would like to check our our devnet and help us improve, more info below! https://x.com/solwarzone_game/status/1972598787794456815
+
+--- PROJECT SUBMISSION ---
+
+Nomu is the marketplace where you can buy products early and get rewarded when they sell. We are building the platform for reflexive commerce, not one-way spend. E-commerce has treated buyers like ATMs: money out, maybe points back. Nomu flips that. When you back a product, your purchase helps fund it and fills a transparent rewards pool. As the community buys, trades, and refers, the pool grows, so when the drop succeeds, the people who made it happen share the upside. Your spending becomes working capital, not a sunk cost. Real products, real liquidity and aligned incentives: brands get velocity; buyers get a stake. Cypherpunk values applied to Web2 ecommerce.
+
+--- PROJECT SUBMISSION ---
+
+Hey guys! We're building SendSol - a mobile-first crowdfunding platform for Solana projects!  App URL - https://www.sendsol.app/ First project is ourselves - https://www.sendsol.app/p/sendsol X - https://x.com/sendsolapp Reviews on Youtube - https://www.youtube.com/watch?v=FOvSrC70BP8  Mobile-first, Download app on Seeker dapp store  Raise funds for any needs - Launch campaigns in minutes  Analyze senders who contributed to your project  First launch? Ourselves - We're building in public  Find early-stage projects to contribute to  More features coming soon - Escrow, DAO votes, rewards  $SENDSOL token launches soon to reward app users!  So far we have raised over 16+ SOL through crowdfunding in the past couple weeks.  If you have needs for fundraising, please try SendSol! Let us know of any feedback. (edited)
+Sunday, September 28, 2025 at 12:09 AM
+
+--- PROJECT SUBMISSION ---
+
+Buy anything on Amazon & Temu with your stablecoins! No KYC, fully compliant. SP3ND mobile makes crypto shopping as easy as shopping directly on Amazon. Tap -> Pay -> Delivered Available on Web and Solana Mobile dApp Store
+
+--- PROJECT SUBMISSION ---
+
+SolTrace is a wallet tracking visualization tool and blockchain data provider designed to be the only application you need to navigate blockchain data on Solana. We offer simple yet powerful blockchain analytics tools at your fingertips, delivering the transparency you deserve and the clarity you’ve been waiting for, all in one place. SolTrace turns raw blockchain data into clear, actionable insights, so you can make smarter decisions faster. No more second guessing connections. Save the one thing more valuable than your own Solana: your time. Where we're at right now: We have finished developing our wallet analytics tool and will be integrating in 4 Decentralized Exchanges in the following weeks. As we expand to be a blockchain data provider to B2B and B2C developers we want to empower YOU, ALL Colosseum Hackathon Participants with Access to our Enterprise Tier API for the entirety of this Colosseum Hackathon You'll be the first ones to get hands on one of the most powerful API's beating out performance and speed of competitors (SolScan API) accessing Solana's Transaction data, specifically trades, token creations, migrations, and transfers. Lets Build Together for the Next Generation of Users on the Solana Network. (edited)
+Saturday, September 27, 2025 at 6:34 AM
+
+--- PROJECT SUBMISSION ---
+
+Play Games. Earn Crypto. Own Your Time.  Gamebyts is the ultimate Web3 platform where your everyday gaming turns into real rewards. Whether you’re grinding in Fortnite , crushing levels in Candy Crush , or exploring any other PC/mobile world  — Gamebyts tracks your playtime and pays you in crypto . No need to switch games. No weird hoops. Just play, earn, and repeat.   Game-agnostic tracking  Seamless on- & off-ramps  NFT upgrades + token rewards  Skins marketplace  Built-in wallet + real-world value Join the movement where your time matters — and your play becomes pay.  gamebyts.com Short Video Introduction: https://drive.google.com/file/d/1gRPn-NeFLtW4Eegk2FViFlqTloo2nDWf/view?usp=sharing
+
+--- PROJECT SUBMISSION ---
+
+VTI Stablecoin Ecosystem: Quantum-Resistant Financial Infrastructure Building the future of decentralized finance with post-quantum cryptography and multi-layer consensus  Current State: Production-Ready Architecture We've reached a critical milestone with our 18 core programs compiled on localnet and CPI calls fully mapped. The VTI Stablecoin ecosystem represents the convergence of aerospace-grade engineering, quantum-resistant security, and ethical AI governance - all running on Solana's high-performance infrastructure.  Technical Achievements  18 interconnected Solana programs (zero defects, zero warnings)  Triple-layer consensus mechanism (Technical + Economic + Social)  Quantum-resistant cryptography via Winternitz One-Time Signatures  150%+ over-collateralized reserves with real-world asset backing  Zero-fee monetization model across the entire ecosystem  Cross-program invocation architecture optimized for 65K+ TPS  The Challenge: Quantum vs Speed We're entering devnet testing phase where we face the fascinating engineering challenge: post-quantum signature sizes vs Solana's blazing TPS. Our hybrid cryptography approach combines classical Ed25519/X25519 with CRYSTALS-Kyber and Dilithium - pushing the boundaries of what's possible in a sub-400ms finality environment.  Hackathon Mission: Web2 → Web3 Transformation For this Cypherpunk hackathon, we're revolutionizing the user experience that will onboard the next 100 million users to web3:  Homepage Mega Experience Transforming our boring web2 landing page into an immersive web3 experience that showcases: Real-time ecosystem metrics flowing across the interface Interactive DeFi visualizations showing triple-consensus in action Quantum-resistant security demonstrations that users can actually see and understand Cross-chain asset flows rendered in beautiful, comprehensible graphics
+
+--- PROJECT SUBMISSION ---
+
+You can trade U.S. stocks, crypto, and perps — but more than that, you can follow signals, post your own strategies, and even bet on whether those strategies will succeed. It’s where users earn by trading, predicting, or building influence — all in one seamless, non-custodial experience.
+
+--- PROJECT SUBMISSION ---
+
+From Nature to Blockchain: Meet Pollinet  In nature, pollination allows life to spread - pollen travels from flower to flower through wind, birds, insects, and even people. Inspired by this, Pollinet brings the same resilience to blockchain.  What it is Pollinet is an offline-first SDK that lets transactions travel from an offline device to any nearby device with an internet connection; which then submits it to the blockchain. This is powered by a BLE mesh network, where smartphones automatically relay transactions until they reach connectivity. No extra hardware required; every modern smartphone is already BLE-enabled.  Why it matters  Unstoppable Access: Payments, voting, and critical apps keep working, even when the internet doesn’t.  Resilience in Censorship & Disaster: In environments with censorship or unstable networks, Pollinet ensures Solana keeps running.  First of Its Kind: Bringing true offline capabilities to Solana.  Solana Foundation Grant Recipient Pollinet has proudly secured a grant from the Solana Foundation as we pioneer the next frontier of blockchain resilience. With Pollinet, Solana transactions can move like pollen - finding their way to the blockchain, no matter the conditions. (edited)
+Monday, October 13, 2025 at 5:43 PM
+
+--- PROJECT SUBMISSION ---
+
+Predict everything, cure all unhappiness! Anyone can post text, images, videos, and live content in the prediction market, which can be personal and fun predictions, as well as predictions of public figures or events! Currently undergoing beta testing on the main network, potential participants for this hackathon! This will truly overturn the past paradigms of the content creator market and the prediction market, and Prizee will become a large base of predictive content social media. We also welcome outstanding talents from the community and market, feel free to contact us at any time: https://x.com/Prizeedotfun  (edited)
+Monday, September 22, 2025 at 8:30 PM
+
+--- PROJECT SUBMISSION ---
+
+What it is AxonSol AI is the Solana Intent Layer - a plug-in chat→transaction rail. Users say the goal (swap/send), get a clear preview (fees/route + which project + user rules applied), their wallet opens, they sign. Non-custodial. Policy-safe by default. Works alongside your manual UX; if you don’t have a flow, we can be live in a day. Comes with an SDK (UI blocks + minimal API) to hit the One Intent Endpoint. Key features Zero-Message: on first contact we infer sensible defaults from the authenticated wallet’s public signals (risk posture, slippage caps, venue prefs). No auto-execution.
+,
+Cross-app identity (wallet-linked): preferences and risk posture travel across partner apps with consent-one memory, fewer re-setups.
+,
+Reason-coded previews: explain why a cap/route applies; full audit trail for support/compliance.
+,
+ Who it’s for Wallets, DEX UIs, web apps, portfolio/analytics, and social trading/coaching tools that want fewer steps, fewer tickets, and cleaner audits - without replacing power-user flows. --- Looking for honest feedback
+,
+Roast the idea: does chat → preview → sign earn a slot next to your current UX? Where does it break?
+,
+Propose features you’d actually use: presets, policy templates, allowlists, per-day limits, alerts - what’s day-one critical?
+,
+Dev ergonomics: what’s missing for a true 1-day SDK drop-in (events, copy blocks, examples)?
+,
+Edge cases: failed sends, bad routes, fee spikes, weird tokens - give us your worst.
+,
+ ---
+
+--- PROJECT SUBMISSION ---
+
+Hello everyone, Crypto has somewhat of a reputation among web2 folks hence not a lot of people allow payments in crypto on their app/product. This leads to customers not being able to pay in crypto and them potentially losing a few customers. To solve this issue, i'm building Okito, simple to integrate, a very friendly and familiar UX for people to integrate without even thinking about anything. All they need is a simple public key. And yes it is "bring your own key". I'm not planning to move towards conversion to fiat and keep it only for crypto transactions. Would love to hear any ideas and I'm launching the beta very very soon. Hope y'all could use it in any of your product and grow your revenue even more. Cheers!
+
+--- PROJECT SUBMISSION ---
+
+Hi everyone! I’m a founder and innovator with a background in music-tech, musical artistry and entrepreneurship. I’m building something in the music x DeFi space for this hackathon. The project is focused on fan ↔ artist engagement After engaging with the other users on the platform today, my project vision has shifted to better address key opportunities. If you want to work on something first-of-its-kind, DM me! KAL3RIS 
+,
+ (edited)
+Thursday, September 25, 2025 at 9:07 AM
+
+--- PROJECT SUBMISSION ---
+
+ZEFE is a network marketplace where you can buy and sell connections. Your network is more than social capital, it’s an asset. ZEFE turns your connections into something tangible and tradable. Here’s how it works: Invite your close network.
+,
+Set price for per connection.
+,
+List your network for others to discover.
+,
+Earn and share revenue with your network.
+,
+ ZEFE makes your network visible and valuable. See what kind of connections lower down.
+,
+Let others explore who’s in your close network.
+,
+Help people get connected — and earn when you do.
+,
+Get rewarded for being part of someone’s close network.
+,
+ Because one intro from the right person is worth more than 100 cold messages. Want to earn from your network? Sign up for early access : https://tally.so/r/3xbq0y
+
+--- PROJECT SUBMISSION ---
+
+https://arena.colosseum.org/posts/3022
+
+--- PROJECT SUBMISSION ---
+
+We have launched 'X-Growth', a multi-AI agent–based social automation service, and we are now preparing an AI meme token project built on top of it. : fudbot.ai You can find an explanation of X-Growth at Crytical Labs.com
+
+--- PROJECT SUBMISSION ---
+
+I'm building episodic content platform powered by gen AI, with co-owned IP. I'm working on the platform (and in particular a solana mobile app as part of the hackathon (and the aussie hackaroo hackathon). I'm interested in connecting with folks that are interested in content and the creator economy.
+
+--- PROJECT SUBMISSION ---
+
+Spelltroum is a high-quality real-time mobile battle arena. A few months ago, we began integrating the game with the Solana blockchain, inspired by the amazing Toronto Vibe Station community. We tested early matches with staking on Solana Seeker phones, and the gameplay turned out to be incredibly fun — that’s why we decided to take this direction.  In Spelltroum, player skill matters more than purchased items, which makes competitive staking matches fair. Players stake the same amount of SOL, play a 2–3 minute match, and the winner takes it all. We already have a working prototype built specifically for Solana, but there’s still a lot to improve — and this hackathon is the perfect chance to do it. Game at a glance: •  12 unique heroes •  53 unique items •  10+ diverse maps •  Quality multiplayer with anti-cheat system •  Balanced and fair gameplay Your feedback as judges and community is crucial. We are building Spelltroum for you, and your input will directly shape what the game becomes. https://www.youtube.com/watch?v=NkD1FcJdqlc https://x.com/spelltroum
+
+--- PROJECT SUBMISSION ---
+
+https://fungerbil.com/pitchdeck.pdf
+
+--- PROJECT SUBMISSION ---
+
+Mileston enables any type of business to add crypto and stable coin payments whether it's one time payment or subscription or pay as you go method, Our APIs and SDKs give you complete control of payment flow and UI, integrate payouts to thousands of merchants at the same time with a single API with a auto USDC swap feature. Anything is possible with Mileston, Check it out at https://mileston.co/
+
+--- PROJECT SUBMISSION ---
+
+Here is a quick description about SafeSol: SafeSol is a security-first platform built to protect Solana users from scams, rugpulls, spam, and malicious tokens. By analyzing wallet activity and identifying harmful assets, SafeSol empowers users to stay ahead of threats on-chain. With advanced detection logic, AI-powered analysis, and its unique “burn-at-all-costs” feature, SafeSol ensures that unwanted NFTs, compressed NFTs (cNFTs), and malicious tokens can be permanently removed — reducing the risk of wallet drains, rugpull traps, and phishing attempts. What makes SafeSol different is its AI-driven intelligence: it translates complex blockchain risks into simple, human-understandable breakdowns, offering clear suggestions and actionable next steps for users. Instead of confusing technical data, SafeSol provides easy-to-digest insights that help traders make safer decisions instantly. SafeSol is starting with Solana — the fastest-growing and most active ecosystem — but will expand to other chains to bring the same security-first approach across the broader Web3 landscape.
+
+--- PROJECT SUBMISSION ---
+
+Competition Markets enable founders to gamify your marketing strategies as communities compete against each other with raiding content. This gamification benefits teams by increasing:  Project Mindshare  Trading Volumes, and  Community Engagement  it's also great for fans by offering a fun way to speculate on price and momentum. And it’s all at $0 cost to the team!  Welcome to Financial Entertainment on Solana  In Raid Arena, communities bid on their token’s price action against the market in 24-hour Battles. Communities unite to create excellent content and out-raid rivals. Winners split the bid token pool, rallying fans, founders, traders and creators.  X: https://www.x.com/RaidArenaFun/ App: https://app.raidarena.fun/ (edited)
+Friday, September 19, 2025 at 6:23 PM
+
+--- PROJECT SUBMISSION ---
+
+Here’s a Quick Look at the mobile version (simultaneously making desktop). The UI for now is simple with click actions. However the game is intended to be way more intricate. I want wealth wars to be a strategy game with the theme of Monopoly or building an empire. Players will have to grow and defend their Wealth efficiently, while preparing to attack others. The mission is to create something that people can enjoy while learning about crypto and gaining financial literacy. 4 years ago I entered the space through a game and I was able to catch on quick. At the time I was working my way to become a licensed stock broker. Now as a licensed financial advisor, Wealth Wars is something I believe in.
+
+--- PROJECT SUBMISSION ---
+
+Hey builders , so I started building Floww not because I'm some trading genius (I literally lost $1,482 testing my own product yesterday), but because I got tired of watching smart people make dumb decisions when they're sleep-deprived and stressed. The breakthrough came when I stopped trying to build a "trading bot" and started building AI that thinks like the trader I wish I could be at 3am. Patient. Logical. Not checking prices every 5 minutes.They trade while you sleep. They don't FOMO. They don't revenge trade. Three months in, early users are sleeping better and their portfolios are growing. Not because the AI is magic, but because it removes human stupidity from the equation. We're live with the beta: https://tryfloww.app/ X: https://x.com/tryflowapp Looking for cracked creatives who get crypto and want to help us tell this story better. Also, all feedback welcome roast it, break it, tell me what sucks. Still building, still learning, still paying for my rent using Floww right now. But at least now my AI makes better decisions than I do when I'm tired. Love
+
+--- PROJECT SUBMISSION ---
+
+Any feedback on our product idea is appreciated: https://arena.colosseum.org/posts/3012 Pls let me if I can feedback on your ideas as well - here to serve

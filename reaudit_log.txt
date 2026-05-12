@@ -1,0 +1,474 @@
+
+Running 25 tests using 1 worker
+
+  ✓   1 e2e/reaudit-surviving.spec.ts:138:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore undefined in policyConfig causes isNaN guard to skip anomaly check — high-risk agent (anomalyScore=0.99) must be DENIED not silently passed (135ms)
+  ✘   2 e2e/reaudit-surviving.spec.ts:179:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters (44ms)
+  ✘   3 e2e/reaudit-surviving.spec.ts:179:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters (retry #1) (53ms)
+  ✘   4 e2e/reaudit-surviving.spec.ts:204:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic (45ms)
+  ✘   5 e2e/reaudit-surviving.spec.ts:204:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic (retry #1) (70ms)
+  ✘   6 e2e/reaudit-surviving.spec.ts:226:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold (52ms)
+  ✘   7 e2e/reaudit-surviving.spec.ts:226:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold (retry #1) (47ms)
+  ✘   8 e2e/reaudit-surviving.spec.ts:255:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (30ms)
+  ✘   9 e2e/reaudit-surviving.spec.ts:255:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (retry #1) (27ms)
+  ✓  10 e2e/reaudit-surviving.spec.ts:298:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Policy with expired expiresAt timestamp (1 second in the past) must DENY — validating the catch block deny path handles expiry errors correctly (32ms)
+  ✓  11 e2e/reaudit-surviving.spec.ts:322:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Forged policy signature (valid structure, invalid signature bytes) must DENY via catch-all — confirming cryptographic failure is caught and denies, not swallowed (24ms)
+  ✓  12 e2e/reaudit-surviving.spec.ts:374:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with attacker-controlled fromMint address (valid Base58, unallowlisted) must DENY — arbitrary mint addresses enable rug-pull token substitution (7ms)
+  ✓  13 e2e/reaudit-surviving.spec.ts:424:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with honeypot token as toMint (valid Base58, zero liquidity token) must DENY — PolicyValidator must enforce an explicit SPL mint allowlist for swap operations (7ms)
+  ✓  14 e2e/reaudit-surviving.spec.ts:471:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with excessive slippageBps (10000 = 100% slippage) must DENY — maximum slippage enables sandwich attack / guaranteed worst execution (8ms)
+  ✘  15 e2e/reaudit-surviving.spec.ts:519:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage (7ms)
+  ✘  16 e2e/reaudit-surviving.spec.ts:519:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage (retry #1) (31ms)
+  ✓  17 e2e/reaudit-surviving.spec.ts:573:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Cryptographic failure response must NOT contain stack trace, file paths, or line numbers — error oracle enables targeted attack refinement (42ms)
+  ✓  18 e2e/reaudit-surviving.spec.ts:607:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Internal tool normalization error must NOT leak the raw unrecognized toolId value back to the caller — error messages must be sanitized before HTTP response (8ms)
+  ✘  19 e2e/reaudit-surviving.spec.ts:660:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) (36ms)
+  ✘  20 e2e/reaudit-surviving.spec.ts:660:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) (retry #1) (53ms)
+  ✘  21 e2e/reaudit-surviving.spec.ts:699:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) (42ms)
+  ✘  22 e2e/reaudit-surviving.spec.ts:699:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) (retry #1) (41ms)
+  ✘  23 e2e/reaudit-surviving.spec.ts:733:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization (42ms)
+  ✘  24 e2e/reaudit-surviving.spec.ts:733:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization (retry #1) (45ms)
+  ✓  25 e2e/reaudit-surviving.spec.ts:786:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString containing __proto__ prototype pollution payload must DENY — JSON.parse of attacker-controlled string must not pollute Object prototype (32ms)
+  ✓  26 e2e/reaudit-surviving.spec.ts:823:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with constructor injection {"constructor": {"prototype": {"isAdmin": true}}} must DENY — alternative prototype pollution vector via constructor property (8ms)
+  ✘  27 e2e/reaudit-surviving.spec.ts:850:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector (7ms)
+  ✘  28 e2e/reaudit-surviving.spec.ts:850:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector (retry #1) (32ms)
+  ✘  29 e2e/reaudit-surviving.spec.ts:890:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 (37ms)
+  ✘  30 e2e/reaudit-surviving.spec.ts:890:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 (retry #1) (41ms)
+  ✘  31 e2e/reaudit-surviving.spec.ts:910:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) (39ms)
+  ✘  32 e2e/reaudit-surviving.spec.ts:910:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) (retry #1) (43ms)
+  ✘  33 e2e/reaudit-surviving.spec.ts:935:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint (31ms)
+  ✘  34 e2e/reaudit-surviving.spec.ts:935:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint (retry #1) (30ms)
+  ✘  35 e2e/reaudit-surviving.spec.ts:957:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool (43ms)
+  ✘  36 e2e/reaudit-surviving.spec.ts:957:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool (retry #1) (50ms)
+  ✓  37 e2e/reaudit-surviving.spec.ts:1002:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with Infinity as amount must DENY — assertSafeFinancialAmount must catch IEEE 754 Infinity injection (25ms)
+  ✓  38 e2e/reaudit-surviving.spec.ts:1050:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: request with action.parameters containing extra fields beyond schema must NOT leak those fields into the validatedParams of the receipt — normalization must strip extraneous keys (no parameter injection into receipt) (16ms)
+
+
+  1) e2e/reaudit-surviving.spec.ts:179:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Anomaly score exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      198 |       const body = await res.json();
+      199 |       expect(body.status).toBe("denied");
+    > 200 |       expect(body.error).toContain("Anomaly score exceeds");
+          |                          ^
+      201 |     }
+      202 |   );
+      203 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:200:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Anomaly score exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      198 |       const body = await res.json();
+      199 |       expect(body.status).toBe("denied");
+    > 200 |       expect(body.error).toContain("Anomaly score exceeds");
+          |                          ^
+      201 |     }
+      202 |   );
+      203 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:200:26
+
+  2) e2e/reaudit-surviving.spec.ts:204:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      218 |
+      219 |       // This is the positive control — it MUST succeed for the anomaly gate to be meaningful
+    > 220 |       expect(res.status()).toBe(200);
+          |                            ^
+      221 |       const body = await res.json();
+      222 |       expect(body.status).toBe("approved");
+      223 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:220:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      218 |
+      219 |       // This is the positive control — it MUST succeed for the anomaly gate to be meaningful
+    > 220 |       expect(res.status()).toBe(200);
+          |                            ^
+      221 |       const body = await res.json();
+      222 |       expect(body.status).toBe("approved");
+      223 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:220:28
+
+  3) e2e/reaudit-surviving.spec.ts:226:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Anomaly score exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      242 |       const body = await res.json();
+      243 |       expect(body.status).toBe("denied");
+    > 244 |       expect(body.error).toContain("Anomaly score exceeds");
+          |                          ^
+      245 |     }
+      246 |   );
+      247 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:244:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Anomaly score exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      242 |       const body = await res.json();
+      243 |       expect(body.status).toBe("denied");
+    > 244 |       expect(body.error).toContain("Anomaly score exceeds");
+          |                          ^
+      245 |     }
+      246 |   );
+      247 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:244:26
+
+  4) e2e/reaudit-surviving.spec.ts:255:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool ID."[39m
+
+      292 |       expect(body.status).toBe("denied");
+      293 |       // Must contain the tool refusal — not leak internal path details
+    > 294 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      295 |     }
+      296 |   );
+      297 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:294:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool ID."[39m
+
+      292 |       expect(body.status).toBe("denied");
+      293 |       // Must contain the tool refusal — not leak internal path details
+    > 294 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      295 |     }
+      296 |   );
+      297 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:294:26
+
+  5) e2e/reaudit-surviving.spec.ts:519:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Negative values"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-300."[39m
+
+      560 |       const body = await res.json();
+      561 |       expect(body.status).toBe("denied");
+    > 562 |       expect(body.error).toContain("Negative values");
+          |                          ^
+      563 |     }
+      564 |   );
+      565 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:562:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Negative values"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Invalid slippageBps: must be integer 0-300."[39m
+
+      560 |       const body = await res.json();
+      561 |       expect(body.status).toBe("denied");
+    > 562 |       expect(body.error).toContain("Negative values");
+          |                          ^
+      563 |     }
+      564 |   );
+      565 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:562:26
+
+  6) e2e/reaudit-surviving.spec.ts:660:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      691 |       // The second request should SUCCEED (nonce was rolled back on deny, not burned)
+      692 |       // If this fails, the rollback is not working correctly
+    > 693 |       expect(secondRes.status()).toBe(200);
+          |                                  ^
+      694 |       const secondBody = await secondRes.json();
+      695 |       expect(secondBody.status).toBe("approved");
+      696 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:693:34
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      691 |       // The second request should SUCCEED (nonce was rolled back on deny, not burned)
+      692 |       // If this fails, the rollback is not working correctly
+    > 693 |       expect(secondRes.status()).toBe(200);
+          |                                  ^
+      694 |       const secondBody = await secondRes.json();
+      695 |       expect(secondBody.status).toBe("approved");
+      696 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:693:34
+
+  7) e2e/reaudit-surviving.spec.ts:699:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      715 |       });
+      716 |
+    > 717 |       expect(firstRes.status()).toBe(200);
+          |                                 ^
+      718 |       const firstBody = await firstRes.json();
+      719 |       expect(firstBody.status).toBe("approved");
+      720 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:717:33
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      715 |       });
+      716 |
+    > 717 |       expect(firstRes.status()).toBe(200);
+          |                                 ^
+      718 |       const firstBody = await firstRes.json();
+      719 |       expect(firstBody.status).toBe("approved");
+      720 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:717:33
+
+  8) e2e/reaudit-surviving.spec.ts:733:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      773 |       const body = await res.json();
+      774 |       expect(body.status).toBe("denied");
+    > 775 |       expect(body.error).toContain("exceeds");
+          |                          ^
+      776 |     }
+      777 |   );
+      778 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:775:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"exceeds"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+      773 |       const body = await res.json();
+      774 |       expect(body.status).toBe("denied");
+    > 775 |       expect(body.error).toContain("exceeds");
+          |                          ^
+      776 |     }
+      777 |   );
+      778 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:775:26
+
+  9) e2e/reaudit-surviving.spec.ts:850:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Multi-tier limit objects are structurally unsafe"[39m
+    Received string:    [31m"Multi-tier forbidden."[39m
+
+      877 |       const body = await res.json();
+      878 |       expect(body.status).toBe("denied");
+    > 879 |       expect(body.error).toContain("Multi-tier limit objects are structurally unsafe");
+          |                          ^
+      880 |     }
+      881 |   );
+      882 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:879:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Multi-tier limit objects are structurally unsafe"[39m
+    Received string:    [31m"Multi-tier forbidden."[39m
+
+      877 |       const body = await res.json();
+      878 |       expect(body.status).toBe("denied");
+    > 879 |       expect(body.error).toContain("Multi-tier limit objects are structurally unsafe");
+          |                          ^
+      880 |     }
+      881 |   );
+      882 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:879:26
+
+  10) e2e/reaudit-surviving.spec.ts:890:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      902 |       });
+      903 |
+    > 904 |       expect(res.status()).toBe(200);
+          |                            ^
+      905 |       const body = await res.json();
+      906 |       expect(body.status).toBe("approved");
+      907 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:904:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      902 |       });
+      903 |
+    > 904 |       expect(res.status()).toBe(200);
+          |                            ^
+      905 |       const body = await res.json();
+      906 |       expect(body.status).toBe("approved");
+      907 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:904:28
+
+  11) e2e/reaudit-surviving.spec.ts:910:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      927 |
+      928 |       // With maxAnomalyScore=100 and score=1.0: 100 > 100 is false — should PASS
+    > 929 |       expect(res.status()).toBe(200);
+          |                            ^
+      930 |       const body = await res.json();
+      931 |       expect(body.status).toBe("approved");
+      932 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:929:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m403[39m
+
+      927 |
+      928 |       // With maxAnomalyScore=100 and score=1.0: 100 > 100 is false — should PASS
+    > 929 |       expect(res.status()).toBe(200);
+          |                            ^
+      930 |       const body = await res.json();
+      931 |       expect(body.status).toBe("approved");
+      932 |     }
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:929:28
+
+  12) e2e/reaudit-surviving.spec.ts:935:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Invalid or unscaled contextual anomaly score"[39m
+    Received string:    [31m"Invalid current anomaly score."[39m
+
+      951 |       const body = await res.json();
+      952 |       expect(body.status).toBe("denied");
+    > 953 |       expect(body.error).toContain("Invalid or unscaled contextual anomaly score");
+          |                          ^
+      954 |     }
+      955 |   );
+      956 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:953:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Invalid or unscaled contextual anomaly score"[39m
+    Received string:    [31m"Invalid current anomaly score."[39m
+
+      951 |       const body = await res.json();
+      952 |       expect(body.status).toBe("denied");
+    > 953 |       expect(body.error).toContain("Invalid or unscaled contextual anomaly score");
+          |                          ^
+      954 |     }
+      955 |   );
+      956 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:953:26
+
+  13) e2e/reaudit-surviving.spec.ts:957:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"asset substitution"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+       996 |       const body = await res.json();
+       997 |       expect(body.status).toBe("denied");
+    >  998 |       expect(body.error).toContain("asset substitution");
+           |                          ^
+       999 |     }
+      1000 |   );
+      1001 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:998:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"asset substitution"[39m
+    Received string:    [31m"Signer not found in provisioned TEE Root-of-Trust. Found: 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"[39m
+
+       996 |       const body = await res.json();
+       997 |       expect(body.status).toBe("denied");
+    >  998 |       expect(body.error).toContain("asset substitution");
+           |                          ^
+       999 |     }
+      1000 |   );
+      1001 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:998:26
+
+  13 failed
+    e2e/reaudit-surviving.spec.ts:179:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters 
+    e2e/reaudit-surviving.spec.ts:204:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic 
+    e2e/reaudit-surviving.spec.ts:226:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold 
+    e2e/reaudit-surviving.spec.ts:255:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+    e2e/reaudit-surviving.spec.ts:519:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage 
+    e2e/reaudit-surviving.spec.ts:660:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) 
+    e2e/reaudit-surviving.spec.ts:699:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) 
+    e2e/reaudit-surviving.spec.ts:733:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization 
+    e2e/reaudit-surviving.spec.ts:850:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector 
+    e2e/reaudit-surviving.spec.ts:890:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 
+    e2e/reaudit-surviving.spec.ts:910:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) 
+    e2e/reaudit-surviving.spec.ts:935:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint 
+    e2e/reaudit-surviving.spec.ts:957:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool 
+  12 passed (18.6s)

@@ -1,0 +1,40 @@
+# 🏛️ CLINICAL VERDICT: COMPLEXITY TRAP (v1.0 Implementation) → DETERMINISTIC FLOOR (Target Architecture)
+
+## 🔍 Synthesis of Debate
+Both auditors converge on the technical reality but diverge on scope:
+
+| Dimension | Kimi K2.6 (Adversarial) | GPT-5.4 (Architectural) | Clinical Synthesis |
+|-----------|------------------------|------------------------|-------------------|
+| **Async PQ Strategy** | Structurally invalid; creates a "Quantum Gap" and probabilistic audit trails. | Architecturally mandatory; L1 MTU/CU/latency constraints forbid synchronous PQ on hot paths. | **GPT is correct on architecture, Kimi is correct on implementation.** Tiering is physically rational, but `fire-and-forget` async without durable intent violates cryptographic protocol discipline. |
+| **State Persistence** | Toy-grade (`Map` + full JSON rewrites, O(n) scans, no `saveEvidence` call, race conditions). | Violates "Prophet's Law"; requires append-only journaling, key-addressable records, and WAL-backed recovery. | **Unanimous.** Current persistence layer is a P0 defect. It cannot guarantee determinism, crash safety, or idempotent replay. |
+| **Cryptographic Binding** | Weak. PQ payload signs only metadata, unbound to Ed25519 receipt or execution result. | Must sign canonical commitment including hot-path hash, normalized params, policy ID, and enclave identity. | **Unanimous.** PQ must cryptographically attest to the exact actuation decision, not a floating timestamp. |
+| **Remediation Path** | Rollback to single-path Ed25519 if invariants aren't met. | Do not rollback. Complete the tiering protocol with WAL state machine, deterministic IDs, and worker isolation. | **Kimi's rollback is a containment tactic; GPT's fix is the target architecture.** The system must be hardened, not simplified into a cryptographic dead end. |
+
+**Final Determination:** 
+In its current shipped state (`v1.0`), Aegis-12 is a **Complexity Trap**. The asynchronous PQ path introduces unmanaged state, silent failure vectors, and resource starvation without the journaling, binding, or backpressure guarantees required for a true audit floor. 
+
+However, the underlying **tiered cryptographic split is structurally sound** and necessary for L1-constrained enforcement. The system can and should be elevated to a **Deterministic Floor**, but only after enforcing strict state-machine invariants over the async boundary.
+
+---
+
+## 🛠️ 3 MANDATORY REMEDIATION STEPS
+*Non-negotiable. Must be implemented before any production pilot or regulatory assertion.*
+
+### 1. Enforce Durable Intent via Append-Only WAL (Fix Async State & Crash Recovery)
+- **Action:** Before returning the receipt to the caller, execute a synchronous WAL append of a `PENDING_PQ_FINALIZATION` record containing: `eventId`, hot-path receipt hash, canonical payload hash, and `enclave_epoch`.
+- **Protocol Rule:** The hot path **must not return** until `fsync` confirms the durability of the pending event.
+- **Recovery:** On enclave restart, scan WAL for `PENDING_PQ_FINALIZATION` without a `PQ_SIGNED` tail record. Idempotently replay missing signatures and emit operational alerts. This eliminates the "black hole for auditors" and converts fire-and-forget into deterministic deferred completion.
+
+### 2. Canonicalize Payload & Bind PQ to Hot-Path Receipt (Fix Quantum Gap & ID Collision)
+- **Action:** Replace `Date.now()` receipt IDs with deterministic `H(tenantId || scopedNonce || policyHash || paramsHash || seqCounter)`.
+- **Binding Requirement:** The `signMLDSA()` payload **must** sign a canonical commitment root:
+  `CommitmentRoot = H(HotPathSignature || AllowDenyDecision || CanonicalParamsHash || PolicyID || EnclaveAttestationQuote)`
+- **Protocol Rule:** The PQ signature no longer asserts "a log exists at time T". It cryptographically attests that **this specific hot-path authorization was finalized by this specific enclave lineage**. Any drift between hot and audit paths becomes mathematically provable and instantly invalidates the receipt.
+
+### 3. Isolate ML-DSA Execution & Enforce Backpressure (Fix Resource Starvation & Silent Failures)
+- **Action:** Move `signMLDSA` out of the main event loop into a bounded `worker_threads` pool with a strict concurrency limit (e.g., `maxQueue=50`).
+- **Backpressure Policy:** If the queue is full, the gateway must either queue with explicit exponential backoff or return `503: PQ_AUDIT_BACKPRESSURE` with the Ed25519 receipt explicitly marked `pq_status: PENDING_DEGRADED`. Never silently drop.
+- **Code Correction:** Fix the missing `await` on `signMLDSA`. Replace `catch(console.error)` with durable error routing: log to WAL as `PQ_SIGNED: FAILED`, trigger compliance escalation, and block tenant spend limits until resolution. This prevents the kill switch from becoming a self-DDoS vector and eliminates side-channel timing leakage in the hot loop.
+
+---
+**Clinical Note:** Marketing language claiming "FIPS 204 Readiness" must be immediately downgraded to `"Uses ML-DSA-65 (FIPS 204 algorithm) in a non-certified TEE module for audit finality"`. Compliance teams and regulators will treat the former as material misrepresentation. Implement the three steps above, and Aegis-12 transitions from a cryptographic liability to a defensible, L1-native deterministic floor.

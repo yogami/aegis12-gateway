@@ -1,0 +1,57 @@
+[
+  {
+    "id": 0,
+    "startSec": 1.0,
+    "text": "This is the Aegis-12 Fiduciary Dashboard — a real-time control plane for autonomous AI agents."
+  },
+  {
+    "id": 1,
+    "startSec": 9.0,
+    "text": "On the left, fiduciary policy rules enforce hard limits on what agents can do with your money."
+  },
+  {
+    "id": 2,
+    "startSec": 17.0,
+    "text": "Let's trigger a live intent stream. This sends a micro-transaction to real hardware running inside a Phala TDX enclave."
+  },
+  {
+    "id": 3,
+    "startSec": 27.0,
+    "text": "The request is now routing through our Fiduciary Firewall to the live Intel hardware. This is real attestation, not a simulation."
+  },
+  {
+    "id": 4,
+    "startSec": 38.5,
+    "text": "DCAP verified. The hardware has cryptographically proven its integrity. The transaction is signed and submitted to Solana Devnet."
+  },
+  {
+    "id": 5,
+    "startSec": 49.5,
+    "text": "Here in the Verifier Registry, you can see the real transaction hash, the round trip latency, and a clickable proof link to Solana Explorer."
+  },
+  {
+    "id": 6,
+    "startSec": 60.0,
+    "text": "This is the actual on-chain transaction with our aegis oracle memo."
+  },
+  {
+    "id": 7,
+    "startSec": 69.5,
+    "text": "Now let's demonstrate the circuit breaker. This simulates a malicious agent attempting an unauthorized drain."
+  },
+  {
+    "id": 8,
+    "startSec": 78.0,
+    "text": "Lockdown initiated. The enclave is sealed. The private key physically cannot sign any more transactions."
+  },
+  {
+    "id": 9,
+    "startSec": 90.5,
+    "text": "Now we recover with a multisig override and trigger another live transaction to prove resilience."
+  },
+  {
+    "id": 10,
+    "startSec": 99.0,
+    "text": "Every action, approved or blocked, is cryptographically anchored to Solana. This is the mathematical cage."
+  }
+]

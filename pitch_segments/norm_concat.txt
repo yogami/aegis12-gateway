@@ -1,0 +1,5 @@
+file 'norm_seg1_problem_v2.mp4'
+file 'norm_seg2_solution.mp4'
+file 'norm_seg3_demo_v2.mp4'
+file 'norm_seg4_killswitch_v2.mp4'
+file 'norm_seg5_closing_v2.mp4'

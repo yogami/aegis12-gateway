@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    image: yamigopal/aegis-phala-cvm:latest
+    container_name: app
+    ports:
+      - "8000:8000"
+    environment:
+      - TEE_ENV=phala
+      - NODE_ENV=production
+      # Update with your actual production secrets/hashes as needed
+      - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"],"tenant-council":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
+      - AEGIS_ZK_PROVER_HASH=aa1768de5e8cd154e33603d41e724a8378ae764cc93af09c52736197b5933850
+      - SOLANA_PAYER_SECRET=${SOLANA_PAYER_SECRET:?SOLANA_PAYER_SECRET must be set}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+    volumes:
+      # Crucial: Maps the host's dstack socket to the container
+      - /var/run/dstack.sock:/var/run/dstack.sock

@@ -1,0 +1,213 @@
+
+Running 4 tests using 1 worker
+
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [SolanaAnchor] ⚠️ Using ephemeral keypair. Set SOLANA_PAYER_SECRET for persistence.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+VULN-006 Error: [90mundefined[39m
+  ✓  1 e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash (172ms)
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+VULN-007 Error: [TERMINAL REFUSAL] Multi-tier limit objects are structurally unsafe. Signature must mathematically lock exactly one Tier attribute.
+  ✘  2 e2e/apt-council-deepthink-bypasses.spec.ts:75:9 › APT-Council DeepThink Security Remediation Verification › VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits (22ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+VULN-007 Error: [TERMINAL REFUSAL] Multi-tier limit objects are structurally unsafe. Signature must mathematically lock exactly one Tier attribute.
+  ✘  3 e2e/apt-council-deepthink-bypasses.spec.ts:75:9 › APT-Council DeepThink Security Remediation Verification › VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits (retry #1) (42ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+VULN-008 Error: Action denied by Aegis Enclave: Invalid type for amount: expected number, got string
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+  ✘  4 e2e/apt-council-deepthink-bypasses.spec.ts:94:9 › APT-Council DeepThink Security Remediation Verification › VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected (43ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+VULN-008 Error: Action denied by Aegis Enclave: Invalid type for amount: expected number, got string
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+  ✘  5 e2e/apt-council-deepthink-bypasses.spec.ts:94:9 › APT-Council DeepThink Security Remediation Verification › VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected (retry #1) (48ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+  ✘  6 e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests (42ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 2000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+  ✘  7 e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests (retry #1) (96ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+
+
+  1) e2e/apt-council-deepthink-bypasses.spec.ts:75:9 › APT-Council DeepThink Security Remediation Verification › VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"exceed"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Multi-tier limit objects are structurally unsafe. Signature must mathematically lock exactly one Tier attribute."[39m
+
+      89 |         expect([403, 200]).toContain(res.status());
+      90 |         expect(body.status).toBe('denied');
+    > 91 |         expect(body.error).toContain('exceed');
+         |                            ^
+      92 |     });
+      93 |
+      94 |     test('VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:91:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"exceed"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Multi-tier limit objects are structurally unsafe. Signature must mathematically lock exactly one Tier attribute."[39m
+
+      89 |         expect([403, 200]).toContain(res.status());
+      90 |         expect(body.status).toBe('denied');
+    > 91 |         expect(body.error).toContain('exceed');
+         |                            ^
+      92 |     });
+      93 |
+      94 |     test('VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:91:28
+
+  2) e2e/apt-council-deepthink-bypasses.spec.ts:94:9 › APT-Council DeepThink Security Remediation Verification › VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Infinity"[39m
+    Received string:    [31m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+
+      106 |         expect([403, 200]).toContain(res.status());
+      107 |         expect(body.status).toBe('denied');
+    > 108 |         expect(body.error).toContain('Infinity');
+          |                            ^
+      109 |     });
+      110 |
+      111 |     test('VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:108:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Infinity"[39m
+    Received string:    [31m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+
+      106 |         expect([403, 200]).toContain(res.status());
+      107 |         expect(body.status).toBe('denied');
+    > 108 |         expect(body.error).toContain('Infinity');
+          |                            ^
+      109 |     });
+      110 |
+      111 |     test('VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:108:28
+
+  3) e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests 
+
+    Error: Circuit Breaker failed to trip after 10 invalid requests!
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      128 |         // Before patch: The breaker never tripped because the inner try/catch swallowed the failure.
+      129 |         // After patch: The breaker throws natively and trips, protecting the gateway.
+    > 130 |         expect(breakerTripped, "Circuit Breaker failed to trip after 10 invalid requests!").toBe(true);
+          |                                                                                             ^
+      131 |     });
+      132 |
+      133 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:130:93
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: Circuit Breaker failed to trip after 10 invalid requests!
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      128 |         // Before patch: The breaker never tripped because the inner try/catch swallowed the failure.
+      129 |         // After patch: The breaker throws natively and trips, protecting the gateway.
+    > 130 |         expect(breakerTripped, "Circuit Breaker failed to trip after 10 invalid requests!").toBe(true);
+          |                                                                                             ^
+      131 |     });
+      132 |
+      133 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:130:93
+
+  3 failed
+    e2e/apt-council-deepthink-bypasses.spec.ts:75:9 › APT-Council DeepThink Security Remediation Verification › VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits 
+    e2e/apt-council-deepthink-bypasses.spec.ts:94:9 › APT-Council DeepThink Security Remediation Verification › VULN-008: Infinity RangeError - Mathematically compromised amounts must be rejected 
+    e2e/apt-council-deepthink-bypasses.spec.ts:111:9 › APT-Council DeepThink Security Remediation Verification › VULN-010: Circuit Breaker Neutralization - Brute force fails-closed after 10 requests 
+  1 passed (5.5s)

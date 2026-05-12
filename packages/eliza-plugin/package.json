@@ -1,0 +1,17 @@
+{
+  "name": "@aegis12/eliza-plugin",
+  "version": "1.0.0",
+  "description": "Aegis-12 TEE Gateway compliance plugin for ai16z/eliza autonomous agents.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@elizaos/core": "latest",
+    "@aegis12/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

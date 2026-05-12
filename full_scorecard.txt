@@ -1,0 +1,580 @@
+
+Running 73 tests using 1 worker
+
+  ✓   1 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (38ms)
+  ✓   2 e2e/adversarial_pentest.spec.ts:118:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-2: Opus-4.6 "Rogue Signer" attack — policy signed by unauthorized key must fail (7ms)
+  ✓   3 e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied (11ms)
+  ✓   4 e2e/adversarial_pentest.spec.ts:165:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-4: Slippage Floor attack — exceeding slippageBps must be rejected (6ms)
+  ✓   5 e2e/adversarial_pentest.spec.ts:186:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-5: Anomaly Boundary Attack — 0.51 vs max 0.50 (7ms)
+  ✓   6 e2e/adversarial_pentest.spec.ts:202:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-6: Circular Swap protection (4ms)
+  ✓   7 e2e/adversarial_pentest.spec.ts:223:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-7: Unapproved Mint substitution (4ms)
+  ✓   8 e2e/adversarial_pentest.spec.ts:245:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-8: Expired Policy Replay attempt (4ms)
+  ✓   9 e2e/council-security-verification.spec.ts:50:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload (6ms)
+  ✓  10 e2e/council-security-verification.spec.ts:66:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Signature Malleability via Unbounded financialLimitsString (parser bomb defense) (5ms)
+  ✓  11 e2e/council-security-verification.spec.ts:85:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant) (5ms)
+  ✓  12 e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) (6ms)
+  ✘  13 e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization (8ms)
+  ✘  14 e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization (retry #1) (26ms)
+  ✓  15 e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration (16ms)
+  ✓  16 e2e/council-security-verification.spec.ts:165:9 › Aegis-12: Solana Transaction Firewall Hardening › POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense) (3ms)
+  ✓  17 e2e/council-security-verification.spec.ts:185:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits (9ms)
+  ✓  18 e2e/council-security-verification.spec.ts:207:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation (8ms)
+  ✓  19 e2e/council-security-verification.spec.ts:227:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-003: Assert JSON Type Confusion on maxAnomalyScore Cannot Bypass Defenses (5ms)
+  ✓  20 e2e/council-security-verification.spec.ts:249:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-004: Assert Empty Limits String "{}" Causes Fail-Closed Denial (5ms)
+  ✓  21 e2e/council-security-verification.spec.ts:270:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS (38ms)
+  ✓  22 e2e/healthtech.spec.ts:8:9 › Aegis Healthtech API E2E › should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack (2ms)
+  ✓  23 e2e/healthtech.spec.ts:32:9 › Aegis Healthtech API E2E › should return 403 Forbidden for unauthorized RBAC access (2ms)
+  ✓  24 e2e/healthtech.spec.ts:52:9 › Aegis Healthtech API E2E › should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt) (6ms)
+  ✓  25 e2e/healthtech.spec.ts:75:9 › Aegis Healthtech API E2E › should return 500 Error for malformed non-JSON requests (1ms)
+  ✓  26 e2e/nightmare.spec.ts:10:9 › Aegis-12 Nightmare Mode Production Bombardment › Verify TEE UI loads and is secure initially (49ms)
+  ✘  27 e2e/nightmare.spec.ts:15:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [1]: Quantum Curve Factorization (5.1s)
+  ✘  28 e2e/nightmare.spec.ts:15:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [1]: Quantum Curve Factorization (retry #1) (5.1s)
+  ✘  29 e2e/nightmare.spec.ts:23:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [6]: Semantic Memory Poisoning (4.1s)
+  ✘  30 e2e/nightmare.spec.ts:23:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [6]: Semantic Memory Poisoning (retry #1) (4.1s)
+  ✘  31 e2e/nightmare.spec.ts:29:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [7]: Shadow Wallet Bypass (4.1s)
+  ✘  32 e2e/nightmare.spec.ts:29:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [7]: Shadow Wallet Bypass (retry #1) (4.1s)
+  ✓  33 e2e/reaudit-surviving.spec.ts:132:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore undefined in policyConfig causes isNaN guard to skip anomaly check — high-risk agent (anomalyScore=0.99) must be DENIED not silently passed (27ms)
+  ✓  34 e2e/reaudit-surviving.spec.ts:173:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters (7ms)
+  ✓  35 e2e/reaudit-surviving.spec.ts:198:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic (6ms)
+  ✓  36 e2e/reaudit-surviving.spec.ts:220:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold (7ms)
+  ✘  37 e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (5ms)
+  ✘  38 e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (retry #1) (26ms)
+  ✓  39 e2e/reaudit-surviving.spec.ts:292:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Policy with expired expiresAt timestamp (1 second in the past) must DENY — validating the catch block deny path handles expiry errors correctly (27ms)
+  ✓  40 e2e/reaudit-surviving.spec.ts:316:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Forged policy signature (valid structure, invalid signature bytes) must DENY via catch-all — confirming cryptographic failure is caught and denies, not swallowed (7ms)
+  ✓  41 e2e/reaudit-surviving.spec.ts:368:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with attacker-controlled fromMint address (valid Base58, unallowlisted) must DENY — arbitrary mint addresses enable rug-pull token substitution (4ms)
+  ✓  42 e2e/reaudit-surviving.spec.ts:418:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with honeypot token as toMint (valid Base58, zero liquidity token) must DENY — PolicyValidator must enforce an explicit SPL mint allowlist for swap operations (6ms)
+  ✓  43 e2e/reaudit-surviving.spec.ts:465:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with excessive slippageBps (10000 = 100% slippage) must DENY — maximum slippage enables sandwich attack / guaranteed worst execution (4ms)
+  ✓  44 e2e/reaudit-surviving.spec.ts:513:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage (4ms)
+  ✓  45 e2e/reaudit-surviving.spec.ts:567:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Cryptographic failure response must NOT contain stack trace, file paths, or line numbers — error oracle enables targeted attack refinement (5ms)
+  ✓  46 e2e/reaudit-surviving.spec.ts:601:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Internal tool normalization error must NOT leak the raw unrecognized toolId value back to the caller — error messages must be sanitized before HTTP response (4ms)
+  ✓  47 e2e/reaudit-surviving.spec.ts:654:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) (12ms)
+  ✓  48 e2e/reaudit-surviving.spec.ts:693:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) (7ms)
+  ✓  49 e2e/reaudit-surviving.spec.ts:727:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization (5ms)
+  ✓  50 e2e/reaudit-surviving.spec.ts:780:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString containing __proto__ prototype pollution payload must DENY — JSON.parse of attacker-controlled string must not pollute Object prototype (5ms)
+  ✓  51 e2e/reaudit-surviving.spec.ts:817:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with constructor injection {"constructor": {"prototype": {"isAdmin": true}}} must DENY — alternative prototype pollution vector via constructor property (8ms)
+  ✓  52 e2e/reaudit-surviving.spec.ts:844:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector (4ms)
+  ✓  53 e2e/reaudit-surviving.spec.ts:884:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 (5ms)
+  ✓  54 e2e/reaudit-surviving.spec.ts:904:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) (5ms)
+  ✓  55 e2e/reaudit-surviving.spec.ts:929:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint (3ms)
+  ✓  56 e2e/reaudit-surviving.spec.ts:951:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool (3ms)
+  ✓  57 e2e/reaudit-surviving.spec.ts:996:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with Infinity as amount must DENY — assertSafeFinancialAmount must catch IEEE 754 Infinity injection (3ms)
+  ✓  58 e2e/reaudit-surviving.spec.ts:1044:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: request with action.parameters containing extra fields beyond schema must NOT leak those fields into the validatedParams of the receipt — normalization must strip extraneous keys (no parameter injection into receipt) (6ms)
+  ✘  59 e2e/solana-integration.spec.ts:80:9 › Infrastructure Endpoints › GET /health returns alive with Solana features (2ms)
+  ✘  60 e2e/solana-integration.spec.ts:80:9 › Infrastructure Endpoints › GET /health returns alive with Solana features (retry #1) (17ms)
+  ✘  61 e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference (17ms)
+  ✘  62 e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference (retry #1) (17ms)
+  ✘  63 e2e/solana-integration.spec.ts:131:9 › Core Policy Enforcement › POST /enforce approves low-risk financial action (23ms)
+  ✘  64 e2e/solana-integration.spec.ts:131:9 › Core Policy Enforcement › POST /enforce approves low-risk financial action (retry #1) (23ms)
+  ✓  65 e2e/solana-integration.spec.ts:168:9 › Core Policy Enforcement › POST /enforce denies high anomaly score action (22ms)
+  ✘  66 e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops (5ms)
+  ✘  67 e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops (retry #1) (20ms)
+  ✓  68 e2e/solana-integration.spec.ts:237:9 › Solana Receipt Anchoring › POST /anchor-receipt rejects missing fields (15ms)
+  ✘  69 e2e/solana-integration.spec.ts:247:9 › Solana Receipt Anchoring › POST /anchor-receipt accepts valid receipt structure (2ms)
+  ✘  70 e2e/solana-integration.spec.ts:247:9 › Solana Receipt Anchoring › POST /anchor-receipt accepts valid receipt structure (retry #1) (16ms)
+  ✘  71 e2e/solana-integration.spec.ts:277:9 › Solana Receipt Anchoring › GET /verify/:txSig handles non-existent transaction (16ms)
+  ✘  72 e2e/solana-integration.spec.ts:277:9 › Solana Receipt Anchoring › GET /verify/:txSig handles non-existent transaction (retry #1) (16ms)
+  ✘  73 e2e/solana-integration.spec.ts:293:9 › Solana Transaction Firewall › POST /solana/enforce-tx rejects missing fields (16ms)
+  ✘  74 e2e/solana-integration.spec.ts:293:9 › Solana Transaction Firewall › POST /solana/enforce-tx rejects missing fields (retry #1) (16ms)
+  ✓  75 e2e/solana-integration.spec.ts:303:9 › Solana Transaction Firewall › POST /solana/enforce-tx blocks unparseable transaction (17ms)
+  ✓  76 e2e/solana-integration.spec.ts:328:9 › Squads V4 Governance › GET /governance/config returns tier limits and EU AI Act mapping (3ms)
+  ✓  77 e2e/solana-integration.spec.ts:341:9 › Squads V4 Governance › POST /governance/evaluate returns AUTONOMOUS for low risk (4ms)
+  ✓  78 e2e/solana-integration.spec.ts:363:9 › Squads V4 Governance › POST /governance/evaluate returns REQUIRE_HUMAN for moderate risk (3ms)
+  ✘  79 e2e/solana-integration.spec.ts:387:9 › Squads V4 Governance › POST /governance/evaluate returns BLOCKED for high risk (3ms)
+  ✘  80 e2e/solana-integration.spec.ts:387:9 › Squads V4 Governance › POST /governance/evaluate returns BLOCKED for high risk (retry #1) (18ms)
+  ✓  81 e2e/solana-integration.spec.ts:408:9 › Squads V4 Governance › POST /governance/evaluate rejects invalid tier (16ms)
+  ✓  82 e2e/solana-integration.spec.ts:422:9 › Squads V4 Governance › POST /governance/evaluate triggers REQUIRE_HUMAN for over-limit T2 spend (2ms)
+  ✓  83 e2e/solana-integration.spec.ts:448:9 › TEE Attestation › GET /attestation/status returns TEE info (5ms)
+  ✓  84 e2e/solana-integration.spec.ts:474:9 › x402 Monetization › GET /monetization/status returns x402 config (3ms)
+  ✓  85 e2e/solana-integration.spec.ts:494:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce allows authorized SCHEDULER (2ms)
+  ✓  86 e2e/solana-integration.spec.ts:511:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce blocks SSN exfiltration (2ms)
+
+
+  1) e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+    Received string:    [31m"Invalid type for amount: expected number, got string"[39m
+
+      140 |         expect(res.status()).toBe(403);
+      141 |         const body = await res.json();
+    > 142 |         expect(body.error).toContain('Action denied by Aegis Enclave: Invalid type for amount: expected number, got string');
+          |                            ^
+      143 |     });
+      144 |
+      145 |     test('Healthtech Privilege Escalation / Data Exfiltration', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:142:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+    Received string:    [31m"Invalid type for amount: expected number, got string"[39m
+
+      140 |         expect(res.status()).toBe(403);
+      141 |         const body = await res.json();
+    > 142 |         expect(body.error).toContain('Action denied by Aegis Enclave: Invalid type for amount: expected number, got string');
+          |                            ^
+      143 |     });
+      144 |
+      145 |     test('Healthtech Privilege Escalation / Data Exfiltration', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:142:28
+
+  2) e2e/nightmare.spec.ts:15:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [1]: Quantum Curve Factorization 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator:  locator('#terminal-title')
+    Expected: [32m"FATAL BREACH DETECTED"[39m
+    Received: [31m"Agent Terminal"[39m
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toHaveText" with timeout 5000ms[22m
+    [2m  - waiting for locator('#terminal-title')[22m
+    [2m    9 × locator resolved to <h1 id="terminal-title">Agent Terminal</h1>[22m
+    [2m      - unexpected value "Agent Terminal"[22m
+
+
+      16 |         await page.click('text="[1] Quantum Curve Factorization"');
+      17 |         // Nightmare mode engaged
+    > 18 |         await expect(page.locator('#terminal-title')).toHaveText('FATAL BREACH DETECTED');
+         |                                                       ^
+      19 |         // TEE Block should appear after a few seconds
+      20 |         await expect(page.locator('.log-entry.block')).toContainText('ERR_SIG_NON_STANDARD', { timeout: 4000 });
+      21 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:18:55
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-db017-Quantum-Curve-Factorization/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoHaveText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator:  locator('#terminal-title')
+    Expected: [32m"FATAL BREACH DETECTED"[39m
+    Received: [31m"Agent Terminal"[39m
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toHaveText" with timeout 5000ms[22m
+    [2m  - waiting for locator('#terminal-title')[22m
+    [2m    9 × locator resolved to <h1 id="terminal-title">Agent Terminal</h1>[22m
+    [2m      - unexpected value "Agent Terminal"[22m
+
+
+      16 |         await page.click('text="[1] Quantum Curve Factorization"');
+      17 |         // Nightmare mode engaged
+    > 18 |         await expect(page.locator('#terminal-title')).toHaveText('FATAL BREACH DETECTED');
+         |                                                       ^
+      19 |         // TEE Block should appear after a few seconds
+      20 |         await expect(page.locator('.log-entry.block')).toContainText('ERR_SIG_NON_STANDARD', { timeout: 4000 });
+      21 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:18:55
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-db017-Quantum-Curve-Factorization-retry1/error-context.md
+
+  3) e2e/nightmare.spec.ts:23:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [6]: Semantic Memory Poisoning 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: locator('.log-entry.allow')
+    Expected substring: [32m"Execution Boundary Secure"[39m
+    Timeout: 4000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 4000ms[22m
+    [2m  - waiting for locator('.log-entry.allow')[22m
+
+
+      23 |     test('Vector [6]: Semantic Memory Poisoning', async ({ page }) => {
+      24 |         await page.click('text="[6] Semantic Memory Poisoning (RAG)"');
+    > 25 |         await expect(page.locator('.log-entry.allow')).toContainText('Execution Boundary Secure', { timeout: 4000 });
+         |                                                        ^
+      26 |         await expect(page.locator('.log-entry.allow')).toContainText('Cognitive Boundary Compromised', { timeout: 4000 });
+      27 |     });
+      28 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:25:56
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-8a8aa-6-Semantic-Memory-Poisoning/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: locator('.log-entry.allow')
+    Expected substring: [32m"Execution Boundary Secure"[39m
+    Timeout: 4000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 4000ms[22m
+    [2m  - waiting for locator('.log-entry.allow')[22m
+
+
+      23 |     test('Vector [6]: Semantic Memory Poisoning', async ({ page }) => {
+      24 |         await page.click('text="[6] Semantic Memory Poisoning (RAG)"');
+    > 25 |         await expect(page.locator('.log-entry.allow')).toContainText('Execution Boundary Secure', { timeout: 4000 });
+         |                                                        ^
+      26 |         await expect(page.locator('.log-entry.allow')).toContainText('Cognitive Boundary Compromised', { timeout: 4000 });
+      27 |     });
+      28 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:25:56
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-8a8aa-6-Semantic-Memory-Poisoning-retry1/error-context.md
+
+  4) e2e/nightmare.spec.ts:29:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [7]: Shadow Wallet Bypass 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: locator('.log-entry.alert')
+    Expected substring: [32m"Out-of-Band Execution"[39m
+    Timeout: 4000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 4000ms[22m
+    [2m  - waiting for locator('.log-entry.alert')[22m
+
+
+      29 |     test('Vector [7]: Shadow Wallet Bypass', async ({ page }) => {
+      30 |         await page.click('text="[7] Shadow Wallet Bypass"');
+    > 31 |         await expect(page.locator('.log-entry.alert')).toContainText('Out-of-Band Execution', { timeout: 4000 });
+         |                                                        ^
+      32 |         await expect(page.locator('.log-entry.alert')).toContainText('Shadow outflow detected outside Squads vault', { timeout: 4000 });
+      33 |     });
+      34 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:31:56
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-8a01c-ctor-7-Shadow-Wallet-Bypass/error-context.md
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoContainText[2m([22m[32mexpected[39m[2m)[22m failed
+
+    Locator: locator('.log-entry.alert')
+    Expected substring: [32m"Out-of-Band Execution"[39m
+    Timeout: 4000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toContainText" with timeout 4000ms[22m
+    [2m  - waiting for locator('.log-entry.alert')[22m
+
+
+      29 |     test('Vector [7]: Shadow Wallet Bypass', async ({ page }) => {
+      30 |         await page.click('text="[7] Shadow Wallet Bypass"');
+    > 31 |         await expect(page.locator('.log-entry.alert')).toContainText('Out-of-Band Execution', { timeout: 4000 });
+         |                                                        ^
+      32 |         await expect(page.locator('.log-entry.alert')).toContainText('Shadow outflow detected outside Squads vault', { timeout: 4000 });
+      33 |     });
+      34 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/nightmare.spec.ts:31:56
+
+    Error Context: test-results/nightmare-Aegis-12-Nightma-8a01c-ctor-7-Shadow-Wallet-Bypass-retry1/error-context.md
+
+  5) e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool execution request."[39m
+
+      286 |       expect(body.status).toBe("denied");
+      287 |       // Must contain the tool refusal — not leak internal path details
+    > 288 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      289 |     }
+      290 |   );
+      291 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:288:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool execution request."[39m
+
+      286 |       expect(body.status).toBe("denied");
+      287 |       // Must contain the tool refusal — not leak internal path details
+    > 288 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      289 |     }
+      290 |   );
+      291 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:288:26
+
+  6) e2e/solana-integration.spec.ts:80:9 › Infrastructure Endpoints › GET /health returns alive with Solana features 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      85 |         expect(body.status).toBe('alive');
+      86 |         expect(body.enclaveDid).toContain('did:aegis:enclave:');
+    > 87 |         expect(body.solanaCluster).toBeTruthy();
+         |                                    ^
+      88 |         expect(body.solanaPayer).toBeTruthy();
+      89 |         expect(body.features).toContain('solana-anchoring');
+      90 |         expect(body.features).toContain('solana-tx-firewall');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:87:36
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      85 |         expect(body.status).toBe('alive');
+      86 |         expect(body.enclaveDid).toContain('did:aegis:enclave:');
+    > 87 |         expect(body.solanaCluster).toBeTruthy();
+         |                                    ^
+      88 |         expect(body.solanaPayer).toBeTruthy();
+      89 |         expect(body.features).toContain('solana-anchoring');
+      90 |         expect(body.features).toContain('solana-tx-firewall');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:87:36
+
+  7) e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      104 |         const endpoints = body.endpoints;
+      105 |         expect(endpoints['POST /enforce']).toBeTruthy();
+    > 106 |         expect(endpoints['POST /anchor-receipt']).toBeTruthy();
+          |                                                   ^
+      107 |         expect(endpoints['GET /verify/:txSignature']).toBeTruthy();
+      108 |         expect(endpoints['POST /solana/enforce-tx']).toBeTruthy();
+      109 |         expect(endpoints['POST /governance/evaluate']).toBeTruthy();
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:106:51
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      104 |         const endpoints = body.endpoints;
+      105 |         expect(endpoints['POST /enforce']).toBeTruthy();
+    > 106 |         expect(endpoints['POST /anchor-receipt']).toBeTruthy();
+          |                                                   ^
+      107 |         expect(endpoints['GET /verify/:txSignature']).toBeTruthy();
+      108 |         expect(endpoints['POST /solana/enforce-tx']).toBeTruthy();
+      109 |         expect(endpoints['POST /governance/evaluate']).toBeTruthy();
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:106:51
+
+  8) e2e/solana-integration.spec.ts:131:9 › Core Policy Enforcement › POST /enforce approves low-risk financial action 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    [1mMatcher error[22m: [31mreceived[39m value must not be null nor undefined
+
+    Received has value: [31mundefined[39m
+
+      162 |         expect(body.receipt.toolId).toBe('swap');
+      163 |         expect(body.receipt.signature).toBeTruthy();
+    > 164 |         expect(body.enclaveDid).toContain('did:aegis:enclave:');
+          |                                 ^
+      165 |         expect(body.attestation).toBeDefined();
+      166 |     });
+      167 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:164:33
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    [1mMatcher error[22m: [31mreceived[39m value must not be null nor undefined
+
+    Received has value: [31mundefined[39m
+
+      162 |         expect(body.receipt.toolId).toBe('swap');
+      163 |         expect(body.receipt.signature).toBeTruthy();
+    > 164 |         expect(body.enclaveDid).toContain('did:aegis:enclave:');
+          |                                 ^
+      165 |         expect(body.attestation).toBeDefined();
+      166 |     });
+      167 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:164:33
+
+  9) e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Tier limit"[39m
+    Received string:    [31m"Schema Sanitization Failed: Missing or invalid 'token' field preventing asset substitution"[39m
+
+      225 |         const body = await res.json();
+      226 |         expect(body.status).toBe('denied');
+    > 227 |         expect(body.error).toContain('Tier limit');
+          |                            ^
+      228 |     });
+      229 | });
+      230 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:227:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Tier limit"[39m
+    Received string:    [31m"Schema Sanitization Failed: Missing or invalid 'token' field preventing asset substitution"[39m
+
+      225 |         const body = await res.json();
+      226 |         expect(body.status).toBe('denied');
+    > 227 |         expect(body.error).toContain('Tier limit');
+          |                            ^
+      228 |     });
+      229 | });
+      230 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:227:28
+
+  10) e2e/solana-integration.spec.ts:247:9 › Solana Receipt Anchoring › POST /anchor-receipt accepts valid receipt structure 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    [1mMatcher error[22m: [31mreceived[39m value must not be null nor undefined
+
+    Received has value: [31mundefined[39m
+
+      271 |         } else {
+      272 |             // Expected on CI without funded wallet
+    > 273 |             expect(body.hint).toContain('payer has SOL balance');
+          |                               ^
+      274 |         }
+      275 |     });
+      276 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:273:31
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    [1mMatcher error[22m: [31mreceived[39m value must not be null nor undefined
+
+    Received has value: [31mundefined[39m
+
+      271 |         } else {
+      272 |             // Expected on CI without funded wallet
+    > 273 |             expect(body.hint).toContain('payer has SOL balance');
+          |                               ^
+      274 |         }
+      275 |     });
+      276 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:273:31
+
+  11) e2e/solana-integration.spec.ts:277:9 › Solana Receipt Anchoring › GET /verify/:txSig handles non-existent transaction 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"FakeTransactionSignature12345"[39m
+    Received: [31mundefined[39m
+
+      280 |
+      281 |         // Should return verification result (failed is expected for fake sig)
+    > 282 |         expect(body.txSignature).toBe('FakeTransactionSignature12345');
+          |                                  ^
+      283 |         expect(body.verifierVersion).toBe('aegis-v1');
+      284 |     });
+      285 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:282:34
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"FakeTransactionSignature12345"[39m
+    Received: [31mundefined[39m
+
+      280 |
+      281 |         // Should return verification result (failed is expected for fake sig)
+    > 282 |         expect(body.txSignature).toBe('FakeTransactionSignature12345');
+          |                                  ^
+      283 |         expect(body.verifierVersion).toBe('aegis-v1');
+      284 |     });
+      285 | });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:282:34
+
+  12) e2e/solana-integration.spec.ts:293:9 › Solana Transaction Firewall › POST /solana/enforce-tx rejects missing fields 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m400[39m
+    Received: [31m200[39m
+
+      296 |         });
+      297 |
+    > 298 |         expect(res.status()).toBe(400);
+          |                              ^
+      299 |         const body = await res.json();
+      300 |         expect(body.error).toContain('Missing required fields');
+      301 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:298:30
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m400[39m
+    Received: [31m200[39m
+
+      296 |         });
+      297 |
+    > 298 |         expect(res.status()).toBe(400);
+          |                              ^
+      299 |         const body = await res.json();
+      300 |         expect(body.error).toContain('Missing required fields');
+      301 |     });
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:298:30
+
+  13) e2e/solana-integration.spec.ts:387:9 › Squads V4 Governance › POST /governance/evaluate returns BLOCKED for high risk 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"hard block threshold"[39m
+    Received string:    [31m"Hard block threshold exceeded"[39m
+
+      402 |         expect(body.decision).toBe('BLOCKED');
+      403 |         expect(body.proposal).toBeUndefined();  // No proposal for hard block
+    > 404 |         expect(body.reason).toContain('hard block threshold');
+          |                             ^
+      405 |         expect(body.euAiActCompliance.article14).toContain('ENFORCED');
+      406 |     });
+      407 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:404:29
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"hard block threshold"[39m
+    Received string:    [31m"Hard block threshold exceeded"[39m
+
+      402 |         expect(body.decision).toBe('BLOCKED');
+      403 |         expect(body.proposal).toBeUndefined();  // No proposal for hard block
+    > 404 |         expect(body.reason).toContain('hard block threshold');
+          |                             ^
+      405 |         expect(body.euAiActCompliance.article14).toContain('ENFORCED');
+      406 |     });
+      407 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:404:29
+
+  13 failed
+    e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization 
+    e2e/nightmare.spec.ts:15:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [1]: Quantum Curve Factorization 
+    e2e/nightmare.spec.ts:23:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [6]: Semantic Memory Poisoning 
+    e2e/nightmare.spec.ts:29:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [7]: Shadow Wallet Bypass 
+    e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+    e2e/solana-integration.spec.ts:80:9 › Infrastructure Endpoints › GET /health returns alive with Solana features 
+    e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference 
+    e2e/solana-integration.spec.ts:131:9 › Core Policy Enforcement › POST /enforce approves low-risk financial action 
+    e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops 
+    e2e/solana-integration.spec.ts:247:9 › Solana Receipt Anchoring › POST /anchor-receipt accepts valid receipt structure 
+    e2e/solana-integration.spec.ts:277:9 › Solana Receipt Anchoring › GET /verify/:txSig handles non-existent transaction 
+    e2e/solana-integration.spec.ts:293:9 › Solana Transaction Firewall › POST /solana/enforce-tx rejects missing fields 
+    e2e/solana-integration.spec.ts:387:9 › Squads V4 Governance › POST /governance/evaluate returns BLOCKED for high risk 
+  60 passed (43.3s)

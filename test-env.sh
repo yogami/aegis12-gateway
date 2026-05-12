@@ -1,0 +1,6 @@
+COMPOSE_WITH_DIGEST=$(cat << 'INNER_EOF'
+environment:
+  - AUTHORIZED_TENANTS='{"t":"1"}'
+INNER_EOF
+)
+echo "$COMPOSE_WITH_DIGEST"

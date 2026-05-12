@@ -1,0 +1,33 @@
+{
+  "name": "video-gen",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "remotion render src/index.ts Segment1 public/segment1.mp4",
+    "build:seg2": "remotion render src/index.ts Segment2 public/segment2.mp4",
+    "build:seg3": "remotion render src/index.ts Segment3 public/segment3.mp4",
+    "build:seg4": "remotion render src/index.ts Segment4 public/segment4.mp4",
+    "build:seg4v2": "remotion render src/index.ts Segment4V2 public/segment4_v2.mp4",
+    "build:seg5": "remotion render src/index.ts Segment5 public/segment5.mp4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "^4.0.459",
+    "cloudinary": "^2.10.0",
+    "playwright": "^1.59.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.459"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}

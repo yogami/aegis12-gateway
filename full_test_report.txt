@@ -1,0 +1,558 @@
+
+Running 73 tests using 1 worker
+
+  ✓   1 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (28ms)
+  ✓   2 e2e/adversarial_pentest.spec.ts:118:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-2: Opus-4.6 "Rogue Signer" attack — policy signed by unauthorized key must fail (7ms)
+  ✘   3 e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied (11ms)
+  -   4 e2e/adversarial_pentest.spec.ts:165:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-4: Slippage Floor attack — exceeding slippageBps must be rejected
+  -   5 e2e/adversarial_pentest.spec.ts:186:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-5: Anomaly Boundary Attack — 0.51 vs max 0.50
+  -   6 e2e/adversarial_pentest.spec.ts:202:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-6: Circular Swap protection
+  -   7 e2e/adversarial_pentest.spec.ts:223:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-7: Unapproved Mint substitution
+  -   8 e2e/adversarial_pentest.spec.ts:245:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-8: Expired Policy Replay attempt
+  ✓   9 e2e/adversarial_pentest.spec.ts:96:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-1: o3-pro "Phantom Value" attack — spoofed estimatedValue should be ignored (retry #1) (27ms)
+  ✓  10 e2e/adversarial_pentest.spec.ts:118:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-2: Opus-4.6 "Rogue Signer" attack — policy signed by unauthorized key must fail (retry #1) (7ms)
+  ✘  11 e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied (retry #1) (11ms)
+  -  12 e2e/adversarial_pentest.spec.ts:165:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-4: Slippage Floor attack — exceeding slippageBps must be rejected (retry #1)
+  -  13 e2e/adversarial_pentest.spec.ts:186:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-5: Anomaly Boundary Attack — 0.51 vs max 0.50 (retry #1)
+  -  14 e2e/adversarial_pentest.spec.ts:202:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-6: Circular Swap protection (retry #1)
+  -  15 e2e/adversarial_pentest.spec.ts:223:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-7: Unapproved Mint substitution (retry #1)
+  -  16 e2e/adversarial_pentest.spec.ts:245:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-8: Expired Policy Replay attempt (retry #1)
+  ✓  17 e2e/council-security-verification.spec.ts:50:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › DeepResearch Flaw A Enforcement: Missing dynamicPolicy envelope - Rejected Payload (20ms)
+  ✓  18 e2e/council-security-verification.spec.ts:66:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Signature Malleability via Unbounded financialLimitsString (parser bomb defense) (9ms)
+  ✓  19 e2e/council-security-verification.spec.ts:85:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Production Root-of-Trust Failure (Unregistered Tenant) (6ms)
+  ✘  20 e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) (12ms)
+  ✘  21 e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) (retry #1) (30ms)
+  ✘  22 e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization (27ms)
+  ✘  23 e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization (retry #1) (26ms)
+  ✘  24 e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration (20ms)
+  ✘  25 e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration (retry #1) (20ms)
+  ✓  26 e2e/council-security-verification.spec.ts:165:9 › Aegis-12: Solana Transaction Firewall Hardening › POST /solana/enforce-tx rejects oversized serializedTx payload (Parser Bomb Defense) (44ms)
+  ✓  27 e2e/council-security-verification.spec.ts:185:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-001: Assert Unverified agent.purpose Cannot Bypass Financial Limits (9ms)
+  ✓  28 e2e/council-security-verification.spec.ts:207:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-002: Assert Unsigned agent.currentTier Cannot Grant Privilege Escalation (6ms)
+  ✓  29 e2e/council-security-verification.spec.ts:227:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-003: Assert JSON Type Confusion on maxAnomalyScore Cannot Bypass Defenses (7ms)
+  ✓  30 e2e/council-security-verification.spec.ts:249:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-004: Assert Empty Limits String "{}" Causes Fail-Closed Denial (5ms)
+  ✓  31 e2e/council-security-verification.spec.ts:270:9 › Aegis-12 Security Re-Audit: DeepResearch Critical Bypasses › VULN-005: Assert Missing dynamicPolicy Fail-Closed Does Not Trip Global Circuit Breaker DoS (39ms)
+  ✘  32 e2e/healthtech.spec.ts:8:9 › Aegis Healthtech API E2E › should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack (2ms)
+  ✘  33 e2e/healthtech.spec.ts:8:9 › Aegis Healthtech API E2E › should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack (retry #1) (22ms)
+  ✘  34 e2e/healthtech.spec.ts:32:9 › Aegis Healthtech API E2E › should return 403 Forbidden for unauthorized RBAC access (24ms)
+  ✘  35 e2e/healthtech.spec.ts:32:9 › Aegis Healthtech API E2E › should return 403 Forbidden for unauthorized RBAC access (retry #1) (22ms)
+  ✘  36 e2e/healthtech.spec.ts:52:9 › Aegis Healthtech API E2E › should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt) (24ms)
+  ✘  37 e2e/healthtech.spec.ts:52:9 › Aegis Healthtech API E2E › should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt) (retry #1) (23ms)
+  ✘  38 e2e/healthtech.spec.ts:75:9 › Aegis Healthtech API E2E › should return 500 Error for malformed non-JSON requests (22ms)
+  ✘  39 e2e/healthtech.spec.ts:75:9 › Aegis Healthtech API E2E › should return 500 Error for malformed non-JSON requests (retry #1) (22ms)
+  ✓  40 e2e/nightmare.spec.ts:10:9 › Aegis-12 Nightmare Mode Production Bombardment › Verify TEE UI loads and is secure initially (105ms)
+  ✓  41 e2e/nightmare.spec.ts:15:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [1]: Quantum Curve Factorization (3.0s)
+  ✓  42 e2e/nightmare.spec.ts:23:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [6]: Semantic Memory Poisoning (3.0s)
+  ✓  43 e2e/nightmare.spec.ts:29:9 › Aegis-12 Nightmare Mode Production Bombardment › Vector [7]: Shadow Wallet Bypass (3.0s)
+  ✓  44 e2e/reaudit-surviving.spec.ts:132:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore undefined in policyConfig causes isNaN guard to skip anomaly check — high-risk agent (anomalyScore=0.99) must be DENIED not silently passed (19ms)
+  ✓  45 e2e/reaudit-surviving.spec.ts:173:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: maxAnomalyScore=0 (uint256 zero) with anomalyScore=0.01 (>0%) must be DENIED — NaN coercion of zero would incorrectly evaluate to !isNaN(0)=true then deny, confirming the isNaN guard direction matters (7ms)
+  ✓  46 e2e/reaudit-surviving.spec.ts:198:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.49 (49%) must be APPROVED — confirming anomaly gate passes legitimate traffic (10ms)
+  ✓  47 e2e/reaudit-surviving.spec.ts:220:7 › NEW-VULN-001: maxAnomalyScore NaN Coercion Silently Disables Anomaly Gate › SECURITY: Valid policy with maxAnomalyScore=50 and anomalyScore=0.51 (51%) must be DENIED — confirming the boundary condition is enforced at exactly the threshold (13ms)
+  ✘  48 e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (5ms)
+  ✘  49 e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable (retry #1) (27ms)
+  ✓  50 e2e/reaudit-surviving.spec.ts:292:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Policy with expired expiresAt timestamp (1 second in the past) must DENY — validating the catch block deny path handles expiry errors correctly (26ms)
+  ✓  51 e2e/reaudit-surviving.spec.ts:316:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Forged policy signature (valid structure, invalid signature bytes) must DENY via catch-all — confirming cryptographic failure is caught and denies, not swallowed (7ms)
+  ✓  52 e2e/reaudit-surviving.spec.ts:368:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with attacker-controlled fromMint address (valid Base58, unallowlisted) must DENY — arbitrary mint addresses enable rug-pull token substitution (4ms)
+  ✓  53 e2e/reaudit-surviving.spec.ts:418:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with honeypot token as toMint (valid Base58, zero liquidity token) must DENY — PolicyValidator must enforce an explicit SPL mint allowlist for swap operations (6ms)
+  ✓  54 e2e/reaudit-surviving.spec.ts:465:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with excessive slippageBps (10000 = 100% slippage) must DENY — maximum slippage enables sandwich attack / guaranteed worst execution (5ms)
+  ✓  55 e2e/reaudit-surviving.spec.ts:513:7 › NEW-VULN-005: Swap Tool Arbitrary SPL Mint Address — Asset Substitution via Unallowlisted Mints › SECURITY: swap tool with negative slippageBps value must DENY — assertSafeFinancialAmount correctly rejects negative slippage (4ms)
+  ✓  56 e2e/reaudit-surviving.spec.ts:567:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Cryptographic failure response must NOT contain stack trace, file paths, or line numbers — error oracle enables targeted attack refinement (5ms)
+  ✓  57 e2e/reaudit-surviving.spec.ts:601:7 › NEW-VULN-003: Error Response Oracle — Stack Trace / Internal State Leakage via HTTP Response › SECURITY: Internal tool normalization error must NOT leak the raw unrecognized toolId value back to the caller — error messages must be sanitized before HTTP response (4ms)
+  ✓  58 e2e/reaudit-surviving.spec.ts:654:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a DENIED action — subsequent request with the same nonce must ALSO be denied (no rollback resurrection) (14ms)
+  ✘  59 e2e/reaudit-surviving.spec.ts:693:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) (10ms)
+  ✘  60 e2e/reaudit-surviving.spec.ts:693:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) (retry #1) (31ms)
+  ✓  61 e2e/reaudit-surviving.spec.ts:727:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: estimatedValue spoofing — action.estimatedValue=1 with parameters.amount=999999 must DENY because AegisPEP overrides estimatedValue from sanitizedParams.amount post-normalization (28ms)
+  ✓  62 e2e/reaudit-surviving.spec.ts:780:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString containing __proto__ prototype pollution payload must DENY — JSON.parse of attacker-controlled string must not pollute Object prototype (7ms)
+  ✓  63 e2e/reaudit-surviving.spec.ts:817:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with constructor injection {"constructor": {"prototype": {"isAdmin": true}}} must DENY — alternative prototype pollution vector via constructor property (6ms)
+  ✓  64 e2e/reaudit-surviving.spec.ts:844:7 › Prototype Pollution and Structural Injection: financialLimitsString Attack Surface › SECURITY: financialLimitsString with multiple tier keys must DENY — {"T1": 100, "T_GOD": 999999} dual-tier bypass vector (7ms)
+  ✓  65 e2e/reaudit-surviving.spec.ts:884:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 0.0 boundary must be ACCEPTED for threshold > 0 (7ms)
+  ✓  66 e2e/reaudit-surviving.spec.ts:904:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore exactly at 1.0 must be REJECTED by pre-validate gate in AegisPEP (AegisPEP.ts line 22 enforces 0.0-1.0 range, but 1.0 is boundary-inclusive) (6ms)
+  ✓  67 e2e/reaudit-surviving.spec.ts:929:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: anomalyScore above 1.0 (e.g. 1.1) must be REJECTED by AegisPEP pre-validation before reaching TierEvaluator — enforces the 0.0-1.0 scale constraint (4ms)
+  ✓  68 e2e/reaudit-surviving.spec.ts:951:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with non-SOL token (e.g. USDC) must DENY — token field allowlist prevents asset substitution for transfer tool (4ms)
+  ✓  69 e2e/reaudit-surviving.spec.ts:996:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: solana_transfer with Infinity as amount must DENY — assertSafeFinancialAmount must catch IEEE 754 Infinity injection (7ms)
+  ✓  70 e2e/reaudit-surviving.spec.ts:1044:7 › Input Validation Edge Cases: Boundary Conditions and Type Safety › SECURITY: request with action.parameters containing extra fields beyond schema must NOT leak those fields into the validatedParams of the receipt — normalization must strip extraneous keys (no parameter injection into receipt) (6ms)
+  ✓  71 e2e/solana-integration.spec.ts:80:9 › Infrastructure Endpoints › GET /health returns alive with Solana features (6ms)
+  ✘  72 e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference (3ms)
+  ✘  73 e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference (retry #1) (18ms)
+  ✓  74 e2e/solana-integration.spec.ts:131:9 › Core Policy Enforcement › POST /enforce approves low-risk financial action (23ms)
+  ✓  75 e2e/solana-integration.spec.ts:168:9 › Core Policy Enforcement › POST /enforce denies high anomaly score action (6ms)
+  ✘  76 e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops (7ms)
+  ✘  77 e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops (retry #1) (21ms)
+  ✓  78 e2e/solana-integration.spec.ts:237:9 › Solana Receipt Anchoring › POST /anchor-receipt rejects missing fields (16ms)
+  ✓  79 e2e/solana-integration.spec.ts:247:9 › Solana Receipt Anchoring › POST /anchor-receipt accepts valid receipt structure (14ms)
+  ✓  80 e2e/solana-integration.spec.ts:277:9 › Solana Receipt Anchoring › GET /verify/:txSig handles non-existent transaction (4ms)
+  ✓  81 e2e/solana-integration.spec.ts:293:9 › Solana Transaction Firewall › POST /solana/enforce-tx rejects missing fields (2ms)
+  ✓  82 e2e/solana-integration.spec.ts:303:9 › Solana Transaction Firewall › POST /solana/enforce-tx blocks unparseable transaction (3ms)
+  ✓  83 e2e/solana-integration.spec.ts:328:9 › Squads V4 Governance › GET /governance/config returns tier limits and EU AI Act mapping (2ms)
+  ✓  84 e2e/solana-integration.spec.ts:341:9 › Squads V4 Governance › POST /governance/evaluate returns AUTONOMOUS for low risk (2ms)
+  ✓  85 e2e/solana-integration.spec.ts:363:9 › Squads V4 Governance › POST /governance/evaluate returns REQUIRE_HUMAN for moderate risk (6ms)
+  ✓  86 e2e/solana-integration.spec.ts:387:9 › Squads V4 Governance › POST /governance/evaluate returns BLOCKED for high risk (2ms)
+  ✓  87 e2e/solana-integration.spec.ts:408:9 › Squads V4 Governance › POST /governance/evaluate rejects invalid tier (2ms)
+  ✓  88 e2e/solana-integration.spec.ts:422:9 › Squads V4 Governance › POST /governance/evaluate triggers REQUIRE_HUMAN for over-limit T2 spend (2ms)
+  ✓  89 e2e/solana-integration.spec.ts:448:9 › TEE Attestation › GET /attestation/status returns TEE info (7ms)
+  ✓  90 e2e/solana-integration.spec.ts:474:9 › x402 Monetization › GET /monetization/status returns x402 config (2ms)
+  ✘  91 e2e/solana-integration.spec.ts:494:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce allows authorized SCHEDULER (2ms)
+  ✘  92 e2e/solana-integration.spec.ts:494:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce allows authorized SCHEDULER (retry #1) (16ms)
+  ✘  93 e2e/solana-integration.spec.ts:511:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce blocks SSN exfiltration (16ms)
+  ✘  94 e2e/solana-integration.spec.ts:511:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce blocks SSN exfiltration (retry #1) (16ms)
+
+
+  1) e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"[7mdeni[27med"[39m
+    Received: [31m"[7mapprov[27med"[39m
+
+      159 |         });
+      160 |         const body2 = await res2.json();
+    > 161 |         expect(body2.status).toBe('denied');
+          |                              ^
+      162 |         expect(body2.error).toContain('Nonce already used');
+      163 |     });
+      164 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/adversarial_pentest.spec.ts:161:30
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m"[7mdeni[27med"[39m
+    Received: [31m"[7mapprov[27med"[39m
+
+      159 |         });
+      160 |         const body2 = await res2.json();
+    > 161 |         expect(body2.status).toBe('denied');
+          |                              ^
+      162 |         expect(body2.error).toContain('Nonce already used');
+      163 |     });
+      164 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/adversarial_pentest.spec.ts:161:30
+
+  2) e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: <= [32m1[39m
+    Received:    [31m2[39m
+
+      122 |         const denials = bodies.filter(b => b.status === "denied" || b.error?.includes('Nonce already used')).length;
+      123 |         
+    > 124 |         expect(approvals).toBeLessThanOrEqual(1); // One or Zero depending on race condition locking vs exact timing
+          |                           ^
+      125 |         expect(denials).toBeGreaterThanOrEqual(1); // At least one must be explicitly denied as double-spend!
+      126 |     });
+      127 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:124:27
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: <= [32m1[39m
+    Received:    [31m2[39m
+
+      122 |         const denials = bodies.filter(b => b.status === "denied" || b.error?.includes('Nonce already used')).length;
+      123 |         
+    > 124 |         expect(approvals).toBeLessThanOrEqual(1); // One or Zero depending on race condition locking vs exact timing
+          |                           ^
+      125 |         expect(denials).toBeGreaterThanOrEqual(1); // At least one must be explicitly denied as double-spend!
+      126 |     });
+      127 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:124:27
+
+  3) e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+    Received string:    [31m"Invalid type for amount: expected number, got string"[39m
+
+      140 |         expect(res.status()).toBe(403);
+      141 |         const body = await res.json();
+    > 142 |         expect(body.error).toContain('Action denied by Aegis Enclave: Invalid type for amount: expected number, got string');
+          |                            ^
+      143 |     });
+      144 |
+      145 |     test('Healthtech Privilege Escalation / Data Exfiltration', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:142:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave: Invalid type for amount: expected number, got string"[39m
+    Received string:    [31m"Invalid type for amount: expected number, got string"[39m
+
+      140 |         expect(res.status()).toBe(403);
+      141 |         const body = await res.json();
+    > 142 |         expect(body.error).toContain('Action denied by Aegis Enclave: Invalid type for amount: expected number, got string');
+          |                            ^
+      143 |     });
+      144 |
+      145 |     test('Healthtech Privilege Escalation / Data Exfiltration', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:142:28
+
+  4) e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      155 |         });
+      156 |
+    > 157 |         expect(res.status()).toBe(403);
+          |                              ^
+      158 |         const body = await res.json();
+      159 |         expect(body.status).toBe('denied');
+      160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:157:30
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      155 |         });
+      156 |
+    > 157 |         expect(res.status()).toBe(403);
+          |                              ^
+      158 |         const body = await res.json();
+      159 |         expect(body.status).toBe('denied');
+      160 |         expect(body.evidencePack?.decisionReason ?? body.error).toContain('not authorized');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/council-security-verification.spec.ts:157:30
+
+  5) e2e/healthtech.spec.ts:8:9 › Aegis Healthtech API E2E › should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      18 |
+      19 |         // Fastify should return 200 OK for approved actions
+    > 20 |         expect(response.ok()).toBeTruthy();
+         |                               ^
+      21 |         const body = await response.json();
+      22 |
+      23 |         expect(body.status).toBe('approved');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:20:31
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      18 |
+      19 |         // Fastify should return 200 OK for approved actions
+    > 20 |         expect(response.ok()).toBeTruthy();
+         |                               ^
+      21 |         const body = await response.json();
+      22 |
+      23 |         expect(body.status).toBe('approved');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:20:31
+
+  6) e2e/healthtech.spec.ts:32:9 › Aegis Healthtech API E2E › should return 403 Forbidden for unauthorized RBAC access 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      41 |         });
+      42 |
+    > 43 |         expect(response.status()).toBe(403);
+         |                                   ^
+      44 |         const body = await response.json();
+      45 |
+      46 |         expect(body.status).toBe('denied');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:43:35
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      41 |         });
+      42 |
+    > 43 |         expect(response.status()).toBe(403);
+         |                                   ^
+      44 |         const body = await response.json();
+      45 |
+      46 |         expect(body.status).toBe('denied');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:43:35
+
+  7) e2e/healthtech.spec.ts:52:9 › Aegis Healthtech API E2E › should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      64 |         });
+      65 |
+    > 66 |         expect(response.status()).toBe(403);
+         |                                   ^
+      67 |         const body = await response.json();
+      68 |
+      69 |         expect(body.status).toBe('denied');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:66:35
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      64 |         });
+      65 |
+    > 66 |         expect(response.status()).toBe(403);
+         |                                   ^
+      67 |         const body = await response.json();
+      68 |
+      69 |         expect(body.status).toBe('denied');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:66:35
+
+  8) e2e/healthtech.spec.ts:75:9 › Aegis Healthtech API E2E › should return 500 Error for malformed non-JSON requests 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      82 |         });
+      83 |
+    > 84 |         expect(response.status()).toBe(403); // The TEE catches the error and enforces a 403 Terminal Refusal
+         |                                   ^
+      85 |     });
+      86 | });
+      87 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:84:35
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      82 |         });
+      83 |
+    > 84 |         expect(response.status()).toBe(403); // The TEE catches the error and enforces a 403 Terminal Refusal
+         |                                   ^
+      85 |     });
+      86 | });
+      87 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/healthtech.spec.ts:84:35
+
+  9) e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool execution request."[39m
+
+      286 |       expect(body.status).toBe("denied");
+      287 |       // Must contain the tool refusal — not leak internal path details
+    > 288 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      289 |     }
+      290 |   );
+      291 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:288:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Action denied by Aegis Enclave"[39m
+    Received string:    [31m"[TERMINAL REFUSAL] Unrecognized tool execution request."[39m
+
+      286 |       expect(body.status).toBe("denied");
+      287 |       // Must contain the tool refusal — not leak internal path details
+    > 288 |       expect(body.error).toContain("Action denied by Aegis Enclave");
+          |                          ^
+      289 |     }
+      290 |   );
+      291 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:288:26
+
+  10) e2e/reaudit-surviving.spec.ts:693:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m200[39m
+
+      718 |       });
+      719 |
+    > 720 |       expect(secondRes.status()).toBe(403);
+          |                                  ^
+      721 |       const secondBody = await secondRes.json();
+      722 |       expect(secondBody.status).toBe("denied");
+      723 |       expect(secondBody.error).toContain("Nonce already used");
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:720:34
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m200[39m
+
+      718 |       });
+      719 |
+    > 720 |       expect(secondRes.status()).toBe(403);
+          |                                  ^
+      721 |       const secondBody = await secondRes.json();
+      722 |       expect(secondBody.status).toBe("denied");
+      723 |       expect(secondBody.error).toContain("Nonce already used");
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/reaudit-surviving.spec.ts:720:34
+
+  11) e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      109 |         expect(endpoints['POST /governance/evaluate']).toBeTruthy();
+      110 |         expect(endpoints['GET /governance/config']).toBeTruthy();
+    > 111 |         expect(endpoints['GET /monetization/status']).toBeTruthy();
+          |                                                       ^
+      112 |         expect(endpoints['GET /attestation/status']).toBeTruthy();
+      113 |
+      114 |         // Verify Solana integration
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:111:55
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      109 |         expect(endpoints['POST /governance/evaluate']).toBeTruthy();
+      110 |         expect(endpoints['GET /governance/config']).toBeTruthy();
+    > 111 |         expect(endpoints['GET /monetization/status']).toBeTruthy();
+          |                                                       ^
+      112 |         expect(endpoints['GET /attestation/status']).toBeTruthy();
+      113 |
+      114 |         // Verify Solana integration
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:111:55
+
+  12) e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Tier limit"[39m
+    Received string:    [31m"Schema Sanitization Failed: Missing or invalid 'token' field preventing asset substitution"[39m
+
+      225 |         const body = await res.json();
+      226 |         expect(body.status).toBe('denied');
+    > 227 |         expect(body.error).toContain('Tier limit');
+          |                            ^
+      228 |     });
+      229 | });
+      230 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:227:28
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected substring: [32m"Tier limit"[39m
+    Received string:    [31m"Schema Sanitization Failed: Missing or invalid 'token' field preventing asset substitution"[39m
+
+      225 |         const body = await res.json();
+      226 |         expect(body.status).toBe('denied');
+    > 227 |         expect(body.error).toContain('Tier limit');
+          |                            ^
+      228 |     });
+      229 | });
+      230 |
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:227:28
+
+  13) e2e/solana-integration.spec.ts:494:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce allows authorized SCHEDULER 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      503 |         });
+      504 |
+    > 505 |         expect(res.ok()).toBeTruthy();
+          |                          ^
+      506 |         const body = await res.json();
+      507 |         expect(body.status).toBe('approved');
+      508 |         expect(body.evidencePack).toBeDefined();
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:505:26
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      503 |         });
+      504 |
+    > 505 |         expect(res.ok()).toBeTruthy();
+          |                          ^
+      506 |         const body = await res.json();
+      507 |         expect(body.status).toBe('approved');
+      508 |         expect(body.evidencePack).toBeDefined();
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:505:26
+
+  14) e2e/solana-integration.spec.ts:511:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce blocks SSN exfiltration 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      523 |         });
+      524 |
+    > 525 |         expect(res.status()).toBe(403);
+          |                              ^
+      526 |         const body = await res.json();
+      527 |         expect(body.status).toBe('denied');
+      528 |         expect(body.evidencePack.regulatoryMapping).toContain('HIPAA_PRIVACY_RULE_164.502');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:525:30
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m403[39m
+    Received: [31m500[39m
+
+      523 |         });
+      524 |
+    > 525 |         expect(res.status()).toBe(403);
+          |                              ^
+      526 |         const body = await res.json();
+      527 |         expect(body.status).toBe('denied');
+      528 |         expect(body.evidencePack.regulatoryMapping).toContain('HIPAA_PRIVACY_RULE_164.502');
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/solana-integration.spec.ts:525:30
+
+  14 failed
+    e2e/adversarial_pentest.spec.ts:134:9 › Aegis-12 Flagship Pentest: Production Shield Verification › Flagship-3: Nonce Collision — second use of same nonce across requests must be denied 
+    e2e/council-security-verification.spec.ts:101:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Distributed Nonce TOCTOU Race (Concurrent Identical Policy) 
+    e2e/council-security-verification.spec.ts:130:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › POST /enforce - Financial Limit Type Confusion Injection Post-Normalization 
+    e2e/council-security-verification.spec.ts:145:9 › Aegis-12: Independent Council Security Re-Audit E2E Base › Healthtech Privilege Escalation / Data Exfiltration 
+    e2e/healthtech.spec.ts:8:9 › Aegis Healthtech API E2E › should allow a SCHEDULER to READ_SCHEDULE and return an Evidence Pack 
+    e2e/healthtech.spec.ts:32:9 › Aegis Healthtech API E2E › should return 403 Forbidden for unauthorized RBAC access 
+    e2e/healthtech.spec.ts:52:9 › Aegis Healthtech API E2E › should return 403 Forbidden if payload contains SSN (PHI Exfiltration Attempt) 
+    e2e/healthtech.spec.ts:75:9 › Aegis Healthtech API E2E › should return 500 Error for malformed non-JSON requests 
+    e2e/reaudit-surviving.spec.ts:249:7 › NEW-VULN-002: Dead Fail-Closed Code Path — evaluatePolicy Safety Net Verification › SECURITY: Structurally malformed request with valid dynamicPolicy but nonsense toolId must DENY without 200-OK — validating catch-all deny path in evaluatePolicy is reachable 
+    e2e/reaudit-surviving.spec.ts:693:7 › Nonce 2PC State Machine: Boundary Conditions and Rollback Correctness › SECURITY: Nonce is permanently burned after a successful approval — a second identical request after approval must be denied as replay (nonce committed, not rolled back) 
+    e2e/solana-integration.spec.ts:94:9 › Infrastructure Endpoints › GET /api/docs returns full endpoint reference 
+    e2e/solana-integration.spec.ts:199:9 › Core Policy Enforcement › POST /enforce denies tier-exceeding financial ops 
+    e2e/solana-integration.spec.ts:494:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce allows authorized SCHEDULER 
+    e2e/solana-integration.spec.ts:511:9 › Healthtech HIPAA Enforcement › POST /healthtech/enforce blocks SSN exfiltration 
+  5 did not run
+  54 passed (24.2s)

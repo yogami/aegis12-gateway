@@ -1,0 +1,35 @@
+{
+  "name": "@aegis12/telemetry-shield",
+  "version": "0.1.0",
+  "description": "Zero-latency telemetry obfuscation and immutable compliance anchoring plugin for Solana AI Agents.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "npx tsx tests/blackbox.e2e.test.ts"
+  },
+  "keywords": [
+    "solana",
+    "ai",
+    "compliance",
+    "mev",
+    "telemetry",
+    "eu-ai-act"
+  ],
+  "author": "Yogami Labs",
+  "license": "MIT",
+  "peerDependencies": {
+    "@solana/web3.js": "^1.87.0",
+    "bs58": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@lit-protocol/constants": "^9.0.1",
+    "@lit-protocol/lit-node-client-nodejs": "^7.4.0",
+    "ethers": "^5.8.0",
+    "siwe": "^3.0.0"
+  }
+}

@@ -1,0 +1,89 @@
+# Note: Rust compilation (formerly Stage 1) has been extracted to GitHub Actions
+# via Artifact Injection caching to prevent 15-minute Docker builds.
+
+# STAGE 1: Build the Node.js Application
+FROM node:20-bookworm AS app-builder
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --legacy-peer-deps
+
+COPY . .
+
+
+
+# Build the TypeScript source to dist/
+RUN npm run build
+
+# Strip all devDependencies (eslint, vitest, playwright) before copying to production stage
+RUN npm prune --production --legacy-peer-deps
+
+# STAGE 2: Final Production Image
+FROM node:20-bookworm-slim
+WORKDIR /app
+
+ARG GIT_COMMIT_SHA
+ENV GIT_COMMIT_SHA=${GIT_COMMIT_SHA}
+
+# Install runtime dependencies (e.g., for child_process execution of the prover)
+RUN apt-get update && apt-get install -y \
+    libssl3 \
+    ca-certificates \
+    libgcc-s1 \
+    libstdc++6 \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy compiled application
+COPY --from=app-builder /app/dist ./dist
+COPY --from=app-builder /app/node_modules ./node_modules
+COPY --from=app-builder /app/package.json ./
+
+# Copy the pre-compiled ZK Prover binary (injected by GitHub Actions)
+RUN mkdir -p /app/bin
+COPY zk-artifacts/aegis-zk-prover /app/bin/aegis-zk-prover
+RUN chmod +x /app/bin/aegis-zk-prover
+
+# Prefetch ONNX Model Weights to bake into image
+COPY scripts/prefetch_model.js /app/scripts/prefetch_model.js
+RUN node /app/scripts/prefetch_model.js
+
+# Fail-fast: verify all shared library dependencies are satisfied
+RUN ldd /app/bin/aegis-zk-prover && echo '✅ All shared libraries found' || (echo '❌ MISSING SHARED LIBRARIES — binary will crash at runtime' && ldd /app/bin/aegis-zk-prover && exit 1)
+
+# Copy RISC Zero IPC prover dependencies (injected by GitHub Actions)
+COPY zk-artifacts/.risc0 /root/.risc0
+ENV PATH="/root/.risc0/bin:${PATH}"
+
+# Create data directory for WAL Engine state persistence and lock files
+RUN mkdir -p /var/data
+
+# Environment Configuration
+ENV PORT=8000
+ENV NODE_ENV=production
+ENV TEE_ENV=phala
+ENV PHALA_CVM_ENVIRONMENT=1
+EXPOSE 8000
+
+# Entrypoint script to calculate hash and start the enclave
+RUN echo '#!/bin/sh\n\
+export AEGIS_ZK_PROVER_HASH=$(sha256sum /app/bin/aegis-zk-prover | cut -d" " -f1)\n\
+echo "[Aegis-12] Calculated Prover Hash: $AEGIS_ZK_PROVER_HASH"\n\
+\n\
+# Wait for sidecar socket if in TEE mode\n\
+if [ "$TEE_ENV" = "phala" ]; then\n\
+    echo "[Aegis-12] Waiting for /var/run/tappd.sock or /var/run/dstack.sock..." \n\
+    for i in $(seq 1 30); do\n\
+        if [ -S /var/run/tappd.sock ] || [ -S /var/run/dstack.sock ]; then\n\
+            echo "[Aegis-12] Hardware socket found."\n\
+            break\n\
+        fi\n\
+        sleep 2\n\
+    done\n\
+fi\n\
+\n\
+# Start the Node.js application with explicit memory limits for 2GB CVM\n\
+exec node --max-old-space-size=4096 dist/phala_cvm_server.js' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

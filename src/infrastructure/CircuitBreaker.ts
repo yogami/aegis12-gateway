@@ -9,6 +9,7 @@
  *   OPEN    → Too many failures, requests blocked
  *   HALF_OPEN → Testing recovery, one request allowed
  */
+import { TerminalRefusalError } from '../errors';
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -99,8 +100,11 @@ export class CircuitBreaker {
             const result = await fn();
             this.recordSuccess();
             return result;
-        } catch (error) {
-            this.recordFailure();
+        } catch (error: any) {
+            const isValidation = error instanceof TerminalRefusalError || error?.name === 'TerminalRefusalError';
+            if (!isValidation) {
+                this.recordFailure();
+            }
             throw error;
         }
     }

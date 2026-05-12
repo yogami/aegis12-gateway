@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CircuitBreaker, getCircuitBreaker } from '../../src/infrastructure/CircuitBreaker';
 
-describe('CircuitBreaker', () => {
-    beforeEach(() => {
+beforeEach(() => {
         vi.useFakeTimers();
     });
 
@@ -57,4 +56,3 @@ describe('CircuitBreaker', () => {
         expect(breaker.getStatus().state).toBe('CLOSED');
         expect(breaker.getStatus().failures).toBe(0);
     });
-});

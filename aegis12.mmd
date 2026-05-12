@@ -1,0 +1,45 @@
+flowchart TD
+    classDef user fill:#2d3748,stroke:#4a5568,stroke-width:2px,color:#fff
+    classDef gateway fill:#2c5282,stroke:#4299e1,stroke-width:2px,color:#fff
+    classDef tee fill:#9b2c2c,stroke:#fc8181,stroke-width:2px,color:#fff
+    classDef zk fill:#276749,stroke:#68d391,stroke-width:2px,color:#fff
+    classDef block fill:#744210,stroke:#d69e2e,stroke-width:2px,color:#fff
+    classDef fallback fill:#718096,stroke:#a0aec0,stroke-width:1px,color:#fff
+
+    A["User / AI Agent (Submits DeFi Trade)"]:::user
+    
+    subgraph Aegis-12 Framework
+        B["Aegis-12 Gateway (Your Live Server)"]:::gateway
+        C{"Compliance Required?"}:::gateway
+    end
+
+    subgraph Hardware Layer (Hot Path)
+        D["Phala Network TEE (Intel SGX) ~22ms Latency"]:::tee
+    end
+
+    subgraph Mathematics Layer (Cold Path)
+        E["ZK Coprocessor (SP1) ~1200ms Latency"]:::zk
+    end
+
+    subgraph Fallback / Edge
+        F["Lit Protocol NodeJS (JS Fallback)"]:::fallback
+    end
+
+    subgraph The Blockchain
+        G["Solana Network (400ms Block-time Limit)"]:::block
+        H["Slow Settlement Layer (Ethereum / Arweave)"]:::block
+    end
+
+    A == "1. API Request" ==> B
+    B --> C
+    C -- "No" --> G
+    
+    C == "Yes (Trigger Hybrid Loop)" ==> D
+    
+    D == "2. Intel Attestation Verified" ===> B
+    B == "3. Secure Trade Executed On-Chain" ===> G
+    
+    D -. "4. Async Audit Trace (Background)" .-> E
+    E -. "5. SNARK Proof Compiled (Absolute)" .-> H
+    
+    C -. "Optional Edge Override" .-> F

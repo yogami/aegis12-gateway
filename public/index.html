@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aegis-12 Fiduciary Firewall Demo</title>
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --surface: #161e2e;
+            --primary: #38bdf8;
+            --success: #4ade80;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --zk: #a855f7;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .container {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+            gap: 40px;
+        }
+        .left-col {
+            flex: 1;
+            max-width: 500px;
+        }
+        .right-col {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.8rem;
+            color: var(--primary);
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        .pitch-section {
+            background-color: var(--surface);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #1f2937;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .pitch-section h3 {
+            margin-top: 0;
+            color: var(--text);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .pitch-section p {
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+        ul.checklist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul.checklist li {
+            margin-bottom: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        button {
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-valid {
+            background: linear-gradient(135deg, var(--primary), #0ea5e9);
+            color: #0b0f19;
+        }
+        .btn-valid:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.3);
+        }
+        .btn-escalate {
+            background: rgba(251, 191, 36, 0.05);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        .btn-escalate:hover:not(:disabled) {
+            background: rgba(251, 191, 36, 0.15);
+            box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);
+        }
+        .btn-malicious {
+            background: rgba(248, 113, 113, 0.05);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        .btn-malicious:hover:not(:disabled) {
+            background: rgba(248, 113, 113, 0.15);
+            box-shadow: 0 10px 20px rgba(248, 113, 113, 0.2);
+        }
+        .terminal {
+            background-color: #020617;
+            border: 1px solid #1e293b;
+            border-radius: 20px;
+            width: 100%;
+            height: 100%;
+            min-height: 650px;
+            overflow-y: auto;
+            padding: 24px;
+            font-family: 'Fira Code', 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .terminal::-webkit-scrollbar { width: 6px; }
+        .terminal::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .log-line { margin-bottom: 6px; word-break: break-all; }
+        .log-time { color: #475569; margin-right: 12px; font-weight: 300; }
+        .log-info { color: #cbd5e1; }
+        .log-success { color: var(--success); font-weight: 600; }
+        .log-warning { color: var(--warning); }
+        .log-error { color: var(--danger); }
+        .log-highlight { color: var(--primary); font-weight: 600; }
+        .log-zk { color: var(--zk); font-weight: 600; }
+        
+        .panel {
+            background-color: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #334155;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        /* Latency Metrics */
+        .metric-group {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155;
+        }
+        .metric:last-child {
+            border-bottom: none;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #f1f5f9;
+        }
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: monospace;
+        }
+        .value-normal { color: #38bdf8; }
+        .value-critical { 
+            color: #ef4444; 
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+            font-size: 28px;
+        }
+        
+        /* Architecture Flow */
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        .node {
+            background-color: #0f172a;
+            border: 2px solid #475569;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f8fafc;
+            width: 80%;
+            text-align: center;
+            position: relative;
+        }
+        .node-enclave {
+            border-color: #3b82f6;
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+        .node-oracle {
+            border-color: #8b5cf6;
+        }
+        .node-reject {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+        .arrow {
+            width: 4px;
+            height: 20px;
+            background-color: #475569;
+            position: relative;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: -8px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #475569;
+        }
+        .arrow-fast {
+            background-color: #ef4444;
+            box-shadow: 0 0 15px #ef4444;
+        }
+        .arrow-fast::after {
+            border-top-color: #ef4444;
+        }
+
+        .status-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .status-badge.zk {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--zk);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        a { color: var(--primary); text-decoration: none; border-bottom: 1px solid var(--primary); }
+        a:hover { color: #7dd3fc; border-bottom-color: #7dd3fc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-col">
+            <div class="status-header">
+                <div class="status-badge">● PHALA TDX ENCLAVE ACTIVE</div>
+                <div class="status-badge zk">● RISCZERO ZK-ATTESTATION READY</div>
+            </div>
+            <h1>Aegis-12</h1>
+            <p class="subtitle">Institutional-Grade Fiduciary Firewall for Autonomous AI Agents.</p>
+
+            <div class="pitch-section">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> The Problem: Hidden Drain</h3>
+                <p>AI Agents are easily tricked by sophisticated prompt injections. A simple transfer limit isn't enough—attackers can use complex DeFi routing to bypass standard middleare.</p>
+            </div>
+
+            <div class="pitch-section">
+                <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--zk)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg> The "Mathematical Cage"</h3>
+                <ul class="checklist">
+                    <li><span>✅</span> <div><strong>ZK-Attestation:</strong> RiscZero proofs of behavioral compliance (EU AI Act Art. 12).</div></li>
+                    <li><span>✅</span> <div><strong>Semantic Validation:</strong> Real-time transaction simulation to detect permission escapes before signing.</div></li>
+                    <li><span>✅</span> <div><strong>Fiduciary Registry:</strong> Every decision is logged to a public, immutable audit feed on Railway.</div></li>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Hardware Topology
+                </div>
+                <div class="flow-diagram">
+                    <div class="node">🤖 Agent Intent (RPC Call)</div>
+                    <div class="arrow"></div>
+                    <div class="node node-enclave">🛡️ Phala TDX Enclave <br><span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Active Policy Engine</span></div>
+                    <div class="arrow"></div>
+                    <div class="node node-oracle">🌐 15-Node Oracle Network <br><span style="font-size: 12px; color: #94a3b8; font-weight: normal;">Attestation Verification</span></div>
+                    <div class="arrow arrow-fast"></div>
+                    <div class="node node-reject">🔴 CONNECTION SEVERED</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Sovereign Hardware Latency
+                </div>
+                <div class="metric-group">
+                    <div class="metric">
+                        <div class="metric-label">Enclave Boot Sequence</div>
+                        <div class="metric-value value-normal">140ms</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Oracle Quote Generation</div>
+                        <div class="metric-value value-normal">450ms</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Policy Evaluation Time</div>
+                        <div class="metric-value value-normal">0.8ms</div>
+                    </div>
+                    <div class="metric" style="border:none; margin-top: 20px; background-color: rgba(239, 68, 68, 0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <div class="metric-label" style="font-weight: 700;">CIRCUIT BREAKER<br>INTERCEPTION LATENCY</div>
+                        <div class="metric-value value-critical">2.1ms</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-valid" class="btn-valid" onclick="runDemo('valid')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    Valid Trade (< 0.03 SOL)
+                </button>
+                <button id="btn-escalate" class="btn-escalate" onclick="runDemo('escalate')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Escalation (Human-on-the-Loop)
+                </button>
+                <button id="btn-malicious" class="btn-malicious" onclick="runDemo('malicious')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    Injection Attack (Blocked)
+                </button>
+                <button id="btn-clear" onclick="clearTerminal()" style="background: transparent; border: 1px solid #1e293b; color: var(--text-dim); margin-top: 10px; font-weight: 500;">
+                    Reset Console
+                </button>
+            </div>
+            
+            <p style="margin-top: 20px; font-size: 0.8rem; color: var(--text-dim); text-align: center;">
+                Institutional Audit Feed: <a id="registry-link" href="https://railway.app/project/aegis12" target="_blank">View Registry</a>
+            </p>
+        </div>
+
+        <div class="right-col">
+            <div class="terminal" id="terminal">
+                <div class="log-line"><span class="log-info">AEGIS-12 TEE CONSOLE INITIALIZED. WAITING FOR INTENT...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const btnValid = document.getElementById('btn-valid');
+        const btnEscalate = document.getElementById('btn-escalate');
+        const btnMalicious = document.getElementById('btn-malicious');
+        let currentEventSource = null;
+
+        function clearTerminal() {
+            terminal.innerHTML = '<div class="log-line"><span class="log-info">AEGIS-12 TEE CONSOLE INITIALIZED. WAITING FOR INTENT...</span></div>';
+        }
+
+        function appendLog(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            
+            const time = new Date().toISOString().split('T')[1].substring(0, 12);
+            
+            let formattedMessage = message;
+            if (message.includes('https://explorer.solana.com')) {
+                const urlMatch = message.match(/(https:\/\/explorer\.solana\.com[^\s]+)/);
+                if (urlMatch) {
+                    formattedMessage = message.replace(urlMatch[0], `<a href="${urlMatch[0]}" target="_blank">Solana Explorer ↗</a>`);
+                }
+            }
+
+            let colorClass = `log-${type}`;
+            if (message.includes('✅')) colorClass = 'log-success';
+            else if (message.includes('🤫') || message.includes('ZK')) colorClass = 'log-zk';
+            else if (message.includes('⚠️') || message.includes('ESCALATED') || message.includes('[Registry]')) colorClass = 'log-warning';
+            else if (message.includes('❌') || message.includes('BLOCK') || message.includes('DENIED') || message.includes('Failed')) colorClass = 'log-error';
+            else if (message.includes('>>>') || message.includes('⚡')) colorClass = 'log-highlight';
+
+            div.innerHTML = `<span class="log-time">[${time}]</span> <span class="${colorClass}">${formattedMessage}</span>`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function setButtonsDisabled(disabled) {
+            btnValid.disabled = disabled;
+            btnEscalate.disabled = disabled;
+            btnMalicious.disabled = disabled;
+        }
+
+        function runDemo(type) {
+            if (currentEventSource) currentEventSource.close();
+
+            setButtonsDisabled(true);
+            appendLog(`\n>>> INITIATING AEGIS-12 HANDSHAKE: ${type.toUpperCase()} <<<`, 'highlight');
+
+            currentEventSource = new EventSource(`/api/demo?type=${type}`);
+
+            currentEventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.done) {
+                        currentEventSource.close();
+                        setButtonsDisabled(false);
+                        appendLog(`>>> HANDSHAKE COMPLETE <<<`, 'highlight');
+                        return;
+                    }
+                    appendLog(data.message, 'info');
+                } catch (e) {
+                    appendLog(event.data, 'info');
+                }
+            };
+
+            currentEventSource.onerror = function() {
+                currentEventSource.close();
+                setButtonsDisabled(false);
+                appendLog(`Connection to TEE Enclave lost or execution finished.`, 'warning');
+            };
+        }
+    </script>
+</body>
+</html>

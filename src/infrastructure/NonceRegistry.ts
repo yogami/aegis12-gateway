@@ -1,0 +1,159 @@
+import * as fs from 'fs';
+import * as path from 'path';
+import * as crypto from 'crypto';
+import { INonceRegistry } from '../ports/INonceRegistry';
+import { WALEngine } from './WALEngine';
+export class AegisLocalNonceRegistry implements INonceRegistry {
+    private committedNonces: Set<string> = new Set();
+    private pendingNonces: Set<string> = new Set();
+    private readonly committedWalPath: string;
+    private readonly pendingWalPath: string;
+    private readonly lockPath: string;
+    private walEngine: WALEngine;
+    public readonly maxCapacity: number;
+
+    constructor(customWalPath?: string, maxCapacity: number = 100_000) {
+        const basePath = customWalPath ? customWalPath.replace('.json', '') : path.resolve('/tmp', '.aegis_wal');
+        this.committedWalPath = `${basePath}_committed.json`;
+        this.pendingWalPath = `${basePath}_pending.json`;
+        this.lockPath = `${basePath}.lock`;
+        this.walEngine = new WALEngine("aegis-12/wal-encryption-key");
+        this.maxCapacity = maxCapacity;
+    }
+
+    public async initialize(): Promise<void> {
+        await this.walEngine.initialize();
+
+        const committed = this.walEngine.loadWalSync(this.committedWalPath);
+        if (committed) {
+            const stored = JSON.parse(committed);
+            if (Array.isArray(stored)) stored.forEach(n => this.committedNonces.add(n));
+        }
+
+        const pending = this.walEngine.loadWalSync(this.pendingWalPath);
+        if (pending) {
+            const stored = JSON.parse(pending);
+            if (Array.isArray(stored)) stored.forEach(n => this.pendingNonces.add(n));
+        }
+    }
+
+    public async isNonceUsed(nonce: string): Promise<boolean> {
+        return this.committedNonces.has(nonce) || this.pendingNonces.has(nonce);
+    }
+
+    public async reserve(nonce: string): Promise<boolean> {
+        await this.walEngine.acquireLock(this.lockPath);
+        try {
+            if (this.committedNonces.has(nonce) || this.pendingNonces.has(nonce)) return false;
+            // SEC-04: Evict oldest entries if capacity exceeded
+            this.evictIfNeeded();
+            const nextPending = new Set(this.pendingNonces);
+            nextPending.add(nonce);
+            const tempPath = `${this.pendingWalPath}.tmp`;
+            this.walEngine.atomicWriteSync(tempPath, this.pendingWalPath, JSON.stringify(Array.from(nextPending)));
+            this.pendingNonces.add(nonce);
+            return true;
+        } catch (e: any) {
+            console.error('RESERVE CAUGHT ERROR:', e);
+            return false;
+        } finally {
+            this.walEngine.releaseLock(this.lockPath);
+        }
+    }
+
+    public async commit(nonce: string): Promise<void> {
+        await this.walEngine.acquireLock(this.lockPath);
+        try {
+            if (this.pendingNonces.has(nonce)) {
+                const nextPending = new Set(this.pendingNonces);
+                nextPending.delete(nonce);
+                const nextCommitted = new Set(this.committedNonces);
+                nextCommitted.add(nonce);
+                
+                // Write both to temporary files first
+                const tempCommittedPath = `${this.committedWalPath}.tmp`;
+                const tempPendingPath = `${this.pendingWalPath}.tmp`;
+                
+                const encryptedCommitted = this.walEngine.encryptWal(JSON.stringify(Array.from(nextCommitted)));
+                const encryptedPending = this.walEngine.encryptWal(JSON.stringify(Array.from(nextPending)));
+
+                this.writeBothWalSync(tempCommittedPath, tempPendingPath, encryptedCommitted, encryptedPending);
+                // Atomic renames
+                fs.renameSync(tempCommittedPath, this.committedWalPath);
+                fs.renameSync(tempPendingPath, this.pendingWalPath);
+                
+                this.pendingNonces.delete(nonce);
+                this.committedNonces.add(nonce);
+            }
+        } catch (e) {
+            throw new Error("Failed to atomically commit nonce to WAL");
+        } finally {
+            this.walEngine.releaseLock(this.lockPath);
+        }
+    }
+
+    private writeBothWalSync(tempCommittedPath: string, tempPendingPath: string, encryptedCommitted: any, encryptedPending: any): void {
+        const fdCommitted = fs.openSync(tempCommittedPath, 'w');
+        const fdPending = fs.openSync(tempPendingPath, 'w');
+        try {
+            fs.writeSync(fdCommitted, encryptedCommitted);
+            fs.fdatasyncSync(fdCommitted);
+            fs.writeSync(fdPending, encryptedPending);
+            fs.fdatasyncSync(fdPending);
+        } finally {
+            fs.closeSync(fdCommitted);
+            fs.closeSync(fdPending);
+        }
+    }
+
+    public async release(nonce: string): Promise<void> {
+        await this.walEngine.acquireLock(this.lockPath);
+        try {
+            if (!this.pendingNonces.has(nonce)) return;
+            const nextPending = new Set(this.pendingNonces);
+            nextPending.delete(nonce);
+            const tempPendingPath = `${this.pendingWalPath}.tmp`;
+            this.walEngine.atomicWriteSync(tempPendingPath, this.pendingWalPath, JSON.stringify(Array.from(nextPending)));
+            this.pendingNonces.delete(nonce);
+        } catch (e) {
+            throw new Error("Failed to release nonce from WAL");
+        } finally {
+            this.walEngine.releaseLock(this.lockPath);
+        }
+    }
+
+    public async clear(): Promise<void> {
+        await this.walEngine.acquireLock(this.lockPath);
+        try {
+            this.committedNonces.clear();
+            this.pendingNonces.clear();
+            if (fs.existsSync(this.committedWalPath)) fs.unlinkSync(this.committedWalPath);
+            if (fs.existsSync(this.pendingWalPath)) fs.unlinkSync(this.pendingWalPath);
+        } finally {
+            this.walEngine.releaseLock(this.lockPath);
+        }
+    }
+
+    /**
+     * SEC-04: Evict oldest committed nonces when capacity is exceeded.
+     * Sets are insertion-ordered in JS, so iterator yields oldest first.
+     */
+    private evictIfNeeded(): void {
+        const totalSize = this.committedNonces.size + this.pendingNonces.size;
+        if (totalSize < this.maxCapacity) return;
+        const evictCount = Math.ceil(this.maxCapacity * 0.1); // Evict oldest 10%
+        let evicted = 0;
+        for (const nonce of this.committedNonces) {
+            if (evicted >= evictCount) break;
+            this.committedNonces.delete(nonce);
+            evicted++;
+        }
+        
+        // Save an eviction watermark so AegisPEP can reject stale nonces that were evicted
+        const watermarkPath = `${this.committedWalPath.replace('_committed.json', '')}_watermark.json`;
+        const currentWatermark = Math.floor(Date.now() / 1000);
+        fs.writeFileSync(watermarkPath, JSON.stringify({ evictionWatermark: currentWatermark }));
+
+        console.warn(`[Aegis-12 NonceRegistry] Evicted ${evicted} oldest nonces to maintain capacity. Watermark set to ${currentWatermark}.`);
+    }
+}

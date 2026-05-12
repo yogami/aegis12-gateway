@@ -1,6 +1,18 @@
 // types.ts
 // Ported from pdp-protocol/src/vera/types.ts for Aegis TEE Enclave
 
+export interface SolanaTransferPayload {
+    to: string;
+    amount: number;
+}
+
+export interface SwapPayload {
+    fromMint: string;
+    toMint: string;
+    amount: number;
+    slippageBps: number;
+}
+
 export type ISO8601 = string; // e.g. "2026-02-27T12:00:00Z"
 
 export enum TrustTier {
@@ -11,8 +23,6 @@ export enum TrustTier {
 }
 
 export enum AgentPurpose {
-    DATA_ANALYSIS = 'data_analysis',
-    CUSTOMER_SERVICE = 'customer_service',
     FINANCIAL_OPERATIONS = 'financial_operations', // Aegis Focus
 }
 
@@ -30,14 +40,98 @@ export interface PolicyObligation {
     parameters: Record<string, unknown>;
 }
 
-export interface ToolExecutionReceipt {
-    actionId: string;               // Matches PoE actionId
-    toolId: string;                 // Tool's SPIFFE ID or DID
-    authorizationNonce: string;     // Nonce issued by PEP at authorization time
-    parameters: Record<string, unknown>; // Canonical parameters received
-    resultHash: string;             // SHA-256 of JCS-canonicalized result
+/**
+ * The canonical payload generated when the TEE decides to ESCALATE.
+ * This binds the exact execution environment (state predicates) to the
+ * TEE's attestation, preventing State Drift and UI Spoofing.
+ */
+export interface AegisIntentEnvelope {
+    domain_separator: string; // e.g. "AEGIS12_ESCALATE_V1"
+    vault_pda: string;
+    squads_multisig: string;
+    instruction_digest: string; // The canonical hash of the intended Solana instruction
+    state_predicates: {
+        max_input_amount: number;
+        allowed_program_ids: string[];
+        valid_until_slot: number; // The Expiration Epoch
+    };
+    policy_hash: string;
+    tee_signature?: string; // The Ed25519 signature from the Phala TEE
+}
+
+export interface EvidencePackage {
+    policyId: string;
+    riskTier: string;
+    modelVersion: string;
+    jurisdiction: string;
+    actionTaxonomy: string;
+    intentHash: string;
+    timestamp: number;
+}
+
+/**
+ * AegisComplianceReceipt (v1.0.0)
+ * 
+ * [EU AI ACT COMPLIANCE]
+ * This structure fulfills the transparency and traceability requirements of 
+ * Article 12 (Traceable Logging) and Article 14 (Human Oversight).
+ */
+
+export interface AegisComplianceReceipt {
+    receiptId: string;              // Unique time-ordered identifier (UUID v7)
+    actionId: string;               // Link to Proof of Execution actionId
+    toolId: string;                 // The tool's unique SPIFFE or DID
+    agentPubKey: string;            // The Solana/Phala identity of the agent
+    
+    // --- ARTICLE 12: TRACEABLE LOGGING ---
+    article12LogHash: string;       // Keccak-256 hash of (params + result + context)
+    parametersHash: string;         // Hash of sanitized parameters
+    resultHash: string;             // Hash of the execution output
+    
+    // --- ARTICLE 14: HUMAN OVERSIGHT ---
+    article14OversightSignature: string; // The EIP-712 human-authorized policy signature
+    policyId: string;               // Reference to the active policy
+    tenantId: string;               // The human owner (Trust-at-the-Root)
+    
+    // --- COMPLIANCE DESCRIPTOR ---
+    complianceStandard: "ARS-01+" | "ERC-8004" | "CUSTOM";
+    limitations: string[];          // "Honest Sentinel" declarations of TEE observation gaps
+    
+    authorizationNonce: string;     // Irrevocable nonce (burned at execution)
+    validatedParams?: Record<string, unknown>; // [AUDIT-GRADE] Sanitized whitelisted parameters
+    decision: 'approved' | 'denied' | 'escalated'; // [AUDIT-GRADE] The final gateway decision
+    envelope?: AegisIntentEnvelope; // [ARTICLE 14] The cryptographically bound envelope if escalated
+    evidencePackage?: EvidencePackage; // [AUDITOR-GRADE] JSON schema mapping for MiCA/NIST
+    x402PaymentHeader?: string;     // [PAYMENT] Bound payment header for the execution
+    enclaveDid: string;             // [AUDIT-GRADE] Hardware identity of the signing enclave
+    zkSeal?: {                      // [PHASE 2.1] RISC Zero Mathematical Proof
+        journal: any;
+        seal: string;               // Base64 encoded ZK-Proof bytes
+    };
+    promptSanitization?: {          // [PHASE 2.2] In-Enclave Prompt Injection Defense
+        clean: boolean;
+        threats: string[];
+    };
     timestamp: ISO8601;
-    signature: string;              // TEE's key (Ed25519)
+    signature: string;              // TEE Hardware Signature (Ed25519)
+    batchProof?: {                  // [POST-QUANTUM] Merkle-Rooted Batch Finality
+        batchId: string;
+        merkleRoot: string;
+        pqSignature: string;        // ML-DSA-65 signature of the merkleRoot
+        proofPath: string[];        // Merkle proof for this specific receipt
+    };
+}
+
+/**
+ * The unified byte-array representation that strictly binds the Ed25519 
+ * execution signature with the ML-DSA-65 audit signature.
+ */
+export interface AegisCanonicalMessage {
+    tenantId: string;
+    nonce: string;
+    receiptId: string;
+    article12LogHash: string;
+    timestamp: ISO8601;
 }
 
 export interface ProofOfExecution {
@@ -78,10 +172,11 @@ export interface PolicyEvaluationRequest {
         currentTier: TrustTier;
     };
     action: {
+        actionId?: string;
         toolId: string;
         actionType: string;
         parameters: Record<string, unknown>;
-        estimatedValue?: number;
+        estimatedValue?: bigint | number;
     };
     context: {
         sessionId: string;
@@ -89,5 +184,30 @@ export interface PolicyEvaluationRequest {
         actionsThisHour: number;
         currentAnomalyScore: number;
         recentIncidents: number;
+        currentSlot?: number; // Added for Solana HOTL slot bounds
+    };
+    agentContext?: {
+        prompt: string;
+        modelVersion: string;
+        jurisdiction: string;
+    };
+    dynamicPolicy?: {
+        policyConfig: {
+            policyId: string;
+            tenantId: string;
+            version?: string;
+            chainId?: number;
+            crossChainTarget?: string; // VULNERABILITY FIXED: Locks the signature to specific network execution semantics
+            maxAnomalyScore: number;
+            financialLimitsString: string; // VULNERABILITY FIXED: Hardened cryptographic string binding for mutable parameters
+            expiresAt: number; // Unix timestamp for Replay Attack Prevention
+            nonce: string; // Cryptographic nonce
+            vaultPda?: string; // Target PDA for HOTL Vault
+            squadsMultisig?: string; // Target Multisig Address
+            allowedProgramIds?: string[]; // Allowed CPI programs
+        };
+        ownerPublicKey: string; // The hex address that signed the policy
+        signature: string; // EIP-712 Signature
     };
 }
+// Trigger CI

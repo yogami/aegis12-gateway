@@ -1,0 +1,36 @@
+name: Railway Control Plane E2E
+on:
+  workflow_run:
+    workflows: ["Phala TEE Deployment (GHCR)"]
+    types:
+      - completed
+
+jobs:
+  test-dashboard:
+    name: Dashboard UI Playwright Tests
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        working-directory: ./apps/dashboard
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: ./apps/dashboard
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright Tests
+        working-directory: ./apps/dashboard
+        run: npx playwright test e2e/control_plane.spec.ts
+        env:
+          SOLANA_PAYER_SECRET: ${{ secrets.SOLANA_PAYER_SECRET }}
+          PHALA_BACKEND_URL: "https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network"
+

@@ -1,6 +1,22 @@
 node_modules/
 dist/
+target/
 .DS_Store
 .env
 .idea/
 .vscode/
+test-results/
+Cargo.lock
+*.log
+.aegis_nonce_test.json
+
+# Persistent State
+.aegis_state.json
+.aegis_wal_committed.json
+.aegis_wal_pending.json
+packages/telemetry-shield/.aegis_wal.json
+.aegis_nonce_test_pending.json
+
+test-ledger/
+
+test-ledger/

@@ -1,0 +1,139 @@
+{
+  "address": "FPVw3tMxjARfaPFqkDRJSp19vPrzGQ1fW4oJwkUgeyxS",
+  "version": "0.1.0",
+  "name": "aegis_onchain",
+  "instructions": [
+    {
+      "name": "anchorComplianceReceipt",
+      "discriminator": [34, 51, 29, 108, 204, 93, 6, 46],
+      "accounts": [
+        {
+          "name": "registryEntry",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "agentSigner",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "receiptId",
+          "type": "string"
+        },
+        {
+          "name": "logHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "article14Signature",
+          "type": {
+            "option": "string"
+          }
+        },
+        {
+          "name": "teeSignature",
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "checkpointNonce",
+      "discriminator": [45, 32, 183, 11, 70, 24, 101, 127],
+      "accounts": [
+        {
+          "name": "nonceCheckpoint",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tenantId",
+          "type": "string"
+        },
+        {
+          "name": "newNonce",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "registryEntry",
+      "discriminator": [48, 198, 240, 252, 155, 186, 72, 16]
+    },
+    {
+      "name": "nonceCheckpoint",
+      "discriminator": [223, 35, 197, 217, 206, 153, 120, 213]
+    }
+  ],
+  "types": [
+    {
+      "name": "registryEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "receiptId",
+            "type": "string"
+          },
+          {
+            "name": "logHash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "article14Signature",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "teeSignature",
+            "type": "bytes"
+          }
+        ]
+      }
+    },
+    {
+      "name": "nonceCheckpoint",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lastNonce",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,409 @@
+Kimi’s critique is strong on implementation defects, but it overreaches on architecture. As the **Architectural Prophet**, I’ll separate **L1 physics**, **protocol invariants**, and **code bugs**.
+
+## Thesis
+The **tiered crypto strategy is architecturally correct under Solana L1 constraints**.  
+What is incorrect is the **current persistence/binding implementation**.
+
+That distinction matters:
+
+- **Architecture question:** Should every hot-path enforcement be blocked on ML-DSA-65?  
+  **No.** On Solana-class L1s, that is structurally wrong.
+- **Implementation question:** Must async evidence be made durable, idempotent, and cryptographically bound?  
+  **Yes. Absolutely.**
+
+So the right response is **not** “revert to single-path Ed25519,” but **complete the architecture** into a deterministic two-tier protocol.
+
+---
+
+# 1. The Prophet’s frame: L1s are not theology, they are thermodynamics
+
+Kimi attacks the tiering as “security theater,” but ignores the governing constraint: **L1 transaction surfaces are finite**.
+
+On Solana, hot-path control lives under hard realities:
+
+- transaction size / MTU pressure,
+- CU budget pressure,
+- latency sensitivity,
+- signer verification cost,
+- mempool / propagation fragility under burst load.
+
+A design that says “just make PQ synchronous on every enforcement” is not serious architecture. It confuses cryptographic purity with deployable system design.
+
+## The core prophecy
+**When a proof primitive is an order of magnitude larger and slower than the execution primitive, forcing it into the execution lane collapses the control plane.**
+
+That is exactly why tiering exists.
+
+### Why tiering is rational
+The kill switch has two different jobs:
+
+1. **Execution safety now**
+   - decide allow/deny within sub-50ms
+   - preserve operator control
+   - avoid making enforcement itself the outage source
+
+2. **Evidence finality for future disputes**
+   - durable logging
+   - long-horizon cryptographic survivability
+   - courtroom / regulator-grade receipts
+
+These are related, but they are not the same timing domain.
+
+The mistake is not that they are separated.  
+The mistake is that the separation is **not yet governed by strict invariants**.
+
+---
+
+# 2. Kimi is right about the code, wrong about the architectural conclusion
+
+Let’s concede the valid points directly.
+
+## Kimi is right that the current code has severe flaws
+Yes:
+
+- `generateAuditProof()` is fire-and-forget.
+- `enforce()` does not persist an event-intent before return.
+- `saveEvidence()` is not in the mandatory hot-path sequence.
+- `updatePqSignature()` is O(n), bad.
+- full JSON rewrites are toy-grade persistence.
+- `receiptId = Date.now()` is unacceptable.
+- `signMLDSA` lacking `await` is a defect if async.
+- current PQ payload under-binds the hot-path authorization.
+
+These are legitimate findings.
+
+## But Kimi is wrong to say the tiered strategy itself is invalid
+That leap fails because it ignores **L1 feasibility**.
+
+A single-path “everything must carry PQ before execution” design causes one of three bad outcomes:
+
+1. **You don’t fit operationally**
+   - packet bloat,
+   - degraded inclusion reliability,
+   - more brittle relay behavior.
+
+2. **You don’t fit economically**
+   - verification and serialization costs become control-plane tax.
+
+3. **You don’t fit temporally**
+   - the kill switch becomes slower than the attack it is meant to stop.
+
+That is the Prophet’s lens:  
+**a control system that cannot actuate in time is not more secure because its receipts are prettier.**
+
+---
+
+# 3. The “Quantum Gap” is only fatal if you define the protocol badly
+
+Kimi describes a “quantum gap” as if asynchronous evidence is inherently meaningless. It isn’t.
+
+An async PQ path is valid **if and only if** these invariants hold:
+
+## Required invariants
+1. **Every allow decision gets a deterministic event ID before release**
+2. **That event ID is durably journaled before the receipt is returned**
+3. **The hot-path receipt contains a commitment to the exact payload to be PQ-signed**
+4. **The PQ worker is idempotent and replayable**
+5. **Missing PQ completion is detectable, enumerable, and recoverable**
+6. **No event can have multiple conflicting PQ receipts**
+7. **Operators can define policy on whether unresolved PQ status blocks settlement, blocks withdrawal, or merely marks evidence incomplete**
+
+If these hold, then async is not “probabilistic swamp.”  
+It is **deterministic deferred finalization**.
+
+That is a known and respectable systems pattern:
+- execution commit now,
+- final evidence completion later,
+- with durable intent logged before release.
+
+The flaw in Aegis-12 v1 is not asynchronous cryptography.  
+The flaw is **asynchronous cryptography without a journaled state machine**.
+
+---
+
+# 4. Why single-path PQ on the hot lane is bad architecture under Solana constraints
+
+Here is the point Kimi underweights.
+
+## Solana hot path is an actuator, not an archive
+The hot path’s mission is to:
+- stop unauthorized execution,
+- preserve throughput,
+- remain live under contention.
+
+If you insert heavyweight PQ signing directly into the gating path:
+
+- burst traffic amplifies signer latency,
+- TEE CPU contention rises,
+- event loop or worker pool starvation appears,
+- queueing delay becomes attacker-amplifiable,
+- kill-switch responsiveness degrades.
+
+That is not “more secure.” That is **control-plane self-poisoning**.
+
+## The packet-size paradox is real
+Even if the exact transport form varies, the high-level point stands:
+
+- PQ artifacts are materially larger than Ed25519 artifacts.
+- pushing large signatures/receipts through the real-time execution lane is irresponsible where L1 message efficiency matters.
+- anchoring commitments/hashes on L1 and storing full evidence off-path is the right shape.
+
+The Prophet’s principle is simple:
+
+> **Put small, fast, sufficient proofs in the actuation lane. Put large, durable, future-proof proofs in the evidence lane. Bind them cryptographically.**
+
+That is not theater.  
+That is proper lane discipline.
+
+---
+
+# 5. What the architecture should have been stated as
+
+The original framing invited attack because it marketed “PQ audit” without stating the invariants. Here is the corrected frame:
+
+## Aegis-12 should be described as a 3-layer evidence stack
+### Layer A — Actuation Proof
+- Ed25519 / EIP-712-style receipt
+- purpose: immediate allow/deny authorization
+- optimized for low latency and compact transport
+
+### Layer B — Durable Commitment
+- hash/commitment to canonical event payload
+- synchronously written to WAL before release
+- optionally anchored to Solana as compact evidence root
+
+### Layer C — Post-Quantum Finalization
+- ML-DSA-65 over the canonical committed payload
+- generated asynchronously in worker isolation
+- attached idempotently to the event record
+- recoverable after crash from WAL replay
+
+Under this model, the hot path is not pretending to be PQ-final.  
+It is honestly declaring:
+
+- **execution authorized now**
+- **evidence durably committed now**
+- **PQ finalization pending / completed as state transition**
+
+That is a real protocol.
+
+---
+
+# 6. The rebuttal to “attacker only needs to break Ed25519”
+
+This is rhetorically strong but structurally misleading.
+
+If an attacker can forge the hot-path authorization primitive, then yes, they can attack immediate execution. But that is true in any design where a real-time authorization primitive exists. The question is whether forcing PQ into the hot path materially changes that risk **without destroying operational liveness**.
+
+Usually it does not.
+
+Because the kill switch’s safety does not come only from signature choice. It comes from:
+
+- TEE attestation boundary,
+- nonce discipline,
+- tenant trust roots,
+- policy envelope verification,
+- multisig / human escalation,
+- execution path severance,
+- L1 anchoring of compact commitments.
+
+The architecture is not “Ed25519 alone saves us.”  
+It is “Ed25519 is the fast actuator in a broader trust fabric.”
+
+PQ’s role here is **long-term non-repudiable evidence survivability**, not sub-50ms actuation.
+
+That is an important distinction Kimi flattens.
+
+---
+
+# 7. Where the current code violates the Prophet’s law
+
+Now, bluntly: the implementation currently betrays the architecture.
+
+## Violation 1: No durable event-intent before release
+This is the biggest defect.
+
+Before `return receipt`, the system must persist:
+
+- canonical event payload,
+- event ID,
+- hot-path signature or its commitment,
+- PQ status = `PENDING`,
+- monotonic sequence / recovery metadata.
+
+Without that, async finalization is non-deterministic.
+
+## Violation 2: The receipt binding is too weak
+PQ must sign the **canonical event commitment**, not a sparse subset.
+
+It should bind at least:
+
+- eventId
+- canonical normalized params hash
+- policy hash / policyId
+- result (`ALLOW` / `DENY`)
+- nonce / tenant scope
+- enclave attestation identity
+- hot-path receipt hash
+- optional Solana anchor reference
+
+Then the PQ receipt proves:  
+**this exact actuation decision, for this exact normalized request, was finalized by this exact enclave lineage**.
+
+## Violation 3: State store is not a journaled state machine
+`Map + JSON stringify + O(n) scans` is prototype storage, not compliance storage.
+
+The Prophet says:
+> If recovery semantics matter, your persistence model is your protocol.
+
+Aegis needs append-only event journaling with key-addressable records.
+
+## Violation 4: Async worker isolation is missing
+ML-DSA should never compete with the hot loop directly. Use:
+- worker threads,
+- bounded queue,
+- backpressure policy,
+- priority classes,
+- watchdog metrics.
+
+---
+
+# 8. The proper deterministic design
+
+Here is the architecture Kimi should be attacking, because this is the hardened version.
+
+## Step 1: Canonicalize
+Normalize request into a canonical binary or deterministic JSON form.
+
+## Step 2: Derive event ID
+Not `Date.now()`.  
+Use something like:
+
+`eventId = H(tenantId || nonce || policyHash || paramsHash || result || enclaveEpoch || monotonicCounter)`
+
+This gives uniqueness and deterministic replay.
+
+## Step 3: Synchronous WAL commit before release
+Write an append-only record:
+
+```text
+EventCreated {
+  eventId,
+  tenantId,
+  scopedNonce,
+  canonicalPayloadHash,
+  hotReceiptHash,
+  pqStatus: PENDING,
+  createdAt,
+  enclaveIdentity,
+  seqNo
+}
+```
+
+fsync it.
+
+Now the system can crash and still recover the obligation to complete PQ finalization.
+
+## Step 4: Return hot-path receipt
+Receipt includes:
+
+- eventId
+- canonicalPayloadHash
+- hotSignature
+- pqStatus = PENDING
+- commitmentRoot
+
+Now the caller knows evidence state honestly.
+
+## Step 5: Worker-thread PQ finalization
+Worker signs:
+
+`PQPayload = H(eventId || canonicalPayloadHash || hotReceiptHash || enclaveIdentity || createdAt)`
+
+Then atomically appends:
+
+```text
+PQFinalized { eventId, pqSignature, finalizedAt }
+```
+
+## Step 6: Recovery
+On restart:
+- scan WAL for `PENDING` events without `PQFinalized`,
+- replay idempotently,
+- complete signatures,
+- emit alerts if SLA exceeded.
+
+This is not “eventual hand-waving.”  
+This is **deterministic deferred completion**.
+
+---
+
+# 9. On Article 12 and regulatory truthfulness
+
+Kimi is also correct that the compliance language needs tightening.
+
+We should not say:
+- “FIPS 204 ready” in a way that implies module certification.
+
+We should say:
+- **Uses ML-DSA-65 as specified by FIPS 204 for post-quantum audit signatures, implemented in a non-certified software module within a TEE.**
+- **Not a FIPS 140-3 validated cryptographic module.**
+
+That is the honest sentence.
+
+But again: marketing cleanup does not invalidate the tiered architecture. It just removes unnecessary attack surface in language.
+
+---
+
+# 10. Why rollback to single-path Ed25519 is the wrong prescription
+
+Kimi’s proposed rollback is understandable as emergency simplification, but architecturally inferior long-term.
+
+Why?
+
+Because it collapses two distinct assurance horizons into one primitive:
+
+- **immediate execution assurance**
+- **long-duration evidence survivability**
+
+That is short-sighted.
+
+A sovereign kill switch for institutional systems needs:
+- compact real-time authorization today,
+- stronger evidence resilience against future cryptanalytic shifts.
+
+The answer is not abandoning tiering.  
+The answer is making tiering **formally stateful**.
+
+Rollback may be a temporary operational containment step. It is not the target architecture.
+
+---
+
+# 11. The concise defense
+
+If I were answering as lead architect in one paragraph:
+
+> The criticism correctly identifies severe implementation defects in Aegis-12 v1’s async evidence path, especially missing WAL-backed intent logging, weak payload binding, and toy persistence semantics. But it is wrong to conclude that the tiered crypto strategy is itself unsound. Under Solana L1 constraints, forcing ML-DSA-65 into the hot execution lane would degrade latency, increase control-plane fragility, and turn the kill switch into a self-denial mechanism. The correct architecture is not single-path PQ; it is a deterministic two-tier protocol: compact Ed25519 actuation for real-time enforcement, synchronous durable commitment before release, and idempotent ML-DSA-65 finalization via WAL-backed replay. The issue is not tiering. The issue is that the current implementation has not yet completed the protocol discipline that tiering requires.
+
+---
+
+# 12. Final ruling in the “Architectural Prophet” frame
+
+The Prophet does not worship algorithms.  
+The Prophet respects **system boundaries**.
+
+- Solana L1 demands compact, low-latency actuation.
+- Post-quantum evidence demands heavier, slower finalization.
+- Therefore, **tiering is the correct architectural shape**.
+
+But the Prophet also warns:
+
+> **Any async security path that lacks durable intent, cryptographic binding, and replayable completion is not a protocol — it is a hope.**
+
+So my defense is firm but not evasive:
+
+- **Defend the tiered strategy:** yes.
+- **Defend this exact code as production-safe:** no.
+- **Path forward:** convert async PQ from “fire-and-forget” into a journaled, deterministic evidence-finalization state machine.
+
+If you want, I can turn this into a **formal rebuttal memo** to Kimi in a sharper debate style, or produce a **patched architecture spec** with invariants and sequence diagrams.

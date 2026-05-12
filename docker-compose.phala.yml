@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  aegis12-tee:
+    image: yamigopal/aegis-phala-cvm@sha256:4b4c49e60dc2a2617660b2efd88487c6c48dc02a9c75bd801c2227a83b640561
+    ports:
+      - "8000:8000"
+    environment:
+      - TEE_ENV=phala
+      - NODE_ENV=production
+      - AUTHORIZED_TENANTS={"tenant-001":["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]}
+      - AEGIS_ZK_PROVER_HASH=aa1768de5e8cd154e33603d41e724a8378ae764cc93af09c52736197b5933850
+      - SOLANA_PAYER_SECRET=${SOLANA_PAYER_SECRET:?SOLANA_PAYER_SECRET must be set}
+    volumes:
+      - /var/run/dstack.sock:/var/run/dstack.sock

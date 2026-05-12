@@ -1,0 +1,54 @@
+
+Running 1 test using 1 worker
+
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [SolanaAnchor] ⚠️ Using ephemeral keypair. Set SOLANA_PAYER_SECRET for persistence.
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+VULN-006 Error: [90mundefined[39m
+  ✘  1 e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash (325ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 1000ms delay...
+[WebServer] [TappdClient] ⚠️ Hardware dStack not found. Falling back to Simulation Mode.
+[WebServer] [Aegis-12 Override]: ZK_PROVER_BACKGROUND_FAILURE: [TERMINAL REFUSAL] AEGIS_ZK_PROVER_HASH environment variable is strictly required. Boot aborted.
+VULN-006 Error: [90mundefined[39m
+  ✘  2 e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash (retry #1) (77ms)
+[WebServer] Server responded with 429 Too Many Requests.  Retrying after 500ms delay...
+
+
+  1) e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: <= [32m266[39m
+    Received:    [31m50040[39m
+
+      70 |         expect(body.status).toBe('approved');
+      71 |         // Ensure we aren't echoing the massive nonce back un-truncated in the actionId
+    > 72 |         expect(body.receipt.actionId.length).toBeLessThanOrEqual(256 + 10); // 'act-' + 256
+         |                                              ^
+      73 |     });
+      74 |
+      75 |     test('VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:72:46
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThanOrEqual[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: <= [32m266[39m
+    Received:    [31m50040[39m
+
+      70 |         expect(body.status).toBe('approved');
+      71 |         // Ensure we aren't echoing the massive nonce back un-truncated in the actionId
+    > 72 |         expect(body.receipt.actionId.length).toBeLessThanOrEqual(256 + 10); // 'act-' + 256
+         |                                              ^
+      73 |     });
+      74 |
+      75 |     test('VULN-007: perTx Logic Collision - Fallback perTx key cannot bypass strict Tier limits', async ({ request }) => {
+        at /Users/user1000/gitprojects/aegis12-gateway/e2e/apt-council-deepthink-bypasses.spec.ts:72:46
+
+  1 failed
+    e2e/apt-council-deepthink-bypasses.spec.ts:55:9 › APT-Council DeepThink Security Remediation Verification › VULN-006: Memo Leviathan - Enclave must safely truncate large nonces and not crash 

@@ -1,0 +1,58 @@
+name: Phala Live Deployment Verification
+
+on:
+  workflow_run:
+    workflows: ["Phala TEE Deployment (GHCR)"]
+    types:
+      - completed
+
+env:
+  PHALA_BACKEND_URL: https://33d807c4df82bc98a1378c403181698f1f12bbed-8000.dstack-pha-prod9.phala.network
+
+jobs:
+  smoke-test-live-hardware:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Verify Phala TEE is Live
+        run: |
+          echo "Verifying 16GB Phala TEE at $PHALA_BACKEND_URL..."
+          for i in {1..24}; do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$PHALA_BACKEND_URL" || echo "000")
+            if [ "$HTTP_CODE" != "000" ]; then
+              echo "✅ Phala TEE is LIVE (HTTP $HTTP_CODE)"
+              exit 0
+            fi
+            echo "Waiting for Phala TEE... ($i/24)"
+            sleep 10
+          done
+          echo "❌ FATAL: Phala TEE at $PHALA_BACKEND_URL is unreachable after 4 minutes."
+          echo "The 16GB hardware node must be investigated. This pipeline does NOT fake results."
+          exit 1
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Substance Verification Against Live Hardware
+        run: |
+          echo "🎯 Target: LIVE 16GB Phala TEE ($PHALA_BACKEND_URL)"
+
+          export TEST_API_URL=$PHALA_BACKEND_URL
+          export SOLANA_PAYER_SECRET=${{ secrets.SOLANA_PAYER_SECRET }}
+
+          echo "Running Hardware Cryptographic Substance tests..."
+          npx playwright test e2e/evidence_substance.spec.ts
+
+          echo "Running Institutional Feature Verification tests..."
+          npx playwright test e2e/institutional_features.spec.ts

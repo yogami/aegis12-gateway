@@ -1,0 +1,7 @@
+file '/Users/user1000/.gemini/antigravity/brain/7f7d6692-e3a7-4eba-bc5a-e748ec55a6ae/seg1_frame1_1778314986607.png'
+duration 20.8
+file '/Users/user1000/.gemini/antigravity/brain/7f7d6692-e3a7-4eba-bc5a-e748ec55a6ae/seg1_frame2_1778315023130.png'
+duration 20.8
+file '/Users/user1000/.gemini/antigravity/brain/7f7d6692-e3a7-4eba-bc5a-e748ec55a6ae/seg1_frame3_1778315037469.png'
+duration 21.0
+file '/Users/user1000/.gemini/antigravity/brain/7f7d6692-e3a7-4eba-bc5a-e748ec55a6ae/seg1_frame3_1778315037469.png'

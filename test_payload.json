@@ -1,0 +1,25 @@
+{
+    "action": { "toolId": "solana_transfer", "parameters": { "to": "11111111111111111111111111111111", "amount": 1, "token": "SOL" }, "estimatedValue": 0 },
+    "agent": { "did": "did:aegis:substance-test", "purpose": "financial_operations", "currentTier": "T1" },
+    "context": { "sessionId": "substance", "actionsThisSession": 1, "actionsThisHour": 1, "currentAnomalyScore": 0.1, "recentIncidents": 0 },
+    "agentContext": { "prompt": "Substance test prompt validation", "modelVersion": "GPT-Substance", "jurisdiction": "GLOBAL" },
+    "x402PaymentHeader": "mock_solana_tx_signature_x402",
+    "dynamicPolicy": {
+        "policyConfig": {
+            "policyId": "POL_SUBSTANCE_001",
+            "tenantId": "tenant-council",
+            "version": "1.0.0",
+            "chainId": 1399811149,
+            "crossChainTarget": "solana:devnet",
+            "maxAnomalyScore": 100,
+            "financialLimitsString": "{\"T1\":1000}",
+            "expiresAt": 9999999999,
+            "nonce": "substance-1778136869233",
+            "vaultPda": "SubstanceVault_Default",
+            "squadsMultisig": "SubstanceSquads_Default",
+            "allowedProgramIds": ["11111111111111111111111111111111"]
+        },
+        "ownerPublicKey": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "signature": "0x53b0c...dummy"
+    }
+}
